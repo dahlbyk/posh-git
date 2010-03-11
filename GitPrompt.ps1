@@ -23,7 +23,7 @@ function Write-GitStatus($status) {
             Write-Host " -$($status.IndexDeleted.Count)" -nonewline -foregroundcolor $indexColor
 
             if($status.HasWorking) {
-                Write-Host " |" -nonewline -foregroundcolor Red
+                Write-Host " |" -nonewline -foregroundcolor Yellow
             }
         }
         
