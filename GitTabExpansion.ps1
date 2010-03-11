@@ -1,7 +1,7 @@
 # Initial implementation by Jeremy Skinner
 # http://www.jeremyskinner.co.uk/2010/03/07/using-git-with-windows-powershell/
 
-function script:gitCommands($filter, $advanced = $FALSE) {
+function script:gitCommands($filter, $includeAliases, $advanced = $FALSE) {
     $cmdList = @()
     if (-not $advanced) {
         $output = git help
@@ -35,7 +35,9 @@ function script:gitCommands($filter, $advanced = $FALSE) {
         }
     }
     
-    $cmdList += gitAliases $filter
+    if ($includeAliases) {
+        $cmdList += gitAliases $filter
+    }
     $cmdList | sort
 }
 
@@ -107,10 +109,14 @@ function GitTabExpansion($lastBlock, $advanced = $FALSE) {
             gitLocalBranches $matches[2]
         }
          
-        # Handles git <cmd>
-        # Handles git help <cmd>
-        'git (help )?(\S*)$' {
-            gitCommands $matches[2] $advanced
+        # Handles git <cmd> (commands & aliases)
+        'git (\S*)$' {
+            gitCommands $matches[1] $TRUE $advanced
+        }
+        
+        # Handles git help <cmd> (commands only)
+        'git help (\S*)$' {
+            gitCommands $matches[1] $FALSE $advanced
         }
          
         # Handles git push remote <branch>
