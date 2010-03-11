@@ -1,48 +1,64 @@
 # Initial implementation by Jeremy Skinner
 # http://www.jeremyskinner.co.uk/2010/03/07/using-git-with-windows-powershell/
 
-if(-not (Test-Path Function:\DefaultTabExpansion)) {
-    Rename-Item Function:\TabExpansion DefaultTabExpansion
-}
-
-function script:gitCommands($filter) {
-  $cmdList = @()
-  $output = git help
-  foreach($line in $output) {
-    if($line -match '^   (\S+) (.*)') {
-      $cmd = $matches[1]
-      if($filter -and $cmd.StartsWith($filter)) {
-        $cmdList += $cmd.Trim()
-      }
-      elseif(-not $filter) {
-        $cmdList += $cmd.Trim()
-      }
+function script:gitCommands($filter, $advanced = $FALSE) {
+    $cmdList = @()
+    if (-not $advanced) {
+        $output = git help
+        foreach($line in $output) {
+            if($line -match '^   (\S+) (.*)') {
+                $cmd = $matches[1]
+                if($filter -and $cmd.StartsWith($filter)) {
+                    $cmdList += $cmd.Trim()
+                }
+                elseif(-not $filter) {
+                    $cmdList += $cmd.Trim()
+                }
+            }
+        }
+    } else {
+        $output = git help --all
+        foreach ($line in $output) {
+            if ($line -match '  (.+)') {
+                $lineCmds = $line.Split(' ', [StringSplitOptions]::RemoveEmptyEntries)
+                foreach ($cmd in $lineCmds) {
+                    if($filter) {
+                        if($filter -and $cmd.StartsWith($filter)) {
+                            $cmdList += $cmd.Trim();
+                        }
+                    }
+                    else {
+                        $cmdList += $cmd.Trim();
+                    }
+                }
+            }
+        }
     }
-  }
- 
-  $cmdList | sort
+    
+    $cmdList += gitAliases $filter
+    $cmdList | sort
 }
 
 function script:gitRemotes($filter) {
-  if($filter) {
-    git remote | where { $_.StartsWith($filter) }
-  }
-  else {
-    git remote
-  }
+    if($filter) {
+        git remote | where { $_.StartsWith($filter) }
+    }
+    else {
+        git remote
+    }
 }
  
 function script:gitLocalBranches($filter) {
-   git branch | foreach { 
-      if($_ -match "^\*?\s*(.*)") { 
-        if($filter -and $matches[1].StartsWith($filter)) {
-          $matches[1]
+    git branch | foreach { 
+        if($_ -match "^\*?\s*(.*)") { 
+            if($filter -and $matches[1].StartsWith($filter)) {
+                $matches[1]
+            }
+            elseif(-not $filter) {
+                $matches[1]
+            }
         }
-        elseif(-not $filter) {
-          $matches[1]
-        }
-      } 
-   }
+    }
 }
 
 function script:gitIndex($filter) {
@@ -65,57 +81,58 @@ function script:gitFiles($filter) {
     }
 }
 
-function gitTabExpansion($line, $lastWord, $lastBlock) {
-     switch -regex ($lastBlock) {
- 
-        #Handles git branch -x -y -z <branch name>
-        'git branch -(d|D) (\S*)$' {
-          gitLocalBranches($matches[2])
+function script:gitAliases($filter) {
+    $aliasList = @()
+    git config --get-regexp alias\..+ | foreach {
+        $alias = $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries)[0].Split(
+            '.', [StringSplitOptions]::RemoveEmptyEntries)[1]
+            
+        if($filter -and $alias.StartsWith($filter)) {
+            $aliasList += $alias.Trim()
         }
- 
-        #handles git checkout <branch name>
-        #handles git merge <brancj name>
-        'git (checkout|merge) (\S*)$' {
-          gitLocalBranches($matches[2])
-        }
- 
-        #handles git <cmd>
-        #handles git help <cmd>
-        'git (help )?(\S*)$' {      
-          gitCommands($matches[2])
-        }
- 
-        #handles git push remote <branch>
-        #handles git pull remote <branch>
-        'git (push|pull) (\S+) (\S*)$' {
-          gitLocalBranches($matches[3])
-        }
- 
-        #handles git pull <remote>
-        #handles git push <remote>
-        'git (push|pull) (\S*)$' {
-          gitRemotes($matches[2])
-        }
-
-		#handles git reset HEAD <path>
-        'git reset HEAD (\S*)$' {
-          gitIndex($matches[1])
-        }
-
-		#handles git add <path>
-        'git add (\S*)$' {
-          gitFiles($matches[1])
-        }
-
-        default {
-          DefaultTabExpansion $line $lastWord
-        }
-    }	
+    }
+    $aliasList | Sort
 }
 
-function TabExpansion($line, $lastWord) {
-  switch -regex ($line) {
-    '(?:^\s*|[;|]\s*)git (.*)' { gitTabExpansion $line $lastWord $matches[0] }
-    default { DefaultTabExpansion $line $lastWord }
-  }
+function GitTabExpansion($lastBlock, $advanced = $FALSE) {
+    switch -regex ($lastBlock) {
+        # Handles git branch -d|-D <branch name>
+        'git branch -(d|D) (\S*)$' {
+            gitLocalBranches $matches[2]
+        }
+         
+        # Handles git checkout <branch name>
+        # Handles git merge <branch name>
+        'git (checkout|merge) (\S*)$' {
+            gitLocalBranches $matches[2]
+        }
+         
+        # Handles git <cmd>
+        # Handles git help <cmd>
+        'git (help )?(\S*)$' {
+            gitCommands $matches[2] $advanced
+        }
+         
+        # Handles git push remote <branch>
+        # Handles git pull remote <branch>
+        'git (push|pull) (\S+) (\S*)$' {
+            gitLocalBranches $matches[3]
+        }
+         
+        # Handles git pull <remote>
+        # Handles git push <remote>
+        'git (push|pull) (\S*)$' {
+            gitRemotes $matches[2]
+        }
+
+        # Handles git reset HEAD <path>
+        'git reset HEAD (\S*)$' {
+            gitIndex $matches[1]
+        }
+
+        # Handles git add <path>
+        'git add (\S*)$' {
+            gitFiles $matches[1]
+        }
+    }	
 }
