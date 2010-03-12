@@ -52,20 +52,23 @@ function Get-GitStatus {
             }
         }
 
-        return New-Object PSObject -Property @{
-            Branch        = Get-GitBranch
-            AheadBy       = $aheadCount
-            HasIndex      = [bool]$diffIndex
-            Index         = $diffIndex | %{ $_.Path }
-            IndexAdded    = $indexAdded
-            IndexModified = $indexModified
-            IndexDeleted  = $indexDeleted
-            HasWorking    = [bool]$diffFiles
-            Working       = ($diffFiles | %{ $_.Path }) + $untracked
-            Added         = $filesAdded
-            Modified      = $filesModified
-            Deleted       = $filesDeleted
-            HasUntracked  = [bool]$filesAdded
+        $status = New-Object PSObject -Property @{
+            Branch          = Get-GitBranch
+            AheadBy         = $aheadCount
+            HasIndex        = [bool]$diffIndex
+            Index           = $diffIndex | %{ $_.Path }
+            IndexAdded      = $indexAdded
+            IndexModified   = $indexModified
+            IndexDeleted    = $indexDeleted
+            HasWorking      = [bool]$diffFiles
+            Working         = ($diffFiles | %{ $_.Path })
+            WorkingAdded    = $filesAdded
+            WorkingModified = $filesModified
+            WorkingDeleted  = $filesDeleted
+            HasUntracked    = [bool]$filesAdded
         }
+        if ($untracked) { $status.Working += $untracked }
+        
+        return $status
     }
 }

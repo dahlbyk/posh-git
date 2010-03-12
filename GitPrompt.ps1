@@ -28,9 +28,9 @@ function Write-GitStatus($status) {
         }
         
         if($status.HasWorking) {
-            Write-Host " +$($status.Added.Count)" -nonewline -foregroundcolor $workingColor
-            Write-Host " ~$($status.Modified.Count)" -nonewline -foregroundcolor $workingColor
-            Write-Host " -$($status.Deleted.Count)" -nonewline -foregroundcolor $workingColor
+            Write-Host " +$($status.WorkingAdded.Count)" -nonewline -foregroundcolor $workingColor
+            Write-Host " ~$($status.WorkingModified.Count)" -nonewline -foregroundcolor $workingColor
+            Write-Host " -$($status.WorkingDeleted.Count)" -nonewline -foregroundcolor $workingColor
         }
         
         if ($status.HasUntracked) {
