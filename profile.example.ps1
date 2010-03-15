@@ -31,3 +31,5 @@ function TabExpansion($line, $lastWord) {
         #'git (.*)' { GitTabExpansion $lastBlock $TRUE }
     }
 }
+
+Enable-GitColors
