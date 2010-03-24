@@ -60,7 +60,7 @@ function Get-GitStatus {
             IndexAdded      = $indexAdded
             IndexModified   = $indexModified
             IndexDeleted    = $indexDeleted
-            HasWorking      = [bool]$diffFiles
+            HasWorking      = [bool]$diffFiles -or [bool]$filesAdded
             Working         = ($diffFiles | %{ $_.Path })
             WorkingAdded    = $filesAdded
             WorkingModified = $filesModified
