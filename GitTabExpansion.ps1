@@ -38,14 +38,16 @@ function script:gitLocalBranches($filter) {
 function script:gitIndex($filter) {
     if($GitStatus) {
         $GitStatus.Index |
-            where { $_ -like "$filter*" }
+            where { $_ -like "$filter*" } |
+            foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
     }
 }
 
 function script:gitFiles($filter) {
     if($GitStatus) {
         $GitStatus.Working |
-            where { $_ -like "$filter*" }
+            where { $_ -like "$filter*" } |
+            foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
     }
 }
 
