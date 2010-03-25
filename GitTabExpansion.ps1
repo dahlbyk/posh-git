@@ -8,35 +8,14 @@ $global:GitTabSettings = New-Object PSObject -Property @{
 function script:gitCommands($filter, $includeAliases) {
     $cmdList = @()
     if (-not $global:GitTabSettings.AllCommands) {
-        $output = git help
-        foreach($line in $output) {
-            if($line -match '^   (\S+) (.*)') {
-                $cmd = $matches[1]
-                if($filter -and $cmd.StartsWith($filter)) {
-                    $cmdList += $cmd.Trim()
-                }
-                elseif(-not $filter) {
-                    $cmdList += $cmd.Trim()
-                }
-            }
-        }
+        $cmdList += git help |
+            foreach { if($_ -match '^   (\S+) (.*)') { $matches[1] } } |
+            where { $_ -like "$filter*" }
     } else {
-        $output = git help --all
-        foreach ($line in $output) {
-            if ($line -match '  (.+)') {
-                $lineCmds = $line.Split(' ', [StringSplitOptions]::RemoveEmptyEntries)
-                foreach ($cmd in $lineCmds) {
-                    if($filter) {
-                        if($filter -and $cmd.StartsWith($filter)) {
-                            $cmdList += $cmd.Trim();
-                        }
-                    }
-                    else {
-                        $cmdList += $cmd.Trim();
-                    }
-                }
-            }
-        }
+        $cmdList += git help --all |
+            where { $_ -match '^  \S.*' } |
+            foreach { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
+            where { $_ -like "$filter*" }
     }
     
     if ($includeAliases) {
@@ -46,44 +25,27 @@ function script:gitCommands($filter, $includeAliases) {
 }
 
 function script:gitRemotes($filter) {
-    if($filter) {
-        git remote | where { $_.StartsWith($filter) }
-    }
-    else {
-        git remote
-    }
+    git remote |
+        where { $_ -like "$filter*" }
 }
  
 function script:gitLocalBranches($filter) {
-    git branch | foreach { 
-        if($_ -match "^\*?\s*(.*)") { 
-            if($filter -and $matches[1].StartsWith($filter)) {
-                $matches[1]
-            }
-            elseif(-not $filter) {
-                $matches[1]
-            }
-        }
-    }
+    git branch |
+        foreach { if($_ -match "^\*?\s*(.*)") { $matches[1] } } |
+        where { $_ -like "$filter*" }
 }
 
 function script:gitIndex($filter) {
     if($GitStatus) {
-        if ($filter) {
-            $GitStatus.Index | Where-Object { $_.StartsWith($filter) }
-        } else {
-            $GitStatus.Index
-        }
+        $GitStatus.Index |
+            where { $_ -like "$filter*" }
     }
 }
 
 function script:gitFiles($filter) {
     if($GitStatus) {
-        if ($filter) {
-            $GitStatus.Working | Where-Object { $_.StartsWith($filter) }
-        } else {
-            $GitStatus.Working
-        }
+        $GitStatus.Working |
+            where { $_ -like "$filter*" }
     }
 }
 
@@ -93,7 +55,7 @@ function script:gitAliases($filter) {
         $alias = $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries)[0].Split(
             '.', [StringSplitOptions]::RemoveEmptyEntries)[1]
             
-        if($filter -and $alias.StartsWith($filter)) {
+        if($alias -like "$filter*") {
             $aliasList += $alias.Trim()
         }
     }
