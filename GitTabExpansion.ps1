@@ -62,7 +62,7 @@ function script:gitAliases($filter) {
     $aliasList | Sort
 }
 
-function global:GitTabExpansion($lastBlock) {
+function GitTabExpansion($lastBlock) {
     switch -regex ($lastBlock) {
         # Handles git branch -d|-D <branch name>
         'git branch -(d|D) (\S*)$' {

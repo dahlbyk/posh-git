@@ -2,10 +2,10 @@ Push-Location (Split-Path -Path $MyInvocation.MyCommand.Definition -Parent)
 
 # Git utils
 . ./GitUtils.ps1
-./GitPrompt.ps1
+. ./GitPrompt.ps1
 
 # Use Git tab expansion
-./GitTabExpansion.ps1
+. ./GitTabExpansion.ps1
 
 Pop-Location
 

@@ -27,7 +27,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
 }
 
-function global:Write-GitStatus($status) {
+function Write-GitStatus($status) {
     if ($status) {
         $s = $global:GitPromptSettings
         
