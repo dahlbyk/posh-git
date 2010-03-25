@@ -57,7 +57,7 @@ function Get-GitStatus {
             Add-Member -PassThru NoteProperty Added    $indexAdded |
             Add-Member -PassThru NoteProperty Modified $indexModified |
             Add-Member -PassThru NoteProperty Deleted  $indexDeleted
-        $working = New-Object PSObject @(,@(($diffFiles | %{ $_.Path }) + $filesAdded | ?{ $_ })) |
+        $working = New-Object PSObject @(,@(@($diffFiles | %{ $_.Path }) + @($filesAdded) | ?{ $_ })) |
             Add-Member -PassThru NoteProperty Added    $filesAdded |
             Add-Member -PassThru NoteProperty Modified $filesModified |
             Add-Member -PassThru NoteProperty Deleted  $filesDeleted
