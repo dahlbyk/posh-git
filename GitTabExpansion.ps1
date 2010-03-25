@@ -1,9 +1,13 @@
 # Initial implementation by Jeremy Skinner
 # http://www.jeremyskinner.co.uk/2010/03/07/using-git-with-windows-powershell/
 
-function script:gitCommands($filter, $includeAliases, $advanced = $FALSE) {
+$global:GitTabSettings = New-Object PSObject -Property @{
+    AllCommands = $false
+}
+
+function script:gitCommands($filter, $includeAliases) {
     $cmdList = @()
-    if (-not $advanced) {
+    if (-not $global:GitTabSettings.AllCommands) {
         $output = git help
         foreach($line in $output) {
             if($line -match '^   (\S+) (.*)') {
