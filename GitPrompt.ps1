@@ -1,42 +1,67 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
+$global:GitPromptSettings = New-Object PSObject -Property @{
+    BeforeText                = ' ['
+    BeforeForegroundColor     = [ConsoleColor]::Yellow
+    BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
+    DelimText                 = ' |'
+    DelimForegroundColor      = [ConsoleColor]::Yellow
+    DelimBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    AfterText                 = ']'
+    AfterForegroundColor      = [ConsoleColor]::Yellow
+    AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    
+    Branch1ForegroundColor    = [ConsoleColor]::Cyan
+    Branch1BackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    Branch2ForegroundColor    = [ConsoleColor]::Red
+    Branch2BackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    
+    IndexForegroundColor      = [ConsoleColor]::Blue
+    IndexBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    WorkingForegroundColor    = [ConsoleColor]::Yellow
+    WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    
+    UntrackedText             = ' !'
+    UntrackedForegroundColor  = [ConsoleColor]::Yellow
+    UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
+}
+
 function Write-GitStatus($status) {
     if ($status) {
-        $indexColor = [ConsoleColor]::Blue
-        $workingColor = [ConsoleColor]::Yellow
+        $s = $global:GitPromptSettings
         
         $currentBranch = $status.Branch
         
-        Write-Host(' [') -nonewline -foregroundcolor Yellow
+        Write-Host $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
         if ($status.AheadBy -eq 0) {
             # We are not ahead of origin
-            Write-Host($currentBranch) -nonewline -foregroundcolor Cyan
+            Write-Host $currentBranch -NoNewline -BackgroundColor $s.Branch1BackgroundColor -ForegroundColor $s.Branch1ForegroundColor
         } else {
             # We are ahead of origin
-            Write-Host($currentBranch) -nonewline -foregroundcolor Red
+            Write-Host $currentBranch -NoNewline -BackgroundColor $s.Branch2BackgroundColor -ForegroundColor $s.Branch2ForegroundColor
         }
         
         if($status.HasIndex) {
-            Write-Host " +$($status.IndexAdded.Count)" -nonewline -foregroundcolor $indexColor
-            Write-Host " ~$($status.IndexModified.Count)" -nonewline -foregroundcolor $indexColor
-            Write-Host " -$($status.IndexDeleted.Count)" -nonewline -foregroundcolor $indexColor
+            Write-Host " +$($status.IndexAdded.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+            Write-Host " ~$($status.IndexModified.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+            Write-Host " -$($status.IndexDeleted.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
 
             if($status.HasWorking) {
-                Write-Host " |" -nonewline -foregroundcolor Yellow
+                Write-Host $s.DelimText -NoNewline -BackgroundColor $s.DelimBackgroundColor -ForegroundColor $s.DelimForegroundColor
             }
         }
         
         if($status.HasWorking) {
-            Write-Host " +$($status.WorkingAdded.Count)" -nonewline -foregroundcolor $workingColor
-            Write-Host " ~$($status.WorkingModified.Count)" -nonewline -foregroundcolor $workingColor
-            Write-Host " -$($status.WorkingDeleted.Count)" -nonewline -foregroundcolor $workingColor
+            Write-Host " +$($status.WorkingAdded.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+            Write-Host " ~$($status.WorkingModified.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+            Write-Host " -$($status.WorkingDeleted.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
         }
         
         if ($status.HasUntracked) {
-            Write-Host(' !') -nonewline -foregroundcolor Yellow
+            Write-Host $s.UntrackedText -NoNewline -BackgroundColor $s.UntrackedBackgroundColor -ForegroundColor $s.UntrackedForegroundColor
         }
         
-        Write-Host(']') -nonewline -foregroundcolor Yellow
+        Write-Host $s.AfterText -NoNewline -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
     }
 }
