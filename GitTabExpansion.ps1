@@ -62,7 +62,7 @@ function script:gitAliases($filter) {
     $aliasList | Sort
 }
 
-function GitTabExpansion($lastBlock, $advanced = $FALSE) {
+function GitTabExpansion($lastBlock) {
     switch -regex ($lastBlock) {
         # Handles git branch -d|-D <branch name>
         'git branch -(d|D) (\S*)$' {
@@ -77,12 +77,12 @@ function GitTabExpansion($lastBlock, $advanced = $FALSE) {
          
         # Handles git <cmd> (commands & aliases)
         'git (\S*)$' {
-            gitCommands $matches[1] $TRUE $advanced
+            gitCommands $matches[1] $TRUE
         }
         
         # Handles git help <cmd> (commands only)
         'git help (\S*)$' {
-            gitCommands $matches[1] $FALSE $advanced
+            gitCommands $matches[1] $FALSE
         }
          
         # Handles git push remote <branch>
