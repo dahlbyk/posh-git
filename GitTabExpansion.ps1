@@ -5,6 +5,16 @@ $global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
 }
 
+$global:ops = @{
+    remote = 'add','rename','rm','set-head','show','prune','update'
+    stash = 'list','show','drop','pop','apply','branch','save','clear','create'
+}
+
+function script:gitCmdOperations($command, $filter) {
+    $ops.$command |
+        where { $_ -like "$filter*" }
+}
+
 function script:gitCommands($filter, $includeAliases) {
     $cmdList = @()
     if (-not $global:GitTabSettings.AllCommands) {
@@ -66,6 +76,12 @@ function script:gitAliases($filter) {
 
 function GitTabExpansion($lastBlock) {
     switch -regex ($lastBlock) {
+        # Handles git remote <op>
+        # Handles git stash <op>
+        'git (remote|stash) (\S*)$' {
+            gitCmdOperations $matches[1] $matches[2]
+        }
+    
         # Handles git branch -d|-D <branch name>
         'git branch -(d|D) (\S*)$' {
             gitLocalBranches $matches[2]
