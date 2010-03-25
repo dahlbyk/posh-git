@@ -2,7 +2,7 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 function Test-GitDirectory {
-	(Get-Item '.\.git' -Force) -or
+	(Get-Item '.\.git' -Force 2> $null) -or
         (git rev-parse --git-dir 2> $null) -ne $null
 }
 
