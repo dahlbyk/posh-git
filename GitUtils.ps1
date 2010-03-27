@@ -66,9 +66,11 @@ function Get-GitStatus {
         $indexAdded = @()
         $indexModified = @()
         $indexDeleted = @()
+        $indexUnmerged = @()
         $filesAdded = @()
         $filesModified = @()
         $filesDeleted = @()
+        $filesUnmerged = @()
         $aheadCount = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
         
         $diffIndex = git diff-index -M --name-status --cached HEAD |
@@ -83,9 +85,11 @@ function Get-GitStatus {
         if($grpIndex.M) { $indexModified += $grpIndex.M | %{ $_.Path } }
         if($grpIndex.R) { $indexModified += $grpIndex.R | %{ $_.Path } }
         if($grpIndex.D) { $indexDeleted += $grpIndex.D | %{ $_.Path } }
+        if($grpIndex.U) { $indexUnmerged += $grpIndex.U | %{ $_.Path } }
         if($grpFiles.M) { $filesModified += $grpFiles.M | %{ $_.Path } }
         if($grpFiles.R) { $filesModified += $grpFiles.R | %{ $_.Path } }
         if($grpFiles.D) { $filesDeleted += $grpFiles.D | %{ $_.Path } }
+        if($grpIndex.U) { $filesUnmerged += $grpIndex.U | %{ $_.Path } }
         
         $untracked = git ls-files -o --exclude-standard
         if($untracked) { $filesAdded += $untracked }
@@ -93,11 +97,13 @@ function Get-GitStatus {
         $index = New-Object PSObject @(,@($diffIndex | %{ $_.Path } | ?{ $_ })) |
             Add-Member -PassThru NoteProperty Added    $indexAdded |
             Add-Member -PassThru NoteProperty Modified $indexModified |
-            Add-Member -PassThru NoteProperty Deleted  $indexDeleted
+            Add-Member -PassThru NoteProperty Deleted  $indexDeleted |
+            Add-Member -PassThru NoteProperty Unmerged $indexUnmerged
         $working = New-Object PSObject @(,@(@($diffFiles | %{ $_.Path }) + @($filesAdded) | ?{ $_ })) |
             Add-Member -PassThru NoteProperty Added    $filesAdded |
             Add-Member -PassThru NoteProperty Modified $filesModified |
-            Add-Member -PassThru NoteProperty Deleted  $filesDeleted
+            Add-Member -PassThru NoteProperty Deleted  $filesDeleted |
+            Add-Member -PassThru NoteProperty Unmerged $filesUnmerged
         
         $status = New-Object PSObject -Property @{
             GitDir          = $gitDir
