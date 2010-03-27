@@ -1,22 +1,67 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
-function Test-GitDirectory {
-	(Get-Item '.\.git' -Force 2> $null) -or
-        (git rev-parse --git-dir 2> $null) -ne $null
+. .\Utils.ps1
+
+function Get-GitDirectory {
+    Coalesce-Args `
+        (Get-Item '.\.git' -Force 2>$null).FullName `
+        { git rev-parse --git-dir 2>$null }
 }
 
-function Get-GitBranch {
-	if (Test-GitDirectory) {
-		$headRef = (git symbolic-ref HEAD) 2> $null
-		if ($headRef) {
-			Split-Path -Leaf $headRef
-		}
-	}
+function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
+    if ($gitDir) {
+        if (Test-Path $gitDir\rebase-merge\interactive) {
+            $r = '|REBASE-i'
+            $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
+        } elseif (Test-Path $gitDir\rebase-merge) {
+            $r = '|REBASE-m'
+            $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
+        } else {
+            if (Test-Path $gitDir\rebase-apply) {
+                if (Test-Path $gitDir\rebase-apply\rebasing) {
+                    $r = '|REBASE'
+                } elseif (Test-Path $gitDir\rebase-apply\applying) {
+                    $r = '|AM'
+                } else {
+                    $r = '|AM/REBASE'
+                }
+            } elseif (Test-Path $gitDir\MERGE_HEAD) {
+                $r = 'MERGING'
+            } elseif (Test-Path $gitDir\BISECT_LOG) {
+                $r = 'BISECTING'
+            }
+
+            $b = ?? { git symbolic-ref HEAD 2>$null } `
+                    { "($(
+                        Coalesce-Args `
+                            { git describe --exact-match HEAD 2>$null } `
+                            {
+                                $ref = Get-Content $gitDir\HEAD 2>$null
+                                if ($ref -and $ref.Length -ge 7) {
+                                    return $ref.Substring(0,7)+'...'
+                                } else {
+                                    return $null
+                                }
+                            } `
+                            'unknown'
+                    ))" }
+        }
+
+        if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
+            if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
+                $c = 'BARE:'
+            } else {
+                $b = 'GIT_DIR!'
+            }
+        }
+
+        "$c$($b -replace 'refs/heads/','')$r"
+    }
 }
 
 function Get-GitStatus {
-    if(Test-GitDirectory)
+    if($gitDir = Get-GitDirectory)
     {
         $indexAdded = @()
         $indexModified = @()
@@ -63,7 +108,8 @@ function Get-GitStatus {
             Add-Member -PassThru NoteProperty Deleted  $filesDeleted
         
         $status = New-Object PSObject -Property @{
-            Branch          = Get-GitBranch
+            GitDir          = $gitDir
+            Branch          = Get-GitBranch $gitDir
             AheadBy         = $aheadCount
             HasIndex        = [bool]$index
             Index           = $index
@@ -77,6 +123,6 @@ function Get-GitStatus {
 }
 
 function Enable-GitColors {
-	$env:TERM = 'cygwin'
-	$env:LESS = 'FRSX'
+    $env:TERM = 'cygwin'
+    $env:LESS = 'FRSX'
 }
