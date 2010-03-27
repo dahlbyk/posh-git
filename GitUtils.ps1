@@ -27,9 +27,9 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
                     $r = '|AM/REBASE'
                 }
             } elseif (Test-Path $gitDir\MERGE_HEAD) {
-                $r = 'MERGING'
+                $r = '|MERGING'
             } elseif (Test-Path $gitDir\BISECT_LOG) {
-                $r = 'BISECTING'
+                $r = '|BISECTING'
             }
 
             $b = ?? { git symbolic-ref HEAD 2>$null } `
