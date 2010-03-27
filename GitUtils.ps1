@@ -69,7 +69,7 @@ function Get-GitStatus {
         $filesAdded = @()
         $filesModified = @()
         $filesDeleted = @()
-        $aheadCount = 0
+        $aheadCount = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
         
         $diffIndex = git diff-index -M --name-status --cached HEAD |
                      ConvertFrom-CSV -Delim "`t" -Header 'Status','Path'
@@ -89,14 +89,6 @@ function Get-GitStatus {
         
         $untracked = git ls-files -o --exclude-standard
         if($untracked) { $filesAdded += $untracked }
-
-        $output = git status
-        
-        $output | foreach {
-            if ($_ -match "^\#.*origin/.*' by (\d+) commit.*") {
-                $aheadCount = $matches[1]
-            }
-        }
 
         $index = New-Object PSObject @(,@($diffIndex | %{ $_.Path } | ?{ $_ })) |
             Add-Member -PassThru NoteProperty Added    $indexAdded |
