@@ -45,6 +45,12 @@ function script:gitLocalBranches($filter) {
         where { $_ -like "$filter*" }
 }
 
+function script:gitStashes($filter) {
+    (git stash list) -replace ':.*','' |
+        where { $_ -like "$filter*" } |
+        foreach { "'$_'" }
+}
+
 function script:gitIndex($filter) {
     if($GitStatus) {
         $GitStatus.Index |
@@ -80,6 +86,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git stash <op>
         'git (remote|stash) (\S*)$' {
             gitCmdOperations $matches[1] $matches[2]
+        }
+
+        # Handles git stash (show|apply|drop|pop|branch) <stash>
+        'git stash (show|apply|drop|pop|branch) (\S*)$' {
+            gitStashes $matches[2]
         }
     
         # Handles git branch -d|-D <branch name>
@@ -124,5 +135,5 @@ function GitTabExpansion($lastBlock) {
         'git add (\S*)$' {
             gitFiles $matches[1]
         }
-    }	
+    }
 }
