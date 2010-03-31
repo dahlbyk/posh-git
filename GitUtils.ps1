@@ -1,12 +1,8 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
-. .\Utils.ps1
-
 function Get-GitDirectory {
-    Coalesce-Args `
-        (Get-Item '.\.git' -Force 2>$null).FullName `
-        { git rev-parse --git-dir 2>$null }
+    Test-LocalOrParentPath .git
 }
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
