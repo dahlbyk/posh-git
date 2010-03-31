@@ -135,5 +135,10 @@ function GitTabExpansion($lastBlock) {
         'git add (\S*)$' {
             gitFiles $matches[1]
         }
+
+        # Handles git checkout -- <path>
+        'git checkout -- (\S*)$' {
+            gitFiles $matches[1]
+        }
     }
 }
