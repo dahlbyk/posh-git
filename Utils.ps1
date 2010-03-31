@@ -12,4 +12,16 @@ function Coalesce-Args {
     }
     $result
 }
-Set-Alias ?? Coalesce-Args
+
+Remove-Item alias:/`?`? -Force
+Set-Alias ?? Coalesce-Args -Force
+
+function Test-LocalOrParentPath($path) {
+    $done = $false
+    do {
+        if (Test-Path $path) { return $true }
+        if (Test-Path ..) { return $false }
+        $path = "..\$path"
+    } while (!$done)
+    return $false
+}
