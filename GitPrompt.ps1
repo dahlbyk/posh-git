@@ -26,7 +26,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     UntrackedForegroundColor  = [ConsoleColor]::Yellow
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
     
-    HideStatusWhenZero        = $false
+    ShowStatusWhenZero        = $true
 }
 
 function Write-GitStatus($status) {
@@ -45,13 +45,13 @@ function Write-GitStatus($status) {
         }
         
         if($status.HasIndex) {
-            if($status.Index.Added.Count -gt 0  -or $s.HideStatusWhenZero -eq $false) {
+            if($s.ShowStatusWhenZero -or $status.Index.Added) {
               Write-Host " +$($status.Index.Added.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
-            if($status.Index.Modified.Count -gt 0  -or $s.HideStatusWhenZero -eq $false) {
+            if($s.ShowStatusWhenZero -or $status.Index.Modified) {
               Write-Host " ~$($status.Index.Modified.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
-            if($status.Index.Deleted.Count -gt 0 -or $s.HideStatusWhenZero -eq $false) {
+            if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
               Write-Host " -$($status.Index.Deleted.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
@@ -65,13 +65,13 @@ function Write-GitStatus($status) {
         }
         
         if($status.HasWorking) {
-            if($status.Working.Added.Count -gt 0 -or $s.HideStatusWhenZero -eq $false) {
+            if($s.ShowStatusWhenZero -or $status.Working.Added) {
               Write-Host " +$($status.Working.Added.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
-            if($status.Working.Modified.Count -gt 0 -or $s.HideStatusWhenZero -eq $false) {
+            if($s.ShowStatusWhenZero -or $status.Working.Modified) {
               Write-Host " ~$($status.Working.Modified.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
-            if($status.Working.Deleted.Count -gt 0 -or $s.HideStatusWhenZero -eq $false) {
+            if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
               Write-Host " -$($status.Working.Deleted.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
 
