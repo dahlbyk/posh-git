@@ -13,7 +13,6 @@ function Coalesce-Args {
     $result
 }
 
-Remove-Item alias:/`?`? -Force
 Set-Alias ?? Coalesce-Args -Force
 
 function Test-LocalOrParentPath($path) {
