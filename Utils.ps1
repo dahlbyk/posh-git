@@ -16,11 +16,14 @@ function Coalesce-Args {
 Set-Alias ?? Coalesce-Args -Force
 
 function Test-LocalOrParentPath($path) {
-    $done = $false
-    do {
-        if (Test-Path $path) { return $true }
-        if (Test-Path ..) { return $false }
-        $path = "..\$path"
-    } while (!$done)
+    $checkIn = Get-Item .
+    while ($checkIn -ne $NULL) {
+        $pathToTest = [System.IO.Path]::Combine($checkIn.fullname, $path)
+        if (Test-Path $pathToTest) {
+            return $true
+        } else {
+            $checkIn = $checkIn.parent
+        }
+    }
     return $false
 }
