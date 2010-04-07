@@ -25,6 +25,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     UntrackedText             = ' !'
     UntrackedForegroundColor  = [ConsoleColor]::Yellow
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
+    
+    ShowStatusWhenZero        = $true
 }
 
 function Write-GitStatus($status) {
@@ -43,9 +45,15 @@ function Write-GitStatus($status) {
         }
         
         if($status.HasIndex) {
-            Write-Host " +$($status.Index.Added.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
-            Write-Host " ~$($status.Index.Modified.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
-            Write-Host " -$($status.Index.Deleted.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+            if($s.ShowStatusWhenZero -or $status.Index.Added) {
+              Write-Host " +$($status.Index.Added.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+            }
+            if($s.ShowStatusWhenZero -or $status.Index.Modified) {
+              Write-Host " ~$($status.Index.Modified.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+            }
+            if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
+              Write-Host " -$($status.Index.Deleted.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+            }
 
             if ($status.Index.Unmerged) {
                 Write-Host " !$($status.Index.Unmerged.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
@@ -57,9 +65,15 @@ function Write-GitStatus($status) {
         }
         
         if($status.HasWorking) {
-            Write-Host " +$($status.Working.Added.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
-            Write-Host " ~$($status.Working.Modified.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
-            Write-Host " -$($status.Working.Deleted.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+            if($s.ShowStatusWhenZero -or $status.Working.Added) {
+              Write-Host " +$($status.Working.Added.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+            }
+            if($s.ShowStatusWhenZero -or $status.Working.Modified) {
+              Write-Host " ~$($status.Working.Modified.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+            }
+            if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
+              Write-Host " -$($status.Working.Deleted.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+            }
 
             if ($status.Working.Unmerged) {
                 Write-Host " !$($status.Working.Unmerged.Count)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
