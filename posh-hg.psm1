@@ -7,5 +7,5 @@ Pop-Location
 Export-ModuleMember -Function @(
   'Write-HgStatus',
   'Get-HgStatus',
-  'HgTabExpansion',
+  'HgTabExpansion'
  )
