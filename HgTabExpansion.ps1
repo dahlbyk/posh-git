@@ -18,6 +18,12 @@ function HgTabExpansion($lastBlock) {
     'hg (help )?(\S*)$' {
       hgCommands($matches[2]);
     }
+    
+    #handles hgtk help <cmd>
+    #handles hgtk <cmd>
+    'hgtk (help )?(\S*)$' {
+      hgtkCommands($matches[2]);
+    }
   }
 }
 
@@ -59,16 +65,6 @@ function hgLocalBranches($filter) {
       elseif(-not $filter) {
         $matches[1]
       }
-    }
-  }
-}
-
-function HgtkTabExpansion($lastBlock) {
-  switch -regex ($lastBlock) {     
-    #handles hgtk help <cmd>
-    #handles hgtk <cmd>
-    'hgtk (help )?(\S*)$' {
-      hgtkCommands($matches[2]);
     }
   }
 }

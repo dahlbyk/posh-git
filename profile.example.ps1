@@ -29,8 +29,7 @@ function TabExpansion($line, $lastWord) {
     
     switch -regex ($lastBlock) {
         # mercurial and tortoisehg tab expansion
-        'hg (.*)' { HgTabExpansion($lastBlock) }
-        'hgtk (.*)' { HgtkTabExpansion($lastBlock) }
+        '(hg|hgtk) (.*)' { HgTabExpansion($lastBlock) }
         # Fall back on existing tab expansion
         default { DefaultTabExpansion $line $lastWord }
     }
