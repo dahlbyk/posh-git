@@ -67,6 +67,8 @@ function Get-GitStatus {
         $filesModified = @()
         $filesDeleted = @()
         $filesUnmerged = @()
+        
+        git update-index --refresh -q
         $aheadCount = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
         
         $diffIndex = git diff-index -M --name-status --cached HEAD |
