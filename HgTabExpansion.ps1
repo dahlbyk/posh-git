@@ -78,8 +78,8 @@ function hgOptions($cmd, $filter) {
 	$optList = @()
 	$output = hg help $cmd
 	foreach($line in $output) {
-		if($line -match '^ -\S --(\S+) .*$') {
-			$opt = $matches[1]
+		if($line -match '^ ((-\S)|  ) --(\S+) .*$') {
+			$opt = $matches[3]
 			if($filter -and $opt.StartsWith($filter)) {
 				$optList += '--' + $opt.Trim()
 			}
