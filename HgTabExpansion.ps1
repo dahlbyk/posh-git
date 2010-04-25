@@ -18,6 +18,11 @@ function HgTabExpansion($lastBlock) {
     'hg (help )?(\S*)$' {
       hgCommands($matches[2]);
     }
+
+	#handles hg <cmd> --<option>
+	'hg (\S+) (-\S* )*--(\S*)$' {
+		hgOptions $matches[1] $matches[3];
+	}
     
     #handles hgtk help <cmd>
     #handles hgtk <cmd>
@@ -67,6 +72,24 @@ function hgLocalBranches($filter) {
       }
     }
   }
+}
+
+function hgOptions($cmd, $filter) {
+	$optList = @()
+	$output = hg help $cmd
+	foreach($line in $output) {
+		if($line -match '^ -\S --(\S+) .*$') {
+			$opt = $matches[1]
+			if($filter -and $opt.StartsWith($filter)) {
+				$optList += '--' + $opt.Trim()
+			}
+			elseif(-not $filter) {
+				$optList += '--' + $opt.Trim()
+			}
+		}
+	}
+
+	$optList | sort
 }
 
 function hgtkCommands($filter) {
