@@ -19,17 +19,34 @@ function HgTabExpansion($lastBlock) {
       hgCommands($matches[2]);
     }
 
-	#handles hg <cmd> --<option>
-	'hg (\S+) (-\S* )*--(\S*)$' {
-		hgOptions $matches[1] $matches[3];
-	}
+    #handles hg <cmd> --<option>
+    'hg (\S+) (-\S* )*--(\S*)$' {
+      hgOptions $matches[1] $matches[3];
+    }
+    
+    #handles hg revert <path>
+    'hg revert (\S*)$' {
+      hgFiles $matches[1]
+    }
     
     #handles hgtk help <cmd>
     #handles hgtk <cmd>
     'hgtk (help )?(\S*)$' {
       hgtkCommands($matches[2]);
     }
+    
   }
+}
+
+function hgFiles($filter) {
+  hg status | 
+    foreach { 
+      if($_ -match ".{1} (.*)") { 
+        $matches[1] 
+      } 
+    } |
+    where { $_ -like "*$filter*" } |
+    foreach { if($_ -like '* *') {  "'$_'"  } else { $_ } } 
 }
 
 function hgRemotes($filter) {
