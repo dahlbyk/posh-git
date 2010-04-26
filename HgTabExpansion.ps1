@@ -26,12 +26,12 @@ function HgTabExpansion($lastBlock) {
     
     #handles hg revert <path>
     'hg revert (\S*)$' {
-      hgModifiedFiles $matches[1]
+      hgFiles $matches[1] 'M|A|R|!'
     }
     
     #handles hg add <path>
     'hg add (\S*)$' {
-      hgUntrackedFiles $matches[1]
+      hgFiles $matches[1] '\?'
     }
     
     #handles hgtk help <cmd>
@@ -43,24 +43,15 @@ function HgTabExpansion($lastBlock) {
   }
 }
 
-function hgUntrackedFiles($filter) {
-  hg status | 
+function hgFiles($filter, $pattern) {
+   hg status | 
     foreach { 
-      if($_ -match "\? (.*)") { $matches[1] } 
-    } |
-    where { $_ -like "*$filter*" } |
-    foreach { if($_ -like '* *') {  "'$_'"  } else { $_ } } 
-}
-
-function hgModifiedFiles($filter) {
-  hg status | 
-    foreach { 
-      if($_ -match "(M|A|R|!){1} (.*)") { 
+      if($_ -match "($pattern){1} (.*)") { 
         $matches[2] 
       } 
     } |
     where { $_ -like "*$filter*" } |
-    foreach { if($_ -like '* *') {  "'$_'"  } else { $_ } } 
+    foreach { if($_ -like '* *') {  "'$_'"  } else { $_ } }
 }
 
 function hgRemotes($filter) {
