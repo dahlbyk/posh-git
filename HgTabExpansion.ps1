@@ -26,7 +26,12 @@ function HgTabExpansion($lastBlock) {
     
     #handles hg revert <path>
     'hg revert (\S*)$' {
-      hgFiles $matches[1]
+      hgModifiedFiles $matches[1]
+    }
+    
+    #handles hg add <path>
+    'hg add (\S*)$' {
+      hgUntrackedFiles $matches[1]
     }
     
     #handles hgtk help <cmd>
@@ -38,11 +43,20 @@ function HgTabExpansion($lastBlock) {
   }
 }
 
-function hgFiles($filter) {
+function hgUntrackedFiles($filter) {
   hg status | 
     foreach { 
-      if($_ -match ".{1} (.*)") { 
-        $matches[1] 
+      if($_ -match "\? (.*)") { $matches[1] } 
+    } |
+    where { $_ -like "*$filter*" } |
+    foreach { if($_ -like '* *') {  "'$_'"  } else { $_ } } 
+}
+
+function hgModifiedFiles($filter) {
+  hg status | 
+    foreach { 
+      if($_ -match "(M|A|R|!){1} (.*)") { 
+        $matches[2] 
       } 
     } |
     where { $_ -like "*$filter*" } |
