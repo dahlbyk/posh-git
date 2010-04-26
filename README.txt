@@ -2,6 +2,9 @@ Inspired by the Posh-Git project (http://github.com/dahlbyk/posh-git)
 
 Posh-hg provides a custom prompt and tab expansion when using Mercurial from within a Windows Powershell command line.
 
+For more details, see this post on Jeremy's blog:
+http://www.jeremyskinner.co.uk/2010/04/21/using-mercurial-with-windows-powershell/
+
 To install posh-hg, download the latest source (http://github.com/JeremySkinner/posh-hg/zipball/master) 
 and add the following code to your Powershell profile (usually C:\Users\Username\Documents\WindowsPowershell\Profile.ps1)
 
