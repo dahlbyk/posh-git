@@ -40,6 +40,11 @@ function HgTabExpansion($lastBlock) {
       hgtkCommands($matches[2]);
     }
     
+    # handles hg diff <path>
+    'hg diff (\S*)$' {
+      hgFiles $matches[1] 'M'
+    }
+    
   }
 }
 
