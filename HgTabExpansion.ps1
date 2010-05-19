@@ -3,7 +3,7 @@ function HgTabExpansion($lastBlock) {
     
     #handles hg update <branch name>
     #handles hg merge <branch name>
-    'hg (update|merge) (\S*)$' {
+    'hg (up|update|merge) (\S*)$' {
       hgLocalBranches($matches[2])
     }
     
