@@ -9,6 +9,8 @@ $global:HgPromptSettings = New-Object PSObject -Property @{
     
     BranchForegroundColor    = [ConsoleColor]::Cyan
     BranchBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    Branch2ForegroundColor   = [ConsoleColor]::Red
+    Branch2BackgroundColor   = $host.UI.RawUI.BackgroundColor
     
     WorkingForegroundColor    = [ConsoleColor]::Yellow
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
@@ -45,8 +47,8 @@ function Write-HgStatus($status = (get-hgStatus)) {
         if($status.Missing) {
            Write-Host " !$($status.Missing)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
         }
-        
-        if($s.ShowTags) {
+
+        if($s.ShowTags -and $status.Tags.Length) {
           write-host $s.BeforeTagText -NoNewLine
           
           $tagCounter=0

@@ -33,7 +33,7 @@ function Get-HgStatus {
     
     hg summary | foreach {   
       switch -regex ($_) {
-        'parent: (\S*) ?(.*)' { $commit = $matches[1]; $tags = $matches[2].Split(" ") } 
+        'parent: (\S*) ?(.*)' { $commit = $matches[1]; $tags = $matches[2].Split(" ", [StringSplitOptions]::RemoveEmptyEntries) } 
         'branch: (\S*)' { $branch = $matches[1] }
         'commit: (.*)' {
           $matches[1].Split(",") | foreach {
