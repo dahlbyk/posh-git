@@ -28,9 +28,12 @@ function Get-HgStatus {
     $modified = 0
     $deleted = 0
     $missing = 0
+    $tags = @()
+    $commit = ""
     
     hg summary | foreach {   
       switch -regex ($_) {
+        'parent: (\S*) ?(.*)' { $commit = $matches[1]; $tags = $matches[2].Split(" ") } 
         'branch: (\S*)' { $branch = $matches[1] }
         'commit: (.*)' {
           $matches[1].Split(",") | foreach {
@@ -51,6 +54,8 @@ function Get-HgStatus {
                "Modified" = $modified;
                "Deleted" = $deleted;
                "Missing" = $missing;
+               "Tags" = $tags;
+               "Commit" = $commit;
                "Branch" = $branch}
    }
 }

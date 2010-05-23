@@ -12,9 +12,16 @@ $global:HgPromptSettings = New-Object PSObject -Property @{
     
     WorkingForegroundColor    = [ConsoleColor]::Yellow
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    
+    ShowTags                  = $true
+    BeforeTagText             = ' '
+    TagForegroundColor        = [ConsoleColor]::DarkGray
+    TagBackgroundColor        = $Host.UI.RawUI.BackgroundColor
+    TagSeparator              = ", "
+    TagSeparatorColor         = [ConsoleColor]::White
 }
 
-function Write-HgStatus($status) {
+function Write-HgStatus($status = (get-hgStatus)) {
     if ($status) {
         $s = $global:HgPromptSettings
        
@@ -38,7 +45,20 @@ function Write-HgStatus($status) {
         if($status.Missing) {
            Write-Host " !$($status.Missing)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
         }
-      
-        Write-Host $s.AfterText -NoNewline -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
+        
+        if($s.ShowTags) {
+          write-host $s.BeforeTagText -NoNewLine
+          
+          $tagCounter=0
+          $status.Tags | % {
+              write-host $_ -NoNewLine -ForegroundColor $s.TagForegroundColor -BackgroundColor $s.TagBackgroundColor 
+              if($tagCounter -lt ($status.Tags.Length -1)) {
+                write-host ", " -NoNewLine -ForegroundColor $s.TagSeparatorColor -BackgroundColor $s.TagBackgroundColor
+              }
+              $tagCounter++;
+          }        
+        }
+        
+       Write-Host $s.AfterText -NoNewline -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
     }
 }
