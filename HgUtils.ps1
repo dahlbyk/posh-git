@@ -30,11 +30,13 @@ function Get-HgStatus {
     $missing = 0
     $tags = @()
     $commit = ""
+    $behind = $false
     
     hg summary | foreach {   
       switch -regex ($_) {
         'parent: (\S*) ?(.*)' { $commit = $matches[1]; $tags = $matches[2].Split(" ", [StringSplitOptions]::RemoveEmptyEntries) } 
         'branch: (\S*)' { $branch = $matches[1] }
+        'update: (\d+)' { $behind = $true }
         'commit: (.*)' {
           $matches[1].Split(",") | foreach {
             switch -regex ($_.Trim()) {
@@ -56,6 +58,7 @@ function Get-HgStatus {
                "Missing" = $missing;
                "Tags" = $tags;
                "Commit" = $commit;
+               "Behind" = $behind;
                "Branch" = $branch}
    }
 }

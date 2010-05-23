@@ -27,8 +27,16 @@ function Write-HgStatus($status = (get-hgStatus)) {
     if ($status) {
         $s = $global:HgPromptSettings
        
+        $branchFg = $s.BranchForegroundColor
+        $branchBg = $s.BranchBackgroundColor
+        
+        if($status.Behind) {
+          $branchFg = $s.Branch2ForegroundColor
+          $branchBg = $s.Branch2BackgroundColor
+        }
+       
         Write-Host $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
-        Write-Host $status.Branch -NoNewline -BackgroundColor $s.BranchBackgroundColor -ForegroundColor $s.BranchForegroundColor
+        Write-Host $status.Branch -NoNewline -BackgroundColor $branchBg -ForegroundColor $branchFg
         
         if($status.Added) {
           Write-Host " +$($status.Added)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
