@@ -48,8 +48,7 @@ function HgTabExpansion($lastBlock) {
     # handles hg commit -(I|X) <path>
     'hg commit -(I|X) (\S*)$' {
       hgFiles $matches[2] 'M|A|R|!'
-    }
-    
+    }    
   }
 }
 
@@ -75,22 +74,25 @@ function hgRemotes($filter) {
   }
 }
 
+$hgCommands = (hg help) | % {
+  if($_ -match '^ (\S+) (.*)') {
+      $matches[1]
+   }
+}
+
+$hgCommands += (hg help mq) | % {
+  if($_ -match '^ (\S+) (.*)') {
+      $matches[1]
+   }
+}
+
 function hgCommands($filter) {
-  $cmdList = @()
-  $output = hg help
-  foreach($line in $output) {
-    if($line -match '^ (\S+) (.*)') {
-      $cmd = $matches[1]
-      if($filter -and $cmd.StartsWith($filter)) {
-        $cmdList += $cmd.Trim()
-      }
-      elseif(-not $filter) {
-        $cmdList += $cmd.Trim()
-      }
-    }
+  if($filter) {
+     $hgCommands | ? { $_.StartsWith($filter) } | % { $_.Trim() } | sort  
   }
-  
-  $cmdList | sort
+  else {
+    $hgCommands | % { $_.Trim() } | sort
+  }
 }
 
 function hgLocalBranches($filter) {
