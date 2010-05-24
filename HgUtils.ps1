@@ -62,3 +62,23 @@ function Get-HgStatus {
                "Branch" = $branch}
    }
 }
+
+function Get-MqPatches($filter) {
+  $applied = @()
+  $unapplied = @()
+  
+  hg qapplied | % { $applied += $_ }
+  hg qunapplied | % { $unapplied += $_ }
+  
+  $all = $unapplied + $applied
+  
+  if($filter) {
+    $all = $all | ? { $_.StartsWith($filter) }
+  }
+  
+  return @{
+    "All" = $all;
+    "Unapplied" = $unapplied;
+    "Applied" = $applied
+  }
+}

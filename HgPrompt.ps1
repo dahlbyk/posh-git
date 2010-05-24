@@ -21,6 +21,18 @@ $global:HgPromptSettings = New-Object PSObject -Property @{
     TagBackgroundColor        = $Host.UI.RawUI.BackgroundColor
     TagSeparator              = ", "
     TagSeparatorColor         = [ConsoleColor]::White
+    
+    ShowPatches                   = $true
+    BeforePatchText               = ' patches: '
+    UnappliedPatchForegroundColor = [ConsoleColor]::DarkGray
+    UnappliedPatchBackgroundColor = $Host.UI.RawUI.BackgroundColor
+    AppliedPatchForegroundColor   = [ConsoleColor]::DarkYellow
+    AppliedPatchBackgroundColor   = $Host.UI.RawUI.BackgroundColor
+    PatchSeparator                = ' › '
+    PatchSeparatorColor           = [ConsoleColor]::White
+    
+    
+    
 }
 
 function Write-HgStatus($status = (get-hgStatus)) {
@@ -67,6 +79,31 @@ function Write-HgStatus($status = (get-hgStatus)) {
               }
               $tagCounter++;
           }        
+        }
+        
+        if($s.ShowPatches) {
+          $patches = Get-MqPatches
+          if($patches.All.Length) {
+            write-host $s.BeforePatchText -NoNewLine
+  
+            $patchCounter = 0
+            
+            $patches.Applied | % {
+              write-host $_ -NoNewLine -ForegroundColor $s.AppliedPatchForegroundColor -BackgroundColor $s.AppliedPatchBackgroundColor
+              if($patchCounter -lt ($patches.All.Length -1)) {
+                write-host $s.PatchSeparator -NoNewLine -ForegroundColor $s.PatchSeparatorColor
+              }
+              $patchCounter++;
+            }
+            
+            $patches.Unapplied | % {
+               write-host $_ -NoNewLine -ForegroundColor $s.UnappliedPatchForegroundColor -BackgroundColor $s.UnappliedPatchBackgroundColor
+               if($patchCounter -lt ($patches.All.Length -1)) {
+                  write-host $s.PatchSeparator -NoNewLine -ForegroundColor $s.PatchSeparatorColor
+               }
+               $patchCounter++;
+            }
+          }
         }
         
        Write-Host $s.AfterText -NoNewline -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
