@@ -46,8 +46,8 @@ function HgTabExpansion($lastBlock) {
     }
     
     # handles hg commit -(I|X) <path>
-    'hg commit -(I|X) (\S*)$' {
-      hgFiles $matches[2] 'M|A|R|!'
+    'hg commit (\S* )*-(I|X) (\S*)$' {
+      hgFiles $matches[3] 'M|A|R|!'
     }    
   }
 }

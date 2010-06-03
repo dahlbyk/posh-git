@@ -22,7 +22,7 @@ $global:HgPromptSettings = New-Object PSObject -Property @{
     TagSeparator              = ", "
     TagSeparatorColor         = [ConsoleColor]::White
     
-    ShowPatches                   = $true
+    ShowPatches                   = $false
     BeforePatchText               = ' patches: '
     UnappliedPatchForegroundColor = [ConsoleColor]::DarkGray
     UnappliedPatchBackgroundColor = $Host.UI.RawUI.BackgroundColor
