@@ -100,7 +100,8 @@ function GitTabExpansion($lastBlock) {
          
         # Handles git checkout <branch name>
         # Handles git merge <branch name>
-        'git (checkout|merge) (\S*)$' {
+        # handles git rebase <branch name>
+        'git (checkout|merge|rebase) (\S*)$' {
             gitLocalBranches $matches[2]
         }
          
