@@ -67,8 +67,17 @@ function Get-MqPatches($filter) {
   $applied = @()
   $unapplied = @()
   
-  hg qapplied | % { $applied += $_ }
-  hg qunapplied | % { $unapplied += $_ }
+  hg qseries -v | % {
+    $bits = $_.Split(" ")
+    $status = $bits[1]
+    $name = $bits[2]
+    
+    if($status -eq "A") {
+      $applied += $name
+    } else {
+      $unapplied += $name
+    }
+  }
   
   $all = $unapplied + $applied
   
