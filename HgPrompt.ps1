@@ -1,43 +1,9 @@
-$global:HgPromptSettings = New-Object PSObject -Property @{
-    BeforeText                = ' ['
-    BeforeForegroundColor     = [ConsoleColor]::Yellow
-    BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
-    
-    AfterText                 = ']'
-    AfterForegroundColor      = [ConsoleColor]::Yellow
-    AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
-    
-    BranchForegroundColor    = [ConsoleColor]::Cyan
-    BranchBackgroundColor    = $Host.UI.RawUI.BackgroundColor
-    Branch2ForegroundColor   = [ConsoleColor]::Red
-    Branch2BackgroundColor   = $host.UI.RawUI.BackgroundColor
-    
-    WorkingForegroundColor    = [ConsoleColor]::Yellow
-    WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
-    
-    ShowTags                  = $true
-    BeforeTagText             = ' '
-    TagForegroundColor        = [ConsoleColor]::DarkGray
-    TagBackgroundColor        = $Host.UI.RawUI.BackgroundColor
-    TagSeparator              = ", "
-    TagSeparatorColor         = [ConsoleColor]::White
-    
-    ShowPatches                   = $false
-    BeforePatchText               = ' patches: '
-    UnappliedPatchForegroundColor = [ConsoleColor]::DarkGray
-    UnappliedPatchBackgroundColor = $Host.UI.RawUI.BackgroundColor
-    AppliedPatchForegroundColor   = [ConsoleColor]::DarkYellow
-    AppliedPatchBackgroundColor   = $Host.UI.RawUI.BackgroundColor
-    PatchSeparator                = ' › '
-    PatchSeparatorColor           = [ConsoleColor]::White
-    
-    
-    
-}
+# For backwards compatibility
+$global:HgPromptSettings = $global:PoshHgSettings
 
 function Write-HgStatus($status = (get-hgStatus)) {
     if ($status) {
-        $s = $global:HgPromptSettings
+        $s = $global:PoshHgSettings
        
         $branchFg = $s.BranchForegroundColor
         $branchBg = $s.BranchBackgroundColor

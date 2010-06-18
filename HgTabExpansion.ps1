@@ -1,3 +1,5 @@
+$script:hgCommands = @()
+
 function HgTabExpansion($lastBlock) {
   switch -regex ($lastBlock) { 
     
@@ -74,25 +76,48 @@ function hgRemotes($filter) {
   }
 }
 
-$hgCommands = (hg help) | % {
-  if($_ -match '^ (\S+) (.*)') {
-      $matches[1]
-   }
-}
-
-$hgCommands += (hg help mq) | % {
-  if($_ -match '^ (\S+) (.*)') {
-      $matches[1]
-   }
-}
-
+# By default the hg command list is populated the first time hgCommands is invoked. 
+# Invoke PopulateHgCommands in your profile if you don't want the initial hit. 
 function hgCommands($filter) {
+  if($script:hgCommands.Length -eq 0) {
+    populateHgCommands
+  }
+
   if($filter) {
      $hgCommands | ? { $_.StartsWith($filter) } | % { $_.Trim() } | sort  
   }
   else {
     $hgCommands | % { $_.Trim() } | sort
   }
+}
+
+# By default the hg command list is populated the first time hgCommands is invoked. 
+# Invoke PopulateHgCommands in your profile if you don't want the initial hit. 
+function PopulateHgCommands() {
+   $hgCommands = (hg help) | % {
+    if($_ -match '^ (\S+) (.*)') {
+        $matches[1]
+     }
+  }
+
+  if($global:PoshHgSettings.ShowPatches) {
+    # MQ integration must be explicitly enabled as the user may not have the extension
+    $hgCommands += (hg help mq) | % {
+      if($_ -match '^ (\S+) (.*)') {
+          $matches[1]
+       }
+    }
+  }
+
+  if($global:PoshHgSettings.EnablePBranch) {
+    $hgCommands += (hg help pbranch) | % { 
+      if($_ -match '^ (\S+) (.*)') {
+          $matches[1]
+       }
+    }
+  }
+  
+  $script:hgCommands = $hgCommands
 }
 
 function hgLocalBranches($filter) {
