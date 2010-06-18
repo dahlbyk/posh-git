@@ -36,10 +36,5 @@ $global:PoshHgSettings = New-Object PSObject -Property @{
     AppliedPatchForegroundColor   = [ConsoleColor]::DarkYellow
     AppliedPatchBackgroundColor   = $Host.UI.RawUI.BackgroundColor
     PatchSeparator                = ' › '
-    PatchSeparatorColor           = [ConsoleColor]::White
-    
-    #PBranch integration
-    EnablePBranch                 = $false
-    
-    
+    PatchSeparatorColor           = [ConsoleColor]::White    
 }

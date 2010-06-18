@@ -108,14 +108,6 @@ function PopulateHgCommands() {
        }
     }
   }
-
-  if($global:PoshHgSettings.EnablePBranch) {
-    $hgCommands += (hg help pbranch) | % { 
-      if($_ -match '^ (\S+) (.*)') {
-          $matches[1]
-       }
-    }
-  }
   
   $script:hgCommands = $hgCommands
 }
