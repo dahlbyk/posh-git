@@ -4,10 +4,11 @@
 $global:GitPromptSettings = New-Object PSObject -Property @{
     BeforeText                = ' ['
     BeforeForegroundColor     = [ConsoleColor]::Yellow
-    BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
+    BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor    
     DelimText                 = ' |'
     DelimForegroundColor      = [ConsoleColor]::Yellow
     DelimBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    
     AfterText                 = ']'
     AfterForegroundColor      = [ConsoleColor]::Yellow
     AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
@@ -17,8 +18,13 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     Branch2ForegroundColor    = [ConsoleColor]::Red
     Branch2BackgroundColor    = $Host.UI.RawUI.BackgroundColor
     
+    BeforeIndexText           = ""
+    BeforeIndexForegroundColor= [ConsoleColor]::Blue
+    BeforeIndexBackgroundColor= $Host.UI.RawUI.BackgroundColor
+    
     IndexForegroundColor      = [ConsoleColor]::Blue
     IndexBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    
     WorkingForegroundColor    = [ConsoleColor]::Yellow
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
     
@@ -47,6 +53,8 @@ function Write-GitStatus($status) {
         }
         
         if($status.HasIndex) {
+            write-host $s.BeforeIndexText -NoNewLine -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
+            
             if($s.ShowStatusWhenZero -or $status.Index.Added) {
               Write-Host " +$($status.Index.Added.Count)" -NoNewline -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
