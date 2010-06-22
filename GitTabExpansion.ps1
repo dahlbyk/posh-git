@@ -8,6 +8,7 @@ $global:GitTabSettings = New-Object PSObject -Property @{
 $global:ops = @{
     remote = 'add','rename','rm','set-head','show','prune','update'
     stash = 'list','show','drop','pop','apply','branch','save','clear','create'
+    svn = 'init', 'fetch', 'clone', 'rebase', 'dcommit', 'branch', 'tag', 'log', 'blame', 'find-rev', 'set-tree', 'create-ignore', 'show-ignore', 'mkdirs', 'commit-diff', 'info', 'proplist', 'propget', 'show-externals', 'gc', 'reset' 
 }
 
 function script:gitCmdOperations($command, $filter) {
@@ -84,7 +85,7 @@ function GitTabExpansion($lastBlock) {
     switch -regex ($lastBlock) {
         # Handles git remote <op>
         # Handles git stash <op>
-        'git (remote|stash) (\S*)$' {
+        'git (remote|stash|svn) (\S*)$' {
             gitCmdOperations $matches[1] $matches[2]
         }
 
