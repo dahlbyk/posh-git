@@ -3,6 +3,7 @@ Push-Location $psScriptRoot
 . ./GitUtils.ps1
 . ./GitPrompt.ps1
 . ./GitTabExpansion.ps1
+. ./TortoiseGit.ps1
 Pop-Location
 
 Export-ModuleMember -Function @(
@@ -10,4 +11,6 @@ Export-ModuleMember -Function @(
         'Get-GitStatus', 
         'Enable-GitColors', 
         'Get-GitDirectory',
-        'GitTabExpansion')
+        'GitTabExpansion',
+        'tgit')
+

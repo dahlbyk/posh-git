@@ -83,6 +83,13 @@ function script:gitAliases($filter) {
 
 function GitTabExpansion($lastBlock) {
     switch -regex ($lastBlock) {
+
+        # Handles tgit <command> (tortoisegit)
+        'tgit (\S*)$' {
+            # Need return statement to prevent fall-through.
+            return $tortoiseGitCommands | where { $_ -like "$($matches[1])*" }
+        }
+    
         # Handles git remote <op>
         # Handles git stash <op>
         'git (remote|stash|svn) (\S*)$' {
