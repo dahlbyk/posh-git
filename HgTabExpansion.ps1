@@ -94,8 +94,14 @@ function hgCommands($filter) {
 # By default the hg command list is populated the first time hgCommands is invoked. 
 # Invoke PopulateHgCommands in your profile if you don't want the initial hit. 
 function PopulateHgCommands() {
-   $hgCommands = (hg help) | % {
-    if($_ -match '^ (\S+) (.*)') {
+   $hgCommands = foreach($cmd in (hg help)) {
+    # Stop once we reach the "Enabled Extensions" section of help. 
+    # Not sure if there's a better way to do this...
+    if($cmd -eq "enabled extensions:") {
+      break
+    }
+    
+    if($cmd -match '^ (\S+) (.*)') {
         $matches[1]
      }
   }
