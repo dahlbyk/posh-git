@@ -2,7 +2,7 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 function Get-GitDirectory {
-    Test-LocalOrParentPath .git
+    Get-LocalOrParentPath .git
 }
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
