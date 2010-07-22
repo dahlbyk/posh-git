@@ -74,9 +74,9 @@ function Get-GitStatus {
         
         $aheadCount = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
         
-        $diffIndex = git diff-index -M --name-status --cached HEAD |
+        $diffIndex = git diff-index -M --name-status --no-ext-diff --ignore-submodules --cached HEAD |
                      ConvertFrom-CSV -Delim "`t" -Header 'Status','Path'
-        $diffFiles = git diff-files -M --name-status |
+        $diffFiles = git diff-files -M --name-status --no-ext-diff --ignore-submodules |
                      ConvertFrom-CSV -Delim "`t" -Header 'Status','Path'
 
         $grpIndex = $diffIndex | Group-Object Status -AsHashTable
