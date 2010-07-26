@@ -8,7 +8,7 @@ $global:GitTabSettings = New-Object PSObject -Property @{
 $global:ops = @{
     remote = 'add','rename','rm','set-head','show','prune','update'
     stash = 'list','show','drop','pop','apply','branch','save','clear','create'
-    svn = 'init', 'fetch', 'clone', 'rebase', 'dcommit', 'branch', 'tag', 'log', 'blame', 'find-rev', 'set-tree', 'create-ignore', 'show-ignore', 'mkdirs', 'commit-diff', 'info', 'proplist', 'propget', 'show-externals', 'gc', 'reset' 
+    svn = 'init', 'fetch', 'clone', 'rebase', 'dcommit', 'branch', 'tag', 'log', 'blame', 'find-rev', 'set-tree', 'create-ignore', 'show-ignore', 'mkdirs', 'commit-diff', 'info', 'proplist', 'propget', 'show-externals', 'gc', 'reset'
 }
 
 function script:gitCmdOperations($command, $filter) {
@@ -28,7 +28,7 @@ function script:gitCommands($filter, $includeAliases) {
             foreach { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
             where { $_ -like "$filter*" }
     }
-    
+
     if ($includeAliases) {
         $cmdList += gitAliases $filter
     }
@@ -39,7 +39,7 @@ function script:gitRemotes($filter) {
     git remote |
         where { $_ -like "$filter*" }
 }
- 
+
 function script:gitLocalBranches($filter, $includeHEAD = $false) {
     $branches = git branch |
         foreach { if($_ -match "^\*?\s*(.*)") { $matches[1] } }
@@ -83,7 +83,7 @@ function script:gitAliases($filter) {
     git config --get-regexp alias\..+ | foreach {
         $alias = $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries)[0].Split(
             '.', [StringSplitOptions]::RemoveEmptyEntries)[1]
-            
+
         if($alias -like "$filter*") {
             $aliasList += $alias.Trim()
         }
@@ -99,7 +99,7 @@ function GitTabExpansion($lastBlock) {
             # Need return statement to prevent fall-through.
             return $tortoiseGitCommands | where { $_ -like "$($matches[1])*" }
         }
-    
+
         # Handles git remote <op>
         # Handles git stash <op>
         'git (remote|stash|svn) (\S*)$' {
@@ -110,29 +110,29 @@ function GitTabExpansion($lastBlock) {
         'git stash (?:show|apply|drop|pop|branch).* (\S*)$' {
             gitStashes $matches[1]
         }
-    
+
         # Handles git branch -d|-D|-m|-M <branch name>
         # Handles git branch <branch name> <start-point>
         'git branch.* (\S*)$' {
             gitLocalBranches $matches[1]
         }
-         
+
         # Handles git <cmd> (commands & aliases)
         'git (\S*)$' {
             gitCommands $matches[1] $TRUE
         }
-        
+
         # Handles git help <cmd> (commands only)
         'git help (\S*)$' {
             gitCommands $matches[1] $FALSE
         }
-         
+
         # Handles git push remote <branch>
         # Handles git pull remote <branch>
         'git (?:push|pull).* (?:\S+) (\S*)$' {
             gitLocalBranches $matches[1]
         }
-         
+
         # Handles git pull <remote>
         # Handles git push <remote>
         'git (?:push|pull).* (\S*)$' {
