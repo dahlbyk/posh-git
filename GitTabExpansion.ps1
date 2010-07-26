@@ -40,10 +40,12 @@ function script:gitRemotes($filter) {
         where { $_ -like "$filter*" }
 }
  
-function script:gitLocalBranches($filter) {
-    git branch |
-        foreach { if($_ -match "^\*?\s*(.*)") { $matches[1] } } |
-        where { $_ -like "$filter*" }
+function script:gitLocalBranches($filter, $includeHEAD = $false) {
+    $branches = git branch |
+        foreach { if($_ -match "^\*?\s*(.*)") { $matches[1] } }
+
+    @(if ($includeHEAD) { 'HEAD' }) + @($branches) |
+        where { $_ -ne '(no branch)' -and $_ -like "$filter*" }
 }
 
 function script:gitStashes($filter) {
@@ -133,6 +135,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git reset HEAD -- <path>
         'git reset.* HEAD(?:\s+--)? (\S*)$' {
             gitIndex $matches[1]
+        }
+
+        # Handles git reset <commit>
+        'git reset.* (\S*)$' {
+            gitLocalBranches $matches[1] $true
         }
 
         # Handles git add <path>
