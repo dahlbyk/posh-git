@@ -95,81 +95,81 @@ function GitTabExpansion($lastBlock) {
     switch -regex ($lastBlock) {
 
         # Handles tgit <command> (tortoisegit)
-        'tgit (\S*)$' {
+        '^tgit (\S*)$' {
             # Need return statement to prevent fall-through.
             return $tortoiseGitCommands | where { $_ -like "$($matches[1])*" }
         }
 
         # Handles git remote <op>
         # Handles git stash <op>
-        'git (remote|stash|svn) (\S*)$' {
-            gitCmdOperations $matches[1] $matches[2]
+        '^git (?<cmd>remote|stash|svn) (?<op>\S*)$' {
+            gitCmdOperations $matches['cmd'] $matches['op']
         }
 
         # Handles git stash (show|apply|drop|pop|branch) <stash>
-        'git stash (?:show|apply|drop|pop|branch).* (\S*)$' {
-            gitStashes $matches[1]
+        '^git stash (?:show|apply|drop|pop|branch).* (?<stash>\S*)$' {
+            gitStashes $matches['stash']
         }
 
         # Handles git branch -d|-D|-m|-M <branch name>
         # Handles git branch <branch name> <start-point>
-        'git branch.* (\S*)$' {
-            gitLocalBranches $matches[1]
+        '^git branch.* (?<branch>\S*)$' {
+            gitLocalBranches $matches['branch']
         }
 
         # Handles git <cmd> (commands & aliases)
-        'git (\S*)$' {
-            gitCommands $matches[1] $TRUE
+        '^git (?<cmd>\S*)$' {
+            gitCommands $matches['cmd'] $TRUE
         }
 
         # Handles git help <cmd> (commands only)
-        'git help (\S*)$' {
-            gitCommands $matches[1] $FALSE
+        '^git help (?<cmd>\S*)$' {
+            gitCommands $matches['cmd'] $FALSE
         }
 
         # Handles git push remote <branch>
         # Handles git pull remote <branch>
-        'git (?:push|pull).* (?:\S+) (\S*)$' {
-            gitLocalBranches $matches[1]
+        '^git (?:push|pull).* (?:\S+) (?<branch>\S*)$' {
+            gitLocalBranches $matches['branch']
         }
 
         # Handles git pull <remote>
         # Handles git push <remote>
-        'git (?:push|pull).* (\S*)$' {
-            gitRemotes $matches[1]
+        '^git (?:push|pull).* (?<remote>\S*)$' {
+            gitRemotes $matches['remote']
         }
 
         # Handles git reset HEAD <path>
         # Handles git reset HEAD -- <path>
-        'git reset.* HEAD(?:\s+--)? (\S*)$' {
-            gitIndex $matches[1]
+        '^git reset.* HEAD(?:\s+--)? (?<path>\S*)$' {
+            gitIndex $matches['path']
         }
 
         # Handles git reset <commit>
-        'git reset.* (\S*)$' {
-            gitLocalBranches $matches[1] $true
+        '^git reset.* (?<commit>\S*)$' {
+            gitLocalBranches $matches['commit'] $true
         }
 
         # Handles git add <path>
-        'git add.* (\S*)$' {
-            gitFiles $matches[1]
+        '^git add.* (?<files>\S*)$' {
+            gitFiles $matches['files']
         }
 
         # Handles git checkout -- <path>
-        'git checkout.* -- (\S*)$' {
-            gitFiles $matches[1]
+        '^git checkout.* -- (?<files>\S*)$' {
+            gitFiles $matches['files']
         }
 
         # Handles git rm <path>
-        'git rm.* (\S*)$' {
-            gitDeleted $matches[1]
+        '^git rm.* (?<index>\S*)$' {
+            gitDeleted $matches['index']
         }
 
         # Handles git checkout <branch name>
         # Handles git merge <branch name>
         # handles git rebase <branch name>
-        'git (?:checkout|merge|rebase).* (\S*)$' {
-            gitLocalBranches $matches[1]
+        '^git (?:checkout|merge|rebase).* (?<branch>\S*)$' {
+            gitLocalBranches $matches['branch']
         }
     }
 }
