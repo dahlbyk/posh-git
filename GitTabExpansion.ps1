@@ -97,20 +97,14 @@ function GitTabExpansion($lastBlock) {
         }
 
         # Handles git stash (show|apply|drop|pop|branch) <stash>
-        'git stash (show|apply|drop|pop|branch) (\S*)$' {
-            gitStashes $matches[2]
+        'git stash (?:show|apply|drop|pop|branch).* (\S*)$' {
+            gitStashes $matches[1]
         }
     
         # Handles git branch -d|-D|-m|-M <branch name>
-        'git branch -(d|D|m|M) (\S*)$' {
-            gitLocalBranches $matches[2]
-        }
-         
-        # Handles git checkout <branch name>
-        # Handles git merge <branch name>
-        # handles git rebase <branch name>
-        'git (checkout|merge|rebase) (\S*)$' {
-            gitLocalBranches $matches[2]
+	# Handles git branch <branch name> <start-point>
+        'git branch.* (\S*)$' {
+            gitLocalBranches $matches[1]
         }
          
         # Handles git <cmd> (commands & aliases)
@@ -125,29 +119,42 @@ function GitTabExpansion($lastBlock) {
          
         # Handles git push remote <branch>
         # Handles git pull remote <branch>
-        'git (push|pull) (\S+) (\S*)$' {
-            gitLocalBranches $matches[3]
+        'git (?:push|pull).* (?:\S+) (\S*)$' {
+            gitLocalBranches $matches[1]
         }
          
         # Handles git pull <remote>
         # Handles git push <remote>
-        'git (push|pull) (\S*)$' {
-            gitRemotes $matches[2]
+        'git (?:push|pull).* (\S*)$' {
+            gitRemotes $matches[1]
         }
 
         # Handles git reset HEAD <path>
-        'git reset HEAD (\S*)$' {
+        # Handles git reset HEAD -- <path>
+        'git reset.* HEAD(?:\s+--)? (\S*)$' {
             gitIndex $matches[1]
         }
 
         # Handles git add <path>
-        'git add (\S*)$' {
+        'git add.* (\S*)$' {
             gitFiles $matches[1]
         }
 
         # Handles git checkout -- <path>
-        'git checkout -- (\S*)$' {
+        'git checkout.* -- (\S*)$' {
             gitFiles $matches[1]
+        }
+
+        # Handles git rm <path>
+        'git rm.* (\S*)$' {
+            gitIndex $matches[1]
+        }
+
+        # Handles git checkout <branch name>
+        # Handles git merge <branch name>
+        # handles git rebase <branch name>
+        'git (?:checkout|merge|rebase).* (\S*)$' {
+            gitLocalBranches $matches[1]
         }
     }
 }
