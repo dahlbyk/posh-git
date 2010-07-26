@@ -7,6 +7,7 @@ function Get-GitDirectory {
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
     if ($gitDir) {
+        $r = ''; $b = ''; $c = ''
         if (Test-Path $gitDir\rebase-merge\interactive) {
             $r = '|REBASE-i'
             $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
@@ -69,7 +70,7 @@ function Get-GitStatus {
         $filesUnmerged = @()
         
         if ($global:GitPromptSettings.AutoRefreshIndex) {
-            git update-index -q --refresh
+            git update-index -q --refresh >$null 2>$null
         }
         
         $aheadCount = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
@@ -95,12 +96,12 @@ function Get-GitStatus {
         $untracked = git ls-files -o --exclude-standard
         if($untracked) { $filesAdded += $untracked }
 
-        $index = New-Object PSObject @(,@($diffIndex | %{ $_.Path } | ?{ $_ })) |
+        $index = New-Object PSObject @(,@($diffIndex | %{ $_.Path } | ?{ $_ } | Select -Unique)) |
             Add-Member -PassThru NoteProperty Added    $indexAdded |
             Add-Member -PassThru NoteProperty Modified $indexModified |
             Add-Member -PassThru NoteProperty Deleted  $indexDeleted |
             Add-Member -PassThru NoteProperty Unmerged $indexUnmerged
-        $working = New-Object PSObject @(,@(@($diffFiles | %{ $_.Path }) + @($filesAdded) | ?{ $_ })) |
+        $working = New-Object PSObject @(,@(@($diffFiles | %{ $_.Path }) + @($filesAdded) | ?{ $_ } | Select -Unique)) |
             Add-Member -PassThru NoteProperty Added    $filesAdded |
             Add-Member -PassThru NoteProperty Modified $filesModified |
             Add-Member -PassThru NoteProperty Deleted  $filesDeleted |
