@@ -62,6 +62,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     {
         $branch = ''
         $aheadBy = 0
+        $behindBy = 0
         $indexAdded = @()
         $indexModified = @()
         $indexDeleted = @()
@@ -71,6 +72,36 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesDeleted = @()
         $filesUnmerged = @()
 
+        $status = git status --short --branch 2>$null
+        $status | where { $_ } | foreach {
+            switch -regex ($_) {
+                '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                    $branch = $matches['branch']
+                    $upstream = $matches['upstream']
+                    $aheadBy = [int]$matches['ahead']
+                    $behindBy = [int]$matches['behind']
+                }
+                
+                '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
+                    switch ($matches['index']) {
+                        'A' { $indexAdded += $matches['path1'] }
+                        'M' { $indexModified += $matches['path1'] }
+                        'R' { $indexModified += $matches['path1'] }
+                        'C' { $indexModified += $matches['path1'] }
+                        'D' { $indexDeleted += $matches['path1'] }
+                        'U' { $indexUnmerged += $matches['path1'] }
+                    }
+                    switch ($matches['working']) {
+                        '?' { $filesAdded += $matches['path1'] }
+                        'A' { $filesAdded += $matches['path1'] }
+                        'M' { $filesModified += $matches['path1'] }
+                        'D' { $filesDeleted += $matches['path1'] }
+                        'U' { $filesUnmerged += $matches['path1'] }
+                    }
+                }
+            }
+        }
+<#
         if ($global:GitPromptSettings.AutoRefreshIndex) {
             git update-index -q --refresh >$null 2>$null
         }
@@ -100,6 +131,9 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         $indexPaths = @($diffIndex | %{ $_.Path })
         $workingPaths = @($diffFiles | %{ $_.Path }) + $filesAdded
+#>
+        $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
+        $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
         $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
             Add-Member -PassThru NoteProperty Added    $indexAdded |
             Add-Member -PassThru NoteProperty Modified $indexModified |
