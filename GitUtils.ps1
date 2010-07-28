@@ -57,9 +57,11 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
     }
 }
 
-function Get-GitStatus {
-    if($gitDir = Get-GitDirectory)
+function Get-GitStatus($gitDir = (Get-GitDirectory)) {
+    if ($gitDir)
     {
+        $branch = ''
+        $aheadBy = 0
         $indexAdded = @()
         $indexModified = @()
         $indexDeleted = @()
@@ -68,13 +70,14 @@ function Get-GitStatus {
         $filesModified = @()
         $filesDeleted = @()
         $filesUnmerged = @()
-        
+
         if ($global:GitPromptSettings.AutoRefreshIndex) {
             git update-index -q --refresh >$null 2>$null
         }
-        
-        $aheadCount = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
-        
+
+        $branch = Get-GitBranch $gitDir
+        $aheadBy = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
+
         $diffIndex = git diff-index -M --name-status --no-ext-diff --ignore-submodules --cached HEAD |
                      ConvertFrom-CSV -Delim "`t" -Header 'Status','Path'
         $diffFiles = git diff-files -M --name-status --no-ext-diff --ignore-submodules |
@@ -92,32 +95,33 @@ function Get-GitStatus {
         if($grpFiles.R) { $filesModified += $grpFiles.R | %{ $_.Path } }
         if($grpFiles.D) { $filesDeleted += $grpFiles.D | %{ $_.Path } }
         if($grpIndex.U) { $filesUnmerged += $grpIndex.U | %{ $_.Path } }
-        
-        $untracked = git ls-files -o --exclude-standard
-        if($untracked) { $filesAdded += $untracked }
 
-        $index = New-Object PSObject @(,@($diffIndex | %{ $_.Path } | ?{ $_ } | Select -Unique)) |
+        $filesAdded = @(git ls-files -o --exclude-standard 2>$null)
+
+        $indexPaths = @($diffIndex | %{ $_.Path })
+        $workingPaths = @($diffFiles | %{ $_.Path }) + $filesAdded
+        $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
             Add-Member -PassThru NoteProperty Added    $indexAdded |
             Add-Member -PassThru NoteProperty Modified $indexModified |
             Add-Member -PassThru NoteProperty Deleted  $indexDeleted |
             Add-Member -PassThru NoteProperty Unmerged $indexUnmerged
-        $working = New-Object PSObject @(,@(@($diffFiles | %{ $_.Path }) + @($filesAdded) | ?{ $_ } | Select -Unique)) |
+        $working = New-Object PSObject @(,@($workingPaths | ?{ $_ } | Select -Unique)) |
             Add-Member -PassThru NoteProperty Added    $filesAdded |
             Add-Member -PassThru NoteProperty Modified $filesModified |
             Add-Member -PassThru NoteProperty Deleted  $filesDeleted |
             Add-Member -PassThru NoteProperty Unmerged $filesUnmerged
-        
+
         $status = New-Object PSObject -Property @{
             GitDir          = $gitDir
-            Branch          = Get-GitBranch $gitDir
-            AheadBy         = $aheadCount
+            Branch          = $branch
+            AheadBy         = $aheadBy
             HasIndex        = [bool]$index
             Index           = $index
             HasWorking      = [bool]$working
             Working         = $working
-            HasUntracked    = [bool]$untracked
+            HasUntracked    = [bool]$filesAdded
         }
-        
+
         return $status
     }
 }
