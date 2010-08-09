@@ -70,6 +70,14 @@ function script:gitFiles($filter) {
     }
 }
 
+function script:gitDeleted($filter) {
+    if($GitStatus) {
+        $GitStatus.Working.Deleted |
+            where { $_ -like "$filter*" } |
+            foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
+    }
+}
+
 function script:gitAliases($filter) {
     $aliasList = @()
     git config --get-regexp alias\..+ | foreach {
@@ -104,7 +112,7 @@ function GitTabExpansion($lastBlock) {
         }
     
         # Handles git branch -d|-D|-m|-M <branch name>
-	# Handles git branch <branch name> <start-point>
+        # Handles git branch <branch name> <start-point>
         'git branch.* (\S*)$' {
             gitLocalBranches $matches[1]
         }
@@ -154,7 +162,7 @@ function GitTabExpansion($lastBlock) {
 
         # Handles git rm <path>
         'git rm.* (\S*)$' {
-            gitIndex $matches[1]
+            gitDeleted $matches[1]
         }
 
         # Handles git checkout <branch name>
