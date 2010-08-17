@@ -34,6 +34,10 @@ function Write-HgStatus($status = (get-hgStatus)) {
            Write-Host " !$($status.Missing)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
         }
 
+        if($status.Renamed) {
+           Write-Host " ^$($status.Renamed)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+        }
+
         if($s.ShowTags -and $status.Tags.Length) {
           write-host $s.BeforeTagText -NoNewLine
           

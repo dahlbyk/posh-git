@@ -28,6 +28,7 @@ function Get-HgStatus {
     $modified = 0
     $deleted = 0
     $missing = 0
+	$renamed = 0
     $tags = @()
     $commit = ""
     $behind = $false
@@ -46,6 +47,7 @@ function Get-HgStatus {
               '(\d+) removed' { $deleted = $matches[1] }
               '(\d+) deleted' { $missing = $matches[1] }
               '(\d+) unknown' { $untracked = $matches[1] }
+              '(\d+) renamed' { $renamed = $matches[1] }
             }
           } 
         } 
@@ -57,6 +59,7 @@ function Get-HgStatus {
                "Modified" = $modified;
                "Deleted" = $deleted;
                "Missing" = $missing;
+			   "Renamed" = $renamed;
                "Tags" = $tags;
                "Commit" = $commit;
                "Behind" = $behind;
