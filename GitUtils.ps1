@@ -101,37 +101,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 }
             }
         }
-<#
-        if ($global:GitPromptSettings.AutoRefreshIndex) {
-            git update-index -q --refresh >$null 2>$null
-        }
 
-        $branch = Get-GitBranch $gitDir
-        $aheadBy = (git cherry 2>$null | where { $_ -like '+*' } | Measure-Object).Count
-
-        $diffIndex = git diff-index -M --name-status --no-ext-diff --ignore-submodules --cached HEAD |
-                     ConvertFrom-CSV -Delim "`t" -Header 'Status','Path'
-        $diffFiles = git diff-files -M --name-status --no-ext-diff --ignore-submodules |
-                     ConvertFrom-CSV -Delim "`t" -Header 'Status','Path'
-
-        $grpIndex = $diffIndex | Group-Object Status -AsHashTable
-        $grpFiles = $diffFiles | Group-Object Status -AsHashTable
-
-        if($grpIndex.A) { $indexAdded += $grpIndex.A | %{ $_.Path } }
-        if($grpIndex.M) { $indexModified += $grpIndex.M | %{ $_.Path } }
-        if($grpIndex.R) { $indexModified += $grpIndex.R | %{ $_.Path } }
-        if($grpIndex.D) { $indexDeleted += $grpIndex.D | %{ $_.Path } }
-        if($grpIndex.U) { $indexUnmerged += $grpIndex.U | %{ $_.Path } }
-        if($grpFiles.M) { $filesModified += $grpFiles.M | %{ $_.Path } }
-        if($grpFiles.R) { $filesModified += $grpFiles.R | %{ $_.Path } }
-        if($grpFiles.D) { $filesDeleted += $grpFiles.D | %{ $_.Path } }
-        if($grpIndex.U) { $filesUnmerged += $grpIndex.U | %{ $_.Path } }
-
-        $filesAdded = @(git ls-files -o --exclude-standard 2>$null)
-
-        $indexPaths = @($diffIndex | %{ $_.Path })
-        $workingPaths = @($diffFiles | %{ $_.Path }) + $filesAdded
-#>
         $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
         $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
         $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
