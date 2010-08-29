@@ -106,6 +106,11 @@ function GitTabExpansion($lastBlock) {
             gitCmdOperations $matches['cmd'] $matches['op']
         }
 
+        # Handles git remote (rename|rm|set-head|set-branches|set-url|show|prune) <stash>
+        '^git remote.* (?:rename|rm|set-head|set-branches|set-url|show|prune).* (?<remote>\S*)$' {
+            gitRemotes $matches['remote']
+        }
+
         # Handles git stash (show|apply|drop|pop|branch) <stash>
         '^git stash (?:show|apply|drop|pop|branch).* (?<stash>\S*)$' {
             gitStashes $matches['stash']
@@ -135,7 +140,8 @@ function GitTabExpansion($lastBlock) {
 
         # Handles git pull <remote>
         # Handles git push <remote>
-        '^git (?:push|pull).* (?<remote>\S*)$' {
+        # Handles git fetch <remote>
+        '^git (?:push|pull|fetch).* (?<remote>\S*)$' {
             gitRemotes $matches['remote']
         }
 
