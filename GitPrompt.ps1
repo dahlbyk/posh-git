@@ -35,6 +35,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     ShowStatusWhenZero        = $true
     
     AutoRefreshIndex          = $true
+
+    EnablePromptStatus        = $true
 }
 
 function Write-GitStatus($status) {
