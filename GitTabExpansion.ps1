@@ -151,6 +151,12 @@ function GitTabExpansion($lastBlock) {
             gitIndex $matches['path']
         }
 
+        # Handles git cherry-pick <commit>
+        # Handles git log <commit>
+        '^git (?:cherry-pick|log).* (?<commit>\S*)$' {
+            gitLocalBranches $matches['commit']
+        }
+
         # Handles git reset <commit>
         '^git reset.* (?<commit>\S*)$' {
             gitLocalBranches $matches['commit'] $true
