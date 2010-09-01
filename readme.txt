@@ -11,6 +11,14 @@ Usage
 
 See profile.example.ps1 as to how you can integrate the tab completion and/or git prompt into your own profile. You can also choose whether advanced git commands are shown in the tab expansion or only simple/common commands. Default is simple.
 
+Installing
+----------
+
+posh-git requires you to modify/create your Powershell Profile. 
+ - Put all posh-git files in your C:\Users\<username>\Documents\WindowsPowerShell folder (create it if it doesn't exist)
+ - Rename profile.example.ps1 to Microsoft.PowerShell_profile.ps1 
+ - If you already have a PowerShell_profile.ps1 you can add the code from profile.example.ps1 to it and it should work fine.
+
 Based on work by:
 
  - Keith Dahlby, http://solutionizing.net/
