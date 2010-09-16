@@ -58,7 +58,9 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
 }
 
 function Get-GitStatus($gitDir = (Get-GitDirectory)) {
-    if ($gitDir)
+    $settings = $Global:GitPromptSettings
+    $enabled = (-not $settings) -or $settings.EnablePromptStatus
+    if ($enabled -and $gitDir)
     {
         $branch = ''
         $aheadBy = 0

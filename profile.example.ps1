@@ -13,10 +13,8 @@ function prompt {
     Write-Host($pwd) -nonewline
         
     # Git Prompt
-    if($Global:GitPromptSettings.EnablePromptStatus) {
-        $Global:GitStatus = Get-GitStatus
-        Write-GitStatus $GitStatus
-    }
+    $Global:GitStatus = Get-GitStatus
+    Write-GitStatus $GitStatus
 
     return "> "
 }
