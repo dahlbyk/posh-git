@@ -41,9 +41,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 }
 
 function Write-GitStatus($status) {
-    if ($status) {
-        $s = $global:GitPromptSettings
-        
+    $s = $global:GitPromptSettings
+    if ($status -and $s) {
         $currentBranch = $status.Branch
         
         Write-Host $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
