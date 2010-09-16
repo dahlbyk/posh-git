@@ -62,7 +62,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
     if ($enabled -and $gitDir)
     {
-        $branch = ''
+        $branch = Get-GitBranch $gitDir
         $aheadBy = 0
         $behindBy = 0
         $indexAdded = @()
@@ -83,7 +83,6 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $status | where { $_ } | foreach {
             switch -regex ($_) {
                 '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
-                    $branch = $matches['branch']
                     $upstream = $matches['upstream']
                     $aheadBy = [int]$matches['ahead']
                     $behindBy = [int]$matches['behind']
