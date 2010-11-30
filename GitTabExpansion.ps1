@@ -153,9 +153,10 @@ function GitTabExpansion($lastBlock) {
 
         # Handles git cherry-pick <commit>
         # Handles git diff <commit>
+        # Handles git difftool <commit>
         # Handles git log <commit>
         # Handles git show <commit>
-        '^git (?:cherry-pick|diff|log|show).* (?<commit>\S*)$' {
+        '^git (?:cherry-pick|diff|difftool|log|show).* (?<commit>\S*)$' {
             gitLocalBranches $matches['commit']
         }
 
