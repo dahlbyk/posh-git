@@ -14,13 +14,16 @@ See profile.example.ps1 as to how you can integrate the tab completion and/or gi
 Installing
 ----------
 
-posh-git requires you to modify/create your Powershell Profile. 
- - Put all posh-git files in your C:\Users\<username>\Documents\WindowsPowerShell folder (create it if it doesn't exist)
- - Rename profile.example.ps1 to Microsoft.PowerShell_profile.ps1 
- - If you already have a PowerShell_profile.ps1 you can add the code from profile.example.ps1 to it and it should work fine.
- - posh-git requires you to set the executionpolicy to remotesigned in order to function. Execute (with admin privileges):
-	Set-ExecutionPolicy RemoteSigned 
-	(More Info on ExecutionPolicy: http://technet.microsoft.com/en-us/library/ee176949.aspx)
+1. Verify execution of scripts is allowed with Get-ExecutionPolicy (should be RemoteSigned or Unrestricted). If scripts are not enabled, run PowerShell as Administrator and call "Set-ExecutionPolicy RemoteSigned -Confirm".
+
+2. Verify that git can be run from PowerShell. If the command is not found, you will need to add a git alias or add %ProgramFiles%\Git\cmd to your PATH environment variable.
+
+3. Clone the posh-git repository to your local machine.
+
+4. From the posh-git repository directory, run .\install.ps1.
+
+5. Enjoy!
+
 
 Based on work by:
 
