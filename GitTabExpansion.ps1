@@ -79,16 +79,14 @@ function script:gitDeleted($filter) {
 }
 
 function script:gitAliases($filter) {
-    $aliasList = @()
-    git config --get-regexp alias\..+ | foreach {
-        $alias = $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries)[0].Split(
-            '.', [StringSplitOptions]::RemoveEmptyEntries)[1]
-
-        if($alias -like "$filter*") {
-            $aliasList += $alias.Trim()
+    git config --get-regexp ^alias\. | foreach {
+        if($_ -match "^alias\.(?<alias>\S+) .*") {
+            $alias = $Matches['alias']
+            if($alias -like "$filter*") {
+                $alias
+            }
         }
-    }
-    $aliasList | Sort
+    } | Sort
 }
 
 function GitTabExpansion($lastBlock) {
