@@ -10,6 +10,9 @@ Import-Module .\posh-git
 
 # Set up a simple prompt, adding the git prompt parts inside git repos
 function prompt {
+    # Reset color, which can be messed up by Enable-GitColors
+    $Host.UI.RawUI.ForegroundColor = $GitPromptSettings.DefaultForegroundColor
+
     Write-Host($pwd) -nonewline
         
     # Git Prompt

@@ -2,6 +2,8 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $global:GitPromptSettings = New-Object PSObject -Property @{
+    DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor
+
     BeforeText                = ' ['
     BeforeForegroundColor     = [ConsoleColor]::Yellow
     BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor    
