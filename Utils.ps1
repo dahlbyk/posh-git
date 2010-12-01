@@ -27,3 +27,8 @@ function Get-LocalOrParentPath($path) {
     }
     return $null
 }
+
+function fixUI($color = 'Gray') {
+  # At times via posh-git the GUI color gets out of whach - this function fixes it quickly and easily
+  $host.UI.RawUI.ForegroundColor = $color
+}
