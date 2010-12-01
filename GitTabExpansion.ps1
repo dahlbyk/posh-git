@@ -89,7 +89,19 @@ function script:gitAliases($filter) {
     } | Sort
 }
 
+function script:expandGitAlias($cmd, $rest) {
+    if((git config --get-regexp "^alias\.$cmd`$") -match "^alias\.$cmd (?<cmd>[^!]\S+) .*`$") {
+        return "git $($Matches['cmd'])$rest"
+    } else {
+        return "git $cmd$rest"
+    }
+}
+
 function GitTabExpansion($lastBlock) {
+    if($lastBlock -match '^git (?<cmd>\S+)(?<args> .*)$') {
+        $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
+    }
+
     switch -regex ($lastBlock) {
 
         # Handles tgit <command> (tortoisegit)
