@@ -1,5 +1,10 @@
 param([switch]$WhatIf = $false)
 
+if($Host.Version.Major -lt 2) {
+    Write-Warning "posh-git requires PowerShell 2.0 or better; you have version $($Host.Version)."
+    return
+}
+
 if(!(Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Warning 'Could not find git command. Please create a git alias or add %ProgramFiles%\Git\cmd to PATH.'
     return
