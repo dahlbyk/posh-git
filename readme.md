@@ -19,6 +19,8 @@ Prompt formatting, among other things, can be customized using `$GitPromptSettin
 Installing
 ----------
 
+0. Verify you have PowerShell 2.0 or better with $Host.Version
+
 1. Verify execution of scripts is allowed with `Get-ExecutionPolicy` (should be `RemoteSigned` or `Unrestricted`). If scripts are not enabled, run PowerShell as Administrator and call `Set-ExecutionPolicy RemoteSigned -Confirm`.
 
 2. Verify that `git` can be run from PowerShell. If the command is not found, you will need to add a git alias or add `%ProgramFiles%\Git\cmd` to your PATH environment variable.
