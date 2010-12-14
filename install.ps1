@@ -39,7 +39,12 @@ if(Select-String -Path $PROFILE -Pattern $profileLine -Quiet -SimpleMatch) {
 }
 
 Write-Host "Adding posh-git to profile..."
-"`n`n# Load posh-git example profile`n$profileLine`n" | Out-File $PROFILE -Append -WhatIf:$WhatIf -Encoding (Get-FileEncoding $PROFILE)
+@"
+
+# Load posh-git example profile
+$profileLine
+
+"@ | Out-File $PROFILE -Append -WhatIf:$WhatIf -Encoding (Get-FileEncoding $PROFILE)
 
 Write-Host 'posh-git sucessfully installed!'
 Write-Host 'Please reload your profile for the changes to take effect:'
