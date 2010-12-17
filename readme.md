@@ -19,7 +19,7 @@ Prompt formatting, among other things, can be customized using `$GitPromptSettin
 Installing
 ----------
 
-0. Verify you have PowerShell 2.0 or better with $Host.Version
+0. Verify you have PowerShell 2.0 or better with $PSVersionTable.PSVersion
 
 1. Verify execution of scripts is allowed with `Get-ExecutionPolicy` (should be `RemoteSigned` or `Unrestricted`). If scripts are not enabled, run PowerShell as Administrator and call `Set-ExecutionPolicy RemoteSigned -Confirm`.
 
