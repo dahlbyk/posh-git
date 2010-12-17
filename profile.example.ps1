@@ -22,8 +22,9 @@ function prompt {
     return "> "
 }
 
-if(-not (Test-Path Function:\DefaultTabExpansion)) {
-    Rename-Item Function:\TabExpansion DefaultTabExpansion
+$teBackup = 'posh-git_DefaultTabExpansion'
+if(!(Test-Path Function:\$teBackup)) {
+    Rename-Item Function:\TabExpansion $teBackup
 }
 
 # Set up tab expansion and include git expansion
@@ -34,7 +35,7 @@ function TabExpansion($line, $lastWord) {
         # Execute git tab completion for all git-related commands
         'git (.*)' { GitTabExpansion $lastBlock }
         # Fall back on existing tab expansion
-        default { DefaultTabExpansion $line $lastWord }
+        default { & $teBackup $line $lastWord }
     }
 }
 
