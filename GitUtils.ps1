@@ -7,33 +7,43 @@ function Get-GitDirectory {
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
     if ($gitDir) {
+        Write-Debug 'Finding branch'
         $r = ''; $b = ''; $c = ''
         if (Test-Path $gitDir\rebase-merge\interactive) {
+            Write-Debug 'Found rebase-merge\interactive'
             $r = '|REBASE-i'
             $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
         } elseif (Test-Path $gitDir\rebase-merge) {
+            Write-Debug 'Found rebase-merge'
             $r = '|REBASE-m'
             $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
         } else {
             if (Test-Path $gitDir\rebase-apply) {
+                Write-Debug 'Found rebase-apply'
                 if (Test-Path $gitDir\rebase-apply\rebasing) {
+                    Write-Debug 'Found rebase-apply\rebasing'
                     $r = '|REBASE'
                 } elseif (Test-Path $gitDir\rebase-apply\applying) {
+                    Write-Debug 'Found rebase-apply\applying'
                     $r = '|AM'
                 } else {
+                    Write-Debug 'Found rebase-apply'
                     $r = '|AM/REBASE'
                 }
             } elseif (Test-Path $gitDir\MERGE_HEAD) {
+                Write-Debug 'Found MERGE_HEAD'
                 $r = '|MERGING'
             } elseif (Test-Path $gitDir\BISECT_LOG) {
+                Write-Debug 'Found BISECT_LOG'
                 $r = '|BISECTING'
             }
 
-            $b = ?? { git symbolic-ref HEAD 2>$null } `
+            $b = ?? { Write-Debug 'Trying symbolic-ref'; git symbolic-ref HEAD 2>$null } `
                     { "($(
                         Coalesce-Args `
-                            { git describe --exact-match HEAD 2>$null } `
+                            { Write-Debug 'Trying describe'; git describe --exact-match HEAD 2>$null } `
                             {
+                                Write-Debug 'Falling back on SHA'
                                 $ref = Get-Content $gitDir\HEAD 2>$null
                                 if ($ref -and $ref.Length -ge 7) {
                                     return $ref.Substring(0,7)+'...'
@@ -46,6 +56,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
         }
 
         if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
+            Write-Debug 'Inside git directory'
             if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
                 $c = 'BARE:'
             } else {
@@ -75,12 +86,15 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = @()
 
         if($settings.EnableFileStatus) {
+            Write-Debug 'Getting status'
             $status = git status --short --branch 2>$null
         } else {
             $status = @()
         }
 
+        Write-Debug 'Parsing status'
         $status | where { $_ } | foreach {
+            Write-Debug "Status: $_"
             switch -regex ($_) {
                 '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
                     $upstream = $matches['upstream']
@@ -108,6 +122,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             }
         }
 
+        Write-Debug 'Building status object'
         $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
         $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
         $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
