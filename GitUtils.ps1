@@ -95,31 +95,33 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         }
 
         dbg 'Parsing status' $sw
-        $status | where { $_ } | foreach {
+        $status | foreach {
             dbg "Status: $_" $sw
-            switch -regex ($_) {
-                '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
-                    switch ($matches['index']) {
-                        'A' { $indexAdded += $matches['path1'] }
-                        'M' { $indexModified += $matches['path1'] }
-                        'R' { $indexModified += $matches['path1'] }
-                        'C' { $indexModified += $matches['path1'] }
-                        'D' { $indexDeleted += $matches['path1'] }
-                        'U' { $indexUnmerged += $matches['path1'] }
+            if($_) {
+                switch -regex ($_) {
+                    '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
+                        switch ($matches['index']) {
+                            'A' { $indexAdded += $matches['path1'] }
+                            'M' { $indexModified += $matches['path1'] }
+                            'R' { $indexModified += $matches['path1'] }
+                            'C' { $indexModified += $matches['path1'] }
+                            'D' { $indexDeleted += $matches['path1'] }
+                            'U' { $indexUnmerged += $matches['path1'] }
+                        }
+                        switch ($matches['working']) {
+                            '?' { $filesAdded += $matches['path1'] }
+                            'A' { $filesAdded += $matches['path1'] }
+                            'M' { $filesModified += $matches['path1'] }
+                            'D' { $filesDeleted += $matches['path1'] }
+                            'U' { $filesUnmerged += $matches['path1'] }
+                        }
                     }
-                    switch ($matches['working']) {
-                        '?' { $filesAdded += $matches['path1'] }
-                        'A' { $filesAdded += $matches['path1'] }
-                        'M' { $filesModified += $matches['path1'] }
-                        'D' { $filesDeleted += $matches['path1'] }
-                        'U' { $filesUnmerged += $matches['path1'] }
-                    }
-                }
 
-                '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
-                    $upstream = $matches['upstream']
-                    $aheadBy = [int]$matches['ahead']
-                    $behindBy = [int]$matches['behind']
+                    '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                        $upstream = $matches['upstream']
+                        $aheadBy = [int]$matches['ahead']
+                        $behindBy = [int]$matches['behind']
+                    }
                 }
             }
         }
