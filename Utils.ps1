@@ -27,3 +27,7 @@ function Get-LocalOrParentPath($path) {
     }
     return $null
 }
+
+function dbg ($Message, [Diagnostics.Stopwatch]$Stopwatch) {
+    Write-Debug ('{0:00000}:{1}' -f $Stopwatch.ElapsedMilliseconds,$Message)
+}

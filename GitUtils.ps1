@@ -5,45 +5,45 @@ function Get-GitDirectory {
     Get-LocalOrParentPath .git
 }
 
-function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
+function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw) {
     if ($gitDir) {
-        Write-Debug 'Finding branch'
+        dbg 'Finding branch' $sw
         $r = ''; $b = ''; $c = ''
         if (Test-Path $gitDir\rebase-merge\interactive) {
-            Write-Debug 'Found rebase-merge\interactive'
+            dbg 'Found rebase-merge\interactive' $sw
             $r = '|REBASE-i'
             $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
         } elseif (Test-Path $gitDir\rebase-merge) {
-            Write-Debug 'Found rebase-merge'
+            dbg 'Found rebase-merge' $sw
             $r = '|REBASE-m'
             $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
         } else {
             if (Test-Path $gitDir\rebase-apply) {
-                Write-Debug 'Found rebase-apply'
+                dbg 'Found rebase-apply' $sw
                 if (Test-Path $gitDir\rebase-apply\rebasing) {
-                    Write-Debug 'Found rebase-apply\rebasing'
+                    dbg 'Found rebase-apply\rebasing' $sw
                     $r = '|REBASE'
                 } elseif (Test-Path $gitDir\rebase-apply\applying) {
-                    Write-Debug 'Found rebase-apply\applying'
+                    dbg 'Found rebase-apply\applying' $sw
                     $r = '|AM'
                 } else {
-                    Write-Debug 'Found rebase-apply'
+                    dbg 'Found rebase-apply' $sw
                     $r = '|AM/REBASE'
                 }
             } elseif (Test-Path $gitDir\MERGE_HEAD) {
-                Write-Debug 'Found MERGE_HEAD'
+                dbg 'Found MERGE_HEAD' $sw
                 $r = '|MERGING'
             } elseif (Test-Path $gitDir\BISECT_LOG) {
-                Write-Debug 'Found BISECT_LOG'
+                dbg 'Found BISECT_LOG' $sw
                 $r = '|BISECTING'
             }
 
-            $b = ?? { Write-Debug 'Trying symbolic-ref'; git symbolic-ref HEAD 2>$null } `
+            $b = ?? { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
                     { "($(
                         Coalesce-Args `
-                            { Write-Debug 'Trying describe'; git describe --exact-match HEAD 2>$null } `
+                            { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
                             {
-                                Write-Debug 'Falling back on SHA'
+                                dbg 'Falling back on SHA' $sw
                                 $ref = Get-Content $gitDir\HEAD 2>$null
                                 if ($ref -and $ref.Length -ge 7) {
                                     return $ref.Substring(0,7)+'...'
@@ -56,7 +56,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory)) {
         }
 
         if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
-            Write-Debug 'Inside git directory'
+            dbg 'Inside git directory' $sw
             if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
                 $c = 'BARE:'
             } else {
@@ -73,7 +73,9 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
     if ($enabled -and $gitDir)
     {
-        $branch = Get-GitBranch $gitDir
+        $sw = [Diagnostics.Stopwatch]::StartNew()
+        $branch = Get-GitBranch $gitDir $sw
+        dbg 'Got branch' $sw
         $aheadBy = 0
         $behindBy = 0
         $indexAdded = @()
@@ -86,15 +88,15 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = @()
 
         if($settings.EnableFileStatus) {
-            Write-Debug 'Getting status'
+            dbg 'Getting status' $sw
             $status = git status --short --branch 2>$null
         } else {
             $status = @()
         }
 
-        Write-Debug 'Parsing status'
+        dbg 'Parsing status' $sw
         $status | where { $_ } | foreach {
-            Write-Debug "Status: $_"
+            dbg "Status: $_" $sw
             switch -regex ($_) {
                 '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
                     $upstream = $matches['upstream']
@@ -122,7 +124,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             }
         }
 
-        Write-Debug 'Building status object'
+        dbg 'Building status object' $sw
         $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
         $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
         $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
@@ -147,6 +149,8 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             HasUntracked    = [bool]$filesAdded
         }
 
+        dbg 'Finished' $sw
+        $sw.Stop()
         return $result
     }
 }
