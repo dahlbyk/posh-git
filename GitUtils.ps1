@@ -98,12 +98,6 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $status | where { $_ } | foreach {
             dbg "Status: $_" $sw
             switch -regex ($_) {
-                '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
-                    $upstream = $matches['upstream']
-                    $aheadBy = [int]$matches['ahead']
-                    $behindBy = [int]$matches['behind']
-                }
-                
                 '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
                     switch ($matches['index']) {
                         'A' { $indexAdded += $matches['path1'] }
@@ -120,6 +114,12 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                         'D' { $filesDeleted += $matches['path1'] }
                         'U' { $filesUnmerged += $matches['path1'] }
                     }
+                }
+
+                '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                    $upstream = $matches['upstream']
+                    $aheadBy = [int]$matches['ahead']
+                    $behindBy = [int]$matches['behind']
                 }
             }
         }
