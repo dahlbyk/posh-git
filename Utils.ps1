@@ -29,5 +29,7 @@ function Get-LocalOrParentPath($path) {
 }
 
 function dbg ($Message, [Diagnostics.Stopwatch]$Stopwatch) {
-    Write-Debug ('{0:00000}:{1}' -f $Stopwatch.ElapsedMilliseconds,$Message)
+    if($Stopwatch) {
+        Write-Verbose ('{0:00000}:{1}' -f $Stopwatch.ElapsedMilliseconds,$Message) -Verbose # -ForegroundColor Yellow
+    }
 }

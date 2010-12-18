@@ -40,6 +40,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnablePromptStatus        = $true
     EnableFileStatus          = $true
+
+    Debug                     = $false
 }
 
 function Write-GitStatus($status) {
