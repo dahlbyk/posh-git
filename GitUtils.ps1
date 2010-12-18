@@ -38,21 +38,20 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 $r = '|BISECTING'
             }
 
-            $b = ?? { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
-                    { "($(
-                        Coalesce-Args `
-                            { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
-                            {
-                                dbg 'Falling back on SHA' $sw
-                                $ref = Get-Content $gitDir\HEAD 2>$null
-                                if ($ref -and $ref.Length -ge 7) {
-                                    return $ref.Substring(0,7)+'...'
-                                } else {
-                                    return $null
-                                }
-                            } `
-                            'unknown'
-                    ))" }
+            $b = '({0})' -f (
+                Coalesce-Args `
+                    { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
+                    {
+                        dbg 'Falling back on SHA' $sw
+                        $ref = Get-Content $gitDir\HEAD 2>$null
+                        if ($ref -and $ref.Length -ge 7) {
+                            return $ref.Substring(0,7)+'...'
+                        } else {
+                            return $null
+                        }
+                    } `
+                    'unknown'
+                )
         }
 
         if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
