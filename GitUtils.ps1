@@ -74,8 +74,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     if ($enabled -and $gitDir)
     {
         $sw = [Diagnostics.Stopwatch]::StartNew()
-        $branch = Get-GitBranch $gitDir $sw
-        dbg 'Got branch' $sw
+        $branch = $null
         $aheadBy = 0
         $behindBy = 0
         $indexAdded = @()
@@ -118,6 +117,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                     }
 
                     '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                        $branch = $matches['branch']
                         $upstream = $matches['upstream']
                         $aheadBy = [int]$matches['ahead']
                         $behindBy = [int]$matches['behind']
@@ -126,6 +126,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             }
         }
 
+        if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
         dbg 'Building status object' $sw
         $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
         $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
