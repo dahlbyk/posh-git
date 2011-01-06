@@ -121,6 +121,10 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                         $aheadBy = [int]$matches['ahead']
                         $behindBy = [int]$matches['behind']
                     }
+
+                    '^## Initial commit on (?<branch>\S+)$' {
+                        $branch = $matches['branch']
+                    }
                 }
             }
         }
