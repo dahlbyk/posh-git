@@ -42,15 +42,16 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 Coalesce-Args `
                     { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
                     {
-                        dbg 'Falling back on SHA' $sw
+                        dbg 'Falling back on parsing HEAD' $sw
                         $ref = Get-Content $gitDir\HEAD 2>$null
-                        if ($ref -and $ref.Length -ge 7) {
+                        if ($ref -match 'ref: (?<ref>.+)') {
+                            return $Matches['ref']
+                        } elseif ($ref -and $ref.Length -ge 7) {
                             return $ref.Substring(0,7)+'...'
                         } else {
-                            return $null
+                            return 'unknown'
                         }
-                    } `
-                    'unknown'
+                    }
                 )
         }
 
