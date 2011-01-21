@@ -10,6 +10,11 @@ if(!(Get-Command git -ErrorAction SilentlyContinue)) {
     return
 }
 
+$installDir = Split-Path $MyInvocation.MyCommand.Path -Parent
+if(!($installDir\CheckVersion.ps1)) {
+    return
+}
+
 if(!(Test-Path $PROFILE)) {
     Write-Host "Creating PowerShell profile...`n$PROFILE"
     New-Item $PROFILE -Force -Type File -ErrorAction Stop -WhatIf:$WhatIf > $null
@@ -31,7 +36,6 @@ function Get-FileEncoding($Path) {
     }
 }
 
-$installDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 $profileLine = ". $installDir\profile.example.ps1"
 if(Select-String -Path $PROFILE -Pattern $profileLine -Quiet -SimpleMatch) {
     Write-Host "It seems posh-git is already installed..."
