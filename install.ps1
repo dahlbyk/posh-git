@@ -11,7 +11,7 @@ if(!(Get-Command git -ErrorAction SilentlyContinue)) {
 }
 
 $installDir = Split-Path $MyInvocation.MyCommand.Path -Parent
-if(!($installDir\CheckVersion.ps1)) {
+if(!(. (Join-Path $installDir "CheckVersion.ps1"))) {
     return
 }
 
