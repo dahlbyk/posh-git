@@ -3,6 +3,12 @@ $script:hgCommands = @()
 function HgTabExpansion($lastBlock) {
   switch -regex ($lastBlock) { 
     
+    #handles hgtk help <cmd>
+    #handles hgtk <cmd>
+    'thg (help )?(\S*)$' {
+      thgCommands($matches[2]);
+    }
+    
     #handles hg update <branch name>
     #handles hg merge <branch name>
     'hg (up|update|merge|co|checkout) (\S*)$' {
@@ -34,12 +40,6 @@ function HgTabExpansion($lastBlock) {
     #handles hg add <path>
     'hg add (\S*)$' {
       hgFiles $matches[1] '\?'
-    }
-    
-    #handles hgtk help <cmd>
-    #handles hgtk <cmd>
-    'hgtk (help )?(\S*)$' {
-      hgtkCommands($matches[2]);
     }
     
     # handles hg diff <path>
@@ -149,9 +149,9 @@ function hgOptions($cmd, $filter) {
 	$optList | sort
 }
 
-function hgtkCommands($filter) {
+function thgCommands($filter) {
   $cmdList = @()
-  $output = hgtk help
+  $output = thg help
   foreach($line in $output) {
     if($line -match '^ (\S+) (.*)') {
       $cmd = $matches[1]
