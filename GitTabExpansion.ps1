@@ -105,9 +105,9 @@ function GitTabExpansion($lastBlock) {
     switch -regex ($lastBlock) {
 
         # Handles tgit <command> (tortoisegit)
-        '^tgit (\S*)$' {
+        '^tgit (?<cmd>\S*)$' {
             # Need return statement to prevent fall-through.
-            return $tortoiseGitCommands | where { $_ -like "$($matches[1])*" }
+            return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
         }
 
         # Handles git remote <op>
