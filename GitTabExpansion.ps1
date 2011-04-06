@@ -90,7 +90,7 @@ function script:gitAliases($filter) {
 }
 
 function script:expandGitAlias($cmd, $rest) {
-    if((git config --get-regexp "^alias\.$cmd`$") -match "^alias\.$cmd (?<cmd>[^!]\S+) .*`$") {
+    if((git config --get-regexp "^alias\.$cmd`$") -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
         return "git $($Matches['cmd'])$rest"
     } else {
         return "git $cmd$rest"
