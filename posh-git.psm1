@@ -14,5 +14,6 @@ Export-ModuleMember -Function @(
         'Enable-GitColors', 
         'Get-GitDirectory',
         'GitTabExpansion',
+        'Get-GitAliasPattern',
         'tgit')
 
