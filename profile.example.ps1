@@ -30,10 +30,11 @@ if(!(Test-Path Function:\$teBackup)) {
 # Set up tab expansion and include git expansion
 function TabExpansion($line, $lastWord) {
     $lastBlock = [regex]::Split($line, '[|;]')[-1]
-    
+    $aliases = alias | where {$_.definition -eq 'git' } | foreach {"|" + $_.name}
+    $gitCmd = "(git$aliases)" 
     switch -regex ($lastBlock) {
         # Execute git tab completion for all git-related commands
-        'git (.*)' { GitTabExpansion $lastBlock }
+        "$gitCmd (.*)" { GitTabExpansion $lastBlock }
         # Fall back on existing tab expansion
         default { & $teBackup $line $lastWord }
     }
