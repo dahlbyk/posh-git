@@ -166,3 +166,9 @@ function Enable-GitColors {
     $env:TERM = 'cygwin'
     $env:LESS = 'FRSX'
 }
+
+function Get-GitAliasPattern {
+   $aliases = @('git') + (Get-Alias | where {$_.definition -eq 'git' } | select -Exp Name) -join '|' 
+   "(" + $aliases + ")"
+}
+
