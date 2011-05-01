@@ -29,7 +29,7 @@ if(!(Test-Path Function:\$teBackup)) {
 
 # Set up tab expansion and include git expansion
 function TabExpansion($line, $lastWord) {
-    $lastBlock = [regex]::Split($line, '[|;]')[-1]
+    $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
     switch -regex ($lastBlock) {
         # Execute git tab completion for all git-related commands
         "$(Get-GitAliasPattern) (.*)" { GitTabExpansion $lastBlock }
