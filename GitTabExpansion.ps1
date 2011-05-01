@@ -98,66 +98,67 @@ function script:expandGitAlias($cmd, $rest) {
 }
 
 function GitTabExpansion($lastBlock) {
-    if($lastBlock -match '^git (?<cmd>\S+)(?<args> .*)$') {
+
+    if($lastBlock -match "^*$(Get-GitAliasPattern) (?<cmd>\S+)(?<args> .*)$") {
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
     }
 
-    switch -regex ($lastBlock) {
-
-        # Handles tgit <command> (tortoisegit)
-        '^tgit (?<cmd>\S*)$' {
+    # Handles tgit <command> (tortoisegit)
+    if($lastBlock -match'^tgit (?<cmd>\S*)$') {
             # Need return statement to prevent fall-through.
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
-        }
+    }
+
+    switch -regex ($lastBlock -replace "^$(Get-GitAliasPattern) ","") {
 
         # Handles git remote <op>
         # Handles git stash <op>
-        '^git (?<cmd>remote|stash|svn) (?<op>\S*)$' {
+        "^(?<cmd>remote|stash|svn) (?<op>\S*)$" {
             gitCmdOperations $matches['cmd'] $matches['op']
         }
 
         # Handles git remote (rename|rm|set-head|set-branches|set-url|show|prune) <stash>
-        '^git remote.* (?:rename|rm|set-head|set-branches|set-url|show|prune).* (?<remote>\S*)$' {
+        "^remote.* (?:rename|rm|set-head|set-branches|set-url|show|prune).* (?<remote>\S*)$" {
             gitRemotes $matches['remote']
         }
 
         # Handles git stash (show|apply|drop|pop|branch) <stash>
-        '^git stash (?:show|apply|drop|pop|branch).* (?<stash>\S*)$' {
+        "^stash (?:show|apply|drop|pop|branch).* (?<stash>\S*)$" {
             gitStashes $matches['stash']
         }
 
         # Handles git branch -d|-D|-m|-M <branch name>
         # Handles git branch <branch name> <start-point>
-        '^git branch.* (?<branch>\S*)$' {
+        "^branch.* (?<branch>\S*)$" {
             gitLocalBranches $matches['branch']
         }
 
         # Handles git <cmd> (commands & aliases)
-        '^git (?<cmd>\S*)$' {
+        "^(?<cmd>\S*)$" {
             gitCommands $matches['cmd'] $TRUE
         }
 
         # Handles git help <cmd> (commands only)
-        '^git help (?<cmd>\S*)$' {
+        "^help (?<cmd>\S*)$" {
             gitCommands $matches['cmd'] $FALSE
         }
 
         # Handles git push remote <branch>
         # Handles git pull remote <branch>
-        '^git (?:push|pull).* (?:\S+) (?<branch>\S*)$' {
+        "^(?:push|pull).* (?:\S+) (?<branch>\S*)$" {
             gitLocalBranches $matches['branch']
         }
 
         # Handles git pull <remote>
         # Handles git push <remote>
         # Handles git fetch <remote>
-        '^git (?:push|pull|fetch).* (?<remote>\S*)$' {
+        "^(?:push|pull|fetch).* (?<remote>\S*)$" {
             gitRemotes $matches['remote']
         }
 
         # Handles git reset HEAD <path>
         # Handles git reset HEAD -- <path>
-        '^git reset.* HEAD(?:\s+--)? (?<path>\S*)$' {
+        "^reset.* HEAD(?:\s+--)? (?<path>\S*)$" {
             gitIndex $matches['path']
         }
 
@@ -166,34 +167,34 @@ function GitTabExpansion($lastBlock) {
         # Handles git difftool <commit>
         # Handles git log <commit>
         # Handles git show <commit>
-        '^git (?:cherry-pick|diff|difftool|log|show).* (?<commit>\S*)$' {
+        "^(?:cherry-pick|diff|difftool|log|show).* (?<commit>\S*)$" {
             gitLocalBranches $matches['commit']
         }
 
         # Handles git reset <commit>
-        '^git reset.* (?<commit>\S*)$' {
+        "^reset.* (?<commit>\S*)$" {
             gitLocalBranches $matches['commit'] $true
         }
 
         # Handles git add <path>
-        '^git add.* (?<files>\S*)$' {
+        "^add.* (?<files>\S*)$" {
             gitFiles $matches['files']
         }
 
         # Handles git checkout -- <path>
-        '^git checkout.* -- (?<files>\S*)$' {
+        "^checkout.* -- (?<files>\S*)$" {
             gitFiles $matches['files']
         }
 
         # Handles git rm <path>
-        '^git rm.* (?<index>\S*)$' {
+        "^rm.* (?<index>\S*)$" {
             gitDeleted $matches['index']
         }
 
         # Handles git checkout <branch name>
         # Handles git merge <branch name>
         # handles git rebase <branch name>
-        '^git (?:checkout|merge|rebase).* (?<branch>\S*)$' {
+        "^(?:checkout|merge|rebase).* (?<branch>\S*)$" {
             gitLocalBranches $matches['branch']
         }
     }
