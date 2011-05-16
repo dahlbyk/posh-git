@@ -164,7 +164,6 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
 function Enable-GitColors {
     $env:TERM = 'cygwin'
-    $env:LESS = 'FRSX'
 }
 
 function Get-GitAliasPattern {
