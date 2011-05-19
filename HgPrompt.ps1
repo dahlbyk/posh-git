@@ -17,25 +17,25 @@ function Write-HgStatus($status = (get-hgStatus)) {
         Write-Host $status.Branch -NoNewline -BackgroundColor $branchBg -ForegroundColor $branchFg
         
         if($status.Added) {
-          Write-Host " +$($status.Added)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+          Write-Host " +$($status.Added)" -NoNewline -BackgroundColor $s.AddedBackgroundColor -ForegroundColor $s.AddedForegroundColor
         }
         if($status.Modified) {
-          Write-Host " ~$($status.Modified)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+          Write-Host " ~$($status.Modified)" -NoNewline -BackgroundColor $s.ModifiedBackgroundColor -ForegroundColor $s.ModifiedForegroundColor
         }
         if($status.Deleted) {
-          Write-Host " -$($status.Deleted)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+          Write-Host " -$($status.Deleted)" -NoNewline -BackgroundColor $s.DeletedBackgroundColor -ForegroundColor $s.DeletedForegroundColor
         }
         
         if ($status.Untracked) {
-          Write-Host " ?$($status.Untracked)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+          Write-Host " ?$($status.Untracked)" -NoNewline -BackgroundColor $s.UntrackedBackgroundColor -ForegroundColor $s.UntrackedForegroundColor
         }
         
         if($status.Missing) {
-           Write-Host " !$($status.Missing)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+           Write-Host " !$($status.Missing)" -NoNewline -BackgroundColor $s.MissingBackgroundColor -ForegroundColor $s.MissingForegroundColor
         }
 
         if($status.Renamed) {
-           Write-Host " ^$($status.Renamed)" -NoNewline -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+           Write-Host " ^$($status.Renamed)" -NoNewline -BackgroundColor $s.RenamedBackgroundColor -ForegroundColor $s.RenamedForegroundColor
         }
 
         if($s.ShowTags -and $status.Tags.Length) {
