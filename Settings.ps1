@@ -17,8 +17,18 @@ $global:PoshHgSettings = New-Object PSObject -Property @{
     Branch2BackgroundColor   = $host.UI.RawUI.BackgroundColor
     
     # Working directory status
-    WorkingForegroundColor    = [ConsoleColor]::Yellow
-    WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    AddedForegroundColor      = [ConsoleColor]::Green
+    AddedBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+	ModifiedForegroundColor   = [ConsoleColor]::Blue
+    ModifiedBackgroundColor   = $Host.UI.RawUI.BackgroundColor
+	DeletedForegroundColor    = [ConsoleColor]::Red
+    DeletedBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+	UntrackedForegroundColor  = [ConsoleColor]::Magenta
+    UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
+	MissingForegroundColor    = [ConsoleColor]::Cyan
+    MissingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+	RenamedForegroundColor    = [ConsoleColor]::Yellow
+    RenamedBackgroundColor    = $Host.UI.RawUI.BackgroundColor
     
     #Tag list
     ShowTags                  = $true
