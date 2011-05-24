@@ -52,12 +52,12 @@ function Write-GitStatus($status) {
         $currentBranch = $status.Branch
         
         Write-Host $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
-        if ($status.AheadBy -gt 0) {
-            # We are ahead of remote
-            Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchAheadBackgroundColor -ForegroundColor $s.BranchAheadForegroundColor
-        } elseif ($status.BehindBy -gt 0) {
+        if ($status.BehindBy -gt 0) {
             # We are behind remote
             Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchBehindBackgroundColor -ForegroundColor $s.BranchBehindForegroundColor
+        } elseif ($status.AheadBy -gt 0) {
+            # We are ahead of remote
+            Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchAheadBackgroundColor -ForegroundColor $s.BranchAheadForegroundColor
         } else {
             # We are not ahead of origin
             Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchBackgroundColor -ForegroundColor $s.BranchForegroundColor
