@@ -149,6 +149,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             GitDir          = $gitDir
             Branch          = $branch
             AheadBy         = $aheadBy
+            BehindBy        = $behindBy
             HasIndex        = [bool]$index
             Index           = $index
             HasWorking      = [bool]$working
