@@ -15,10 +15,12 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     AfterForegroundColor      = [ConsoleColor]::Yellow
     AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
     
-    Branch1ForegroundColor    = [ConsoleColor]::Cyan
-    Branch1BackgroundColor    = $Host.UI.RawUI.BackgroundColor
-    Branch2ForegroundColor    = [ConsoleColor]::Red
-    Branch2BackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    BranchForegroundColor       = [ConsoleColor]::Cyan
+    BranchBackgroundColor       = $Host.UI.RawUI.BackgroundColor
+    BranchAheadForegroundColor  = [ConsoleColor]::Red
+    BranchAheadBackgroundColor  = $Host.UI.RawUI.BackgroundColor
+    BranchBehindForegroundColor  = [ConsoleColor]::Green
+    BranchBehindBackgroundColor  = $Host.UI.RawUI.BackgroundColor
     
     BeforeIndexText           = ""
     BeforeIndexForegroundColor= [ConsoleColor]::Blue
@@ -50,12 +52,15 @@ function Write-GitStatus($status) {
         $currentBranch = $status.Branch
         
         Write-Host $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
-        if ($status.AheadBy -eq 0) {
-            # We are not ahead of origin
-            Write-Host $currentBranch -NoNewline -BackgroundColor $s.Branch1BackgroundColor -ForegroundColor $s.Branch1ForegroundColor
+        if ($status.AheadBy -gt 0) {
+            # We are ahead of remote
+            Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchAheadBackgroundColor -ForegroundColor $s.BranchAheadForegroundColor
+        } elseif ($status.BehindBy -gt 0) {
+            # We are behind remote
+            Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchBehindBackgroundColor -ForegroundColor $s.BranchBehindForegroundColor
         } else {
-            # We are ahead of origin
-            Write-Host $currentBranch -NoNewline -BackgroundColor $s.Branch2BackgroundColor -ForegroundColor $s.Branch2ForegroundColor
+            # We are not ahead of origin
+            Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchBackgroundColor -ForegroundColor $s.BranchForegroundColor
         }
         
         if($s.EnableFileStatus -and $status.HasIndex) {
