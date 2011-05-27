@@ -17,9 +17,9 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     
     BranchForegroundColor       = [ConsoleColor]::Cyan
     BranchBackgroundColor       = $Host.UI.RawUI.BackgroundColor
-    BranchAheadForegroundColor  = [ConsoleColor]::Red
+    BranchAheadForegroundColor  = [ConsoleColor]::Green
     BranchAheadBackgroundColor  = $Host.UI.RawUI.BackgroundColor
-    BranchBehindForegroundColor  = [ConsoleColor]::Green
+    BranchBehindForegroundColor  = [ConsoleColor]::Red
     BranchBehindBackgroundColor  = $Host.UI.RawUI.BackgroundColor
     
     BeforeIndexText           = ""
