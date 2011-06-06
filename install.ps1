@@ -36,7 +36,7 @@ function Get-FileEncoding($Path) {
     }
 }
 
-$profileLine = ". $installDir\profile.example.ps1"
+$profileLine = ". '$installDir\profile.example.ps1'"
 if(Select-String -Path $PROFILE -Pattern $profileLine -Quiet -SimpleMatch) {
     Write-Host "It seems posh-git is already installed..."
     return
