@@ -3,17 +3,33 @@ $script:hgCommands = @()
 function HgTabExpansion($lastBlock) {
   switch -regex ($lastBlock) { 
     
-    #handles hgtk help <cmd>
-    #handles hgtk <cmd>
-    'thg (help )?(\S*)$' {
-      thgCommands($matches[2]);
-    }
+   #handles hgtk help <cmd>
+   #handles hgtk <cmd>
+   'thg (help )?(\S*)$' {
+     thgCommands($matches[2]);
+   }
     
-    #handles hg update <branch name>
-    #handles hg merge <branch name>
-    'hg (up|update|merge|co|checkout) (\S*)$' {
-      hgLocalBranches($matches[2])
-    }
+   #handles hg update <branch name>
+   #handles hg merge <branch name>
+   'hg (up|update|merge|co|checkout) (\S*)$' {
+      findBranchOrBookmark($matches[2])
+   }
+       
+   #Handles hg pull -B <bookmark>   
+   'hg pull (-\S* )*-(B) (\S*)$' {
+     hgRemoteBookmarks($matches[3])
+     hgLocalBookmarks($matches[3])
+   }
+    
+   #Handles hg push -B <bookmark>   
+   'hg push (-\S* )*-(B) (\S*)$' {
+     hgLocalBookmarks($matches[3])
+   }
+   
+   #Handles hg bookmark <bookmark>
+   'hg (book|bookmark) (\S*)$' {
+      hgLocalBookmarks($matches[2])
+   }
     
     #Handles hg push <path>
     #Handles hg pull <path>
@@ -118,8 +134,51 @@ function PopulateHgCommands() {
   $script:hgCommands = $hgCommands
 }
 
+function findBranchOrBookmark($filter){
+    hgLocalBranches($filter)
+    hgLocalBookmarks($filter)
+}
+
 function hgLocalBranches($filter) {
-  hg branches | foreach {
+  hg branches -a | foreach {
+    if($_ -match "(\S+) .*") {
+      if($filter -and $matches[1].StartsWith($filter)) {
+        $matches[1]
+      }
+      elseif(-not $filter) {
+        $matches[1]
+      }
+    }
+  }
+}
+
+function bookmarkName($bookmark) {
+    $split = $bookmark.Split(" ");
+        
+    if($bookmark.StartsWith("*")) {
+        $split[1]
+    }
+    else{
+        $split[0]
+    }
+}
+
+function hgLocalBookmarks($filter) {
+  hg bookmarks | foreach {
+    if($_ -match "(\S+) .*") {
+      $bookmark = bookmarkName($matches[0])  
+      if($filter -and $bookmark.StartsWith($filter)) {
+        $bookmark
+      }
+      elseif(-not $filter) {
+        $bookmark
+      }
+    }
+  }
+}
+
+function hgRemoteBookmarks($filter) {
+  hg incoming -B | foreach {
     if($_ -match "(\S+) .*") {
       if($filter -and $matches[1].StartsWith($filter)) {
         $matches[1]
