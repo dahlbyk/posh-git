@@ -1,18 +1,16 @@
 try {
-  $scriptPath = $(Split-Path -parent $MyInvocation.MyCommand.Definition)
-  Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.3' $scriptPath
+  $sysDrive = $env:SystemDrive
+  $poshgitPath = "$sysDrive\tools\poshgit"
+  
+  Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.3' $poshgitPath
 
   #------- ADDITIONAL SETUP -------#
-  #todo: find the installer. This is not it
-  #$installer = Join-Path $scriptPath 'install.ps1' 
-  #& $installer
+  $installer = Join-Path $poshgitPath 'dahlbyk-posh-git-60e1ed7'
+  $installer = Join-Path $installer 'install.ps1' 
+  & $installer
 
-  write-host "poshgit has been installed into powershell."
-  Start-Sleep 6
+  Write-ChocolateySuccess 'poshgit'
 } catch {
-@"
-Error Occurred: $($_.Exception.Message)
-"@ | Write-Host -ForegroundColor White -BackgroundColor DarkRed
-	Start-Sleep 8
-	throw 
+  Write-ChocolateyFailure 'poshgit' $($_.Exception.Message)
+  throw 
 }
