@@ -1,6 +1,5 @@
 try {
-  $sysDrive = $env:SystemDrive
-  $poshgitPath = "$sysDrive\tools\poshgit"
+  $poshgitPath = "$env:SystemDrive\tools\poshgit"
   
   Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.3' $poshgitPath
 
