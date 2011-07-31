@@ -6,6 +6,7 @@ $global:GitTabSettings = New-Object PSObject -Property @{
 }
 
 $global:ops = @{
+    reflog = 'expire','delete','show'
     remote = 'add','rename','rm','set-head','show','prune','update'
     stash = 'list','show','drop','pop','apply','branch','save','clear','create'
     svn = 'init', 'fetch', 'clone', 'rebase', 'dcommit', 'branch', 'tag', 'log', 'blame', 'find-rev', 'set-tree', 'create-ignore', 'show-ignore', 'mkdirs', 'commit-diff', 'info', 'proplist', 'propget', 'show-externals', 'gc', 'reset'
@@ -111,9 +112,11 @@ function GitTabExpansion($lastBlock) {
 
     switch -regex ($lastBlock -replace "^$(Get-GitAliasPattern) ","") {
 
+        # Handles git reflog <op>
         # Handles git remote <op>
         # Handles git stash <op>
-        "^(?<cmd>remote|stash|svn) (?<op>\S*)$" {
+        # Handles git svn <op>
+        "^(?<cmd>reflog|remote|stash|svn)\s+(?<op>\S*)$" {
             gitCmdOperations $matches['cmd'] $matches['op']
         }
 
@@ -194,7 +197,8 @@ function GitTabExpansion($lastBlock) {
         # Handles git checkout <branch name>
         # Handles git merge <branch name>
         # handles git rebase <branch name>
-        "^(?:checkout|merge|rebase).* (?<branch>\S*)$" {
+        # Handles git reflog show <branch name>
+        "^(?:checkout|merge|rebase|reflog\s+show).*\s(?<branch>\S*)$" {
             gitLocalBranches $matches['branch']
         }
     }
