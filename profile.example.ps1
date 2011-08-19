@@ -44,3 +44,5 @@ function TabExpansion($line, $lastWord) {
 Enable-GitColors
 
 Pop-Location
+
+Start-SshAgent

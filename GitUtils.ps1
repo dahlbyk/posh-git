@@ -172,3 +172,8 @@ function Get-GitAliasPattern {
    "(" + $aliases + ")"
 }
 
+$startSshAgent = Get-ChildItem start-ssh-agent.sh | select -Exp FullName
+function Start-SshAgent {
+    $sh = Get-Command sh.exe -TotalCount 1 -ErrorAction SilentlyContinue
+    if ($sh) { & $sh $startSshAgent }
+}
