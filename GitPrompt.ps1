@@ -40,7 +40,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     
     AutoRefreshIndex          = $true
 
-    EnablePromptStatus        = $true
+    EnablePromptStatus        = !$GitMissing
     EnableFileStatus          = $true
 
     Debug                     = $false
