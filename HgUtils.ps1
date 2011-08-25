@@ -37,7 +37,7 @@ function Get-HgStatus {
        hg summary | foreach {   
       switch -regex ($_) {
         'parent: (\S*) ?(.*)' { $commit = $matches[1]; $tags = $matches[2].Replace("(empty repository)", "").Split(" ", [StringSplitOptions]::RemoveEmptyEntries) } 
-        'branch: (\S*)' { $branch = $matches[1] }
+        'branch: ([\S ]*)' { $branch = $matches[1] }
         'update: (\d+)' { $behind = $true }
         'pmerge: (\d+) pending' { $behind = $true }
         'commit: (.*)' {
