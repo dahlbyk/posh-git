@@ -172,8 +172,34 @@ function Get-GitAliasPattern {
    "(" + $aliases + ")"
 }
 
-$startSshAgent = Get-ChildItem start-ssh-agent.sh | select -Exp FullName
-function Start-SshAgent {
-    $sh = Get-Command sh.exe -TotalCount 1 -ErrorAction SilentlyContinue
-    if ($sh) { & $sh $startSshAgent }
+function setenv($key, $value) {
+    [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+    [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::User)
+}
+
+# Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
+function Start-SshAgent([switch]$Quiet) {
+    $sshAgentProcess = Get-Process -Id $Env:SSH_AGENT_PID -ErrorAction SilentlyContinue
+    if ($sshAgentProcess.Name -eq 'ssh-agent') {
+        if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($sshAgentProcess.Id))" }
+        return
+    } elseif ($sshAgentProcess) {
+        if (!$Quiet) { Write-Host "Reseting ssh-agent as it is not configured correctly" }
+        setenv('SSH_AGENT_PID', $null)
+        setenv('SSH_AUTH_SOCK', $null)
+    }
+
+    $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
+    if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
+
+    & $sshAgent | foreach {
+        if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
+            setenv $Matches['key'] $Matches['value']
+        }
+    }
+
+    $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
+    if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
+
+    & $sshAdd
 }

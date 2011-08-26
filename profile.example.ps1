@@ -45,4 +45,4 @@ Enable-GitColors
 
 Pop-Location
 
-Start-SshAgent
+Start-SshAgent -Quiet
