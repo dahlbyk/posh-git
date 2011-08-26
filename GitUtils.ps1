@@ -179,7 +179,9 @@ function setenv($key, $value) {
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
 function Start-SshAgent([switch]$Quiet) {
-    $sshAgentProcess = Get-Process -Id $Env:SSH_AGENT_PID -ErrorAction SilentlyContinue
+    if ($Env:SSH_AGENT_PID) {
+        $sshAgentProcess = Get-Process -Id $Env:SSH_AGENT_PID -ErrorAction SilentlyContinue
+    }
     if ($sshAgentProcess.Name -eq 'ssh-agent') {
         if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($sshAgentProcess.Id))" }
         return
