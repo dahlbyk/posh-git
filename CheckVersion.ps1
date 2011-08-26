@@ -3,9 +3,13 @@ if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
     $Global:GitMissing = $true
     return
 }
-$version = git --version 2> $null
-if($version -notlike 'git version 1.7.*') {
-    Write-Warning "posh-git requires git version 1.7.x You have $version."
+
+$requiredVersion = [Version]'1.7.2'
+if ((git --version 2> $null) -match '(?<ver>\d\.\d\.\d\.\d)') {
+    $version = [Version]$Matches['ver']
+}
+if ($version -lt $requiredVersion) {
+    Write-Warning "posh-git requires Git $requiredVersion or better. You have $version."
     $false
 } else {
     $true
