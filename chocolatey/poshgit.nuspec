@@ -15,7 +15,6 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>-->
     <dependencies>
       <dependency id="msysgit" />
-      <dependency id="chocolatey" version="0.9.8.6" />
     </dependencies>
   </metadata>
 </package>
