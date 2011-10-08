@@ -86,7 +86,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesDeleted = @()
         $filesUnmerged = @()
 
-        if($settings.EnableFileStatus) {
+        if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
             $status = git status --short --branch 2>$null
         } else {
@@ -161,6 +161,19 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         if($sw) { $sw.Stop() }
         return $result
     }
+}
+
+function InDisabledRepository {
+    $currentLocation = Get-Location
+
+    foreach ($repo in $Global:GitPromptSettings.RepositoriesInWhichToDisableFileStatus)
+    {
+        if ($currentLocation -like "$repo*") {
+            return $true
+        }
+    }
+
+    return $false
 }
 
 function Enable-GitColors {
