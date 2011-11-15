@@ -1,25 +1,27 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
+$enableFileStatus = $false
+
 $global:GitPromptSettings = New-Object PSObject -Property @{
     DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor
 
-    BeforeText                = ' ['
-    BeforeForegroundColor     = [ConsoleColor]::Yellow
+    BeforeText                = if ($enableFileStatus) {' ['} else {' '}
+    BeforeForegroundColor     = [ConsoleColor]::DarkGray
     BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor    
     DelimText                 = ' |'
-    DelimForegroundColor      = [ConsoleColor]::Yellow
+    DelimForegroundColor      = [ConsoleColor]::DarkGray
     DelimBackgroundColor      = $Host.UI.RawUI.BackgroundColor
     
-    AfterText                 = ']'
-    AfterForegroundColor      = [ConsoleColor]::Yellow
+    AfterText                 = if ($enableFileStatus) {']'} else {''}
+    AfterForegroundColor      = [ConsoleColor]::DarkGray
     AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
     
-    BranchForegroundColor       = [ConsoleColor]::Cyan
+    BranchForegroundColor       = [ConsoleColor]::DarkGray
     BranchBackgroundColor       = $Host.UI.RawUI.BackgroundColor
-    BranchAheadForegroundColor  = [ConsoleColor]::Green
+    BranchAheadForegroundColor  = [ConsoleColor]::DarkGreen
     BranchAheadBackgroundColor  = $Host.UI.RawUI.BackgroundColor
-    BranchBehindForegroundColor  = [ConsoleColor]::Red
+    BranchBehindForegroundColor  = [ConsoleColor]::DarkRed
     BranchBehindBackgroundColor  = $Host.UI.RawUI.BackgroundColor
     
     BeforeIndexText           = ""
@@ -41,7 +43,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     AutoRefreshIndex          = $true
 
     EnablePromptStatus        = !$GitMissing
-    EnableFileStatus          = $true
+    EnableFileStatus          = $enableFileStatus
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
     Debug                     = $false
@@ -62,6 +64,10 @@ function Write-GitStatus($status) {
         } else {
             # We are not ahead of origin
             Write-Host $currentBranch -NoNewline -BackgroundColor $s.BranchBackgroundColor -ForegroundColor $s.BranchForegroundColor
+        }
+        
+        if ($status.BehindBy -eq 0 -and $status.AheadBy -gt 0) {
+            Write-Host ' >>' -NoNewLine -ForeGroundColor White
         }
         
         if($s.EnableFileStatus -and $status.HasIndex) {

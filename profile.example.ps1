@@ -22,6 +22,7 @@ function prompt {
     Write-GitStatus $GitStatus
 
     $LASTEXITCODE = $realLASTEXITCODE
+    Write-Host
     return "> "
 }
 
