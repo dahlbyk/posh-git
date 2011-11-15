@@ -23,6 +23,7 @@ function script:gitCommands($filter, $includeAliases) {
         $cmdList += git help |
             foreach { if($_ -match '^   (\S+) (.*)') { $matches[1] } } |
             where { $_ -like "$filter*" }
+        $cmdList += "svn"
     } else {
         $cmdList += git help --all |
             where { $_ -match '^  \S.*' } |
