@@ -105,7 +105,7 @@ function GitTabExpansion($lastBlock) {
     }
 
     # Handles tgit <command> (tortoisegit)
-    if($lastBlock -match'^tgit (?<cmd>\S*)$') {
+    if($lastBlock -match "^$(Get-TGitAliasPattern) (?<cmd>\S*)$") {
             # Need return statement to prevent fall-through.
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
     }

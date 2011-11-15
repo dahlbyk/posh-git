@@ -186,6 +186,11 @@ function Get-GitAliasPattern {
    "(" + $aliases + ")"
 }
 
+function Get-TGitAliasPattern {
+   $aliases = @('tgit') + (Get-Alias | where {$_.definition -eq 'tgit' } | select -Exp Name) -join '|' 
+   "(" + $aliases + ")"
+}
+
 function setenv($key, $value) {
     [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
     [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::User)
