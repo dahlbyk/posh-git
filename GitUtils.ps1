@@ -2,7 +2,11 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 function Get-GitDirectory {
-    Get-LocalOrParentPath .git
+    if ($Env:GIT_DIR) {
+        $Env:GIT_DIR
+    } else {
+        Get-LocalOrParentPath .git
+    }
 }
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw) {
