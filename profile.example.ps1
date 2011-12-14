@@ -37,6 +37,7 @@ if(Test-Path Function:\TabExpansion) {
         switch -regex ($lastBlock) {
             # Execute git tab completion for all git-related commands
             "^$(Get-AliasPattern git) (.*)" { GitTabExpansion $lastBlock }
+            "^$(Get-AliasPattern tgit) (.*)" { GitTabExpansion $lastBlock }
             # Fall back on existing tab expansion
             default { & $teBackup $line $lastWord }
         }
