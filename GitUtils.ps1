@@ -184,8 +184,8 @@ function Enable-GitColors {
     $env:TERM = 'cygwin'
 }
 
-function Get-GitAliasPattern {
-   $aliases = @('git') + @(Get-Alias | where { $_.definition -eq 'git' } | select -Exp Name)
+function Get-AliasPattern($exe) {
+   $aliases = @($exe) + @(Get-Alias | where { $_.Definition -eq $exe } | select -Exp Name)
    "($($aliases -join '|'))"
 }
 

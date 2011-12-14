@@ -100,7 +100,7 @@ function script:expandGitAlias($cmd, $rest) {
 
 function GitTabExpansion($lastBlock) {
 
-    if($lastBlock -match "^$(Get-GitAliasPattern) (?<cmd>\S+)(?<args> .*)$") {
+    if($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
     }
 
@@ -110,7 +110,7 @@ function GitTabExpansion($lastBlock) {
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
     }
 
-    switch -regex ($lastBlock -replace "^$(Get-GitAliasPattern) ","") {
+    switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
         # Handles git reflog <op>
         # Handles git remote <op>
