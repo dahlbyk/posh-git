@@ -185,8 +185,8 @@ function Enable-GitColors {
 }
 
 function Get-GitAliasPattern {
-   $aliases = @('git') + (Get-Alias | where {$_.definition -eq 'git' } | select -Exp Name) -join '|' 
-   "(" + $aliases + ")"
+   $aliases = @('git') + @(Get-Alias | where { $_.definition -eq 'git' } | select -Exp Name)
+   "($($aliases -join '|'))"
 }
 
 function setenv($key, $value) {
