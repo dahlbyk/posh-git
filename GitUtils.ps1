@@ -203,7 +203,7 @@ function Start-SshAgent([switch]$Quiet) {
         if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($sshAgentProcess.Id))" }
         return
     } elseif ($sshAgentProcess) {
-        if (!$Quiet) { Write-Host "Reseting ssh-agent as it is not configured correctly" }
+        if (!$Quiet) { Write-Host "Resetting ssh-agent as it is not configured correctly" }
         setenv('SSH_AGENT_PID', $null)
         setenv('SSH_AUTH_SOCK', $null)
     }
