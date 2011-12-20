@@ -16,5 +16,7 @@ Export-ModuleMember -Function @(
         'GitTabExpansion',
         'Get-AliasPattern',
         'Start-SshAgent',
+        'Stop-SshAgent',
+        'Add-SshKey',
         'tgit')
 
