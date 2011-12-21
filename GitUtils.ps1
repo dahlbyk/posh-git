@@ -220,5 +220,7 @@ function Start-SshAgent([switch]$Quiet) {
     $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
     if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-    & $sshAdd
+    $sshPath = resolve-path ~/.ssh/id_rsa
+    
+    & $sshAdd $sshPath
 }
