@@ -270,3 +270,15 @@ function Stop-SshAgent() {
     }
 }
 
+function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
+    $branches = git branch --no-color
+    foreach ($line in $branches) {
+        $branch = $line.SubString(2)
+        if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }
+        git rebase -q $Upstream $branch > $null 2> $null
+        if ($LASTEXITCODE) {
+            git rebase --abort
+            Write-Warning "Rebase failed for $branch"
+        }
+    }
+}
