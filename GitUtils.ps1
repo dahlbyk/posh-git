@@ -262,3 +262,9 @@ function Stop-SshAgent() {
     }
 }
 
+function RebaseAllBranches() {
+    git branch | foreach {
+        git checkout $_.SubString(2);
+        git rebase master;
+    }
+}

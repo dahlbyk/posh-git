@@ -18,5 +18,6 @@ Export-ModuleMember -Function @(
         'Start-SshAgent',
         'Stop-SshAgent',
         'Add-SshKey',
+        'RebaseAllBranches',
         'tgit')
 
