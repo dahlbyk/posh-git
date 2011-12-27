@@ -16,6 +16,8 @@ Usage
 See `profile.example.ps1` as to how you can integrate the tab completion and/or git prompt into your own profile.
 Prompt formatting, among other things, can be customized using `$GitPromptSettings`, `$GitTabSettings` and `$TortoiseGitSettings`.
 
+Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
+
 Installing
 ----------
 
@@ -31,6 +33,49 @@ Installing
 
 5. Enjoy!
 
+The Prompt
+----------
+
+PowerShell generates its prompt by executing a `prompt` function, if one exists. posh-git defines such a function in `profile.example.ps1` that outputs the current working directory followed by an abbreviated `git status`:
+
+    C:\Users\Keith [master]>
+
+By default, the status summary has the following format:
+
+    [{HEAD-name} +A ~B -C !D | +E ~F -G !H]
+
+* `{HEAD-name}` is the current branch, or the SHA of a detached HEAD
+ * Cyan means the branch matches its remote
+ * Green means the branch is ahead of its remote (green light to push)
+ * Red means the branch is behind its remote
+* ABCD represent the index; EFGH represent the working directory
+ * `+` = Added files
+ * `~` = Modified files
+ * `-` = Removed files
+ * `!` = Conflicted files
+ * As in `git status`, index status is dark red and working directory status is dark green
+
+For example, a status of `[master +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
+
+    # On branch master
+    #
+    # Changes to be committed:
+    #   (use "git reset HEAD <file>..." to unstage)
+    #
+    #        modified:   this-changed.txt
+    #        modified:   this-too.txt
+    #        deleted:    gone.ps1
+    #
+    # Changed but not updated:
+    #   (use "git add <file>..." to update what will be committed)
+    #   (use "git checkout -- <file>..." to discard changes in working directory)
+    #
+    #        modified:   not-staged.ps1
+    #
+    # Untracked files:
+    #   (use "git add <file>..." to include in what will be committed)
+    #
+    #        new.file
 
 ### Based on work by:
 

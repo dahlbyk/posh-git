@@ -23,17 +23,17 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchBehindBackgroundColor  = $Host.UI.RawUI.BackgroundColor
     
     BeforeIndexText           = ""
-    BeforeIndexForegroundColor= [ConsoleColor]::Blue
+    BeforeIndexForegroundColor= [ConsoleColor]::DarkGreen
     BeforeIndexBackgroundColor= $Host.UI.RawUI.BackgroundColor
     
-    IndexForegroundColor      = [ConsoleColor]::Blue
+    IndexForegroundColor      = [ConsoleColor]::DarkGreen
     IndexBackgroundColor      = $Host.UI.RawUI.BackgroundColor
     
-    WorkingForegroundColor    = [ConsoleColor]::Yellow
+    WorkingForegroundColor    = [ConsoleColor]::DarkRed
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
     
     UntrackedText             = ' !'
-    UntrackedForegroundColor  = [ConsoleColor]::Yellow
+    UntrackedForegroundColor  = [ConsoleColor]::DarkRed
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
     
     ShowStatusWhenZero        = $true
@@ -42,6 +42,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnablePromptStatus        = !$GitMissing
     EnableFileStatus          = $true
+    RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
     Debug                     = $false
 }

@@ -14,7 +14,9 @@ Export-ModuleMember -Function @(
         'Enable-GitColors', 
         'Get-GitDirectory',
         'GitTabExpansion',
-        'Get-GitAliasPattern',
+        'Get-AliasPattern',
         'Start-SshAgent',
+        'Stop-SshAgent',
+        'Add-SshKey',
         'tgit')
 
