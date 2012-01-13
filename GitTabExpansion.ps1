@@ -17,14 +17,12 @@ function script:gitCmdOperations($command, $filter) {
         where { $_ -like "$filter*" }
 }
 
+$script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry','cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch','format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv','notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm','shortlog','show','stash','status','submodule','svn','tag','whatchanged')
+
 function script:gitCommands($filter, $includeAliases) {
     $cmdList = @()
     if (-not $global:GitTabSettings.AllCommands) {
-        $cmdList += git help |
-            foreach { if($_ -match '^   (\S+) (.*)') { $matches[1] } } |
-            where { $_ -like "$filter*" }
-        if("svn" -like "$filter*") { $cmdList += "svn" }
-        if("stash" -like "$filter*") { $cmdList += "stash" }
+        $cmdList += $someCommands -like "$filter*"
     } else {
         $cmdList += git help --all |
             where { $_ -match '^  \S.*' } |
@@ -102,17 +100,17 @@ function script:expandGitAlias($cmd, $rest) {
 
 function GitTabExpansion($lastBlock) {
 
-    if($lastBlock -match "^$(Get-GitAliasPattern) (?<cmd>\S+)(?<args> .*)$") {
+    if($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
     }
 
     # Handles tgit <command> (tortoisegit)
-    if($lastBlock -match "^$(Get-TGitAliasPattern) (?<cmd>\S*)$") {
+    if($lastBlock -match "^$(Get-AliasPattern tgit) (?<cmd>\S*)$") {
             # Need return statement to prevent fall-through.
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
     }
 
-    switch -regex ($lastBlock -replace "^$(Get-GitAliasPattern) ","") {
+    switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
         # Handles git reflog <op>
         # Handles git remote <op>

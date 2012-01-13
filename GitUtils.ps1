@@ -2,7 +2,11 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 function Get-GitDirectory {
-    Get-LocalOrParentPath .git
+    if ($Env:GIT_DIR) {
+        $Env:GIT_DIR
+    } else {
+        Get-LocalOrParentPath .git
+    }
 }
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw) {
@@ -181,9 +185,9 @@ function Enable-GitColors {
     $env:LESS = 'FRSX'
 }
 
-function Get-GitAliasPattern {
-   $aliases = @('git') + (Get-Alias | where {$_.definition -eq 'git' } | select -Exp Name) -join '|' 
-   "(" + $aliases + ")"
+function Get-AliasPattern($exe) {
+   $aliases = @($exe) + @(Get-Alias | where { $_.Definition -eq $exe } | select -Exp Name)
+   "($($aliases -join '|'))"
 }
 
 function Get-TGitAliasPattern {
@@ -196,18 +200,30 @@ function setenv($key, $value) {
     [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::User)
 }
 
+# Retrieve the current SSH agent PID (or zero). Can be used to determine if there
+# is a running agent.
+function Get-SshAgent() {
+    $agentPid = $Env:SSH_AGENT_PID
+    if ($agentPid) {
+        $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
+
+        if ($sshAgentProcess.Name -eq 'ssh-agent') {
+            return $agentPid
+        } elseif ($sshAgentProcess) {
+            setenv('SSH_AGENT_PID', $null)
+            setenv('SSH_AUTH_SOCK', $null)
+        }
+    }
+
+    return 0
+}
+
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
 function Start-SshAgent([switch]$Quiet) {
-    if ($Env:SSH_AGENT_PID) {
-        $sshAgentProcess = Get-Process -Id $Env:SSH_AGENT_PID -ErrorAction SilentlyContinue
-    }
-    if ($sshAgentProcess.Name -eq 'ssh-agent') {
-        if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($sshAgentProcess.Id))" }
+    [int]$agentPid = Get-SshAgent
+    if ($agentPid -gt 0) {
+        if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($agentPid))" }
         return
-    } elseif ($sshAgentProcess) {
-        if (!$Quiet) { Write-Host "Reseting ssh-agent as it is not configured correctly" }
-        setenv('SSH_AGENT_PID', $null)
-        setenv('SSH_AUTH_SOCK', $null)
     }
 
     $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
@@ -219,8 +235,36 @@ function Start-SshAgent([switch]$Quiet) {
         }
     }
 
+    Add-SshKey
+}
+
+# Add a key to the SSH agent
+function Add-SshKey() {
     $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
     if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-    & $sshAdd
+    if ($args.Count -eq 0) {
+        $sshPath = Resolve-Path ~/.ssh/id_rsa
+        & $sshAdd $sshPath
+    } else {
+        foreach ($value in $args) {
+            & $sshAdd $value
+        }
+    }
 }
+
+# Stop a running SSH agent
+function Stop-SshAgent() {
+    [int]$agentPid = Get-SshAgent
+    if ($agentPid -gt 0) {
+        # Stop agent process
+        $proc = Get-Process -Id $agentPid
+        if ($proc -ne $null) {
+            Stop-Process $agentPid
+        }
+
+        setenv('SSH_AGENT_PID', $null)
+        setenv('SSH_AUTH_SOCK', $null)
+    }
+}
+
