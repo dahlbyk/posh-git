@@ -21,6 +21,8 @@ function prompt {
     $Global:GitStatus = Get-GitStatus
     Write-GitStatus $GitStatus
 
+    $Host.UI.RawUI.WindowTitle = "$pwd $($GitStatus.Branch) - Windows Powershell"
+
     $LASTEXITCODE = $realLASTEXITCODE
     Write-Host
     return "> "
@@ -48,4 +50,4 @@ Enable-GitColors
 
 Pop-Location
 
-Start-SshAgent -Quiet
+#Start-SshAgent -Quiet
