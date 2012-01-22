@@ -1,15 +1,17 @@
 try {
-  $poshgitPath = "$env:SystemDrive\tools\poshgit"
-  
-  Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.3' $poshgitPath
+    $binRoot = join-path $env:systemdrive 'tools'
+    if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
+    $poshgitPath = join-path $binRoot 'poshgit'
 
-  #------- ADDITIONAL SETUP -------#
-  $installer = Join-Path $poshgitPath 'dahlbyk-posh-git-60e1ed7'
-  $installer = Join-Path $installer 'install.ps1' 
-  & $installer
+    Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.3' $poshgitPath
 
-  Write-ChocolateySuccess 'poshgit'
+    #------- ADDITIONAL SETUP -------#
+    $installer = Join-Path $poshgitPath 'dahlbyk-posh-git-60e1ed7'
+    $installer = Join-Path $installer 'install.ps1'
+    & $installer
+
+    Write-ChocolateySuccess 'poshgit'
 } catch {
   Write-ChocolateyFailure 'poshgit' $($_.Exception.Message)
-  throw 
+  throw
 }
