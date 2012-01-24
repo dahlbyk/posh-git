@@ -1,5 +1,7 @@
 try {
     $binRoot = join-path $env:systemdrive 'tools'
+
+    ### Using an environment variable to to define the bin root until we implement YAML configuration ###
     if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
     $poshgitPath = join-path $binRoot 'poshgit'
 
