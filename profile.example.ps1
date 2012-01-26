@@ -16,10 +16,8 @@ function prompt {
     $Host.UI.RawUI.ForegroundColor = $GitPromptSettings.DefaultForegroundColor
 
     Write-Host($pwd) -nonewline
-        
-    # Git Prompt
-    $Global:GitStatus = Get-GitStatus
-    Write-GitStatus $GitStatus
+
+    Write-VcsStatus
 
     $LASTEXITCODE = $realLASTEXITCODE
     return "> "
