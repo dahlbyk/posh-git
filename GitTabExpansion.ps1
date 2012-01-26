@@ -42,10 +42,16 @@ function script:gitRemotes($filter) {
 }
 
 function script:gitBranches($filter, $includeHEAD = $false) {
+    if ($filter -match "^(?<from>\S*\.{2,3})(?<to>.*)") {
+        $prefix = $matches['from']
+        $filter = $matches['to']
+    }
     $branches = @(git branch | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+                @(git branch -r | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
     $branches |
-        where { $_ -ne '(no branch)' -and $_ -like "$filter*" }
+        where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
+        foreach { $prefix + $_ }
 }
 
 function script:gitStashes($filter) {
