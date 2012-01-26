@@ -41,7 +41,7 @@ function script:gitRemotes($filter) {
         where { $_ -like "$filter*" }
 }
 
-function script:gitLocalBranches($filter, $includeHEAD = $false) {
+function script:gitBranches($filter, $includeHEAD = $false) {
     $branches = git branch |
         foreach { if($_ -match "^\*?\s*(.*)") { $matches[1] } }
 
@@ -133,7 +133,7 @@ function GitTabExpansion($lastBlock) {
         # Handles git branch -d|-D|-m|-M <branch name>
         # Handles git branch <branch name> <start-point>
         "^branch.* (?<branch>\S*)$" {
-            gitLocalBranches $matches['branch']
+            gitBranches $matches['branch']
         }
 
         # Handles git <cmd> (commands & aliases)
@@ -149,7 +149,7 @@ function GitTabExpansion($lastBlock) {
         # Handles git push remote <branch>
         # Handles git pull remote <branch>
         "^(?:push|pull).* (?:\S+) (?<branch>\S*)$" {
-            gitLocalBranches $matches['branch']
+            gitBranches $matches['branch']
         }
 
         # Handles git pull <remote>
@@ -171,12 +171,12 @@ function GitTabExpansion($lastBlock) {
         # Handles git log <commit>
         # Handles git show <commit>
         "^(?:cherry-pick|diff|difftool|log|show).* (?<commit>\S*)$" {
-            gitLocalBranches $matches['commit']
+            gitBranches $matches['commit'] $true
         }
 
         # Handles git reset <commit>
         "^reset.* (?<commit>\S*)$" {
-            gitLocalBranches $matches['commit'] $true
+            gitBranches $matches['commit'] $true
         }
 
         # Handles git add <path>
@@ -199,7 +199,7 @@ function GitTabExpansion($lastBlock) {
         # handles git rebase <branch name>
         # Handles git reflog show <branch name>
         "^(?:checkout|merge|rebase|reflog\s+show).*\s(?<branch>\S*)$" {
-            gitLocalBranches $matches['branch']
+            gitBranches $matches['branch'] $true
         }
     }
 }
