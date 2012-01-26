@@ -1,27 +1,25 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
-$enableFileStatus = $false
-
 $global:GitPromptSettings = New-Object PSObject -Property @{
     DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor
 
-    BeforeText                = if ($enableFileStatus) {' ['} else {' '}
-    BeforeForegroundColor     = [ConsoleColor]::DarkGray
+    BeforeText                = ' ['
+    BeforeForegroundColor     = [ConsoleColor]::Yellow
     BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor    
     DelimText                 = ' |'
-    DelimForegroundColor      = [ConsoleColor]::DarkGray
+    DelimForegroundColor      = [ConsoleColor]::Yellow
     DelimBackgroundColor      = $Host.UI.RawUI.BackgroundColor
     
-    AfterText                 = if ($enableFileStatus) {']'} else {''}
-    AfterForegroundColor      = [ConsoleColor]::DarkGray
+    AfterText                 = ']'
+    AfterForegroundColor      = [ConsoleColor]::Yellow
     AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
     
-    BranchForegroundColor       = [ConsoleColor]::DarkGray
+    BranchForegroundColor       = [ConsoleColor]::Cyan
     BranchBackgroundColor       = $Host.UI.RawUI.BackgroundColor
-    BranchAheadForegroundColor  = [ConsoleColor]::DarkGreen
+    BranchAheadForegroundColor  = [ConsoleColor]::Green
     BranchAheadBackgroundColor  = $Host.UI.RawUI.BackgroundColor
-    BranchBehindForegroundColor  = [ConsoleColor]::DarkRed
+    BranchBehindForegroundColor  = [ConsoleColor]::Red
     BranchBehindBackgroundColor  = $Host.UI.RawUI.BackgroundColor
     
     BeforeIndexText           = ""
@@ -43,7 +41,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     AutoRefreshIndex          = $true
 
     EnablePromptStatus        = !$GitMissing
-    EnableFileStatus          = $enableFileStatus
+    EnableFileStatus          = $true
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
     Debug                     = $false
