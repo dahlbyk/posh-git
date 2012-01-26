@@ -7,7 +7,7 @@ Pop-Location
 
 Export-ModuleMember -Function @(
   'Get-HgStatus',
-  'HgTabExpansion',
+  'TabExpansion',
   'Get-MqPatches',
   'PopulateHgCommands'
  )
