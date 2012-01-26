@@ -12,7 +12,7 @@ Export-ModuleMember -Function @(
         'Get-GitStatus', 
         'Enable-GitColors', 
         'Get-GitDirectory',
-        'GitTabExpansion',
+        'TabExpansion',
         'Get-AliasPattern',
         'Start-SshAgent',
         'Stop-SshAgent',
