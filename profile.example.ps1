@@ -11,10 +11,8 @@ Import-Module .\posh-hg
 # Set up a simple prompt, adding the hg prompt parts inside hg repos
 function prompt {
     Write-Host($pwd) -nonewline
-        
-    # Mercurial Prompt
-    $Global:HgStatus = Get-HgStatus
-    Write-HgStatus $HgStatus
+
+    Write-VcsStatus
       
     return "> "
 }
