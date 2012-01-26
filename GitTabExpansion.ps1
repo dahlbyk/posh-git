@@ -42,10 +42,9 @@ function script:gitRemotes($filter) {
 }
 
 function script:gitBranches($filter, $includeHEAD = $false) {
-    $branches = git branch |
-        foreach { if($_ -match "^\*?\s*(.*)") { $matches[1] } }
-
-    @(if ($includeHEAD) { 'HEAD' }) + @($branches) |
+    $branches = @(git branch | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+                @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
+    $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" }
 }
 
