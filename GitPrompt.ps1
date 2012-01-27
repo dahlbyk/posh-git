@@ -45,6 +45,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
     Debug                     = $false
+    PromptNewLine             = $false
 }
 
 $WriteHost = Get-Command Write-Host -Type Cmdlet

@@ -20,7 +20,11 @@ function prompt {
     Write-VcsStatus
 
     $LASTEXITCODE = $realLASTEXITCODE
-    return "> "
+    if($GitPromptSettings.PromptNewLine) {
+        return [System.Environment]::newline + "> "
+    } else {
+        return "> "
+    }
 }
 
 Enable-GitColors
