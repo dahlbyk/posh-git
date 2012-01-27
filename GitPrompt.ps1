@@ -47,6 +47,15 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     Debug                     = $false
 }
 
+$WriteHost = Get-Command Write-Host -Type Cmdlet
+function Write-Host($Object, [switch]$NoNewline, $ForegroundColor, $BackgroundColor) {
+    if ($BackgroundColor -lt 0) {
+        & $WriteHost $Object -NoNewline:$NoNewline -ForegroundColor $ForegroundColor
+    } else {
+        & $WriteHost $Object -NoNewline:$NoNewline -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
+    }
+}
+
 function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
     if ($status -and $s) {
