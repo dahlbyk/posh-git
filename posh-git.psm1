@@ -9,6 +9,7 @@ Push-Location $psScriptRoot
 Pop-Location
 
 Export-ModuleMember -Function @(
+        'Write-GitStatus',
         'Get-GitStatus', 
         'Enable-GitColors', 
         'Get-GitDirectory',
