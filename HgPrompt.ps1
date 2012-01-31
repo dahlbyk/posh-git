@@ -38,16 +38,19 @@ function Write-HgStatus($status = (get-hgStatus)) {
            Write-Host " ^$($status.Renamed)" -NoNewline -BackgroundColor $s.RenamedBackgroundColor -ForegroundColor $s.RenamedForegroundColor
         }
 
-        if($s.ShowTags -and $status.Tags.Length) {
+        if($s.ShowTags -and ($status.Tags.Length -or $status.ActiveBookmark.Length)) {
           write-host $s.BeforeTagText -NoNewLine
+            
+          if($status.ActiveBookmark.Length) {
+              write-host $status.ActiveBookmark -NoNewLine -ForegroundColor $s.BranchForegroundColor -BackgroundColor $s.TagBackgroundColor 
+              if($status.Tags.Length) {
+                write-host " " -NoNewLine -ForegroundColor $s.TagSeparatorColor -BackgroundColor $s.TagBackgroundColor
+              }
+          }
          
           $tagCounter=0
           $status.Tags | % {
             $color = $s.TagForegroundColor
-            
-            if($_.Trim() -eq $status.ActiveBookmark) {
-                $color = $s.BranchForegroundColor
-            }
                 
               write-host $_ -NoNewLine -ForegroundColor $color -BackgroundColor $s.TagBackgroundColor 
           
