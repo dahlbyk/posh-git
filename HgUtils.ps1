@@ -1,11 +1,13 @@
 function isHgDirectory() {
+  if(test-path ".git") {
+    return $false; #short circuit if git repo
+  }
+  
   if(test-path ".hg") {
     return $true;
   }
   
-  if(test-path ".git") {
-    return $false; #short circuit if git repo
-  }
+  
   
   # Test within parent dirs
   $checkIn = (Get-Item .).parent
