@@ -44,6 +44,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
 
             $b = '({0})' -f (
                 Coalesce-Args `
+                    { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
                     { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
                     {
                         dbg 'Falling back on parsing HEAD' $sw
