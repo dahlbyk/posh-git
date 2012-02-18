@@ -83,6 +83,12 @@ function script:gitStashes($filter) {
         foreach { "'$_'" }
 }
 
+function script:gitTfsShelvesets($filter) {
+    (git tfs shelve-list) |
+        where { $_ -like "$filter*" } |
+        foreach { "'$_'" }
+}
+
 function script:gitFiles($filter, $files) {
     $files | sort |
         where { $_ -like "$filter*" } |
@@ -174,6 +180,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git bisect (bad|good|reset|skip) <ref>
         "^bisect (?:bad|good|reset|skip).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
+        }
+
+        # Handles git tfs unshelve <shelveset>
+        "^tfs +unshelve.* (?<shelveset>\S*)$" {
+            gitTfsShelvesets $matches['shelveset']
         }
 
         # Handles git branch -d|-D|-m|-M <branch name>
