@@ -10,6 +10,7 @@ $global:ops = @{
     remote = 'add','rename','rm','set-head','show','prune','update'
     stash = 'list','show','drop','pop','apply','branch','save','clear','create'
     svn = 'init', 'fetch', 'clone', 'rebase', 'dcommit', 'branch', 'tag', 'log', 'blame', 'find-rev', 'set-tree', 'create-ignore', 'show-ignore', 'mkdirs', 'commit-diff', 'info', 'proplist', 'propget', 'show-externals', 'gc', 'reset'
+    tfs = 'bootstrap','checkin','checkintool','ct','cleanup','cleanup-workspaces','clone','diagnostics','fetch','help','init','pull','quick-clone','rcheckin','shelve','shelve-list','unshelve','verify'
 }
 
 function script:gitCmdOperations($command, $filter) {
@@ -56,6 +57,12 @@ function script:gitBranches($filter, $includeHEAD = $false) {
 
 function script:gitStashes($filter) {
     (git stash list) -replace ':.*','' |
+        where { $_ -like "$filter*" } |
+        foreach { "'$_'" }
+}
+
+function script:gitTfsShelvesets($filter) {
+    (git tfs shelve-list) |
         where { $_ -like "$filter*" } |
         foreach { "'$_'" }
 }
@@ -121,7 +128,8 @@ function GitTabExpansion($lastBlock) {
         # Handles git remote <op>
         # Handles git stash <op>
         # Handles git svn <op>
-        "^(?<cmd>reflog|remote|stash|svn)\s+(?<op>\S*)$" {
+        # Handles git tfs <op>
+        "^(?<cmd>reflog|remote|stash|svn|tfs)\s+(?<op>\S*)$" {
             gitCmdOperations $matches['cmd'] $matches['op']
         }
 
@@ -133,6 +141,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git stash (show|apply|drop|pop|branch) <stash>
         "^stash (?:show|apply|drop|pop|branch).* (?<stash>\S*)$" {
             gitStashes $matches['stash']
+        }
+
+        # Handles git tfs unshelve <shelveset>
+        "^tfs +unshelve.* (?<shelveset>\S*)$" {
+            gitTfsShelvesets $matches['shelveset']
         }
 
         # Handles git branch -d|-D|-m|-M <branch name>
