@@ -44,6 +44,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnableFileStatus          = $true
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
+    PromptOnNewLine           = $false
+
     Debug                     = $false
 }
 
