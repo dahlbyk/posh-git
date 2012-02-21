@@ -22,8 +22,12 @@ function prompt {
     $Host.UI.RawUI.WindowTitle = "$pwd $($GitStatus.Branch) - Windows Powershell"
 
     $LASTEXITCODE = $realLASTEXITCODE
-    Write-Host
-    return "> "
+    if ($GitPromptSettings.PromptOnNewLine) {
+        return "`r`n> "
+    }
+    else {
+        return "> "
+    }
 }
 
 Enable-GitColors
