@@ -16,35 +16,14 @@ function prompt {
     $Host.UI.RawUI.ForegroundColor = $GitPromptSettings.DefaultForegroundColor
 
     Write-Host($pwd) -nonewline
-        
-    # Git Prompt
-    $Global:GitStatus = Get-GitStatus
-    Write-GitStatus $GitStatus
+
+    Write-VcsStatus
 
     $Host.UI.RawUI.WindowTitle = "$pwd $($GitStatus.Branch) - Windows Powershell"
 
     $LASTEXITCODE = $realLASTEXITCODE
     Write-Host
     return "> "
-}
-
-if(Test-Path Function:\TabExpansion) {
-    $teBackup = 'posh-git_DefaultTabExpansion'
-    if(!(Test-Path Function:\$teBackup)) {
-        Rename-Item Function:\TabExpansion $teBackup
-    }
-
-    # Set up tab expansion and include git expansion
-    function TabExpansion($line, $lastWord) {
-        $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
-        switch -regex ($lastBlock) {
-            # Execute git tab completion for all git-related commands
-            "^$(Get-AliasPattern git) (.*)" { GitTabExpansion $lastBlock }
-            "^$(Get-AliasPattern tgit) (.*)" { GitTabExpansion $lastBlock }
-            # Fall back on existing tab expansion
-            default { & $teBackup $line $lastWord }
-        }
-    }
 }
 
 Enable-GitColors
