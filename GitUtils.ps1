@@ -183,7 +183,6 @@ function InDisabledRepository {
 
 function Enable-GitColors {
     $env:TERM = 'cygwin'
-    $env:LESS = 'FRSX'
 }
 
 function Get-AliasPattern($exe) {

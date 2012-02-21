@@ -72,10 +72,6 @@ function Write-GitStatus($status) {
             Write-Prompt $currentBranch -NoNewline -BackgroundColor $s.BranchBackgroundColor -ForegroundColor $s.BranchForegroundColor
         }
         
-        if ($status.BehindBy -eq 0 -and $status.AheadBy -gt 0) {
-            Write-Host ' >>' -NoNewLine -ForeGroundColor White
-        }
-        
         if($s.EnableFileStatus -and $status.HasIndex) {
             write-host $s.BeforeIndexText -NoNewLine -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
             
