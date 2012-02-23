@@ -78,7 +78,7 @@ function script:gitFiles($filter) {
 
 function script:gitDeleted($filter) {
     if($GitStatus) {
-        @($GitStatus.Working.Deleted) + @($GitStatus.Index.Deleted) |
+        @($GitStatus.Working.Deleted) |
             where { $_ -like "$filter*" } |
             foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
     }
