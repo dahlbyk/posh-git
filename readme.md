@@ -48,6 +48,7 @@ By default, the status summary has the following format:
  * Cyan means the branch matches its remote
  * Green means the branch is ahead of its remote (green light to push)
  * Red means the branch is behind its remote
+ * Yellow means the branch is both ahead of and behind its remote
 * ABCD represent the index; EFGH represent the working directory
  * `+` = Added files
  * `~` = Modified files
