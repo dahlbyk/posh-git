@@ -12,7 +12,7 @@ function HgTabExpansion($lastBlock) {
    #handles hg update <branch name>
    #handles hg merge <branch name>
    'hg (up|update|merge|co|checkout) (\S*)$' {
-      findBranchOrBookmark($matches[2])
+      findBranchOrBookmarkOrTags($matches[2])
    }
        
    #Handles hg pull -B <bookmark>   
@@ -134,13 +134,27 @@ function PopulateHgCommands() {
   $script:hgCommands = $hgCommands
 }
 
-function findBranchOrBookmark($filter){
+function findBranchOrBookmarkOrTags($filter){
     hgLocalBranches($filter)
+	hgLocalTags($filter)
     hgLocalBookmarks($filter)
 }
 
 function hgLocalBranches($filter) {
   hg branches -a | foreach {
+    if($_ -match "(\S+) .*") {
+      if($filter -and $matches[1].StartsWith($filter)) {
+        $matches[1]
+      }
+      elseif(-not $filter) {
+        $matches[1]
+      }
+    }
+  }
+}
+
+function hgLocalTags($filter) {
+  hg tags | foreach {
     if($_ -match "(\S+) .*") {
       if($filter -and $matches[1].StartsWith($filter)) {
         $matches[1]
@@ -164,7 +178,7 @@ function bookmarkName($bookmark) {
 }
 
 function hgLocalBookmarks($filter) {
-  hg bookmarks | foreach {
+  hg bookmarks --quiet | foreach {
     if($_ -match "(\S+) .*") {
       $bookmark = bookmarkName($matches[0])  
       if($filter -and $bookmark.StartsWith($filter)) {
