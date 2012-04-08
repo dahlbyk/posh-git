@@ -138,6 +138,11 @@ function GitTabExpansion($lastBlock) {
             gitStashes $matches['stash']
         }
 
+        # Handles git bisect (bad|good|reset|skip) <ref>
+        "^bisect (?:bad|good|reset|skip).* (?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
+        }
+
         # Handles git branch -d|-D|-m|-M <branch name>
         # Handles git branch <branch name> <start-point>
         "^branch.* (?<branch>\S*)$" {
