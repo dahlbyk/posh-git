@@ -6,9 +6,12 @@ $global:GitTabSettings = New-Object PSObject -Property @{
 }
 
 $subcommands = @{
+    bisect = 'start bad good skip reset visualize replay log run'
+    notes = 'edit show'
     reflog = 'expire delete show'
     remote = 'add rename rm set-head show prune update'
     stash = 'list show drop pop apply branch save clear create'
+    submodule = 'add status init update summary foreach sync'
     svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
 }
 
