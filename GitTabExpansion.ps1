@@ -13,6 +13,7 @@ $subcommands = @{
     stash = 'list show drop pop apply branch save clear create'
     submodule = 'add status init update summary foreach sync'
     svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
+    tfs = 'bootstrap checkin checkintool ct cleanup cleanup-workspaces clone diagnostics fetch help init pull quick-clone rcheckin shelve shelve-list unshelve verify'
 }
 
 function script:gitCmdOperations($command, $filter) {
