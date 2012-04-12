@@ -120,10 +120,7 @@ function GitTabExpansion($lastBlock) {
 
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
-        # Handles git reflog <op>
-        # Handles git remote <op>
-        # Handles git stash <op>
-        # Handles git svn <op>
+        # Handles git <cmd> <op>
         "^(?<cmd>$($subcommands.Keys -join '|'))\s+(?<op>\S*)$" {
             gitCmdOperations $matches['cmd'] $matches['op']
         }
