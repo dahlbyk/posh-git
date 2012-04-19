@@ -177,7 +177,7 @@ function GitTabExpansion($lastBlock) {
         }
 
         # Handles git <cmd> <ref>
-        "^(?:checkout|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|show).* (?<ref>\S*)$" {
+        "^(?:checkout|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
         }
 
