@@ -181,6 +181,11 @@ function GitTabExpansion($lastBlock) {
             gitBranches $matches['ref'] $true
         }
 
+        # Handles git <cmd> <ref>
+        "^commit.*-C\s+(?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
+        }
+
         # Handles git add <path>
         "^add.* (?<files>\S*)$" {
             gitFiles $matches['files']
