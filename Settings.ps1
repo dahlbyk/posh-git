@@ -47,4 +47,12 @@ $global:PoshHgSettings = New-Object PSObject -Property @{
     AppliedPatchBackgroundColor   = $Host.UI.RawUI.BackgroundColor
     PatchSeparator                = ' › '
     PatchSeparatorColor           = [ConsoleColor]::White    
+    
+    # Status Count Prefixes for prompt
+    AddedStatusPrefix             = ' +'
+    ModifiedStatusPrefix          = ' ~'
+    DeletedStatusPrefix           = ' -'
+    UntrackedStatusPrefix         = ' ?'
+    MissingStatusPrefix           = ' !'
+    RenamedStatusPrefix           = ' ^'
 }
