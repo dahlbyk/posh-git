@@ -176,18 +176,9 @@ function GitTabExpansion($lastBlock) {
             gitIndex $matches['path']
         }
 
-        # Handles git cherry-pick <commit>
-        # Handles git diff <commit>
-        # Handles git difftool <commit>
-        # Handles git log <commit>
-        # Handles git show <commit>
-        "^(?:cherry-pick|diff|difftool|log|show).* (?<commit>\S*)$" {
-            gitBranches $matches['commit'] $true
-        }
-
-        # Handles git reset <commit>
-        "^reset.* (?<commit>\S*)$" {
-            gitBranches $matches['commit'] $true
+        # Handles git <cmd> <ref>
+        "^(?:checkout|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|show).* (?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
         }
 
         # Handles git add <path>
@@ -203,14 +194,6 @@ function GitTabExpansion($lastBlock) {
         # Handles git rm <path>
         "^rm.* (?<index>\S*)$" {
             gitDeleted $matches['index']
-        }
-
-        # Handles git checkout <branch name>
-        # Handles git merge <branch name>
-        # handles git rebase <branch name>
-        # Handles git reflog show <branch name>
-        "^(?:checkout|merge|rebase|reflog\s+show).*\s(?<branch>\S*)$" {
-            gitBranches $matches['branch'] $true
         }
     }
 }
