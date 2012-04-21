@@ -37,6 +37,9 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             } elseif (Test-Path $gitDir\MERGE_HEAD) {
                 dbg 'Found MERGE_HEAD' $sw
                 $r = '|MERGING'
+            } elseif (Test-Path $gitDir\CHERRY_PICK_HEAD) {
+                dbg 'Found CHERRY_PICK_HEAD' $sw
+                $r = '|CHERRY-PICKING'
             } elseif (Test-Path $gitDir\BISECT_LOG) {
                 dbg 'Found BISECT_LOG' $sw
                 $r = '|BISECTING'
