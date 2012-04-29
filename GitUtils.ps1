@@ -37,14 +37,17 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             } elseif (Test-Path $gitDir\MERGE_HEAD) {
                 dbg 'Found MERGE_HEAD' $sw
                 $r = '|MERGING'
+            } elseif (Test-Path $gitDir\CHERRY_PICK_HEAD) {
+                dbg 'Found CHERRY_PICK_HEAD' $sw
+                $r = '|CHERRY-PICKING'
             } elseif (Test-Path $gitDir\BISECT_LOG) {
                 dbg 'Found BISECT_LOG' $sw
                 $r = '|BISECTING'
             }
 
-            $b = '({0})' -f (
-                Coalesce-Args `
-                    { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
+            $b = Coalesce-Args `
+                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
+                { '({0})' -f (Coalesce-Args `
                     { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
                     {
                         dbg 'Falling back on parsing HEAD' $sw
@@ -57,9 +60,10 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                             return 'unknown'
                         }
                     }
-                )
+                ) }
         }
 
+        dbg 'Inside git directory?' $sw
         if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
             dbg 'Inside git directory' $sw
             if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {

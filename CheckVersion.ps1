@@ -5,7 +5,7 @@ if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
 }
 
 $requiredVersion = [Version]'1.7.2'
-if ((git --version 2> $null) -match '(?<ver>\d(?:\.\d)+)') {
+if ((git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)') {
     $version = [Version]$Matches['ver']
 }
 if ($version -lt $requiredVersion) {

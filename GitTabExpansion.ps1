@@ -5,15 +5,19 @@ $global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
 }
 
-$global:ops = @{
-    reflog = 'expire','delete','show'
-    remote = 'add','rename','rm','set-head','show','prune','update'
-    stash = 'list','show','drop','pop','apply','branch','save','clear','create'
-    svn = 'init', 'fetch', 'clone', 'rebase', 'dcommit', 'branch', 'tag', 'log', 'blame', 'find-rev', 'set-tree', 'create-ignore', 'show-ignore', 'mkdirs', 'commit-diff', 'info', 'proplist', 'propget', 'show-externals', 'gc', 'reset'
+$subcommands = @{
+    bisect = 'start bad good skip reset visualize replay log run'
+    notes = 'edit show'
+    reflog = 'expire delete show'
+    remote = 'add rename rm set-head show prune update'
+    stash = 'list show drop pop apply branch save clear create'
+    submodule = 'add status init update summary foreach sync'
+    svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
+    tfs = 'bootstrap checkin checkintool ct cleanup cleanup-workspaces clone diagnostics fetch help init pull quick-clone rcheckin shelve shelve-list unshelve verify'
 }
 
 function script:gitCmdOperations($command, $filter) {
-    $ops.$command |
+    $subcommands.$command -split ' ' |
         where { $_ -like "$filter*" }
 }
 
@@ -78,7 +82,7 @@ function script:gitFiles($filter) {
 
 function script:gitDeleted($filter) {
     if($GitStatus) {
-        @($GitStatus.Working.Deleted) + @($GitStatus.Index.Deleted) |
+        @($GitStatus.Working.Deleted) |
             where { $_ -like "$filter*" } |
             foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
     }
@@ -117,11 +121,8 @@ function GitTabExpansion($lastBlock) {
 
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
-        # Handles git reflog <op>
-        # Handles git remote <op>
-        # Handles git stash <op>
-        # Handles git svn <op>
-        "^(?<cmd>reflog|remote|stash|svn)\s+(?<op>\S*)$" {
+        # Handles git <cmd> <op>
+        "^(?<cmd>$($subcommands.Keys -join '|'))\s+(?<op>\S*)$" {
             gitCmdOperations $matches['cmd'] $matches['op']
         }
 
@@ -133,6 +134,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git stash (show|apply|drop|pop|branch) <stash>
         "^stash (?:show|apply|drop|pop|branch).* (?<stash>\S*)$" {
             gitStashes $matches['stash']
+        }
+
+        # Handles git bisect (bad|good|reset|skip) <ref>
+        "^bisect (?:bad|good|reset|skip).* (?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
         }
 
         # Handles git branch -d|-D|-m|-M <branch name>
@@ -170,18 +176,14 @@ function GitTabExpansion($lastBlock) {
             gitIndex $matches['path']
         }
 
-        # Handles git cherry-pick <commit>
-        # Handles git diff <commit>
-        # Handles git difftool <commit>
-        # Handles git log <commit>
-        # Handles git show <commit>
-        "^(?:cherry-pick|diff|difftool|log|show).* (?<commit>\S*)$" {
-            gitBranches $matches['commit'] $true
+        # Handles git <cmd> <ref>
+        "^(?:checkout|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
         }
 
-        # Handles git reset <commit>
-        "^reset.* (?<commit>\S*)$" {
-            gitBranches $matches['commit'] $true
+        # Handles git <cmd> <ref>
+        "^commit.*-C\s+(?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
         }
 
         # Handles git add <path>
@@ -197,14 +199,6 @@ function GitTabExpansion($lastBlock) {
         # Handles git rm <path>
         "^rm.* (?<index>\S*)$" {
             gitDeleted $matches['index']
-        }
-
-        # Handles git checkout <branch name>
-        # Handles git merge <branch name>
-        # handles git rebase <branch name>
-        # Handles git reflog show <branch name>
-        "^(?:checkout|merge|rebase|reflog\s+show).*\s(?<branch>\S*)$" {
-            gitBranches $matches['branch'] $true
         }
     }
 }
