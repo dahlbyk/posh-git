@@ -82,7 +82,11 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
     if ($enabled -and $gitDir)
     {
-        if($settings.Debug) { $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host '' }
+        if($settings.Debug) {
+            $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
+        } else {
+            $sw = $null
+        }
         $branch = $null
         $aheadBy = 0
         $behindBy = 0
