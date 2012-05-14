@@ -1,7 +1,7 @@
 # For backwards compatibility
 $global:HgPromptSettings = $global:PoshHgSettings
 
-function Write-HgStatus($status = (get-hgStatus)) {
+function Write-HgStatus($status = (get-hgStatus $global:PoshHgSettings.GetFileStatus $global:PoshHgSettings.GetBookmarkStatus)) {
     if ($status) {
         $s = $global:PoshHgSettings
        
@@ -96,6 +96,5 @@ function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
 $Global:VcsPromptStatuses += {
-    $Global:HgStatus = Get-HgStatus
-    Write-HgStatus $HgStatus
+    Write-HgStatus
 }

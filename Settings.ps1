@@ -1,4 +1,8 @@
 $global:PoshHgSettings = New-Object PSObject -Property @{
+    #Retreival settings
+    GetFileStatus             = $true
+    GetBookmarkStatus         = $true
+	
     #Before prompt
     BeforeText                = ' ['
     BeforeForegroundColor     = [ConsoleColor]::Yellow
