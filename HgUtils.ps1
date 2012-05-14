@@ -37,16 +37,19 @@ function Get-HgStatus($getFileStatus=$true, $getBookmarkStatus=$true) {
 	
 	
 	if ($getFileStatus -eq $false) {
-		$behind = $true
 		hg parent | foreach {
 		switch -regex ($_) {
 			'tag:\s*(.*)' { $tags = $matches[1].Replace("(empty repository)", "").Split(" ", [StringSplitOptions]::RemoveEmptyEntries) }
 			'changeset:\s*(\S*)' { $commit = $matches[1]}
 			}
 		}
-		
-		$behind = $tags -notcontains "tip"
 		$branch = hg branch
+		$behind = $true
+		hg heads $branch | foreach {
+			switch -regex ($_) {
+				'changeset:\s*(\S*)' { if ($commit -eq $matches[1]) { $behind=$false } }
+			}
+		}
 	}
 	else
 	{
