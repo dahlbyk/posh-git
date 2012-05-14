@@ -5,10 +5,10 @@ try {
     if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
     $poshgitPath = join-path $binRoot 'poshgit'
 
-    Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.3' $poshgitPath
+    Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.4' $poshgitPath
 
     #------- ADDITIONAL SETUP -------#
-    $installer = Join-Path $poshgitPath 'dahlbyk-posh-git-60e1ed7'
+    $installer = Join-Path $poshgitPath 'dahlbyk-posh-git-60be436'
     $installer = Join-Path $installer 'install.ps1'
     & $installer
 
