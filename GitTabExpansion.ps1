@@ -177,11 +177,6 @@ function GitTabExpansion($lastBlock) {
         }
 
         # Handles git <cmd> <ref>
-        "^(?:checkout|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
-            gitBranches $matches['ref'] $true
-        }
-
-        # Handles git <cmd> <ref>
         "^commit.*-C\s+(?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
         }
@@ -199,6 +194,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git rm <path>
         "^rm.* (?<index>\S*)$" {
             gitDeleted $matches['index']
+        }
+
+        # Handles git <cmd> <ref>
+        "^(?:checkout|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
         }
     }
 }
