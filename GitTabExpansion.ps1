@@ -64,28 +64,26 @@ function script:gitStashes($filter) {
         foreach { "'$_'" }
 }
 
-function script:gitIndex($filter) {
-    if($GitStatus) {
-        $GitStatus.Index |
-            where { $_ -like "$filter*" } |
-            foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
-    }
+function script:gitFiles($filter, $files) {
+    $files | sort |
+        where { $_ -like "$filter*" } |
+        foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
 }
 
-function script:gitFiles($filter) {
-    if($GitStatus) {
-        $GitStatus.Working |
-            where { $_ -like "$filter*" } |
-            foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
-    }
+function script:gitIndex($filter) {
+    gitFiles $filter $GitStatus.Index
+}
+
+function script:gitAddFiles($filter) {
+    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Added))
+}
+
+function script:gitCheckoutFiles($filter) {
+    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
 function script:gitDeleted($filter) {
-    if($GitStatus) {
-        @($GitStatus.Working.Deleted) |
-            where { $_ -like "$filter*" } |
-            foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
-    }
+    gitFiles $filter $GitStatus.Working.Deleted
 }
 
 function script:gitAliases($filter) {
@@ -183,12 +181,12 @@ function GitTabExpansion($lastBlock) {
 
         # Handles git add <path>
         "^add.* (?<files>\S*)$" {
-            gitFiles $matches['files']
+            gitAddFiles $matches['files']
         }
 
         # Handles git checkout -- <path>
         "^checkout.* -- (?<files>\S*)$" {
-            gitFiles $matches['files']
+            gitCheckoutFiles $matches['files']
         }
 
         # Handles git rm <path>
