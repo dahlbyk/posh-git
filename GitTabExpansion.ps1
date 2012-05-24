@@ -82,6 +82,14 @@ function script:gitCheckoutFiles($filter) {
     gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
+function script:gitDiffFiles($filter) {
+    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified))
+}
+
+function script:gitMergeFiles($filter) {
+    gitFiles $filter (@($GitStatus.Working.Unmerged))
+}
+
 function script:gitDeleted($filter) {
     gitFiles $filter $GitStatus.Working.Deleted
 }
@@ -192,6 +200,26 @@ function GitTabExpansion($lastBlock) {
         # Handles git rm <path>
         "^rm.* (?<index>\S*)$" {
             gitDeleted $matches['index']
+        }
+
+        # Handles git diff <path>
+        "^diff.* (?<files>\S*)$" {
+            gitDiffFiles $matches['files']
+        }
+
+        # Handles git diff <path>
+        "^difftool.* (?<files>\S*)$" {
+            gitDiffFiles $matches['files']
+        }
+
+        # Handles git diff <path>
+        "^merge.* (?<files>\S*)$" {
+            gitMergeFiles $matches['files']
+        }
+
+        # Handles git diff <path>
+        "^mergetool.* (?<files>\S*)$" {
+            gitMergeFiles $matches['files']
         }
 
         # Handles git <cmd> <ref>
