@@ -82,12 +82,16 @@ function script:gitCheckoutFiles($filter) {
     gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
-function script:gitDiffFiles($filter) {
-    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified))
+function script:gitDiffFiles($filter, $staged) {
+    if ($staged) {
+        gitFiles $filter $GitStatus.Index.Modified
+    } else {
+        gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Index.Modified))
+    }
 }
 
 function script:gitMergeFiles($filter) {
-    gitFiles $filter (@($GitStatus.Working.Unmerged))
+    gitFiles $filter $GitStatus.Working.Unmerged
 }
 
 function script:gitDeleted($filter) {
@@ -155,12 +159,12 @@ function GitTabExpansion($lastBlock) {
 
         # Handles git <cmd> (commands & aliases)
         "^(?<cmd>\S*)$" {
-            gitCommands $matches['cmd'] $TRUE
+            gitCommands $matches['cmd'] $true
         }
 
         # Handles git help <cmd> (commands only)
         "^help (?<cmd>\S*)$" {
-            gitCommands $matches['cmd'] $FALSE
+            gitCommands $matches['cmd'] $false
         }
 
         # Handles git push remote <branch>
@@ -202,23 +206,13 @@ function GitTabExpansion($lastBlock) {
             gitDeleted $matches['index']
         }
 
-        # Handles git diff <path>
-        "^diff.* (?<files>\S*)$" {
-            gitDiffFiles $matches['files']
+        # Handles git diff/difftool <path>
+        "^(?:diff|difftool)(?:.* (?<staged>(?:--cached|--staged))|.*) (?<files>\S*)$" {
+            gitDiffFiles $matches['files'] $matches['staged']
         }
 
-        # Handles git diff <path>
-        "^difftool.* (?<files>\S*)$" {
-            gitDiffFiles $matches['files']
-        }
-
-        # Handles git diff <path>
-        "^merge.* (?<files>\S*)$" {
-            gitMergeFiles $matches['files']
-        }
-
-        # Handles git diff <path>
-        "^mergetool.* (?<files>\S*)$" {
+        # Handles git merge/mergetool <path>
+        "^(?:merge|mergetool).* (?<files>\S*)$" {
             gitMergeFiles $matches['files']
         }
 
