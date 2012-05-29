@@ -1,12 +1,10 @@
-$packageName = (split-Path (Resolve-Path *.nuspec) -leaf).Replace(".nuspec","")
+$packageName = "poshgit"
 cpack
 
 function Setup-Environment {
     Cleanup
     $env:poshGit = join-path (Resolve-Path .\Tests ) dahlbyk-posh-git-60be436.zip
-    $profileScript = @"
-function Prompt(){ `$host.ui.RawUI.WindowTitle = "My Prompt" }
-"@
+    $profileScript = "function Prompt(){ `$host.ui.RawUI.WindowTitle = `"My Prompt`" }"
     (Set-Content $Profile -value $profileScript -Force)
 }
 
@@ -112,9 +110,101 @@ Describe "Install-Posh-Git" {
             throw
         }
         finally {
+            Clean-Environment
             if( Test-Path function:\Write-Host ) {Remove-Item function:\Write-Host}
             if( Test-Path PoshTest ) {Remove-Item PoshTest -Force -Recurse}
-            Clean-Environment
         }
     }
+
+    It "WillSucceedOnEmptyProfile" {
+        Setup-Environment
+        try{
+            Remove-Item $Profile -Force
+            RunInstall
+            mkdir PoshTest
+            Pushd PoshTest
+            git init
+            . $Profile
+            $global:wh=""
+            New-Item function:\global:Write-Host -value "param([object] `$object, `$backgroundColor, `$foregroundColor, [switch] `$nonewline) try{Write-Output `$object;[string]`$global:wh += `$object.ToString()} catch{}"
+
+            Prompt
+
+            Popd
+            $wh.should.be("$pwd\PoshTest [master]")
+        }
+        catch {
+            write-output (Get-Content $Profile)
+            throw
+        }
+        finally {
+            Clean-Environment
+            if( Test-Path function:\Write-Host ) {Remove-Item function:\Write-Host}
+            if( Test-Path PoshTest ) {Remove-Item PoshTest -Force -Recurse}
+        }
+    }
+
+    It "WillSucceedOnProfileWithPromptWithWriteHost" {
+        Cleanup
+        Setup-Environment
+        try{
+            Remove-Item $Profile -Force
+            Add-Content $profile -value "function prompt {Write-Host 'Hi'}" -Force
+            RunInstall
+            mkdir PoshTest
+            Pushd PoshTest
+            git init
+            . $Profile
+            $global:wh=""
+            New-Item function:\global:Write-Host -value "param([object] `$object, `$backgroundColor, `$foregroundColor, [switch] `$nonewline) try{Write-Output `$object;[string]`$global:wh += `$object.ToString()} catch{}"
+
+            Prompt
+
+            Remove-Item function:\global:Write-Host
+            Popd
+            $wh.should.be("$pwd\PoshTest [master]")
+        }
+        catch {
+            write-output (Get-Content $Profile)
+            throw
+        }
+        finally {
+            Clean-Environment
+            if( Test-Path function:\Write-Host ) {Remove-Item function:\Write-Host}
+            if( Test-Path PoshTest ) {Remove-Item PoshTest -Force -Recurse}
+        }
+    }
+
+    It "WillSucceedOnUpdatingFrom040" {
+        Cleanup
+        Setup-Environment
+        try{
+            Remove-Item $Profile -Force
+            Add-Content $profile -value ". 'C:\tools\poshgit\dahlbyk-posh-git-60be436\profile.example.ps1'" -Force
+            RunInstall
+            mkdir PoshTest
+            Pushd PoshTest
+            git init
+            write-output (Get-Content function:\prompt)
+            . $Profile
+            $global:wh=""
+            New-Item function:\global:Write-Host -value "param([object] `$object, `$backgroundColor, `$foregroundColor, [switch] `$nonewline) try{Write-Output `$object;[string]`$global:wh += `$object.ToString()} catch{}"
+
+            Prompt
+
+            Remove-Item function:\global:Write-Host
+            Popd
+            $wh.should.be("$pwd\PoshTest [master]")
+        }
+        catch {
+            write-output (Get-Content $Profile)
+            throw
+        }
+        finally {
+            Clean-Environment
+            if( Test-Path function:\Write-Host ) {Remove-Item function:\Write-Host}
+            if( Test-Path PoshTest ) {Remove-Item PoshTest -Force -Recurse}
+        }
+    }
+
 }

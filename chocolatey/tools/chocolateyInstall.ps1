@@ -4,7 +4,8 @@ function Insert-Script([ref]$originalScript, $script) {
 
 try {
     $binRoot = join-path $env:systemdrive 'tools'
-
+    $oldPromptOverride = "if(Test-Path Function:\Prompt) {Rename-Item Function:\Prompt PrePoshGitPrompt -Force}"
+    $newPromptOverride = "function Prompt() {if(Test-Path Function:\PrePoshGitPrompt){++`$global:poshScope; New-Item function:\script:Write-host -value `"param([object] ```$object, ```$backgroundColor, ```$foregroundColor, [switch] ```$nonewline) `" -Force | Out-Null;`$private:p = PrePoshGitPrompt; if(--`$global:poshScope -eq 0) {Remove-Item function:\Write-Host -Force}}PoshGitPrompt}"
     ### Using an environment variable to to define the bin root until we implement YAML configuration ###
     if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
     $poshgitPath = join-path $binRoot 'poshgit'
@@ -26,15 +27,17 @@ try {
     if(Test-Path $PROFILE) {
         $oldProfile = [string[]](Get-Content $PROFILE)
         $newProfile = @()
-        $lib = "$env:chocolateyInstall\lib"
-        #Clean out old profiles
+        #If old profile exists replace with new one and make sure prompt preservation function is on top
         $pgitExample = "$pgitDir\profile.example.ps1"
         foreach($line in $oldProfile) {
-            if($line.ToLower().Contains("$poshgitPath".ToLower())) { $line = ". '$pgitExample'" }
+            if($line.ToLower().Contains("$poshgitPath".ToLower())) { 
+                Insert-Script ([REF]$newProfile) $oldPromptOverride
+                $line = ". '$pgitExample'" 
+            }
             if($line.Trim().Length -gt 0) {  $newProfile += $line }
         }
         #Save any previous Prompt logic
-        Insert-Script ([REF]$newProfile) "if(Test-Path Function:\Prompt) {Rename-Item Function:\Prompt PrePoshGitPrompt -Force}"
+        Insert-Script ([REF]$newProfile) $oldPromptOverride
         Set-Content -path $profile -value $newProfile -Force
     }
 
@@ -46,12 +49,13 @@ try {
     $installer = Join-Path $subfolder 'install.ps1'
     & $installer
 
-    if($oldProfile) {
-        $newProfile = [string[]](Get-Content $PROFILE)
-        Insert-Script ([REF]$newProfile) "Rename-Item Function:\Prompt PoshGitPrompt -Force"
-        Insert-Script ([REF]$newProfile) "function Prompt() {if(Test-Path Function:\PrePoshGitPrompt){PrePoshGitPrompt}PoshGitPrompt}"
-        Set-Content -path $profile  -value $newProfile -Force
-    }
+    $newProfile = [string[]](Get-Content $PROFILE)
+    Insert-Script ([REF]$newProfile) "Rename-Item Function:\Prompt PoshGitPrompt -Force"
+
+    #function that will run previous prompt logic and then the poshgit logic
+    #all output from previous prompts will be swallowed
+    Insert-Script ([REF]$newProfile) $newPromptOverride
+    Set-Content -path $profile  -value $newProfile -Force
 
     Write-ChocolateySuccess 'poshgit'
 } catch {
