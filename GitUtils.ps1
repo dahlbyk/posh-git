@@ -101,7 +101,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
-            $status = git status --short --branch 2>$null
+            $status = git -c color.status=false status --short --branch 2>$null
         } else {
             $status = @()
         }
