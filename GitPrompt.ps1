@@ -128,6 +128,6 @@ function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
 $Global:VcsPromptStatuses += {
-    $Global:GitStatus = Get-GitStatus
+    $Global:GitStatus = Get-GitPromptStatus
     Write-GitStatus $GitStatus
 }

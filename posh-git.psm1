@@ -6,6 +6,7 @@ Push-Location $psScriptRoot
 . ./Utils.ps1
 . ./GitUtils.ps1
 . ./GitPrompt.ps1
+. ./GitPromptAsync.ps1
 . ./GitTabExpansion.ps1
 . ./TortoiseGit.ps1
 Pop-Location
@@ -15,7 +16,12 @@ if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
 Export-ModuleMember -Function @(
         'Write-GitStatus',
-        'Get-GitStatus', 
+        'Get-GitStatus',
+        'Start-GitPrompt',
+        'Update-GitPromptRepositories',
+        'Update-GitPromptRepository',
+        'Stop-GitPrompt',
+        'Get-GitPromptStatus',
         'Enable-GitColors', 
         'Get-GitDirectory',
         'TabExpansion',
@@ -24,4 +30,3 @@ Export-ModuleMember -Function @(
         'Stop-SshAgent',
         'Add-SshKey',
         'tgit')
-
