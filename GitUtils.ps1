@@ -2,11 +2,11 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 function Get-GitDirectory {
-    if ($Env:GIT_DIR) {
-        $Env:GIT_DIR
-    } else {
-        Get-LocalOrParentPath .git
+    $gitDir = git rev-parse --git-dir 2>$null
+    if ($LastExitCode -ne 0) {
+        return
     }
+    (Resolve-Path $gitDir).Path
 }
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw) {
