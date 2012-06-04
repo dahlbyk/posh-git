@@ -97,6 +97,14 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     }
 }
 
+$Global:GitStatusCache = @{
+    GitDirectory = $null
+    Status = $null
+    Watchers = $null
+    Events = "Changed", "Created", "Deleted", "Renamed"
+    NextSubscriberId = 0
+}
+
 function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $settings = $Global:GitPromptSettings
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
@@ -107,6 +115,29 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         } else {
             $sw = $null
         }
+
+        $events = @(Get-Event | ?{ $_.SourceIdentifier -like "GitStatusEvent*" })
+        foreach ($event in $events) {
+            Remove-Event $event.EventIdentifier
+        }
+        if (($gitDir -eq $Global:GitStatusCache.GitDirectory) -and $Global:GitStatusCache.Status) {
+            if (!$events) {
+                dbg 'Reusing old status' $sw
+                return $Global:GitStatusCache.Status
+            }
+        }
+
+        # Stop listening for changes before running git-status so we don't pick
+        # up changes from that command.
+        if ($Global:GitStatusCache.Watchers) {
+            foreach ($watcher in $Global:GitStatusCache.Watchers) {
+                $watcher.Dispose()
+            }
+            foreach ($event in (Get-EventSubscriber | ?{ $_.SourceIdentifier -like "GitStatusEvent*" })) {
+                Unregister-Event $event.SourceIdentifier
+            }
+        }
+
         $branch = $null
         $aheadBy = 0
         $behindBy = 0
@@ -189,6 +220,28 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             Working         = $working
             HasUntracked    = [bool]$filesAdded
         }
+
+        $Global:GitStatusCache.GitDirectory = $gitDir
+        $workingDirectory = Get-GitWorkingDirectory
+        $directoriesToWatch = @($workingDirectory)
+        # Submodules' .git directories are not contained within their working
+        # directory, so we have to watch them separately.
+        if ((Split-Path $gitDir) -ne $workingDirectory) {
+            $directoriesToWatch += $gitDir
+        }
+        $Global:GitStatusCache.Watchers = $directoriesToWatch | %{
+            dbg "Watching for changes in $_" $sw
+            $watcher = New-Object IO.FileSystemWatcher $_ -Property @{
+                IncludeSubdirectories = $true
+                EnableRaisingEvents = $true
+            }
+            foreach ($event in $Global:GitStatusCache.Events) {
+                $id = $Global:GitStatusCache.NextSubscriberId++
+                Register-ObjectEvent $watcher $event -SourceIdentifier "GitStatusEvent$id"
+            }
+            $watcher
+        }
+        $Global:GitStatusCache.Status = $result
 
         dbg 'Finished' $sw
         if($sw) { $sw.Stop() }
