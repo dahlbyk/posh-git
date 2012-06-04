@@ -9,6 +9,17 @@ function Get-GitDirectory {
     (Resolve-Path $gitDir).Path
 }
 
+function Get-GitWorkingDirectory {
+    $cdup = git rev-parse --show-cdup
+    if ($LastExitCode -ne 0) {
+        return
+    }
+    if (!$cdup) {
+        $cdup = "."
+    }
+    (Resolve-Path $cdup).Path
+}
+
 function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw) {
     if ($gitDir) {
         dbg 'Finding branch' $sw
