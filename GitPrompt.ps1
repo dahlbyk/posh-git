@@ -123,10 +123,7 @@ function Write-GitStatus($status) {
     }
 }
 
-try {
-    Get-Variable VcsPromptStatuses -Scope Global
-}
-catch {
+if((Get-Variable -Scope Global -Name VcsPromptStatuses -ErrorAction SilentlyContinue) -eq $null) {
     $Global:VcsPromptStatuses = @()
 }
 if (!$Global:VcsPromptStatuses) {
