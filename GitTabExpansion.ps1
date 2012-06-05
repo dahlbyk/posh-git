@@ -1,7 +1,7 @@
 # Initial implementation by Jeremy Skinner
 # http://www.jeremyskinner.co.uk/2010/03/07/using-git-with-windows-powershell/
 
-$global:GitTabSettings = New-Object PSObject -Property @{
+$Global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
 }
 
@@ -46,6 +46,7 @@ function script:gitRemotes($filter) {
 }
 
 function script:gitBranches($filter, $includeHEAD = $false) {
+    $prefix = $null
     if ($filter -match "^(?<from>\S*\.{2,3})(?<to>.*)") {
         $prefix = $matches['from']
         $filter = $matches['to']
