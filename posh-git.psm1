@@ -19,7 +19,7 @@ Export-ModuleMember -Function @(
         'Get-GitStatus',
         'Start-GitPrompt',
         'Update-GitPromptRepositories',
-        'Update-GitPromptRepository',
+        'Publish-GitPromptRepositoryUpdated',
         'Stop-GitPrompt',
         'Get-GitPromptStatus',
         'Enable-GitColors', 
