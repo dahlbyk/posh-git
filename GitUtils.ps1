@@ -212,8 +212,8 @@ function Get-SshAgent() {
         if (($sshAgentProcess -ne $null) -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
             return $agentPid
         } else {
-            setenv('SSH_AGENT_PID', $null)
-            setenv('SSH_AUTH_SOCK', $null)
+            setenv 'SSH_AGENT_PID', $null
+            setenv 'SSH_AUTH_SOCK', $null
         }
     }
 
@@ -265,8 +265,8 @@ function Stop-SshAgent() {
             Stop-Process $agentPid
         }
 
-        setenv('SSH_AGENT_PID', $null)
-        setenv('SSH_AUTH_SOCK', $null)
+        setenv 'SSH_AGENT_PID', $null
+        setenv 'SSH_AUTH_SOCK', $null
     }
 }
 
