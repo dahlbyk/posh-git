@@ -29,7 +29,7 @@ function Update-GitPromptRepositories {
             $repository = $repositories[$key]
             if ($repository.LastStatusUpdate -lt $repository.LastUpdate) {
                 if ($repository.LastStatusUpdate.AddMilliseconds($repository.StatusUpdateIntervalBuffer) -lt [DateTime]::Now) {
-                    Push-Location $Path
+                    Push-Location $repository.Path
                     try { $repository.Status = Get-GitStatus $repository.Path }
                     finally { Pop-Location }
                 }
@@ -103,7 +103,7 @@ function Update-GitPromptRepository($Path) {
     if ($GitPromptState -and $GitPromptState.Repositories.ContainsKey($Path) -and (-not $GitPromptState.Asynchronous)) {
         $repository = $GitPromptState.Repositories[$Path]
         if ($repository.LastStatusUpdate -lt $repository.LastUpdate) {
-            Push-Location $Path
+            Push-Location $repository.Path
             try { $repository.Status = Get-GitStatus $repository.Path }
             finally { Pop-Location }
             $repository.LastStatusUpdate = [DateTime]::Now
