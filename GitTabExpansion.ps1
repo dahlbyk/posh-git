@@ -58,6 +58,12 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         foreach { $prefix + $_ }
 }
 
+function script:gitRemoteBranches($remote, $ref, $filter) {
+    git branch -r |
+        where { $_ -like "  $remote/$filter*" } |
+        foreach { $ref + ($_ -replace "  $remote/","") }
+}
+
 function script:gitStashes($filter) {
     (git stash list) -replace ':.*','' |
         where { $_ -like "$filter*" } |
@@ -155,9 +161,14 @@ function GitTabExpansion($lastBlock) {
             gitCommands $matches['cmd'] $FALSE
         }
 
+        # Handles git push remote <ref>:<branch>
+        "^push.* (?<remote>\S+) (?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
+            gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch']
+        }
+
         # Handles git push remote <branch>
         # Handles git pull remote <branch>
-        "^(?:push|pull).* (?:\S+) (?<branch>\S*)$" {
+        "^(?:push|pull).* (?:\S+) (?<branch>[^\s\:]*)$" {
             gitBranches $matches['branch']
         }
 
