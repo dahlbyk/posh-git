@@ -212,6 +212,19 @@ function GitTabExpansion($lastBlock) {
     }
 }
 
+if (Get-Command "Register-TabExpansion" -errorAction SilentlyContinue)
+{
+    Register-TabExpansion "git.cmd" -Type Command {
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
+
+        $line = $Context.Line
+        $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
+        $TabExpansionHasOutput.Value = $true
+        GitTabExpansion $lastBlock
+    }
+    return
+}
+
 if (Test-Path Function:\TabExpansion) {
     Rename-Item Function:\TabExpansion TabExpansionBackup
 }
