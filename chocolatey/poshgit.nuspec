@@ -3,7 +3,7 @@
   <metadata>
     <id>poshgit</id>
     <title>posh-git</title>
-    <version>0.4.0</version>
+    <version>0.4.0.20120717</version>
     <authors>Keith Dahlby, Mark Embling, Jeremy Skinner</authors>
     <owners>Rob Reynolds, Keith Dahlby</owners>
     <description>posh-git - A set of PowerShell scripts which provide Git/PowerShell integration.
@@ -14,7 +14,7 @@
     <!--<licenseUrl></licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>-->
     <dependencies>
-      <dependency id="msysgit" />
+      <dependency id="git" />
     </dependencies>
   </metadata>
 </package>
