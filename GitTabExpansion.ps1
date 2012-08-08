@@ -51,8 +51,8 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         $prefix = $matches['from']
         $filter = $matches['to']
     }
-    $branches = @(git branch | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
-                @(git branch -r | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
+    $branches = @(git -c color.branch=false branch | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+                @(git -c color.branch=false branch -r | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
@@ -60,7 +60,7 @@ function script:gitBranches($filter, $includeHEAD = $false) {
 }
 
 function script:gitRemoteBranches($remote, $ref, $filter) {
-    git branch -r |
+    git -c color.branch=false branch -r |
         where { $_ -like "  $remote/$filter*" } |
         foreach { $ref + ($_ -replace "  $remote/","") }
 }
