@@ -271,7 +271,8 @@ function Stop-SshAgent() {
 }
 
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
-    $branches = git branch --no-color
+    $head = ?? (git symbolic-ref -q --short HEAD) (git rev-parse HEAD)
+    $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' }
     foreach ($line in $branches) {
         $branch = $line.SubString(2)
         if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }
@@ -281,4 +282,5 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
             Write-Warning "Rebase failed for $branch"
         }
     }
+    git checkout -q $head
 }
