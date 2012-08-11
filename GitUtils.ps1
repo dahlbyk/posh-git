@@ -271,7 +271,8 @@ function Stop-SshAgent() {
 }
 
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
-    $head = ?? (git symbolic-ref -q --short HEAD) (git rev-parse HEAD)
+    $head = git rev-parse --abbrev-ref HEAD
+    git checkout -q $Upstream
     $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' }
     foreach ($line in $branches) {
         $branch = $line.SubString(2)
