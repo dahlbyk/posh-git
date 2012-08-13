@@ -12,6 +12,11 @@ function Write-HgStatus($status = (get-hgStatus $global:PoshHgSettings.GetFileSt
           $branchFg = $s.Branch2ForegroundColor
           $branchBg = $s.Branch2BackgroundColor
         }
+
+        if ($status.MultipleHeads) {
+          $branchFg = $s.Branch3ForegroundColor
+          $branchBg = $s.Branch3BackgroundColor
+        }
        
         Write-Host $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
         Write-Host $status.Branch -NoNewline -BackgroundColor $branchBg -ForegroundColor $branchFg

@@ -34,8 +34,8 @@ function Get-HgStatus($getFileStatus=$true, $getBookmarkStatus=$true) {
     $tags = @()
     $commit = ""
     $behind = $false
-	
-	
+    $multipleHeads = $false
+		
 	if ($getFileStatus -eq $false) {
 		hg parent | foreach {
 		switch -regex ($_) {
@@ -45,9 +45,15 @@ function Get-HgStatus($getFileStatus=$true, $getBookmarkStatus=$true) {
 		}
 		$branch = hg branch
 		$behind = $true
+		$headCount = 0
 		hg heads $branch | foreach {
 			switch -regex ($_) {
-				'changeset:\s*(\S*)' { if ($commit -eq $matches[1]) { $behind=$false } }
+				'changeset:\s*(\S*)' 
+				{ 
+					if ($commit -eq $matches[1]) { $behind=$false }
+					$headCount++
+					if ($headCount -gt 1) { $multipleHeads=$true }
+				}
 			}
 		}
 	}
@@ -95,6 +101,7 @@ function Get-HgStatus($getFileStatus=$true, $getBookmarkStatus=$true) {
                "Tags" = $tags;
                "Commit" = $commit;
                "Behind" = $behind;
+               "MultipleHeads" = $multipleHeads;
                "ActiveBookmark" = $active;
                "Branch" = $branch}
    }
