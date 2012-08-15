@@ -215,7 +215,7 @@ function GitTabExpansion($lastBlock) {
 
 if (Get-Command "Register-TabExpansion" -errorAction SilentlyContinue)
 {
-    Register-TabExpansion "git.cmd" -Type Command {
+    Register-TabExpansion "git.exe" -Type Command {
         param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
 
         $line = $Context.Line
