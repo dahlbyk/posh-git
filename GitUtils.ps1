@@ -88,6 +88,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             $sw = $null
         }
         $branch = $null
+        $isSvn = $false
         $aheadBy = 0
         $behindBy = 0
         $indexAdded = @()
@@ -143,6 +144,8 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             }
         }
 
+        $isSvn = (Test-Path $gitDir\svn) 
+        
         if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
         dbg 'Building status object' $sw
         $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
@@ -168,6 +171,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             HasWorking      = [bool]$working
             Working         = $working
             HasUntracked    = [bool]$filesAdded
+            IsSvn           = $isSvn
         }
 
         dbg 'Finished' $sw
