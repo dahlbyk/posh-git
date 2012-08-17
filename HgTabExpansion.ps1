@@ -240,18 +240,33 @@ function thgCommands($filter) {
   $cmdList | sort 
 }
 
-if(-not (Test-Path Function:\DefaultTabExpansion)) {
-   Rename-Item Function:\TabExpansion DefaultTabExpansion
+if (Get-Command "Register-TabExpansion" -errorAction SilentlyContinue)
+{
+    Register-TabExpansion "hg.exe" -Type Command {
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
+
+        $line = $Context.Line
+        $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
+        $TabExpansionHasOutput.Value = $true
+        HgTabExpansion $lastBlock
+    }
+    return
 }
+
+if (Test-Path Function:\TabExpansion) {
+    Rename-Item Function:\TabExpansion TabExpansionBackup
+}
+
 
 # Set up tab expansion and include hg expansion
 function TabExpansion($line, $lastWord) {
    $lastBlock = [regex]::Split($line, '[|;]')[-1]
 
    switch -regex ($lastBlock) {
-       # mercurial and tortoisehg tab expansion
-       '(hg|thg) (.*)' { HgTabExpansion($lastBlock) }
-       # Fall back on existing tab expansion
-       default { DefaultTabExpansion $line $lastWord }
+        "^$(Get-AliasPattern hg) (.*)" { HgTabExpansion $lastBlock }
+        "^$(Get-AliasPattern tgh) (.*)" { HgTabExpansion $lastBlock }
+
+        # Fall back on existing tab expansion
+        default { if (Test-Path Function:\TabExpansionBackup) { TabExpansionBackup $line $lastWord } }
    }
 }
