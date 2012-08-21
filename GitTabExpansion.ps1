@@ -51,8 +51,8 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         $prefix = $matches['from']
         $filter = $matches['to']
     }
-    $branches = @(git branch | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
-                @(git branch -r | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
+    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+                @(git branch --no-color -r | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
@@ -60,7 +60,7 @@ function script:gitBranches($filter, $includeHEAD = $false) {
 }
 
 function script:gitRemoteBranches($remote, $ref, $filter) {
-    git branch -r |
+    git branch --no-color -r |
         where { $_ -like "  $remote/$filter*" } |
         foreach { $ref + ($_ -replace "  $remote/","") }
 }
@@ -211,6 +211,19 @@ function GitTabExpansion($lastBlock) {
             gitBranches $matches['ref'] $true
         }
     }
+}
+
+if (Get-Command "Register-TabExpansion" -errorAction SilentlyContinue)
+{
+    Register-TabExpansion "git.exe" -Type Command {
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
+
+        $line = $Context.Line
+        $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
+        $TabExpansionHasOutput.Value = $true
+        GitTabExpansion $lastBlock
+    }
+    return
 }
 
 if (Test-Path Function:\TabExpansion) {

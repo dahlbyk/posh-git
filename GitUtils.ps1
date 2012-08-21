@@ -209,7 +209,7 @@ function Get-SshAgent() {
     $agentPid = $Env:SSH_AGENT_PID
     if ($agentPid) {
         $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
-        if (($sshAgentProcess -ne $null) -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
+        if ($sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
             return $agentPid
         } else {
             setenv 'SSH_AGENT_PID', $null
@@ -270,3 +270,18 @@ function Stop-SshAgent() {
     }
 }
 
+function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
+    $head = git rev-parse --abbrev-ref HEAD
+    git checkout -q $Upstream
+    $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' }
+    foreach ($line in $branches) {
+        $branch = $line.SubString(2)
+        if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }
+        git rebase -q $Upstream $branch > $null 2> $null
+        if ($LASTEXITCODE) {
+            git rebase --abort
+            Write-Warning "Rebase failed for $branch"
+        }
+    }
+    git checkout -q $head
+}
