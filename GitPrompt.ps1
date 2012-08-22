@@ -46,6 +46,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnableFileStatus          = $true
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
+    SvnPrefix                 = 'svn '
+
     Debug                     = $false
 }
 
@@ -61,6 +63,10 @@ function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
     if ($status -and $s) {
         $currentBranch = $status.Branch
+        
+        if ($status.IsSvn) {
+            $currentBranch = $s.SvnPrefix + $currentBranch
+        }
         
         Write-Prompt $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
         if ($status.BehindBy -gt 0 -and $status.AheadBy -gt 0) {
