@@ -71,7 +71,7 @@ function HgTabExpansion($lastBlock) {
 }
 
 function hgFiles($filter, $pattern) {
-   hg status | 
+   hg status $(hg root) | 
     foreach { 
       if($_ -match "($pattern){1} (.*)") { 
         $matches[2] 
