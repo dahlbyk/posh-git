@@ -33,7 +33,9 @@ function HgTabExpansion($lastBlock) {
     
     #Handles hg push <path>
     #Handles hg pull <path>
-    'hg (push|pull) (-\S* )*(\S*)$' {
+    #Handles hg outgoing <path>
+    #Handles hg incoming <path>
+    'hg (push|pull|outgoing|incoming) (-\S* )*(\S*)$' {
       hgRemotes($matches[3])
     }
     
