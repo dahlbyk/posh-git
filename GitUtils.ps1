@@ -246,8 +246,8 @@ function Add-SshKey() {
     if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
     if ($args.Count -eq 0) {
-        $sshPath = Resolve-Path ~/.ssh/id_rsa
-        & $sshAdd $sshPath
+        $sshPath = Resolve-Path ~/.ssh/id_rsa -ErrorAction SilentlyContinue
+        if ($sshPath) { & $sshAdd $sshPath }
     } else {
         foreach ($value in $args) {
             & $sshAdd $value
