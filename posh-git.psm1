@@ -15,6 +15,7 @@ if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
 Export-ModuleMember -Function @(
         'Write-GitStatus',
+        'Write-Prompt',
         'Get-GitStatus', 
         'Enable-GitColors', 
         'Get-GitDirectory',
