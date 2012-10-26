@@ -29,6 +29,7 @@ Export-ModuleMember `
         'Stop-SshAgent',
         'Add-SshKey',
         'Update-AllBranches',
+        'Get-GitRevision',
         'tgit')
 
 

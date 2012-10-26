@@ -270,6 +270,14 @@ function Stop-SshAgent() {
     }
 }
 
+function Get-GitRevision([switch]$Short) {
+    if ($Short) {
+        git rev-parse --verify --short HEAD 2> $null
+    } else {
+        git rev-parse --verify HEAD 2> $null
+    }
+}
+
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
     $head = git rev-parse --abbrev-ref HEAD
     git checkout -q $Upstream
