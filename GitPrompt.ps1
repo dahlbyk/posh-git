@@ -60,22 +60,25 @@ function Write-Prompt($Object, [switch]$NoNewline, $ForegroundColor, $Background
 function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
     if ($status -and $s) {
-        $currentBranch = $status.Branch
-
         Write-Prompt $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
+
+        $branchBackgroundColor = $s.BranchBackgroundColor
+        $branchForegroundColor = $s.BranchForegroundColor
         if ($status.BehindBy -gt 0 -and $status.AheadBy -gt 0) {
             # We are behind and ahead of remote
-            Write-Prompt $currentBranch -NoNewline -BackgroundColor $s.BranchBehindAndAheadBackgroundColor -ForegroundColor $s.BranchBehindAndAheadForegroundColor
+            $branchBackgroundColor = $s.BranchBehindAndAheadBackgroundColor
+            $branchForegroundColor = $s.BranchBehindAndAheadForegroundColor
         } elseif ($status.BehindBy -gt 0) {
             # We are behind remote
-            Write-Prompt $currentBranch -NoNewline -BackgroundColor $s.BranchBehindBackgroundColor -ForegroundColor $s.BranchBehindForegroundColor
+            $branchBackgroundColor = $s.BranchBehindBackgroundColor
+            $branchForegroundColor = $s.BranchBehindForegroundColor
         } elseif ($status.AheadBy -gt 0) {
             # We are ahead of remote
-            Write-Prompt $currentBranch -NoNewline -BackgroundColor $s.BranchAheadBackgroundColor -ForegroundColor $s.BranchAheadForegroundColor
-        } else {
-            # We are not ahead of origin
-            Write-Prompt $currentBranch -NoNewline -BackgroundColor $s.BranchBackgroundColor -ForegroundColor $s.BranchForegroundColor
+            $branchBackgroundColor = $s.BranchAheadBackgroundColor
+            $branchForegroundColor = $s.BranchAheadForegroundColor
         }
+
+        Write-Prompt $status.Branch -NoNewline -BackgroundColor $branchBackgroundColor -ForegroundColor $branchForegroundColor
 
         if($s.EnableFileStatus -and $status.HasIndex) {
             Write-Prompt $s.BeforeIndexText -NoNewLine -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
