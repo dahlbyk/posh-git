@@ -7,6 +7,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BeforeText                = ' ['
     BeforeForegroundColor     = [ConsoleColor]::Yellow
     BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
+    BeforeScript              = $null
+
     DelimText                 = ' |'
     DelimForegroundColor      = [ConsoleColor]::Yellow
     DelimBackgroundColor      = $Host.UI.RawUI.BackgroundColor
@@ -14,6 +16,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     AfterText                 = ']'
     AfterForegroundColor      = [ConsoleColor]::Yellow
     AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    AfterScript               = $null
 
     BranchForegroundColor       = [ConsoleColor]::Cyan
     BranchBackgroundColor       = $Host.UI.RawUI.BackgroundColor
@@ -23,6 +26,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchBehindBackgroundColor = $Host.UI.RawUI.BackgroundColor
     BranchBehindAndAheadForegroundColor = [ConsoleColor]::Yellow
     BranchBehindAndAheadBackgroundColor = $Host.UI.RawUI.BackgroundColor
+
+    AfterBranchScript         = $null
 
     BeforeIndexText           = ""
     BeforeIndexForegroundColor= [ConsoleColor]::DarkGreen
@@ -61,6 +66,9 @@ function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
     if ($status -and $s) {
         Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
+        if ($s.BeforeScript -is [ScriptBlock]) {
+            Invoke-Command $s.BeforeScript -NoNewScope -ArgumentList $status,$s.BeforeBackgroundColor,$s.BeforeForegroundColor
+        }
 
         $branchBackgroundColor = $s.BranchBackgroundColor
         $branchForegroundColor = $s.BranchForegroundColor
@@ -79,6 +87,9 @@ function Write-GitStatus($status) {
         }
 
         Write-Prompt $status.Branch -BackgroundColor $branchBackgroundColor -ForegroundColor $branchForegroundColor
+        if ($s.AfterBranchScript -is [ScriptBlock]) {
+            Invoke-Command $s.AfterBranchScript -NoNewScope -ArgumentList $status,$branchBackgroundColor,$branchForegroundColor
+        }
 
         if($s.EnableFileStatus -and $status.HasIndex) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
@@ -120,6 +131,10 @@ function Write-GitStatus($status) {
 
         if ($status.HasUntracked) {
             Write-Prompt $s.UntrackedText -BackgroundColor $s.UntrackedBackgroundColor -ForegroundColor $s.UntrackedForegroundColor
+        }
+
+        if ($s.AfterScript -is [ScriptBlock]) {
+            Invoke-Command $s.AfterScript -NoNewScope -ArgumentList $status,$s.AfterBackgroundColor,$s.AfterForegroundColor
         }
 
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
