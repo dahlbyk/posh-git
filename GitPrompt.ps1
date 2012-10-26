@@ -49,7 +49,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     Debug                     = $false
 }
 
-function Write-Prompt($Object, $ForegroundColor, $BackgroundColor) {
+function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
     if ($BackgroundColor -lt 0) {
         Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor
     } else {
