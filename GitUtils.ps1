@@ -45,9 +45,9 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 $r = '|BISECTING'
             }
 
-            $b = Coalesce-Args `
+            $b = Invoke-NullCoalescing `
                 { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
-                { '({0})' -f (Coalesce-Args `
+                { '({0})' -f (Invoke-NullCoalescing `
                     { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
                     {
                         dbg 'Falling back on parsing HEAD' $sw
@@ -246,7 +246,7 @@ function Add-SshKey() {
     if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
     if ($args.Count -eq 0) {
-        $sshPath = Resolve-Path ~/.ssh/id_rsa -ErrorAction SilentlyContinue
+        $sshPath = Resolve-Path ~/.ssh/id_rsa -ErrorAction SilentlyContinue 2> $null
         if ($sshPath) { & $sshAdd $sshPath }
     } else {
         foreach ($value in $args) {
