@@ -67,6 +67,11 @@ function HgTabExpansion($lastBlock) {
     'hg commit (\S* )*-(I|X) (\S*)$' {
       hgFiles $matches[3] 'M|A|R|!'
     }    
+    
+    #handles hg merge <branch name>
+    'hg flow (feature|release|hotfix|support) (\S*)$' {
+      findBranchOrBookmarkOrTags($matches[1]+"/"+$matches[2])
+    }
   }
 }
 
