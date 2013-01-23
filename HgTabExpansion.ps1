@@ -1,4 +1,5 @@
 $script:hgCommands = @()
+$script:hgflowStreams = @()
 
 function HgTabExpansion($lastBlock) {
   switch -regex ($lastBlock) { 
@@ -69,6 +70,17 @@ function HgTabExpansion($lastBlock) {
     'hg commit (\S* )*-(I|X) (\S*)$' {
       hgFiles $matches[3] 'M|A|R|!'
     }    
+    
+    #handles hg flow * <branch name>
+    'hg flow (feature|release|hotfix|support) (\S*)$' {
+      findBranchOrBookmarkOrTags($matches[1]+"/"+$matches[2])
+    }
+    
+    #handles hg flow *
+    'hg flow (\S*)$' {
+      hgflowStreams($matches[1])
+      hgLocalBranches($matches[1])
+    }
   }
 }
 
@@ -240,6 +252,50 @@ function thgCommands($filter) {
   }
   
   $cmdList | sort 
+}
+
+function hgflowStreams($filter) {
+  if($script:hgflowStreams.Length -eq 0) {
+    $hgflow = ((hg root) + "\.flow")
+    if (Test-Path $hgflow) {
+      populatehgflowStreams($hgflow)
+    } else {
+      $hgflow = ((hg root) + "\.hgflow")
+      if (Test-Path $hgflow) {
+        populatehgflowStreams($hgflow)
+      }
+    }
+    
+    $script:hgflowStreams = $script:hgflowStreams
+  }
+  
+  if($filter) {
+     $hgflowStreams | ? { $_.StartsWith($filter) } | % { $_.Trim() } | sort  
+  }
+  else {
+    $hgflowStreams | % { $_.Trim() } | sort
+  }
+}
+
+function populatehgflowStreams($filename) {
+  $ini = @{}
+  
+  switch -regex -file $filename
+  {
+    "^\[(.+)\]" # Section
+    {
+      $section = $matches[1]
+      $ini[$section] = @()
+    }
+    "(.+?)\s*=(.*)" # Key
+    {
+      $name,$value = $matches[1..2]
+      $ini[$section] += $name
+    }
+  }
+  
+  # Supporting by 0.4 and 0.9 files
+  $script:hgflowStreams = if ($ini["Basic"]) { $ini["Basic"] } else { $ini["branchname"] }
 }
 
 if (Get-Command "Register-TabExpansion" -errorAction SilentlyContinue)
