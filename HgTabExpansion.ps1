@@ -77,6 +77,7 @@ function HgTabExpansion($lastBlock) {
     #handles hg flow *
     'hg flow (\S*)$' {
       hgflowStreams($matches[1])
+      hgLocalBranches($matches[1])
     }
   }
 }
