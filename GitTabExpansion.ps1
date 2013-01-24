@@ -18,9 +18,9 @@ $subcommands = @{
 }
 
 $gitflowsubcommands = @{
-    feature = 'start finish publish pull'
-    release = 'start finish publish pull'
-    hotfix = 'start finish publish pull'
+    feature = 'list start finish publish track diff rebase checkout pull'
+    release = 'list start finish publish track'
+    hotfix = 'list start finish publish track'
 }
 
 function script:gitCmdOperations($commands, $command, $filter) {
