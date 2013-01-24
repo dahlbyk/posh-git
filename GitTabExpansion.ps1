@@ -14,16 +14,41 @@ $subcommands = @{
     submodule = 'add status init update summary foreach sync'
     svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
     tfs = 'bootstrap checkin checkintool ct cleanup cleanup-workspaces clone diagnostics fetch help init pull quick-clone rcheckin shelve shelve-list unshelve verify'
+    flow = 'init feature release hotfix'
 }
 
-function script:gitCmdOperations($command, $filter) {
-    $subcommands.$command -split ' ' |
+$gitflowsubcommands = @{
+    feature = 'start finish publish pull'
+    release = 'start finish publish pull'
+    hotfix = 'start finish publish pull'
+}
+
+function script:gitCmdOperations($commands, $command, $filter) {
+    $commands.$command -split ' ' |
         where { $_ -like "$filter*" }
 }
 
-$script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry','cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch','format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv','notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm','shortlog','show','stash','status','submodule','svn','tag','whatchanged')
+
+$script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry','cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch','flow','format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv','notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm','shortlog','show','stash','status','submodule','svn','tag','whatchanged')
 
 function script:gitCommands($filter, $includeAliases) {
+    $cmdList = @()
+    if (-not $global:GitTabSettings.AllCommands) {
+        $cmdList += $someCommands -like "$filter*"
+    } else {
+        $cmdList += git help --all |
+            where { $_ -match '^  \S.*' } |
+            foreach { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
+            where { $_ -like "$filter*" }
+    }
+
+    if ($includeAliases) {
+        $cmdList += gitAliases $filter
+    }
+    $cmdList | sort
+}
+
+function script:gitFlowSubCommands($filter, $includeAliases) {
     $cmdList = @()
     if (-not $global:GitTabSettings.AllCommands) {
         $cmdList += $someCommands -like "$filter*"
@@ -128,7 +153,13 @@ function GitTabExpansion($lastBlock) {
 
         # Handles git <cmd> <op>
         "^(?<cmd>$($subcommands.Keys -join '|'))\s+(?<op>\S*)$" {
-            gitCmdOperations $matches['cmd'] $matches['op']
+            gitCmdOperations $subcommands $matches['cmd'] $matches['op']
+        }
+
+
+        # Handles git flow <cmd> <op>
+        "^flow (?<cmd>$($gitflowsubcommands.Keys -join '|'))\s+(?<op>\S*)$" {
+            gitCmdOperations $gitflowsubcommands $matches['cmd'] $matches['op']
         }
 
         # Handles git remote (rename|rm|set-head|set-branches|set-url|show|prune) <stash>
