@@ -48,23 +48,6 @@ function script:gitCommands($filter, $includeAliases) {
     $cmdList | sort
 }
 
-function script:gitFlowSubCommands($filter, $includeAliases) {
-    $cmdList = @()
-    if (-not $global:GitTabSettings.AllCommands) {
-        $cmdList += $someCommands -like "$filter*"
-    } else {
-        $cmdList += git help --all |
-            where { $_ -match '^  \S.*' } |
-            foreach { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
-            where { $_ -like "$filter*" }
-    }
-
-    if ($includeAliases) {
-        $cmdList += gitAliases $filter
-    }
-    $cmdList | sort
-}
-
 function script:gitRemotes($filter) {
     git remote |
         where { $_ -like "$filter*" }
