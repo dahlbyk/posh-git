@@ -37,4 +37,10 @@ $gitShortcuts = @{
     "gf" = "git ls-files | grep";
 }
 
-$gitShortcuts.GetEnumerator() | % { Set-Item -Path $("function:global:" + $_.Name) -Value $($_.Value + " `$args") }
+function Enable-GitShortcuts {
+    $gitShortcuts.GetEnumerator() | % { Set-Item -Path $("function:global:" + $_.Name) -Value $($_.Value + " `$args") }
+}
+
+function Disable-GitShortcuts {
+    $gitShortcuts.GetEnumerator() | % { Remove-Item -Path $("function:" + $_.Name) }
+}
