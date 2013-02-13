@@ -37,4 +37,4 @@ $gitAliases = @{
     "gf" = "git ls-files | grep";
 }
 
-$gitAliases.GetEnumerator() | % { Set-Item -Path $("function:global:" + $_.Name) -Value $_.Value }
+$gitAliases.GetEnumerator() | % { Set-Item -Path $("function:global:" + $_.Name) -Value $($_.Value + " `$args") }
