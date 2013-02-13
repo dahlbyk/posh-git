@@ -2,7 +2,7 @@
 # Inspired by git plugin for zsh: https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh
 # Modified to be more intuitive and work with default powershell aliases.
 
-$gitAliases = @{
+$gitShortcuts = @{
     "g" = "git";
     "gst" = "git status";
     "gsts" = "git status -s";
@@ -37,4 +37,4 @@ $gitAliases = @{
     "gf" = "git ls-files | grep";
 }
 
-$gitAliases.GetEnumerator() | % { Set-Item -Path $("function:global:" + $_.Name) -Value $($_.Value + " `$args") }
+$gitShortcuts.GetEnumerator() | % { Set-Item -Path $("function:global:" + $_.Name) -Value $($_.Value + " `$args") }

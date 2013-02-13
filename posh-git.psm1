@@ -7,7 +7,7 @@ Push-Location $psScriptRoot
 . .\GitUtils.ps1
 . .\GitPrompt.ps1
 . .\GitTabExpansion.ps1
-. .\GitAliases.ps1
+. .\GitShortcuts.ps1
 . .\TortoiseGit.ps1
 Pop-Location
 
