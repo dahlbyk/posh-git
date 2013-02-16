@@ -13,16 +13,23 @@ Pop-Location
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
 if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
-Export-ModuleMember -Function @(
+Export-ModuleMember `
+    -Alias @(
+        '??') `
+    -Function @(
+        'Invoke-NullCoalescing',
         'Write-GitStatus',
+        'Write-Prompt',
         'Get-GitStatus', 
         'Enable-GitColors', 
         'Get-GitDirectory',
         'TabExpansion',
         'Get-AliasPattern',
+        'Get-SshAgent',
         'Start-SshAgent',
         'Stop-SshAgent',
         'Add-SshKey',
         'Update-AllBranches',
         'tgit')
+
 

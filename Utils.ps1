@@ -1,6 +1,6 @@
 # General Utility Functions
 
-function Coalesce-Args {
+function Invoke-NullCoalescing {
     $result = $null
     foreach($arg in $args) {
         if ($arg -is [ScriptBlock]) {
@@ -13,7 +13,7 @@ function Coalesce-Args {
     $result
 }
 
-Set-Alias ?? Coalesce-Args -Force
+Set-Alias ?? Invoke-NullCoalescing -Force
 
 function Get-LocalOrParentPath($path) {
     $checkIn = Get-Item .
