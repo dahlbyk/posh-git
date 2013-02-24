@@ -54,7 +54,7 @@ By default, the status summary has the following format:
  * `~` = Modified files
  * `-` = Removed files
  * `!` = Conflicted files
- * As in `git status`, index status is dark red and working directory status is dark green
+ * As in `git status`, index status is dark green and working directory status is dark red
 
 For example, a status of `[master +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
 
