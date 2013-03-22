@@ -244,7 +244,7 @@ function Start-SshAgent([switch]$Quiet) {
 function Get-SshFile()
 {
     if ($Env:HOME) {
-        Join-Path (Resolve-Path $Env:HOME) ".ssh\id_rsa"
+        Resolve-Path (Join-Path (Resolve-Path $Env:HOME) ".ssh\id_rsa") -ErrorAction SilentlyContinue 2> $null
     }
     else {
         Resolve-Path ~/.ssh/id_rsa -ErrorAction SilentlyContinue 2> $null
