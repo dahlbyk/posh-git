@@ -46,7 +46,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnableFileStatus          = $true
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
-    EnableWindowTitle         = $true
+    EnableWindowTitle         = 'posh~git ~ '
 
     Debug                     = $false
 }
@@ -131,7 +131,8 @@ function Write-GitStatus($status) {
                 $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
             }
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
-            $Host.UI.RawUI.WindowTitle = "posh-git - $repoName [$($status.Branch)]"
+            $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
+            $Host.UI.RawUI.WindowTitle = "$prefix$repoName [$($status.Branch)]"
         }
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
