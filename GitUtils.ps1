@@ -200,7 +200,27 @@ function Get-AliasPattern($exe) {
 
 function setenv($key, $value) {
     [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
-    [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::User)
+    Set-TempEnv $key $value
+}
+
+function Get-TempEnv($key) {
+    $path = Join-Path ($Env:TEMP) ".ssh\$key.env"
+    if (Test-Path $path) {
+        $value =  Get-Content $path
+        [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+    }
+}
+
+function Set-TempEnv($key, $value) {
+    $path = Join-Path ($Env:TEMP) ".ssh\$key.env"
+    if ($value -eq $null) {
+        if (Test-Path $path) {
+            Remove-Item $path
+        }
+    } else {
+        New-Item $path -Force -ItemType File > $null
+        $value > $path
+    }
 }
 
 # Retrieve the current SSH agent PID (or zero). Can be used to determine if there
