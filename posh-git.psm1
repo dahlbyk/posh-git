@@ -33,6 +33,7 @@ Export-ModuleMember `
         'Start-SshAgent',
         'Stop-SshAgent',
         'Add-SshKey',
+        'Get-SshPath',
         'Update-AllBranches',
         'Enable-GitShortcuts',
         'Disable-GitShortcuts',

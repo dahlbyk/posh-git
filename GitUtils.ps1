@@ -260,15 +260,10 @@ function Start-SshAgent([switch]$Quiet) {
     Add-SshKey
 }
 
-#get the default ssh keyfile
-function Get-SshFile()
+function Get-SshPath($File = 'id_rsa')
 {
-    if ($Env:HOME) {
-        Resolve-Path (Join-Path (Resolve-Path $Env:HOME) ".ssh\id_rsa") -ErrorAction SilentlyContinue 2> $null
-    }
-    else {
-        Resolve-Path ~/.ssh/id_rsa -ErrorAction SilentlyContinue 2> $null
-    }
+    $home = Resolve-Path (Invoke-NullCoalescing $Env:HOME ~)
+    Resolve-Path (Join-Path $home '.ssh\$File') -ErrorAction SilentlyContinue 2> $null
 }
 
 # Add a key to the SSH agent
@@ -277,7 +272,7 @@ function Add-SshKey() {
     if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
     if ($args.Count -eq 0) {
-        $sshPath = Get-SshFile
+        $sshPath = Get-SshPath
         if ($sshPath) { & $sshAdd $sshPath }
     } else {
         foreach ($value in $args) {
