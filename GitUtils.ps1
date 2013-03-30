@@ -200,7 +200,32 @@ function Get-AliasPattern($exe) {
 
 function setenv($key, $value) {
     [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
-    [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::User)
+    Store-TempEnv $key $value
+}
+
+function Load-TempEnv($key) {
+    $path = Join-Path ($Env:TEMP) "\.ssh\$key.env"
+    if (Test-Path $path) {
+        $value =  Get-Content $path
+        [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+    }    
+}
+function Store-TempEnv($key, $value) {
+    $path = Join-Path ($Env:TEMP) "\.ssh"
+    if (-not (Test-Path $path)) {
+       New-Item $path -itemType Directory
+    }
+
+    $path = Join-Path $path "\$key.env"
+
+    if ($value -eq $null)
+    {
+        if (Test-Path $path) {
+            Remove-Item $path 
+        }
+    } else {
+        $value > $path
+    }
 }
 
 # Retrieve the current SSH agent PID (or zero). Can be used to determine if there
@@ -240,15 +265,17 @@ function Start-SshAgent([switch]$Quiet) {
     Add-SshKey
 }
 
+
 #get the default ssh keyfile
 function Get-SshFile()
 {
     if ($Env:HOME) {
-        Resolve-Path (Join-Path (Resolve-Path $Env:HOME) ".ssh\id_rsa") -ErrorAction SilentlyContinue 2> $null
+        $path = Join-Path (Resolve-Path $Env:HOME) '\.ssh'
     }
     else {
-        Resolve-Path ~/.ssh/id_rsa -ErrorAction SilentlyContinue 2> $null
-    }
+        $path = Join-Path (Resolve-Path) '\.ssh'
+    } 
+    Resolve-Path (Join-Path $path '\id_rsa') -ErrorAction SilentlyContinue 2> $null    
 }
 
 # Add a key to the SSH agent

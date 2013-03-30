@@ -13,6 +13,9 @@ Pop-Location
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
 if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
+Load-TempEnv 'SSH_AGENT_PID'
+Load-TempEnv 'SSH_AUTH_SOCK'
+
 Export-ModuleMember `
     -Alias @(
         '??') `
