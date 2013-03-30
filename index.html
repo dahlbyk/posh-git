@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>posh-git by dahlbyk</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/dahlbyk/posh-git">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/dahlbyk/posh-git/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/dahlbyk/posh-git/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>posh-git</h1>
+          <p>A PowerShell environment for Git</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/dahlbyk">dahlbyk</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <p>posh-git is a PowerShell module which provides Git/PowerShell integration.</p>
+
+<h3>Prompt for Git repositories</h3>
+
+<p>The prompt within Git repositories can show the current branch and the state of files (additions, modifications, deletions) within.</p>
+
+<h3>Tab completion</h3>
+
+<p>Provides tab completion for common commands when using git.<br>
+   E.g. <code>git ch&lt;tab&gt;</code> --&gt; <code>git checkout</code></p>
+
+<h3>Other goodies</h3>
+
+<ul>
+<li>
+<code>ssh-agent</code> wrappers: <code>Get-SshAgent</code>, <code>Start-Ssh-Agent</code>, <code>Stop-SshAgent</code>
+</li>
+<li><code>Update-AllBranches</code></li>
+</ul><h2>Usage</h2>
+
+<p>See <code>profile.example.ps1</code> as to how you can integrate the tab completion and/or git prompt into your own profile.
+Prompt formatting, among other things, can be customized using <code>$GitPromptSettings</code>, <code>$GitTabSettings</code> and <code>$TortoiseGitSettings</code>.</p>
+
+<p>Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to <code>$GitPromptSettings.RepositoriesInWhichToDisableFileStatus</code>.</p>
+
+<h2>Installing</h2>
+
+<ol>
+<li><p>Verify you have PowerShell 2.0 or better with <code>$PSVersionTable.PSVersion</code></p></li>
+<li><p>Verify execution of scripts is allowed with <code>Get-ExecutionPolicy</code> (should be <code>RemoteSigned</code> or <code>Unrestricted</code>). If scripts are not enabled, run PowerShell as Administrator and call <code>Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm</code>.</p></li>
+<li><p>Verify that <code>git</code> can be run from PowerShell. If the command is not found, you will need to add a git alias or add <code>%ProgramFiles%\Git\cmd</code> to your PATH environment variable.</p></li>
+<li><p>Clone the posh-git repository to your local machine.</p></li>
+<li><p>From the posh-git repository directory, run <code>.\install.ps1</code>.</p></li>
+<li><p>Enjoy!</p></li>
+</ol><h2>The Prompt</h2>
+
+<p>PowerShell generates its prompt by executing a <code>prompt</code> function, if one exists. posh-git defines such a function in <code>profile.example.ps1</code> that outputs the current working directory followed by an abbreviated <code>git status</code>:</p>
+
+<pre><code>C:\Users\Keith [master]&gt;
+</code></pre>
+
+<p>By default, the status summary has the following format:</p>
+
+<pre><code>[{HEAD-name} +A ~B -C !D | +E ~F -G !H]
+</code></pre>
+
+<ul>
+<li>
+<code>{HEAD-name}</code> is the current branch, or the SHA of a detached HEAD
+
+<ul>
+<li>Cyan means the branch matches its remote</li>
+<li>Green means the branch is ahead of its remote (green light to push)</li>
+<li>Red means the branch is behind its remote</li>
+<li>Yellow means the branch is both ahead of and behind its remote</li>
+</ul>
+</li>
+<li>ABCD represent the index; EFGH represent the working directory
+
+<ul>
+<li>
+<code>+</code> = Added files</li>
+<li>
+<code>~</code> = Modified files</li>
+<li>
+<code>-</code> = Removed files</li>
+<li>
+<code>!</code> = Conflicted files</li>
+<li>As in <code>git status</code>, index status is dark green and working directory status is dark red</li>
+</ul>
+</li>
+</ul><p>For example, a status of <code>[master +0 ~2 -1 | +1 ~1 -0]</code> corresponds to the following <code>git status</code>:</p>
+
+<pre><code># On branch master
+#
+# Changes to be committed:
+#   (use "git reset HEAD &lt;file&gt;..." to unstage)
+#
+#        modified:   this-changed.txt
+#        modified:   this-too.txt
+#        deleted:    gone.ps1
+#
+# Changed but not updated:
+#   (use "git add &lt;file&gt;..." to update what will be committed)
+#   (use "git checkout -- &lt;file&gt;..." to discard changes in working directory)
+#
+#        modified:   not-staged.ps1
+#
+# Untracked files:
+#   (use "git add &lt;file&gt;..." to include in what will be committed)
+#
+#        new.file
+</code></pre>
+
+<h3>Based on work by:</h3>
+
+<ul>
+<li>Keith Dahlby, <a href="http://solutionizing.net/">http://solutionizing.net/</a>
+</li>
+<li>Mark Embling, <a href="http://www.markembling.info/">http://www.markembling.info/</a>
+</li>
+<li>Jeremy Skinner, <a href="http://www.jeremyskinner.co.uk/">http://www.jeremyskinner.co.uk/</a>
+</li>
+<li>Many other contributors - thank you, thank you, thank you!</li>
+</ul>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-39641898-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
