@@ -189,6 +189,10 @@ function InDisabledRepository {
     return $false
 }
 
+<#
+.SYNOPSIS
+   Enables Git colors.
+#>
 function Enable-GitColors {
     $env:TERM = 'cygwin'
 }
@@ -266,18 +270,39 @@ function Get-SshPath($File = 'id_rsa')
     Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
 }
 
-# Add a key to the SSH agent
-function Add-SshKey() {
+<#
+.SYNOPSIS
+   Add a key to the SSH agent
+.DESCRIPTION
+   Adds one or more SSH keys to the SSH agent.
+.EXAMPLE
+   Add-SshKey
+
+   Description
+   -----------
+   Adds ~\.ssh\id_rsa to the SSH agent.
+.EXAMPLE
+   Add-SshKey ~\.ssh\mykey, ~\.ssh\myotherkey
+
+   Description
+   -----------
+   Adds ~\.ssh\mykey and ~\.ssh\myotherkey to the SSH agent.
+#>
+function Add-SshKey {
+    [CmdletBinding()]
+    [OutputType([void])]
+    Param
+    (
+    )
     $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
     if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-    if ($args.Count -eq 0) {
-        $sshPath = Get-SshPath
-        if ($sshPath) { & $sshAdd $sshPath }
-    } else {
-        foreach ($value in $args) {
-            & $sshAdd $value
-        }
+    if (-not $args) {
+        $args = Get-SshPath
+    }
+    foreach ($value in $args) {
+        Write-Verbose "Adding key '$value'"
+        & $sshAdd $value
     }
 }
 
