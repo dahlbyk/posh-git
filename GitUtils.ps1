@@ -263,7 +263,7 @@ function Start-SshAgent([switch]$Quiet) {
 function Get-SshPath($File = 'id_rsa')
 {
     $home = Resolve-Path (Invoke-NullCoalescing $Env:HOME ~)
-    Resolve-Path (Join-Path $home '.ssh\$File') -ErrorAction SilentlyContinue 2> $null
+    Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
 }
 
 # Add a key to the SSH agent
