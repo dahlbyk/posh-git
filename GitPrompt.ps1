@@ -46,7 +46,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnableFileStatus          = $true
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
 
-    EnableWindowTitle         = 'posh~git ~ '
+    DefaultWindowTitle        = 'posh~git ~ '
+    EnableWindowTitle         = $true
 
     Debug                     = $false
 }
@@ -127,12 +128,23 @@ function Write-GitStatus($status) {
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
 
         if ($s.EnableWindowTitle) {
-            if( -not $Global:PreviousWindowTitle ) {
-                $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
-            }
+		    if($s.EnableWindowTitle -is [boolean] -and -not $Global:PreviousWindowTitle) {
+			    $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
+		    }
+
+		    # Original
+		    # $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
+		    # $Host.UI.RawUI.WindowTitle = "$prefix$repoName [$($status.Branch)]"
+
+		    # My Old Version
+		    # $prefix = if ($s.EnableWindowTitle -is [boolean]) { $repoName } else { $s.EnableWindowTitle } 
+		    # $Host.UI.RawUI.WindowTitle = "$prefix [$($status.Branch)]"
+
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
-            $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-            $Host.UI.RawUI.WindowTitle = "$prefix$repoName [$($status.Branch)]"
+
+		    $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { $s.DefaultWindowTitle }
+		    $Host.UI.RawUI.WindowTitle = "$prefix [${repoName}:$($status.Branch)]"
+
         }
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
