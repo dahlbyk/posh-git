@@ -51,7 +51,16 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                     { dbg 'Trying describe' $sw; git describe --exact-match HEAD 2>$null } `
                     {
                         dbg 'Falling back on parsing HEAD' $sw
-                        $ref = Get-Content $gitDir\HEAD 2>$null
+                        $ref = $null
+
+                        if (Test-Path $gitDir\HEAD) {
+                            dbg 'Reading from .git\HEAD' $sw
+                            $ref = Get-Content $gitDir\HEAD 2>$null
+                        } else {
+                            dbg 'Trying rev-parse' $sw
+                            $ref = git rev-parse HEAD 2>$null
+                        }
+
                         if ($ref -match 'ref: (?<ref>.+)') {
                             return $Matches['ref']
                         } elseif ($ref -and $ref.Length -ge 7) {
