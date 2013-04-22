@@ -116,10 +116,9 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             $sw = $null
         }
 
-        $events = @(Get-Event | ?{ $_.SourceIdentifier -like "GitStatusEvent*" })
-        foreach ($event in $events) {
-            Remove-Event $event.EventIdentifier
-        }
+        @(Get-Event | ?{ $_.SourceIdentifier -like "GitStatusEvent*" }) |
+            Tee-Object -Variable events | Remove-Event
+
         if (($gitDir -eq $Global:GitStatusCache.GitDirectory) -and $Global:GitStatusCache.Status) {
             if (!$events) {
                 dbg 'Reusing old status' $sw
