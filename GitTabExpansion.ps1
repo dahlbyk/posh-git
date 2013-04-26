@@ -28,12 +28,14 @@ function script:gitCmdOperations($commands, $command, $filter) {
         where { $_ -like "$filter*" }
 }
 
-
 $script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry','cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch','format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv','notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm','shortlog','show','stash','status','submodule','svn','tag','whatchanged')
-if ((git flow 2> $null) -ne $null) {
-    $script:someCommands += 'flow'
+try {
+    if ((git flow 2> $null) -ne $null) {
+        $script:someCommands += 'flow'
+    }
+} catch {
+    Write-Warning "'git flow' command is not available."
 }
-
 
 function script:gitCommands($filter, $includeAliases) {
     $cmdList = @()
@@ -294,3 +296,4 @@ function TabExpansion($line, $lastWord) {
         default { if (Test-Path Function:\TabExpansionBackup) { TabExpansionBackup $line $lastWord } }
     }
 }
+

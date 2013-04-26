@@ -142,6 +142,9 @@ function Write-GitStatus($status) {
 if((Get-Variable -Scope Global -Name VcsPromptStatuses -ErrorAction SilentlyContinue) -eq $null) {
     $Global:VcsPromptStatuses = @()
 }
+if (!$Global:VcsPromptStatuses) {
+    $Global:VcsPromptStatuses = @()
+}
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
