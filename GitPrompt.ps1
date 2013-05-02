@@ -51,6 +51,11 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     Debug                     = $false
 }
 
+$WindowTitleSupported = $true
+if (Get-Module NuGet) {
+    $WindowTitleSupported = $false
+}
+
 function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
     if ($BackgroundColor -lt 0) {
         Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor
@@ -126,7 +131,7 @@ function Write-GitStatus($status) {
 
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
 
-        if ($s.EnableWindowTitle) {
+        if ($WindowTitleSupported -and $s.EnableWindowTitle) {
             if( -not $Global:PreviousWindowTitle ) {
                 $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
             }
