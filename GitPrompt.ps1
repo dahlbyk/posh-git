@@ -144,7 +144,16 @@ function Write-GitStatus($status) {
     }
 }
 
-if((Get-Variable -Scope Global -Name VcsPromptStatuses -ErrorAction SilentlyContinue) -eq $null) {
+try {
+    Get-Variable VcsPromptStatuses -Scope Global
+}
+catch {
+    $Global:VcsPromptStatuses = @()
+}
+if (!$Global:VcsPromptStatuses) {
+    $Global:VcsPromptStatuses = @()
+}
+if (!$Global:VcsPromptStatuses) {
     $Global:VcsPromptStatuses = @()
 }
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
