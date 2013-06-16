@@ -7,6 +7,7 @@ Push-Location $psScriptRoot
 . .\GitUtils.ps1
 . .\GitPrompt.ps1
 . .\GitTabExpansion.ps1
+. .\GitShortcuts.ps1
 . .\TortoiseGit.ps1
 Pop-Location
 
@@ -34,6 +35,6 @@ Export-ModuleMember `
         'Add-SshKey',
         'Get-SshPath',
         'Update-AllBranches',
+        'Enable-GitShortcuts',
+        'Disable-GitShortcuts',
         'tgit')
-
-
