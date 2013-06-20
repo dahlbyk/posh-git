@@ -15,7 +15,7 @@ function Write-GitStatusPromptAsync([string]$gitDir = (Get-GitDirectory)) {
     $positionToWriteStatus = $Host.UI.RawUI.CursorPosition
     
     # Output a placeholder line where the status will be written to.  This makes sure the status line doesn't overwrite the actual prompt
-    Write-Host " [...processing...]" 
+    Write-Host " [...]" 
 
     $messageData = new-object psobject -property @{
         gitDir = $gitDir
