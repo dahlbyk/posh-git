@@ -298,9 +298,10 @@ function populatehgflowStreams($filename) {
   $script:hgflowStreams = if ($ini["Basic"]) { $ini["Basic"] } else { $ini["branchname"] }
 }
 
-if (Get-Command "Register-TabExpansion" -errorAction SilentlyContinue)
+$PowerTab_RegisterTabExpansion = Get-Command Register-TabExpansion -Module powertab -ErrorAction SilentlyContinue
+if ($PowerTab_RegisterTabExpansion)
 {
-    Register-TabExpansion "hg.exe" -Type Command {
+    & $PowerTab_RegisterTabExpansion "hg.exe" -Type Command {
         param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
 
         $line = $Context.Line
