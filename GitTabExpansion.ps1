@@ -74,6 +74,14 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         foreach { $prefix + $_ }
 }
 
+function script:gitFeatures($filter, $command){
+	$featurePrefix = git config --local --get "gitflow.prefix.$command"
+    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
+    $branches |
+        where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
+        foreach { $prefix + $_ }
+}
+
 function script:gitRemoteBranches($remote, $ref, $filter) {
     git branch --no-color -r |
         where { $_ -like "  $remote/$filter*" } |
@@ -168,6 +176,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git flow <cmd> <op>
         "^flow (?<cmd>$($gitflowsubcommands.Keys -join '|'))\s+(?<op>\S*)$" {
             gitCmdOperations $gitflowsubcommands $matches['cmd'] $matches['op']
+        }
+		
+		# Handles git flow <command> <op> <name>
+        "^flow (?<command>\S*)\s+(?<op>\S*)\s+(?<name>\S*)$" {
+			gitFeatures $matches['name'] $matches['command']
         }
 
         # Handles git remote (rename|rm|set-head|set-branches|set-url|show|prune) <stash>
