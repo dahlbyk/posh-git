@@ -17,4 +17,7 @@
       <dependency id="git" />
     </dependencies>
   </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
 </package>
