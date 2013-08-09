@@ -1,5 +1,3 @@
-if (Get-Module posh-git) { return }
-
 Push-Location $psScriptRoot
 .\CheckVersion.ps1 > $null
 
@@ -20,6 +18,8 @@ Export-ModuleMember `
     -Alias @(
         '??') `
     -Function @(
+        'Set-VcsStatusSettings',
+        'Write-VcsStatus',
         'Invoke-NullCoalescing',
         'Write-GitStatus',
         'Write-Prompt',
@@ -35,5 +35,3 @@ Export-ModuleMember `
         'Get-SshPath',
         'Update-AllBranches',
         'tgit')
-
-
