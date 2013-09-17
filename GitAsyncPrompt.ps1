@@ -6,7 +6,7 @@ function Write-GitStatusPromptAsync([string]$gitDir = (Get-GitDirectory)) {
     $processStartInfo.RedirectStandardOutput = $true
     $processStartInfo.RedirectStandardError = $false
     $processStartInfo.UseShellExecute = $false
-    $processStartInfo.WorkingDirectory = $pwd
+    $processStartInfo.WorkingDirectory = $pwd.ProviderPath
 
     $process = New-Object Diagnostics.Process
     $process.StartInfo = $processStartInfo
