@@ -281,8 +281,7 @@ function Add-SshKey() {
     if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
     if ($args.Count -eq 0) {
-        $sshPath = Get-SshPath
-        if ($sshPath) { & $sshAdd $sshPath }
+        & $sshAdd
     } else {
         foreach ($value in $args) {
             & $sshAdd $value
