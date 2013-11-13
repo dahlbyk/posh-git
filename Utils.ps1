@@ -18,8 +18,8 @@ Set-Alias ?? Invoke-NullCoalescing -Force
 function Get-LocalOrParentPath($path) {
     $checkIn = Get-Item -Force .
     while ($checkIn -ne $NULL) {
-        $pathToTest = [System.IO.Path]::Combine($checkIn.fullname, $path)
-        if (Test-Path $pathToTest) {
+        $pathToTest = Join-Path $checkIn $path
+        if (Test-Path -LiteralPath $pathToTest) {
             return $pathToTest
         } else {
             $checkIn = $checkIn.parent
