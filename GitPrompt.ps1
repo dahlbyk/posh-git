@@ -1,58 +1,211 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
+function Set-VcsStatusSettings {
+    [CmdletBinding()]
+param(
+    [ConsoleColor]$DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor,
+    [ConsoleColor]$DefaultBackgroundColor    = $Host.UI.RawUI.BackgroundColor,
 
-$global:GitPromptSettings = New-Object PSObject -Property @{
-    DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor
+    # Retrieval settings
+    [Switch]$EnablePromptStatus        = !$Global:GitMissing,
+    [Switch]$EnableFileStatus          = $true,
+    [Switch]$ShowStatusWhenZero        = $true,
+    [String[]]$RepositoriesInWhichToDisableFileStatus = @( ), # Array of repository paths
 
-    BeforeText                = ' ['
-    BeforeForegroundColor     = [ConsoleColor]::Yellow
-    BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
-    DelimText                 = ' |'
-    DelimForegroundColor      = [ConsoleColor]::Yellow
-    DelimBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    #Before prompt
+    [String]$BeforeText                      = ' [',
+    [ConsoleColor]$BeforeForegroundColor     = $([ConsoleColor]::Yellow),
+    [ConsoleColor]$BeforeBackgroundColor     = $DefaultBackgroundColor,
 
-    AfterText                 = ']'
-    AfterForegroundColor      = [ConsoleColor]::Yellow
-    AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    #After prompt
+    [String]$AfterText                       = '] ',
+    [ConsoleColor]$AfterForegroundColor      = $([ConsoleColor]::Yellow),
+    [ConsoleColor]$AfterBackgroundColor      = $DefaultBackgroundColor,
 
-    BranchForegroundColor       = [ConsoleColor]::Cyan
-    BranchBackgroundColor       = $Host.UI.RawUI.BackgroundColor
-    BranchAheadForegroundColor  = [ConsoleColor]::Green
-    BranchAheadBackgroundColor  = $Host.UI.RawUI.BackgroundColor
-    BranchBehindForegroundColor = [ConsoleColor]::Red
-    BranchBehindBackgroundColor = $Host.UI.RawUI.BackgroundColor
-    BranchBehindAndAheadForegroundColor = [ConsoleColor]::Yellow
-    BranchBehindAndAheadBackgroundColor = $Host.UI.RawUI.BackgroundColor
+    # Branches
+    [ConsoleColor]$BranchForegroundColor       = $([ConsoleColor]::Cyan),
+    [ConsoleColor]$BranchBackgroundColor       = $DefaultBackgroundColor,
+    # Current branch when not updated
+    [ConsoleColor]$BranchBehindForegroundColor = $([ConsoleColor]::DarkRed),
+    [ConsoleColor]$BranchBehindBackgroundColor = $DefaultBackgroundColor,
+    # Current branch when we're both
+    [ConsoleColor]$BranchBeheadForegroundColor = $([ConsoleColor]::Yellow),
+    [ConsoleColor]$BranchBeheadBackgroundColor = $DefaultBackgroundColor,
 
-    BeforeIndexText           = ""
-    BeforeIndexForegroundColor= [ConsoleColor]::DarkGreen
-    BeforeIndexBackgroundColor= $Host.UI.RawUI.BackgroundColor
+    # Working DirectoryColors
+    [String]$AddedStatusPrefix                       = ' +',
+    [ConsoleColor]$AddedLocalForegroundColor      = $([ConsoleColor]::DarkRed),
+    [ConsoleColor]$AddedLocalBackgroundColor      = $DefaultBackgroundColor,
 
-    IndexForegroundColor      = [ConsoleColor]::DarkGreen
-    IndexBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    [String]$ModifiedStatusPrefix                    = ' ~',
+    [ConsoleColor]$ModifiedLocalForegroundColor   = $([ConsoleColor]::DarkRed),
+    [ConsoleColor]$ModifiedLocalBackgroundColor   = $DefaultBackgroundColor,
 
-    WorkingForegroundColor    = [ConsoleColor]::DarkRed
-    WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    [String]$DeletedStatusPrefix                     = ' -',
+    [ConsoleColor]$DeletedLocalForegroundColor    = $([ConsoleColor]::DarkRed),
+    [ConsoleColor]$DeletedLocalBackgroundColor    = $DefaultBackgroundColor,
 
-    UntrackedText             = ' !'
-    UntrackedForegroundColor  = [ConsoleColor]::DarkRed
-    UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
+    [String]$UntrackedStatusPrefix                   = ' !',
+    [ConsoleColor]$UntrackedLocalForegroundColor  = $([ConsoleColor]::DarkRed),
+    [ConsoleColor]$UntrackedLocalBackgroundColor  = $DefaultBackgroundColor,
 
-    ShowStatusWhenZero        = $true
+    # Git Specific ============================
+    # Current branch when we need to push
+    [ConsoleColor]$BranchAheadForegroundColor  = $([ConsoleColor]::Green),
+    [ConsoleColor]$BranchAheadBackgroundColor  = $DefaultBackgroundColor,
 
-    AutoRefreshIndex          = $true
+    [String]$DelimText                       = ' |',
+    [ConsoleColor]$DelimForegroundColor      = $([ConsoleColor]::Yellow),
+    [ConsoleColor]$DelimBackgroundColor      = $DefaultBackgroundColor,
 
-    EnablePromptStatus        = !$Global:GitMissing
-    EnableFileStatus          = $true
-    RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
+    [String]$UnmergedStatusPrefix                    = ' ?',
+    [ConsoleColor]$UnmergedLocalBackgroundColor   = $([ConsoleColor]::DarkRed),
+    [ConsoleColor]$UnmergedLocalForegroundColor   = $DefaultBackgroundColor,
 
-    EnableWindowTitle         = 'posh~git ~ '
+    [String]$BeforeIndexText                 = "",
+    [ConsoleColor]$BeforeIndexForegroundColor= $([ConsoleColor]::DarkGreen),
+    [ConsoleColor]$BeforeIndexBackgroundColor= $DefaultBackgroundColor,
 
-    Debug                     = $false
+    [ConsoleColor]$IndexForegroundColor      = $([ConsoleColor]::DarkGreen),
+    [ConsoleColor]$IndexBackgroundColor      = $DefaultBackgroundColor,
+
+    [Switch]$AutoRefreshIndex          = $true,
+
+    [string]$EnableWindowTitle         = 'posh~git ~ '
+
+)
+
+    if($global:VcsStatusSettings) {
+        ## Sync the Background Colors: 
+        ## If the DefaultBackgroundColor is changed
+        if($PSBoundParameters.ContainsKey("DefaultBackgroundColor") -and ($global:VcsStatusSettings.DefaultBackgroundColor -ne $DefaultBackgroundColor)) {
+            ## Any other background colors
+            foreach($Background in $global:VcsStatusSettings.PsObject.Properties | Where { $_.Name -like "*BackgroundColor"} | % { $_.Name }) {
+                # Which haven't been set
+                if(!$PSBoundParameters.ContainsKey($Background)) {
+                    if((!$global:VcsStatusSettings.$Background) -or ($global:VcsStatusSettings.$Background -eq $global:VcsStatusSettings.DefaultBackgroundColor)) {
+                        # And are currently synced with the DefaultBackgroundColor
+                        $PSBoundParameters.Add($Background, $DefaultBackgroundColor)
+                    }
+                }
+            }
+        }
+
+        foreach($key in $PSBoundParameters.Keys) {
+            $global:VcsStatusSettings | Add-Member NoteProperty $key $PSBoundParameters.$key -Force
+        }
+        ## Git Specific: Set them if they've never been set:
+        if(!(Get-Member -In $global:VcsStatusSettings -Name BranchAheadForegroundColor)){
+            $global:VcsStatusSettings | Add-Member NoteProperty BranchAheadForegroundColor $BranchAheadForegroundColor -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty BranchAheadBackgroundColor $BranchAheadBackgroundColor -Force
+
+            $global:VcsStatusSettings | Add-Member NoteProperty DelimText $DelimText -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty DelimForegroundColor $DelimForegroundColor -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty DelimBackgroundColor $DelimBackgroundColor -Force
+
+            $global:VcsStatusSettings | Add-Member NoteProperty UnmergedStatusPrefix $UnmergedStatusPrefix -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty UnmergedLocalBackgroundColor $UnmergedLocalBackgroundColor -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty UnmergedLocalForegroundColor $UnmergedLocalForegroundColor -Force
+
+            $global:VcsStatusSettings | Add-Member NoteProperty BeforeIndexText $BeforeIndexText -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty BeforeIndexForegroundColor $BeforeIndexForegroundColor -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty BeforeIndexBackgroundColor $BeforeIndexBackgroundColor -Force
+
+            $global:VcsStatusSettings | Add-Member NoteProperty IndexForegroundColor $IndexForegroundColor -Force
+            $global:VcsStatusSettings | Add-Member NoteProperty IndexBackgroundColor $IndexBackgroundColor -Force
+
+
+            $global:VcsStatusSettings | Add-Member NoteProperty ShowStatusWhenZero $ShowStatusWhenZero -Force
+
+            $global:VcsStatusSettings | Add-Member NoteProperty AutoRefreshIndex $AutoRefreshIndex -Force
+
+            $global:VcsStatusSettings | Add-Member NoteProperty EnableWindowTitle $EnableWindowTitle -Force
+        }
+
+
+    } else {
+        $global:VcsStatusSettings = New-Object PSObject -Property @{
+            DefaultBackgroundColor = $DefaultBackgroundColor
+            # Retreival settings
+            EnablePromptStatus = $EnablePromptStatus
+            EnableFileStatus = $EnableFileStatus
+            RepositoriesInWhichToDisableFileStatus = $RepositoriesInWhichToDisableFileStatus       
+
+            #Before prompt        
+            BeforeText = $BeforeText
+            BeforeForegroundColor = $BeforeForegroundColor
+            BeforeBackgroundColor = $BeforeBackgroundColor
+
+            #After prompt
+            AfterText = $AfterText
+            AfterForegroundColor = $AfterForegroundColor
+            AfterBackgroundColor = $AfterBackgroundColor
+
+            BranchForegroundColor = $BranchForegroundColor
+            BranchBackgroundColor = $BranchBackgroundColor
+            BranchAheadForegroundColor = $BranchAheadForegroundColor
+            BranchAheadBackgroundColor = $BranchAheadBackgroundColor
+            BranchBehindForegroundColor = $BranchBehindForegroundColor
+            BranchBehindBackgroundColor = $BranchBehindBackgroundColor
+
+            BranchBeheadForegroundColor = $BranchBeheadForegroundColor
+            BranchBeheadBackgroundColor = $BranchBeheadBackgroundColor
+
+            # WorkingColors
+            AddedStatusPrefix = $AddedStatusPrefix
+            AddedLocalForegroundColor    = $AddedLocalForegroundColor   
+            AddedLocalBackgroundColor    = $AddedLocalBackgroundColor   
+            
+            ModifiedStatusPrefix = $ModifiedStatusPrefix
+            ModifiedLocalForegroundColor = $ModifiedLocalForegroundColor
+            ModifiedLocalBackgroundColor = $ModifiedLocalBackgroundColor
+            
+            DeletedStatusPrefix = $DeletedStatusPrefix
+            DeletedLocalForegroundColor  = $DeletedLocalForegroundColor 
+            DeletedLocalBackgroundColor  = $DeletedLocalBackgroundColor 
+            
+            UntrackedStatusPrefix = $UntrackedStatusPrefix
+            UntrackedLocalForegroundColor = $UntrackedLocalForegroundColor
+            UntrackedLocalBackgroundColor = $UntrackedLocalBackgroundColor
+
+            Debug = $DebugPreference -eq "Continue"
+
+            #Delimiter
+            DelimText = $DelimText
+            DelimForegroundColor = $DelimForegroundColor
+            DelimBackgroundColor = $DelimBackgroundColor
+
+            UnmergedStatusPrefix = $UnmergedStatusPrefix
+            UnmergedLocalBackgroundColor = $UnmergedLocalBackgroundColor
+            UnmergedLocalForegroundColor = $UnmergedLocalForegroundColor
+
+            BeforeIndexText = $BeforeIndexText
+            BeforeIndexForegroundColor = $BeforeIndexForegroundColor
+            BeforeIndexBackgroundColor = $BeforeIndexBackgroundColor
+
+            IndexForegroundColor = $IndexForegroundColor
+            IndexBackgroundColor = $IndexBackgroundColor
+
+
+            ShowStatusWhenZero = $ShowStatusWhenZero
+
+            AutoRefreshIndex = $AutoRefreshIndex
+
+            EnableWindowTitle         = $EnableWindowTitle
+        }
+    }
+
+    # Keep track of the DEFAULT background color....
+    if(!$Script:CurrentBackgroundColor -or $PSBoundParameters.ContainsKey("DefaultBackgroundColor")) {
+        $Script:CurrentBackgroundColor = $DefaultBackgroundColor
+    }
 }
 
+# Make sure this runs at least once (when the module is initially imported)
+Set-VcsStatusSettings
+
 $WindowTitleSupported = $true
-if (Get-Module NuGet) {
+if ((get-host).Name -eq "Package Manager Host") {
     $WindowTitleSupported = $false
 }
 
@@ -65,7 +218,7 @@ function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
 }
 
 function Write-GitStatus($status) {
-    $s = $global:GitPromptSettings
+    $s = $global:VcsStatusSettings
     if ($status -and $s) {
         Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
 
@@ -73,8 +226,8 @@ function Write-GitStatus($status) {
         $branchForegroundColor = $s.BranchForegroundColor
         if ($status.BehindBy -gt 0 -and $status.AheadBy -gt 0) {
             # We are behind and ahead of remote
-            $branchBackgroundColor = $s.BranchBehindAndAheadBackgroundColor
-            $branchForegroundColor = $s.BranchBehindAndAheadForegroundColor
+            $branchBackgroundColor = $s.BranchBeheadBackgroundColor
+            $branchForegroundColor = $s.BranchBeheadForegroundColor
         } elseif ($status.BehindBy -gt 0) {
             # We are behind remote
             $branchBackgroundColor = $s.BranchBehindBackgroundColor
@@ -91,17 +244,17 @@ function Write-GitStatus($status) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
 
             if($s.ShowStatusWhenZero -or $status.Index.Added) {
-              Write-Prompt " +$($status.Index.Added.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt "$($s.AddedStatusPrefix)$($status.Index.Added.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Modified) {
-              Write-Prompt " ~$($status.Index.Modified.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt "$($s.ModifiedStatusPrefix)$($status.Index.Modified.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
-              Write-Prompt " -$($status.Index.Deleted.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt "$($s.DeletedStatusPrefix)$($status.Index.Deleted.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if ($status.Index.Unmerged) {
-                Write-Prompt " !$($status.Index.Unmerged.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+                Write-Prompt "$($s.UnmergedStatusPrefix)$($status.Index.Unmerged.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if($status.HasWorking) {
@@ -111,22 +264,22 @@ function Write-GitStatus($status) {
 
         if($s.EnableFileStatus -and $status.HasWorking) {
             if($s.ShowStatusWhenZero -or $status.Working.Added) {
-              Write-Prompt " +$($status.Working.Added.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt "$($s.AddedStatusPrefix)$($status.Working.Added.Count)" -BackgroundColor $s.AddedLocalBackgroundColor -ForegroundColor $s.AddedLocalForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Modified) {
-              Write-Prompt " ~$($status.Working.Modified.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt "$($s.ModifiedStatusPrefix)$($status.Working.Modified.Count)" -BackgroundColor $s.ModifiedLocalBackgroundColor -ForegroundColor $s.ModifiedLocalForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
-              Write-Prompt " -$($status.Working.Deleted.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt "$($s.DeletedStatusPrefix)$($status.Working.Deleted.Count)" -BackgroundColor $s.DeletedLocalBackgroundColor -ForegroundColor $s.DeletedLocalForegroundColor
             }
 
             if ($status.Working.Unmerged) {
-                Write-Prompt " !$($status.Working.Unmerged.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+                Write-Prompt "$($s.UnmergedStatusPrefix)$($status.Working.Unmerged.Count)" -BackgroundColor $s.UnmergedLocalBackgroundColor -ForegroundColor $s.UnmergedLocalForegroundColor
             }
         }
 
         if ($status.HasUntracked) {
-            Write-Prompt $s.UntrackedText -BackgroundColor $s.UntrackedBackgroundColor -ForegroundColor $s.UntrackedForegroundColor
+            Write-Prompt $s.UntrackedStatusPrefix -BackgroundColor $s.UntrackedLocalBackgroundColor -ForegroundColor $s.UntrackedLocalForegroundColor
         }
 
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
@@ -147,6 +300,7 @@ function Write-GitStatus($status) {
 if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
 }
+
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
@@ -154,3 +308,5 @@ $Global:VcsPromptStatuses += {
     $Global:GitStatus = Get-GitStatus
     Write-GitStatus $GitStatus
 }
+# but we don't want any duplicate hooks (if people import the module twice)
+$Global:VcsPromptStatuses = @( $Global:VcsPromptStatuses | Select -Unique )
