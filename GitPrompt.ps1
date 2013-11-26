@@ -301,7 +301,7 @@ if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
 }
 
-function global:Write-VcsStatus { $Global:VcsPromptStatuses | Invoke-Command }
+function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
 $Global:VcsPromptStatuses += {
