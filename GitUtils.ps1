@@ -146,7 +146,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                         }
                     }
 
-                    '^## (?<branch>\S+)(?:\.\.\.(?<upstream>\S+) \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                    '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
                         $branch = $matches['branch']
                         $upstream = $matches['upstream']
                         $aheadBy = [int]$matches['ahead']
