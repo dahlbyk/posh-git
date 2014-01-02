@@ -74,6 +74,12 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         foreach { $prefix + $_ }
 }
 
+function script:gitTags($filter) {
+    git tag |
+        where { $_ -like "$filter*" } |
+        foreach { $_ }
+}
+
 function script:gitFeatures($filter, $command){
 	$featurePrefix = git config --local --get "gitflow.prefix.$command"
     $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
@@ -281,6 +287,7 @@ function GitTabExpansion($lastBlock) {
         # Handles git <cmd> <ref>
         "^(?:checkout|cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
+            gitTags $matches['ref']
         }
     }
 }
