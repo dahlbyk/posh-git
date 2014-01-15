@@ -44,7 +44,7 @@ PowerShell generates its prompt by executing a `prompt` function, if one exists.
 
 By default, the status summary has the following format:
 
-    [{HEAD-name} +A ~B -C !D | +E ~F -G !H]
+    [{HEAD-name} +A ~B -C !D | +E ~F -G !H !]
 
 * `{HEAD-name}` is the current branch, or the SHA of a detached HEAD
  * Cyan means the branch matches its remote
@@ -57,6 +57,7 @@ By default, the status summary has the following format:
  * `-` = Removed files
  * `!` = Conflicted files
  * As in `git status`, index status is dark green and working directory status is dark red
+ * The trailing `!` means there are untracked files
 
 For example, a status of `[master +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
 
