@@ -300,17 +300,17 @@ function Get-SshPath($File = 'id_rsa')
 function Add-SshKey() {
     if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
         $pageant = (Get-Command pageant -Erroraction SilentlyContinue).Name
-        if ($pageant) {
-            if ($args.Count -eq 0) {
-                $keystring = ""
-                $keyPath = Join-Path $Env:HOME ".ssh"
-                $keys = (Get-ChildItem $keyPath/"*.ppk").Name
-                foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
-                & $pageant "$keystring"
-            } else {
-                foreach ($value in $args) {
-                    & $pageant $value
-                }
+        if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
+
+        if ($args.Count -eq 0) {
+            $keystring = ""
+            $keyPath = Join-Path $Env:HOME ".ssh"
+            $keys = (Get-ChildItem $keyPath/"*.ppk").Name
+            foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
+            & $pageant "$keystring"
+        } else {
+            foreach ($value in $args) {
+                & $pageant $value
             }
         }
     }
