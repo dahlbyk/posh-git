@@ -243,11 +243,10 @@ function Set-TempEnv($key, $value) {
 # Retrieve the current SSH agent PID (or zero). Can be used to determine if there
 # is a running agent.
 function Get-SshAgent() {
-    if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
+    if ($env:GIT_SSH -imatch 'plink') {
         $pageantPid = (Get-Process pageant -ErrorAction SilentlyContinue).Id
         if ($pageantPid) { return $pageantPid }
-    }
-    else{
+    } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
             $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
@@ -271,13 +270,12 @@ function Start-SshAgent([switch]$Quiet) {
         return
     }
 
-    if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
+    if ($env:GIT_SSH -imatch 'plink') {
         Write-Host "GIT_SSH set to $($env:GIT_SSH), using Pageant as SSH agent."
         $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
         if (!$pageant) { Write-Warning "Could not find Pageant."; return }
         & $pageant
-    }
-    else {
+    } else {
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
         if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
@@ -298,7 +296,7 @@ function Get-SshPath($File = 'id_rsa')
 
 # Add a key to the SSH agent
 function Add-SshKey() {
-    if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
+    if ($env:GIT_SSH -imatch 'plink') {
         $pageant = (Get-Command pageant -Erroraction SilentlyContinue).Name
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
 
@@ -313,8 +311,7 @@ function Add-SshKey() {
                 & $pageant $value
             }
         }
-    }
-    else {
+    } else {
         $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
