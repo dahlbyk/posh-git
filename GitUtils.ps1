@@ -259,22 +259,41 @@ function Get-SshAgent() {
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
 function Start-SshAgent([switch]$Quiet) {
-    [int]$agentPid = Get-SshAgent
-    if ($agentPid -gt 0) {
-        if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($agentPid))" }
-        return
-    }
-
-    $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
-    if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
-
-    & $sshAgent | foreach {
-        if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
-            setenv $Matches['key'] $Matches['value']
+    if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
+        Write-Host "GIT_SSH set to plink.exe, using Pageant as SSH agent."
+        $pageantPid = Get-Process pageant -ErrorAction SilentlyContinue | Select -ExpandProperty Id
+        if (!$pageantPid) {
+            $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
+            if ($pageant) {
+                Write-Host "Starting Pageant"
+                $keyPath = Join-Path $Env:HOME ".ssh"
+                $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
+                $keystring = ""
+                foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
+                & $pageant "$keystring"
+            }
+            else { Write-Warning "Could not find Pageant." }
         }
+        else { Write-Host "Pageant is already running (pid $($pageantPid))" }
     }
+    else {
+        [int]$agentPid = Get-SshAgent
+        if ($agentPid -gt 0) {
+            if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($agentPid))" }
+            return
+        }
 
-    Add-SshKey
+        $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
+        if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
+
+        & $sshAgent | foreach {
+            if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
+                setenv $Matches['key'] $Matches['value']
+            }
+        }
+
+        Add-SshKey
+    }
 }
 
 function Get-SshPath($File = 'id_rsa')
