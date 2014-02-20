@@ -266,13 +266,8 @@ function Start-SshAgent([switch]$Quiet) {
             $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
             if ($pageant) {
                 Write-Host "Starting Pageant"
-                $keyPath = Join-Path $Env:HOME ".ssh"
-                $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
-                $keystring = ""
-                foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
-                & $pageant "$keystring"
             }
-            else { Write-Warning "Could not find Pageant." }
+            else { Write-Warning "Could not find Pageant."; return }
         }
         else { Write-Host "Pageant is already running (pid $($pageantPid))" }
     }
@@ -291,9 +286,8 @@ function Start-SshAgent([switch]$Quiet) {
                 setenv $Matches['key'] $Matches['value']
             }
         }
-
-        Add-SshKey
     }
+    Add-SshKey
 }
 
 function Get-SshPath($File = 'id_rsa')
@@ -304,14 +298,32 @@ function Get-SshPath($File = 'id_rsa')
 
 # Add a key to the SSH agent
 function Add-SshKey() {
-    $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
-    if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
+    if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
+        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
+        if ($pageant) {
+            if ($args.Count -eq 0) {
+                $keystring = ""
+                $keyPath = Join-Path $Env:HOME ".ssh"
+                $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
+                foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
+                & $pageant "$keystring"
+            } else {
+                foreach ($value in $args) {
+                    & $pageant $value
+                }
+            }
+        }
+    }
+    else {
+        $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
+        if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-    if ($args.Count -eq 0) {
-        & $sshAdd
-    } else {
-        foreach ($value in $args) {
-            & $sshAdd $value
+        if ($args.Count -eq 0) {
+            & $sshAdd
+        } else {
+            foreach ($value in $args) {
+                & $sshAdd $value
+            }
         }
     }
 }
