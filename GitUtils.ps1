@@ -265,25 +265,19 @@ function Get-SshAgent() {
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
 function Start-SshAgent([switch]$Quiet) {
+    [int]$agentPid = Get-SshAgent
+    if ($agentPid -gt 0) {
+        if (!$Quiet) { Write-Host "$($(Get-Process -Id $agentPid).Name) is already running (pid $($agentPid))" }
+        return
+    }
+
     if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
-        Write-Host "GIT_SSH set to plink.exe, using Pageant as SSH agent."
-        $pageantPid = Get-SshAgent
-        if (!$pageantPid) {
-            $pageant = (Get-Command pageant -Erroraction SilentlyContinue).Name
-            if ($pageant) {
-                Write-Host "Starting Pageant"
-            }
-            else { Write-Warning "Could not find Pageant."; return }
-        }
-        else { Write-Host "Pageant is already running (pid $($pageantPid))" }
+        Write-Host "GIT_SSH set to $($env:GIT_SSH), using Pageant as SSH agent."
+        $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
+        if (!$pageant) { Write-Warning "Could not find Pageant."; return }
+        & $pageant
     }
     else {
-        [int]$agentPid = Get-SshAgent
-        if ($agentPid -gt 0) {
-            if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($agentPid))" }
-            return
-        }
-
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
         if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
