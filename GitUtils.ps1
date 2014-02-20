@@ -243,14 +243,20 @@ function Set-TempEnv($key, $value) {
 # Retrieve the current SSH agent PID (or zero). Can be used to determine if there
 # is a running agent.
 function Get-SshAgent() {
-    $agentPid = $Env:SSH_AGENT_PID
-    if ($agentPid) {
-        $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
-        if ($sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
-            return $agentPid
-        } else {
-            setenv 'SSH_AGENT_PID', $null
-            setenv 'SSH_AUTH_SOCK', $null
+    if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
+        $pageantPid = (Get-Process pageant -ErrorAction SilentlyContinue).Id
+        if ($pageantPid) { return $pageantPid }
+    }
+    else{
+        $agentPid = $Env:SSH_AGENT_PID
+        if ($agentPid) {
+            $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
+            if ($sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
+                return $agentPid
+            } else {
+                setenv 'SSH_AGENT_PID', $null
+                setenv 'SSH_AUTH_SOCK', $null
+            }
         }
     }
 
@@ -261,9 +267,9 @@ function Get-SshAgent() {
 function Start-SshAgent([switch]$Quiet) {
     if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
         Write-Host "GIT_SSH set to plink.exe, using Pageant as SSH agent."
-        $pageantPid = Get-Process pageant -ErrorAction SilentlyContinue | Select -ExpandProperty Id
+        $pageantPid = Get-SshAgent
         if (!$pageantPid) {
-            $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
+            $pageant = (Get-Command pageant -Erroraction SilentlyContinue).Name
             if ($pageant) {
                 Write-Host "Starting Pageant"
             }
@@ -299,12 +305,12 @@ function Get-SshPath($File = 'id_rsa')
 # Add a key to the SSH agent
 function Add-SshKey() {
     if ($env:GIT_SSH -and $env:GIT_SSH.toLower().Contains('plink')) {
-        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
+        $pageant = (Get-Command pageant -Erroraction SilentlyContinue).Name
         if ($pageant) {
             if ($args.Count -eq 0) {
                 $keystring = ""
                 $keyPath = Join-Path $Env:HOME ".ssh"
-                $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
+                $keys = (Get-ChildItem $keyPath/"*.ppk").Name
                 foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
                 & $pageant "$keystring"
             } else {
