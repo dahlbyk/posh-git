@@ -330,7 +330,7 @@ function Stop-SshAgent() {
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         # Stop agent process
-        $proc = Get-Process -Id $agentPid
+        $proc = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
         if ($proc -ne $null) {
             Stop-Process $agentPid
         }
