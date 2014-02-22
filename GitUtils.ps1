@@ -244,7 +244,7 @@ function Set-TempEnv($key, $value) {
 # is a running agent.
 function Get-SshAgent() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = (Get-Process pageant -ErrorAction SilentlyContinue).Id
+        $pageantPid = Get-Process pageant -ErrorAction SilentlyContinue | Select -ExpandProperty Id
         if ($pageantPid) { return $pageantPid }
     } else {
         $agentPid = $Env:SSH_AGENT_PID
@@ -266,7 +266,11 @@ function Get-SshAgent() {
 function Start-SshAgent([switch]$Quiet) {
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
-        if (!$Quiet) { Write-Host "$($(Get-Process -Id $agentPid).Name) is already running (pid $($agentPid))" }
+        if (!$Quiet) {
+            $agentName = Get-Process -Id $agentPid | Select -ExpandProperty Name
+            if (!$agentName) { $agentName = "SSH Agent" }
+            Write-Host "$agentName is already running (pid $($agentPid))"
+        }
         return
     }
 
@@ -297,13 +301,13 @@ function Get-SshPath($File = 'id_rsa')
 # Add a key to the SSH agent
 function Add-SshKey() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageant = (Get-Command pageant -Erroraction SilentlyContinue).Name
+        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
 
         if ($args.Count -eq 0) {
             $keystring = ""
             $keyPath = Join-Path $Env:HOME ".ssh"
-            $keys = (Get-ChildItem $keyPath/"*.ppk").Name
+            $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
             foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
             & $pageant "$keystring"
         } else {
