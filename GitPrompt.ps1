@@ -45,8 +45,16 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnablePromptStatus        = !$Global:GitMissing
     EnableFileStatus          = $true
     RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
+    DescribeStyle             = ''
+
+    EnableWindowTitle         = 'posh~git ~ '
 
     Debug                     = $false
+}
+
+$WindowTitleSupported = $true
+if (Get-Module NuGet) {
+    $WindowTitleSupported = $false
 }
 
 function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
@@ -123,10 +131,21 @@ function Write-GitStatus($status) {
         }
 
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
+
+        if ($WindowTitleSupported -and $s.EnableWindowTitle) {
+            if( -not $Global:PreviousWindowTitle ) {
+                $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
+            }
+            $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
+            $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
+            $Host.UI.RawUI.WindowTitle = "$prefix$repoName [$($status.Branch)]"
+        }
+    } elseif ( $Global:PreviousWindowTitle ) {
+        $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
     }
 }
 
-if((Get-Variable -Scope Global -Name VcsPromptStatuses -ErrorAction SilentlyContinue) -eq $null) {
+if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
 }
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
