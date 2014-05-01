@@ -27,4 +27,4 @@ Enable-GitColors
 
 Pop-Location
 
-Start-SshAgent -Quiet
+Start-Ssh-Agent -Quiet
