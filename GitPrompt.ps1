@@ -51,9 +51,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     Debug                     = $false
 
-    EnableBranchNameLimit     = $true
-    BranchNameLimit           = 20
-    TruncatedBranchSuffix     = "..."
+    BranchNameLimit           = 0
+    TruncatedBranchSuffix     = '...'
 }
 
 $WindowTitleSupported = $true
@@ -72,7 +71,7 @@ function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
 function Format-BranchName($branchName){
     $s = $global:GitPromptSettings
 
-    if($s.EnableBranchNameLimit -eq $true)
+    if($s.BranchNameLimit -gt 0 -and $branchName.Length -gt $s.BranchNameLimit)
     {
         $branchName = "{0}{1}" -f $branchName.Substring(0,$s.BranchNameLimit), $s.TruncatedBranchSuffix
     }
