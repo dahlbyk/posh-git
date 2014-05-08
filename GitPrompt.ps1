@@ -50,6 +50,10 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnableWindowTitle         = 'posh~git ~ '
 
     Debug                     = $false
+
+    EnableBranchNameLimit     = $true
+    BranchNameLimit           = 20
+    TruncatedBranchSuffix     = "..."
 }
 
 $WindowTitleSupported = $true
@@ -63,6 +67,17 @@ function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
     } else {
         Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
     }
+}
+
+function Format-BranchName($branchName){
+    $s = $global:GitPromptSettings
+
+    if($s.EnableBranchNameLimit -eq $true)
+    {
+        $branchName = "{0}{1}" -f $branchName.Substring(0,$s.BranchNameLimit), $s.TruncatedBranchSuffix
+    }
+
+    return $branchName
 }
 
 function Write-GitStatus($status) {
@@ -86,7 +101,7 @@ function Write-GitStatus($status) {
             $branchForegroundColor = $s.BranchAheadForegroundColor
         }
 
-        Write-Prompt $status.Branch -BackgroundColor $branchBackgroundColor -ForegroundColor $branchForegroundColor
+        Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchBackgroundColor -ForegroundColor $branchForegroundColor
 
         if($s.EnableFileStatus -and $status.HasIndex) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
