@@ -3,7 +3,7 @@
 
 $global:GitPromptSettings = New-Object PSObject -Property @{
     DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor
-
+    
     BeforeText                = ' ['
     BeforeForegroundColor     = [ConsoleColor]::Yellow
     BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
@@ -52,7 +52,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     Debug                     = $false
 
     BranchNameLimit           = 0
-    TruncatedBranchSuffix     = '...'
+    TruncatedBranchSuffix     = '…'
 }
 
 $WindowTitleSupported = $true
