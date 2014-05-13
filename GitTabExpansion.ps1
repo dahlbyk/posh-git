@@ -310,3 +310,28 @@ function TabExpansion($line, $lastWord) {
         default { if (Test-Path Function:\TabExpansionBackup) { TabExpansionBackup $line $lastWord } }
     }
 }
+
+# Enable writing alias's that still support Tab-Expansion
+#
+# Requires PowerTab
+#
+function Register-TabExpansion-Alias([string]$alias, [string]$expansion) {
+
+    Invoke-Expression "function global:$alias { $expansion `$args }"
+
+    Register-TabExpansion -Name $alias -Type Command {
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces) 
+
+        $Argument = $Context.Argument
+        if ( $Argument -notlike '^\$' ){
+            $TabExpansionHasoutput.Value = $true 
+            TabExpansion "$expansion $Argument"
+        }
+    }.GetNewClosure()
+}
+
+# Examples of alias's supporting tab expansion
+#
+#Register-TabExpansion-Alias "gco" "git checkout"
+#Register-TabExpansion-Alias "grb" "git rebase"
+
