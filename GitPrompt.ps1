@@ -52,7 +52,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     Debug                     = $false
 
     BranchNameLimit           = 0
-    TruncatedBranchSuffix     = '…'
+    TruncatedBranchSuffix     = '...'
 }
 
 $WindowTitleSupported = $true
