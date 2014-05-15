@@ -243,14 +243,19 @@ function Set-TempEnv($key, $value) {
 # Retrieve the current SSH agent PID (or zero). Can be used to determine if there
 # is a running agent.
 function Get-SshAgent() {
-    $agentPid = $Env:SSH_AGENT_PID
-    if ($agentPid) {
-        $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
-        if ($sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
-            return $agentPid
-        } else {
-            setenv 'SSH_AGENT_PID', $null
-            setenv 'SSH_AUTH_SOCK', $null
+    if ($env:GIT_SSH -imatch 'plink') {
+        $pageantPid = Get-Process pageant -ErrorAction SilentlyContinue | Select -ExpandProperty Id
+        if ($pageantPid) { return $pageantPid }
+    } else {
+        $agentPid = $Env:SSH_AGENT_PID
+        if ($agentPid) {
+            $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
+            if ($sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
+                return $agentPid
+            } else {
+                setenv 'SSH_AGENT_PID', $null
+                setenv 'SSH_AUTH_SOCK', $null
+            }
         }
     }
 
@@ -261,19 +266,29 @@ function Get-SshAgent() {
 function Start-SshAgent([switch]$Quiet) {
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
-        if (!$Quiet) { Write-Host "ssh-agent is already running (pid $($agentPid))" }
+        if (!$Quiet) {
+            $agentName = Get-Process -Id $agentPid | Select -ExpandProperty Name
+            if (!$agentName) { $agentName = "SSH Agent" }
+            Write-Host "$agentName is already running (pid $($agentPid))"
+        }
         return
     }
 
-    $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
-    if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
+    if ($env:GIT_SSH -imatch 'plink') {
+        Write-Host "GIT_SSH set to $($env:GIT_SSH), using Pageant as SSH agent."
+        $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
+        if (!$pageant) { Write-Warning "Could not find Pageant."; return }
+        & $pageant
+    } else {
+        $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
+        if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
-    & $sshAgent | foreach {
-        if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
-            setenv $Matches['key'] $Matches['value']
+        & $sshAgent | foreach {
+            if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
+                setenv $Matches['key'] $Matches['value']
+            }
         }
     }
-
     Add-SshKey
 }
 
@@ -285,14 +300,31 @@ function Get-SshPath($File = 'id_rsa')
 
 # Add a key to the SSH agent
 function Add-SshKey() {
-    $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
-    if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
+    if ($env:GIT_SSH -imatch 'plink') {
+        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
+        if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
 
-    if ($args.Count -eq 0) {
-        & $sshAdd
+        if ($args.Count -eq 0) {
+            $keystring = ""
+            $keyPath = Join-Path $Env:HOME ".ssh"
+            $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
+            foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
+            & $pageant "$keystring"
+        } else {
+            foreach ($value in $args) {
+                & $pageant $value
+            }
+        }
     } else {
-        foreach ($value in $args) {
-            & $sshAdd $value
+        $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
+        if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
+
+        if ($args.Count -eq 0) {
+            & $sshAdd
+        } else {
+            foreach ($value in $args) {
+                & $sshAdd $value
+            }
         }
     }
 }
@@ -302,7 +334,7 @@ function Stop-SshAgent() {
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         # Stop agent process
-        $proc = Get-Process -Id $agentPid
+        $proc = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
         if ($proc -ne $null) {
             Stop-Process $agentPid
         }
