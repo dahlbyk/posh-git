@@ -262,6 +262,16 @@ function Get-SshAgent() {
     return 0
 }
 
+# Attempt to guess Pageant's location
+function Guess-Pageant() {
+    Write-Verbose "Pageant not in path. Trying to guess location."
+    if ($env:GIT_SSH -and (test-path $env:GIT_SSH)) {
+        $pageant = join-path (split-path $env:GIT_SSH) pageant
+    }
+    if (!(get-command $pageant -Erroraction SilentlyContinue)) { return }     # Guessing failed.
+    else { return $pageant }
+}
+
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
 function Start-SshAgent([switch]$Quiet) {
     [int]$agentPid = Get-SshAgent
@@ -277,6 +287,7 @@ function Start-SshAgent([switch]$Quiet) {
     if ($env:GIT_SSH -imatch 'plink') {
         Write-Host "GIT_SSH set to $($env:GIT_SSH), using Pageant as SSH agent."
         $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
+        $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning "Could not find Pageant."; return }
         & $pageant
     } else {
@@ -302,6 +313,7 @@ function Get-SshPath($File = 'id_rsa')
 function Add-SshKey() {
     if ($env:GIT_SSH -imatch 'plink') {
         $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
+        $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
 
         if ($args.Count -eq 0) {
