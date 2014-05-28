@@ -272,6 +272,16 @@ function Guess-Pageant() {
     else { return $pageant }
 }
 
+# Attempt to guess $program's location. For ssh-agent/ssh-add.
+function Guess-Ssh($program = 'ssh-agent') {
+    Write-Verbose "$program not in path. Trying to guess location."
+    if (!(get-command git -Erroraction SilentlyContinue)) { Write-Warning 'git not in path'; return }
+    $sshLocation = join-path (get-item(get-command git).path).directory.parent.fullname bin
+    $sshLocation = join-path $sshLocation $program
+    if (!(get-command $sshLocation -Erroraction SilentlyContinue)) { return }     # Guessing failed.
+    else { return $sshLocation }
+}
+
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
 function Start-SshAgent([switch]$Quiet) {
     [int]$agentPid = Get-SshAgent
@@ -292,6 +302,7 @@ function Start-SshAgent([switch]$Quiet) {
         & $pageant
     } else {
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
+        $sshAgent = if ($sshAgent) {$sshAgent} else {Guess-Ssh('ssh-agent')}
         if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
         & $sshAgent | foreach {
@@ -329,6 +340,7 @@ function Add-SshKey() {
         }
     } else {
         $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
+        $sshAdd = if ($sshAdd) {$sshAdd} else {Guess-Ssh('ssh-add')}
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
         if ($args.Count -eq 0) {
