@@ -309,7 +309,7 @@ function Add-SshKey() {
             $keyPath = Join-Path $Env:HOME ".ssh"
             $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
             foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
-            & $pageant "$keystring"
+            if ( $keystring ) { & $pageant "$keystring" }
         } else {
             foreach ($value in $args) {
                 & $pageant $value
