@@ -118,62 +118,106 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
-            $status = git -c color.status=false status --short --branch 2>$null
+            if ($settings.UseGitPrompt) {
+                $status = GitPromptClient 2>$null
+            } else {
+                $status = git -c color.status=false status --short --branch 2>$null
+            }
         } else {
             $status = @()
         }
 
-        dbg 'Parsing status' $sw
-        $status | foreach {
-            dbg "Status: $_" $sw
-            if($_) {
-                switch -regex ($_) {
-                    '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
-                        switch ($matches['index']) {
-                            'A' { $indexAdded += $matches['path1'] }
-                            'M' { $indexModified += $matches['path1'] }
-                            'R' { $indexModified += $matches['path1'] }
-                            'C' { $indexModified += $matches['path1'] }
-                            'D' { $indexDeleted += $matches['path1'] }
-                            'U' { $indexUnmerged += $matches['path1'] }
-                        }
-                        switch ($matches['working']) {
-                            '?' { $filesAdded += $matches['path1'] }
-                            'A' { $filesAdded += $matches['path1'] }
-                            'M' { $filesModified += $matches['path1'] }
-                            'D' { $filesDeleted += $matches['path1'] }
-                            'U' { $filesUnmerged += $matches['path1'] }
+        if ($settings.UseGitPrompt) {
+            dbg 'Parsing status' $sw
+            $status | foreach {
+                dbg "Status: $_" $sw
+                if($_) {
+                    switch -regex ($_) {
+                        '^\((?<branch>\S+)\) i\[\+(?<ia>\d+), -(?<id>\d+), \~(?<im>\d+)\] w\[\+(?<fa>\d+), -(?<fd>\d+), \~(?<fm>\d+)\] (?<state>\S+)$' {
+                            $branch = $matches['branch']
+                            $indexAddedCount = $matches['ia']
+                            $indexModifiedCount = $matches['im']
+                            $indexDeletedCount = $matches['id']
+                            $filesAddedCount = $matches['fa']
+                            $filesModifiedCount = $matches['fm']
+                            $filesDeletedCount = $matches['fd']
                         }
                     }
+                }
 
-                    '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
-                        $branch = $matches['branch']
-                        $upstream = $matches['upstream']
-                        $aheadBy = [int]$matches['ahead']
-                        $behindBy = [int]$matches['behind']
+                $indexCount = [int]$indexAddedCount + [int]$indexModifiedCount + [int]$indexDeletedCount
+                $filesCount = [int]$filesAddedCount + [int]$filesModifiedCount + [int]$filesDeletedCount
+                echo $indexCount
+                echo $filesCount
+                if ($indexCount -gt 0) {
+                    $index = New-Object PSObject -Property @{
+                        Added    = [int]$indexAddedCount
+                            Modified = [int]$indexModifiedCount
+                            Deleted  = [int]$indexDeletedCount
                     }
+                }
 
-                    '^## Initial commit on (?<branch>\S+)$' {
-                        $branch = $matches['branch']
+                if ($filesCount -gt 0) {
+                    $working = New-Object PSObject -Property @{
+                        Added    = [int]$filesAddedCount
+                            Modified = [int]$filesModifiedCount
+                            Deleted  = [int]$filesDeletedCount
                     }
                 }
             }
-        }
+        } else {
+            dbg 'Parsing status' $sw
+            $status | foreach {
+                dbg "Status: $_" $sw
+                if($_) {
+                    switch -regex ($_) {
+                        '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
+                            switch ($matches['index']) {
+                                'A' { $indexAdded += $matches['path1'] }
+                                'M' { $indexModified += $matches['path1'] }
+                                'R' { $indexModified += $matches['path1'] }
+                                'C' { $indexModified += $matches['path1'] }
+                                'D' { $indexDeleted += $matches['path1'] }
+                                'U' { $indexUnmerged += $matches['path1'] }
+                            }
+                            switch ($matches['working']) {
+                                '?' { $filesAdded += $matches['path1'] }
+                                'A' { $filesAdded += $matches['path1'] }
+                                'M' { $filesModified += $matches['path1'] }
+                                'D' { $filesDeleted += $matches['path1'] }
+                                'U' { $filesUnmerged += $matches['path1'] }
+                            }
+                        }
 
-        if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
-        dbg 'Building status object' $sw
-        $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
-        $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
-        $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
-            Add-Member -PassThru NoteProperty Added    $indexAdded |
-            Add-Member -PassThru NoteProperty Modified $indexModified |
-            Add-Member -PassThru NoteProperty Deleted  $indexDeleted |
-            Add-Member -PassThru NoteProperty Unmerged $indexUnmerged
-        $working = New-Object PSObject @(,@($workingPaths | ?{ $_ } | Select -Unique)) |
-            Add-Member -PassThru NoteProperty Added    $filesAdded |
-            Add-Member -PassThru NoteProperty Modified $filesModified |
-            Add-Member -PassThru NoteProperty Deleted  $filesDeleted |
-            Add-Member -PassThru NoteProperty Unmerged $filesUnmerged
+                        '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                            $branch = $matches['branch']
+                            $upstream = $matches['upstream']
+                            $aheadBy = [int]$matches['ahead']
+                            $behindBy = [int]$matches['behind']
+                        }
+
+                        '^## Initial commit on (?<branch>\S+)$' {
+                            $branch = $matches['branch']
+                        }
+                    }
+                }
+            }
+            if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
+            dbg 'Building status object' $sw
+            $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
+            $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
+
+            $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
+                Add-Member -PassThru NoteProperty Added    $indexAdded.Count |
+                Add-Member -PassThru NoteProperty Modified $indexModified.Count |
+                Add-Member -PassThru NoteProperty Deleted  $indexDeleted.Count |
+                Add-Member -PassThru NoteProperty Unmerged $indexUnmerged.Count
+            $working = New-Object PSObject @(,@($workingPaths | ?{ $_ } | Select -Unique)) |
+                Add-Member -PassThru NoteProperty Added    $filesAdded.Count |
+                Add-Member -PassThru NoteProperty Modified $filesModified.Count |
+                Add-Member -PassThru NoteProperty Deleted  $filesDeleted.Count |
+                Add-Member -PassThru NoteProperty Unmerged $filesUnmerged.Count
+        }
 
         $result = New-Object PSObject -Property @{
             GitDir          = $gitDir

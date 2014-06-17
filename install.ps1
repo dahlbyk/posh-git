@@ -20,6 +20,18 @@ if(!(. (Join-Path $installDir "CheckVersion.ps1"))) {
     return
 }
 
+$gitpromptfiles = 'GitPromptClient.exe', 'GitPromptCache.exe', 'git2.dll'
+taskkill /f /im gitpromptcache.exe
+$binDir = Join-Path $installDir "bin"
+mkdir $binDir
+
+foreach ($file in $gitpromptfiles)
+{
+    Remove-Item "$binDir\$file"
+    wget -Uri "https://github.com/fieryorc/gitprompt/releases/download/v0.1-beta.3/$file" -OutFile "$binDir\$file"
+}
+
+
 # Adapted from http://www.west-wind.com/Weblog/posts/197245.aspx
 function Get-FileEncoding($Path) {
     $bytes = [byte[]](Get-Content $Path -Encoding byte -ReadCount 4 -TotalCount 4)
