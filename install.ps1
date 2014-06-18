@@ -35,7 +35,7 @@ foreach ($file in $gitpromptfiles)
         Remove-Item "$filePath"
     }
     echo "Downloading file: $filePath"
-    wget -Uri "https://github.com/fieryorc/gitprompt/releases/download/v0.1-beta.3/$file" -OutFile "$filePath"
+    wget -Uri "https://github.com/fieryorc/gitprompt/releases/download/v0.1-beta.4/$file" -OutFile "$filePath"
 }
 
 
