@@ -3,6 +3,9 @@ posh-git
 
 A set of PowerShell scripts which provide Git/PowerShell integration
 
+###NOTE
+  This version of posh-git uses GitPrompt (https://github.com/fieryorc/gitprompt) by default. GitPrompt makes displaying prompt much faster regardless of the repo size.
+
 ### Prompt for Git repositories
    The prompt within Git repositories can show the current branch and the state of files (additions, modifications, deletions) within.
    

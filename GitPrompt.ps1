@@ -50,7 +50,14 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnableWindowTitle         = 'posh~git ~ '
 
     Debug                     = $false
+
+    UseGitPrompt              = $true
 }
+
+if(!(Get-Command GitPromptClient -ErrorAction SilentlyContinue)) {
+    $global:GitPromptSettings.UseGitPrompt = $false
+}
+
 
 $WindowTitleSupported = $true
 if (Get-Module NuGet) {
@@ -92,17 +99,17 @@ function Write-GitStatus($status) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
 
             if($s.ShowStatusWhenZero -or $status.Index.Added) {
-              Write-Prompt " +$($status.Index.Added.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt " +$($status.Index.Added)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Modified) {
-              Write-Prompt " ~$($status.Index.Modified.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt " ~$($status.Index.Modified)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
-              Write-Prompt " -$($status.Index.Deleted.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt " -$($status.Index.Deleted)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if ($status.Index.Unmerged) {
-                Write-Prompt " !$($status.Index.Unmerged.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+                Write-Prompt " !$($status.Index.Unmerged)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if($status.HasWorking) {
@@ -112,17 +119,17 @@ function Write-GitStatus($status) {
 
         if($s.EnableFileStatus -and $status.HasWorking) {
             if($s.ShowStatusWhenZero -or $status.Working.Added) {
-              Write-Prompt " +$($status.Working.Added.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt " +$($status.Working.Added)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Modified) {
-              Write-Prompt " ~$($status.Working.Modified.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt " ~$($status.Working.Modified)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
-              Write-Prompt " -$($status.Working.Deleted.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt " -$($status.Working.Deleted)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
 
             if ($status.Working.Unmerged) {
-                Write-Prompt " !$($status.Working.Unmerged.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+                Write-Prompt " !$($status.Working.Unmerged)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
         }
 

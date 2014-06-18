@@ -1,5 +1,8 @@
 Push-Location (Split-Path -Path $MyInvocation.MyCommand.Definition -Parent)
 
+$installDir = Split-Path $MyInvocation.MyCommand.Path -Parent
+$env:path = "$installdir\bin;" + $env:path
+
 # Load posh-git module from current directory
 Import-Module .\posh-git
 
@@ -28,3 +31,4 @@ Enable-GitColors
 Pop-Location
 
 Start-SshAgent -Quiet
+
