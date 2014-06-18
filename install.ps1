@@ -21,14 +21,21 @@ if(!(. (Join-Path $installDir "CheckVersion.ps1"))) {
 }
 
 $gitpromptfiles = 'GitPromptClient.exe', 'GitPromptCache.exe', 'git2.dll'
-taskkill /f /im gitpromptcache.exe
+taskkill /f /im gitpromptcache.exe >$null 2>$null
 $binDir = Join-Path $installDir "bin"
-mkdir $binDir
+if (!(Test-Path -PathType Container $bindir)) {
+    mkdir $binDir >$null
+}
+
 
 foreach ($file in $gitpromptfiles)
 {
-    Remove-Item "$binDir\$file"
-    wget -Uri "https://github.com/fieryorc/gitprompt/releases/download/v0.1-beta.3/$file" -OutFile "$binDir\$file"
+    $filePath = Join-path $bindir $file
+    if (Test-Path $filePath -ErrorAction SilentlyContinue) {
+        Remove-Item "$filePath"
+    }
+    echo "Downloading file: $filePath"
+    wget -Uri "https://github.com/fieryorc/gitprompt/releases/download/v0.1-beta.3/$file" -OutFile "$filePath"
 }
 
 
