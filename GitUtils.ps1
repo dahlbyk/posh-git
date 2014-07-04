@@ -217,6 +217,7 @@ function Get-AliasPattern($exe) {
 
 function setenv($key, $value) {
     [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+    [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::User)
     Set-TempEnv $key $value
 }
 
@@ -225,6 +226,7 @@ function Get-TempEnv($key) {
     if (Test-Path $path) {
         $value =  Get-Content $path
         [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+        [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::User)
     }
 }
 
@@ -320,7 +322,12 @@ function Add-SshKey() {
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
         if ($args.Count -eq 0) {
-            & $sshAdd
+            $keyPath = Join-Path $Env:HOME ".ssh"
+            $keys = Get-ChildItem $keyPath/"*_rsa" | Select -ExpandProperty FullName
+            foreach($key in $keys)
+            {
+                & $sshAdd $key
+            }
         } else {
             foreach ($value in $args) {
                 & $sshAdd $value
