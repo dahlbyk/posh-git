@@ -1,11 +1,45 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
+<#
+.SYNOPSIS
+    Get the path of the .git directory
+
+.DESCRIPTION
+    Returns the location of the .git directory. If environment variable GIT_DIR 
+    has been defined, the return value will be the content of GIT_DIR.
+    This command can be piped and it will return 
+    If one or more 
+
+.PARAMETER Path
+    Path of the location to start searching from.
+
+.LINK
+    http://git-scm.com/blog/2010/04/11/environment.html
+
+#>
 function Get-GitDirectory {
-    if ($Env:GIT_DIR) {
-        $Env:GIT_DIR
-    } else {
-        Get-LocalOrParentPath .git
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromPipeline=$true,Position=0)]
+        [AllowEmptyCollection()]
+        [String[]] $Path
+    )
+    
+    PROCESS{
+        if ($Env:GIT_DIR) {
+            return Get-Item $Env:GIT_DIR
+        }
+
+        if (!$Path) {
+            return Get-LocalOrParentPath .git
+        }
+
+        $all = @()
+        foreach ($l in $Path) {
+            $all = $all + @(Get-LocalOrParentPath .git $l)
+        }
+        return $all | Get-Unique
     }
 }
 
@@ -94,14 +128,30 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     }
 }
 
-function Get-GitStatus($gitDir = (Get-GitDirectory)) {
+<#
+.SYNOPSIS
+    Show the working tree status.
+#>
+function Get-GitStatus {
+    param(
+        [parameter(ValueFromPipeline=$true,Position=0)]
+        [string[]] $GitDir = (Get-GitDirectory)
+    )
+    process {
+        $GitDir | foreach {
+            return GitStatusOf($_)
+        }
+    }
+}
+
+function GitStatusOf($GitDir) {
     $settings = $Global:GitPromptSettings
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
-    if ($enabled -and $gitDir)
-    {
+    if ($enabled -and $GitDir) {
         if($settings.Debug) {
             $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
-        } else {
+        }
+        else {
             $sw = $null
         }
         $branch = $null
@@ -116,7 +166,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesDeleted = @()
         $filesUnmerged = @()
 
-        if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
+        if ($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
             $status = git -c color.status=false status --short --branch 2>$null
         } else {
