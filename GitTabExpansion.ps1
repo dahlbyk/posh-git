@@ -164,6 +164,11 @@ function GitTabExpansion($lastBlock) {
             # Need return statement to prevent fall-through.
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
     }
+	
+	# Handles gitk
+	if($lastBlock -match "^$(Get-AliasPattern gitk) (?<ref>\S*)$"){			
+            return gitBranches $matches['ref'] $true
+	}
 
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
