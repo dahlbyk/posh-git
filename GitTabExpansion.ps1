@@ -166,7 +166,7 @@ function GitTabExpansion($lastBlock) {
     }
 
     # Handles gitk
-    if($lastBlock -match "^$(Get-AliasPattern gitk) (?<ref>\S*)$"){
+    if($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
         return gitBranches $matches['ref'] $true
     }
 
