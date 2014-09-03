@@ -3,6 +3,42 @@
 
 <#
 .SYNOPSIS
+    Test if directory is within Git working tree.
+
+.DESCRIPTION
+    Returns True if the directory is in a Git working tree.
+
+    This can be used in a pipeline to check if a specific 
+    location is a part of a Git working tree. 
+#>
+function Test-GitWorkingTree {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromPipeline=$true,Position=0)]
+        [AllowEmptyCollection()]
+        [String[]] $Path,
+
+        [Parameter()]
+        [String] $GitDir = $Env:GIT_DIR
+    )
+    PROCESS {
+        $p = ?? $Path @(Get-Location)
+        if ($Env:GIT_DIR) {
+            return if ($Env:GIT_WORK_TREE) {
+                $gwt = [IO.Path]::GetFullPath($Env:GIT_WORK_TREE)
+            } else {
+                Write-Error 
+            }
+        }
+
+        $Path | foreach {
+            if (Get-LocalOrParentPath .git $_) { $true } else { $false }
+        }
+    }
+}
+
+<#
+.SYNOPSIS
     Get the path of the .git directory
 
 .DESCRIPTION
@@ -35,11 +71,9 @@ function Get-GitDirectory {
             return Get-LocalOrParentPath .git
         }
 
-        $all = @()
-        foreach ($l in $Path) {
-            $all = $all + @(Get-LocalOrParentPath .git $l)
-        }
-        return $all | Get-Unique
+        $Path | foreach {
+           @(Get-LocalOrParentPath .git $_)
+        } | Get-Unique
     }
 }
 
