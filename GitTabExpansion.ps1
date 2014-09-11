@@ -85,7 +85,7 @@ function script:gitFeatures($filter, $command){
 function script:gitRemoteBranches($remote, $ref, $filter) {
     git branch --no-color -r |
         where { $_ -like "  $remote/$filter*" } |
-        foreach { $ref + ($_ -replace "  $remote/","") }
+        foreach { $ref + ($_ -replace "  $remote","") }
 }
 
 function script:gitStashes($filter) {
