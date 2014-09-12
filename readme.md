@@ -18,8 +18,17 @@ Prompt formatting, among other things, can be customized using `$GitPromptSettin
 
 Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
 
-Installing
-----------
+Installing via PsGet
+--------------------
+
+If you have [PsGet](http://psget.net/) installed just run:
+
+```
+Install-Module posh-git
+```
+
+Installing (manual)
+-------------------
 
 0. Verify you have PowerShell 2.0 or better with $PSVersionTable.PSVersion
 
