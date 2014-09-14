@@ -301,7 +301,7 @@ function Get-SshPath($File = 'id_rsa')
 # Add a key to the SSH agent
 function Add-SshKey() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
+        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
 
         if ($args.Count -eq 0) {
