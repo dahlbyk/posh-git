@@ -1,4 +1,4 @@
-$packageName = "poshgit"
+﻿$packageName = "poshgit"
 cpack
 
 function Setup-Environment {
@@ -18,7 +18,7 @@ function Clean-Temp {
 }
 
 function RunInstall {
-    cinst $packageName -source (Resolve-Path .) 
+    cinst $packageName -source (Resolve-Path .)
 }
 $binRoot = join-path $env:systemdrive 'tools'
 if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}

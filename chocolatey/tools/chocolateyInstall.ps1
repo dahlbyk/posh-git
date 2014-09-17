@@ -1,4 +1,4 @@
-function Insert-Script([ref]$originalScript, $script) {
+﻿function Insert-Script([ref]$originalScript, $script) {
     if(!($originalScript.Value -Contains $script)) { $originalScript.Value += $script }
 }
 
@@ -9,7 +9,7 @@ try {
     ### Using an environment variable to to define the bin root until we implement YAML configuration ###
     if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
     $poshgitPath = join-path $binRoot 'poshgit'
-    
+
     try {
       if (test-path($poshgitPath)) {
         Write-Host "Attempting to remove existing `'$poshgitPath`' prior to install."
@@ -30,9 +30,9 @@ try {
         #If old profile exists replace with new one and make sure prompt preservation function is on top
         $pgitExample = "$pgitDir\profile.example.ps1"
         foreach($line in $oldProfile) {
-            if($line.ToLower().Contains("$poshgitPath".ToLower())) { 
+            if($line.ToLower().Contains("$poshgitPath".ToLower())) {
                 Insert-Script ([REF]$newProfile) $oldPromptOverride
-                $line = ". '$pgitExample'" 
+                $line = ". '$pgitExample'"
             }
             if($line.Trim().Length -gt 0) {  $newProfile += $line }
         }
@@ -62,7 +62,8 @@ try {
   try {
     if($oldProfile){ Set-Content -path $PROFILE -value $oldProfile -Force }
   }
-  catch{}  
+  catch{}
   Write-ChocolateyFailure 'poshgit' $($_.Exception.Message)
   throw
 }
+
