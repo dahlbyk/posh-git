@@ -26,6 +26,7 @@ Export-ModuleMember `
         'Get-GitStatus', 
         'Enable-GitColors', 
         'Get-GitDirectory',
+        'Test-GitWorkingTree',
         'TabExpansion',
         'Get-AliasPattern',
         'Get-SshAgent',
