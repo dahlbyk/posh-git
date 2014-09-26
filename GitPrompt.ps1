@@ -49,6 +49,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnableWindowTitle         = 'posh~git ~ '
 
+    AutoPathFix               = $false
     Debug                     = $false
 }
 
@@ -155,3 +156,24 @@ $Global:VcsPromptStatuses += {
     $Global:GitStatus = Get-GitStatus
     Write-GitStatus $GitStatus
 }
+
+function Global:Reset-LocationCase($path){
+    if ($path -eq $null){
+        $path = $pwd
+    }
+    $newPath = Get-CaseSensitivePath $path
+    Set-Location "$newPath"
+}
+
+function Global:Write-LocationCaseCorrectness {
+    $s = $global:GitPromptSettings
+    $caseSensitivePwd = Get-CaseSensitivePath $pwd
+    if ( $pwd.ToString() -cne $caseSensitivePwd ) {
+        if ( $s.AutoPathFix ) {
+            Reset-LocationCase
+        } else {
+            Write-Host "Path is not case sensitive match, you can fix this with Reset-LocationCase"
+        }
+    }
+}
+

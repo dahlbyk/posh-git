@@ -33,3 +33,22 @@ function dbg ($Message, [Diagnostics.Stopwatch]$Stopwatch) {
         Write-Verbose ('{0:00000}:{1}' -f $Stopwatch.ElapsedMilliseconds,$Message) -Verbose # -ForegroundColor Yellow
     }
 }
+
+function Get-CaseSensitivePath{
+    param($pathName)
+
+    $pathExists = Test-Path($pathName)
+    if (-Not $pathExists){
+        return $pathName
+    }
+
+    $directoryInfo = New-Object IO.DirectoryInfo($pathName)
+    
+    if ($directoryInfo.Parent -ne $null){
+        $parentPath = Get-CaseSensitivePath($directoryInfo.Parent.FullName)
+        $childPath = $directoryInfo.Parent.GetFileSystemInfos($directoryInfo.Name)[0].Name
+        return(Join-Path $parentPath $childpath -resolv)
+    }else{
+        return $directoryInfo.Name
+    }
+}
