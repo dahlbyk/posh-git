@@ -28,7 +28,7 @@ function Get-MergedRemoteBranches($ignore)
 
 function Remove-MergedLocalGitBranches
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     Param(
         [Parameter()]
         [string[]]
@@ -47,8 +47,11 @@ function Remove-MergedLocalGitBranches
     
     foreach ($item in $branches)
     {
-        Write-Host "Deleting branch $item..."
-        git branch -d $trimmed
+        if ($PSCmdlet.ShouldProcess($item, "delete branch"))
+        {
+            Write-Host "Deleting branch $item..."
+            git branch -d $item
+        }
         Write-Host
     }
     Write-Host "Finish deleting local merged branches"
@@ -56,7 +59,7 @@ function Remove-MergedLocalGitBranches
 
 function Remove-MergedRemoteGitBranches
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     Param(
         [Parameter()]
         [string[]]
@@ -75,8 +78,11 @@ function Remove-MergedRemoteGitBranches
     
     foreach ($item in $branches)
     {
-        Write-Host "Deleting branch $item..."
-        git push origin :$branch
+        if ($PSCmdlet.ShouldProcess($item, "delete remote branch"))
+        {
+            Write-Host "Deleting branch $item..."
+            git push origin :$item
+        }
         Write-Host
     }
     Write-Host "Finish deleting remote merged branches"
@@ -84,14 +90,14 @@ function Remove-MergedRemoteGitBranches
 
 function Remove-MergedGitBranches()
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     Param(
         [Parameter()]
         [string[]]
         $Ignore = @("master", "develop")
     )
 
-    Remove-MergedLocalGitBranches -Ignore $Ignore
+    Remove-MergedLocalGitBranches @PSBoundParameters
     Write-Host
-    Remove-MergedRemoteGitBranches -Ignore $Ignore
+    Remove-MergedRemoteGitBranches @PSBoundParameters
 }
