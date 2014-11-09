@@ -249,7 +249,7 @@ function Get-SshAgent() {
     } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-            $sshAgentProcess = Get-Process | Where-Object { $_.Id -eq $agentPid -and $_.Name -eq 'ssh-agent' } | Select -ExpandProperty Id
+            $sshAgentProcess = Get-Process | Where-Object { $_.Id -eq $agentPid -and $_.Name -eq 'ssh-agent' }
             if ($null -ne $sshAgentProcess) {
                 return $agentPid
             } else {
