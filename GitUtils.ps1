@@ -244,13 +244,13 @@ function Set-TempEnv($key, $value) {
 # is a running agent.
 function Get-SshAgent() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = Get-Process pageant -ErrorAction SilentlyContinue | Select -ExpandProperty Id
-        if ($pageantPid) { return $pageantPid }
+        $pageantPid = Get-Process pageant -ErrorAction Ignore | Select -ExpandProperty Id
+        if ($null -ne $pageantPid) { return $pageantPid }
     } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-            $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
-            if ($sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
+            $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction Ignore
+            if ($null -ne $sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
                 return $agentPid
             } else {
                 setenv 'SSH_AGENT_PID', $null
