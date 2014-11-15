@@ -275,8 +275,9 @@ function Guess-Pageant() {
 # Attempt to guess $program's location. For ssh-agent/ssh-add.
 function Guess-Ssh($program = 'ssh-agent') {
     Write-Verbose "$program not in path. Trying to guess location."
-    if (!(get-command git -Erroraction SilentlyContinue)) { Write-Warning 'git not in path'; return }
-    $sshLocation = join-path (get-item(get-command git).path).directory.parent.fullname bin
+    $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
+    if ($gitItem -eq $null) { Write-Warning 'git not in path'; return }
+    $sshLocation = join-path $gitItem.directory.parent.fullname bin
     $sshLocation = join-path $sshLocation $program
     if (!(get-command $sshLocation -Erroraction SilentlyContinue)) { return }     # Guessing failed.
     else { return $sshLocation }
