@@ -265,8 +265,9 @@ function Get-SshAgent() {
 # Attempt to guess Pageant's location
 function Guess-Pageant() {
     Write-Verbose "Pageant not in path. Trying to guess location."
-    if ($env:GIT_SSH -and (test-path $env:GIT_SSH)) {
-        $pageant = join-path (split-path $env:GIT_SSH) pageant
+    $gitSsh = $env:GIT_SSH
+    if ($gitSsh -and (test-path $gitSsh)) {
+        $pageant = join-path (split-path $gitSsh) pageant
     }
     if (!(get-command $pageant -Erroraction SilentlyContinue)) { return }     # Guessing failed.
     else { return $pageant }
