@@ -45,9 +45,6 @@ function Remove-MergedLocalGitBranches
         return
     }
 
-    Write-Host "Start deleting local merged branches"
-    Write-Host
-    
     foreach ($item in $branches)
     {
         if ($PSCmdlet.ShouldProcess($item, "delete branch"))
@@ -55,9 +52,7 @@ function Remove-MergedLocalGitBranches
             Write-Host "Deleting branch $item..."
             git branch -d $item
         }
-        Write-Host
     }
-    Write-Host "Finish deleting local merged branches"
 }
 
 function Remove-MergedRemoteGitBranches
@@ -76,19 +71,14 @@ function Remove-MergedRemoteGitBranches
         return
     }
 
-    Write-Host "Start deleting remote merged branches"
-    Write-Host
-    
     foreach ($item in $branches)
     {
         if ($PSCmdlet.ShouldProcess($item, "delete remote branch"))
         {
-            Write-Host "Deleting branch $item..."
+            Write-Host "Deleting remote branch $item..."
             git push origin :$item
         }
-        Write-Host
     }
-    Write-Host "Finish deleting remote merged branches"
 }
 
 function Remove-MergedGitBranches()
@@ -101,6 +91,5 @@ function Remove-MergedGitBranches()
     )
 
     Remove-MergedLocalGitBranches @PSBoundParameters
-    Write-Host
     Remove-MergedRemoteGitBranches @PSBoundParameters
 }
