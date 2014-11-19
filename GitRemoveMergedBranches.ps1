@@ -3,9 +3,12 @@ function IsNotCurrentLocal-GitBranch($branch)
     !$branch.StartsWith("*")
 }
 
-function TrimRemote-GitBranch($branch)
+function TrimRemote-GitBranch()
 {
-    $branch -replace "^(.*?)/(.*)$", "`$2"
+    PROCESS
+    {
+        $_ -replace "^(.*?)/(.*)$", "`$2"
+    }
 }
 
 function Get-MergedLocalGitBranches($ignore)
@@ -22,7 +25,7 @@ function Get-MergedRemoteBranches($ignore)
     $trimmed = $branches | foreach {$_.Trim()}
     return $trimmed `
         | where {!$_.Contains("/HEAD ->")} `
-        | foreach {TrimRemote-GitBranch $_} `
+        | TrimRemote-GitBranch `
         | where {($_ -ne $current) -and !$ignore.Contains($_)}
 }
 
