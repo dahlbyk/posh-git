@@ -15,7 +15,7 @@ function Get-MergedLocalGitBranches($ignore)
 {
     $branches = git branch --merged
     $trimmed = $branches | foreach {$_.Trim()}
-    return $trimmed | where {(IsNotCurrentLocal-GitBranch $_) -and !$ignore.Contains($_)}
+    return $trimmed | where {IsNotCurrentLocal-GitBranch $_}
 }
 
 function Get-MergedRemoteBranches($ignore)
@@ -26,7 +26,7 @@ function Get-MergedRemoteBranches($ignore)
     return $trimmed `
         | where {!$_.Contains("/HEAD ->")} `
         | TrimRemote-GitBranch `
-        | where {($_ -ne $current) -and !$ignore.Contains($_)}
+        | where {$_ -ne $current}
 }
 
 function Remove-MergedLocalGitBranches
@@ -35,10 +35,10 @@ function Remove-MergedLocalGitBranches
     Param(
         [Parameter()]
         [string[]]
-        $Ignore = @("master", "develop")
+        $Ignore = $Global:GitPromptSettings.MergedBranchesToKeep
     )
 
-    $branches = Get-MergedLocalGitBranches $Ignore
+    $branches = Get-MergedLocalGitBranches | where {$_ -notin $Ignore}
     if ($branches.Length -eq 0)
     {
         Write-Host "No local merged branches"
@@ -66,10 +66,10 @@ function Remove-MergedRemoteGitBranches
     Param(
         [Parameter()]
         [string[]]
-        $Ignore = @("master", "develop")
+        $Ignore = $Global:GitPromptSettings.MergedBranchesToKeep
     )
 
-    $branches = Get-MergedRemoteBranches $Ignore
+    $branches = Get-MergedRemoteBranches | where {$_ -notin $Ignore}
     if ($branches.Length -eq 0)
     {
         Write-Host "No remote merged branches"
@@ -97,7 +97,7 @@ function Remove-MergedGitBranches()
     Param(
         [Parameter()]
         [string[]]
-        $Ignore = @("master", "develop")
+        $Ignore = $Global:GitPromptSettings.MergedBranchesToKeep
     )
 
     Remove-MergedLocalGitBranches @PSBoundParameters

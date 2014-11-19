@@ -50,6 +50,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     EnableWindowTitle         = 'posh~git ~ '
 
     Debug                     = $false
+
+    MergedBranchesToKeep       = @("master", "develop")
 }
 
 $WindowTitleSupported = $true
