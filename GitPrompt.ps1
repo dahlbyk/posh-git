@@ -138,11 +138,20 @@ function Write-GitStatus($status) {
             }
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-            $Host.UI.RawUI.WindowTitle = "$prefix$repoName [$($status.Branch)]"
+            $adminHeader = Get-AdminTitleHeader
+            $Host.UI.RawUI.WindowTitle = "$adminHeader$prefix$repoName [$($status.Branch)]"
         }
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
     }
+}
+
+function Get-AdminTitleHeader
+{
+    $currentUser = [Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
+    $isAdminProcess = $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+    if ($isAdminProcess) { return 'Administrator: ' }
 }
 
 if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
