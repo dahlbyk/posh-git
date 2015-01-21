@@ -263,7 +263,7 @@ function Get-SshAgent() {
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
-function Start-SshAgent([switch]$Quiet) {
+function Start-SshAgent([switch]$Quiet, [switch] $AutoFix) {
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         if (!$Quiet) {
@@ -281,7 +281,38 @@ function Start-SshAgent([switch]$Quiet) {
         & $pageant
     } else {
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
-        if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
+
+        if (!$sshAgent)
+        { 
+            if ($AutoFix)
+            {
+                $pathFound = Find-SshAgent;
+                if ($pathFound)
+                {
+                    $currentPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
+                    [Environment]::SetEnvironmentVariable('Path', "${currentPath};${pathFound}", 'User');
+                    $env:Path += ";${pathFound}"
+                    $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
+                }
+                else
+                {
+                    Write-Warning 'ssh-agent.exe could not be found automatically.  Please add the location to your PATH manually.'
+                }
+            }
+            else
+            {
+                Write-Warning 'Could not find ssh-agent'; 
+                # Search common locations for ssh-agent.exe so we can provide a helpful message
+                # on how to fix this problem
+                $pathFound = Find-SshAgent
+                if ($pathFound)
+                {
+                    Write-Warning "ssh-agent.exe exists in '${pathFound}'.  Run Start-SshAgent -AutoFix to automatically add the directory to your PATH."
+                }
+
+                return 
+            }
+        }
 
         & $sshAgent | foreach {
             if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
@@ -291,6 +322,23 @@ function Start-SshAgent([switch]$Quiet) {
     }
     Add-SshKey
 }
+
+# Search common locations for ssh-agent.exe
+function Find-SshAgent
+{
+  $possiblePaths = @(
+    "${env:ProgramFiles(x86)}\Git\bin",
+    "${env:ProgramFiles}\Git\bin",
+    "${env:SystemDrive}\"
+  )
+
+  $pathFound = $possiblePaths | 
+    Where-Object { Test-Path "$_\ssh-agent.exe" } |
+    Select-Object -First 1
+
+  return $pathFound;
+}
+
 
 function Get-SshPath($File = 'id_rsa')
 {
