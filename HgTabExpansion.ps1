@@ -298,7 +298,7 @@ function populatehgflowStreams($filename) {
   $script:hgflowStreams = if ($ini["Basic"]) { $ini["Basic"] } else { $ini["branchname"] }
 }
 
-$PowerTab_RegisterTabExpansion = Get-Command Register-TabExpansion -Module powertab -ErrorAction SilentlyContinue
+$PowerTab_RegisterTabExpansion = if (Get-Module -Name powertab) { Get-Command Register-TabExpansion -Module powertab -ErrorAction SilentlyContinue }
 if ($PowerTab_RegisterTabExpansion)
 {
     & $PowerTab_RegisterTabExpansion "hg.exe" -Type Command {

@@ -104,9 +104,9 @@ function Write-HgStatus($status = (get-hgStatus $global:PoshHgSettings.GetFileSt
 }
 
 # Should match https://github.com/dahlbyk/posh-git/blob/master/GitPrompt.ps1
-if((Get-Variable -Scope Global -Name VcsPromptStatuses -ErrorAction SilentlyContinue) -eq $null) {
-    $Global:VcsPromptStatuses = @()
-}
+if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
+     $Global:VcsPromptStatuses = @()
+ }
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
