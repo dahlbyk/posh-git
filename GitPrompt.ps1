@@ -34,6 +34,9 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     WorkingForegroundColor    = [ConsoleColor]::DarkRed
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
 
+    StashForegroundColor      = [ConsoleColor]::Yellow
+    StashBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+
     UntrackedText             = ' !'
     UntrackedForegroundColor  = [ConsoleColor]::DarkRed
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
@@ -128,6 +131,10 @@ function Write-GitStatus($status) {
 
         if ($status.HasUntracked) {
             Write-Prompt $s.UntrackedText -BackgroundColor $s.UntrackedBackgroundColor -ForegroundColor $s.UntrackedForegroundColor
+        }
+
+        if ($status.StashCount -gt 0) {
+            Write-Prompt " >$($status.StashCount)" -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor
         }
 
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor

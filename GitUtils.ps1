@@ -115,12 +115,15 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesModified = @()
         $filesDeleted = @()
         $filesUnmerged = @()
+        $stashCount = 0
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
             $status = git -c color.status=false status --short --branch 2>$null
+            $stashCount = (git stash list) | measure-object | select -expand Count
         } else {
             $status = @()
+            $stashCount = 0
         }
 
         dbg 'Parsing status' $sw
@@ -185,6 +188,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             HasWorking      = [bool]$working
             Working         = $working
             HasUntracked    = [bool]$filesAdded
+            StashCount      = $stashCount
         }
 
         dbg 'Finished' $sw
