@@ -98,6 +98,13 @@ function Write-HgStatus($status = (get-hgStatus $global:PoshHgSettings.GetFileSt
             }
           }
         }
+
+        if($status.Revision) {
+           Write-Prompt " <" -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
+           Write-Prompt $status.Revision -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
+           Write-Prompt ">" -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
+        }
+
         
        Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
     }
