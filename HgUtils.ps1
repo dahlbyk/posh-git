@@ -35,7 +35,8 @@ function Get-HgStatus($getFileStatus=$true, $getBookmarkStatus=$true) {
     $commit = ""
     $behind = $false
     $multipleHeads = $false
-		
+    $rev = ""
+
 	if ($getFileStatus -eq $false) {
 		hg parent | foreach {
 		switch -regex ($_) {
@@ -92,6 +93,9 @@ function Get-HgStatus($getFileStatus=$true, $getBookmarkStatus=$true) {
 			}
 		}
 	}
+
+	$rev = hg log -r . --template '{rev}:{node|short}'
+
     return @{"Untracked" = $untracked;
                "Added" = $added;
                "Modified" = $modified;
@@ -103,7 +107,8 @@ function Get-HgStatus($getFileStatus=$true, $getBookmarkStatus=$true) {
                "Behind" = $behind;
                "MultipleHeads" = $multipleHeads;
                "ActiveBookmark" = $active;
-               "Branch" = $branch}
+               "Branch" = $branch
+               "Revision" = $rev}
    }
 }
 
