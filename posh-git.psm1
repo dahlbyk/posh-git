@@ -1,6 +1,7 @@
 if (Get-Module posh-git) { return }
 
 Push-Location $psScriptRoot
+. .\Exec.ps1
 .\CheckVersion.ps1 > $null
 
 . .\Utils.ps1
