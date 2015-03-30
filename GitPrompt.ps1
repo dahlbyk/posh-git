@@ -133,7 +133,7 @@ function Write-GitStatus($status) {
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
 
         if ($WindowTitleSupported -and $s.EnableWindowTitle) {
-            if( -not $Global:PreviousWindowTitle ) {
+            if (-not (Test-Path -Path Variable:Global:PreviousWindowTitle)) {
                 $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
             }
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
