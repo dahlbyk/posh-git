@@ -31,7 +31,7 @@ function script:gitCmdOperations($commands, $command, $filter) {
 
 $script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry','cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch','format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv','notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm','shortlog','show','stash','status','submodule','svn','tag','whatchanged')
 try {
-  if ((git help -a 2>&1 | Select-String flow) -ne $null) {
+  if ((safeexec { git help -a } | Select-String flow) -ne $null) {
       $script:someCommands += 'flow'
   }
 }
