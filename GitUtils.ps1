@@ -345,17 +345,17 @@ function Stop-SshAgent() {
 }
 
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
-    $head = git rev-parse --abbrev-ref HEAD
-    git checkout -q $Upstream
-    $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' }
+    $head = exec { git rev-parse --abbrev-ref HEAD }
+    exec { git checkout -q $Upstream }
+    $branches = (exec { git branch --no-color --no-merged }) | where { $_ -notmatch '^\* ' }
     foreach ($line in $branches) {
         $branch = $line.SubString(2)
         if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }
         safeexec { git rebase -q $Upstream $branch } > $null
         if ($LASTEXITCODE) {
-            git rebase --abort
+            exec { git rebase --abort }
             Write-Warning "Rebase failed for $branch"
         }
     }
-    git checkout -q $head
+    exec { git checkout -q $head }
 }
