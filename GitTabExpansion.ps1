@@ -43,7 +43,7 @@ function script:gitCommands($filter, $includeAliases) {
     if (-not $global:GitTabSettings.AllCommands) {
         $cmdList += $someCommands -like "$filter*"
     } else {
-        $cmdList += exec{ git help --all } |
+        $cmdList += safeexec{ git help --all } |
             where { $_ -match '^  \S.*' } |
             foreach { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
             where { $_ -like "$filter*" }
@@ -56,7 +56,7 @@ function script:gitCommands($filter, $includeAliases) {
 }
 
 function script:gitRemotes($filter) {
-    exec { git remote } |
+    safeexec { git remote } |
         where { $_ -like "$filter*" }
 }
 
@@ -66,8 +66,8 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         $prefix = $matches['from']
         $filter = $matches['to']
     }
-    $branches = @(exec { git branch --no-color } | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
-                @(exec { git branch --no-color -r } | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
+    $branches = @(safeexec { git branch --no-color } | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+                @(safeexec { git branch --no-color -r } | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
@@ -75,27 +75,27 @@ function script:gitBranches($filter, $includeHEAD = $false) {
 }
 
 function script:gitFeatures($filter, $command){
-	$featurePrefix = exec { git config --local --get "gitflow.prefix.$command" }
-    $branches = @(exec { git branch --no-color } | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
+	$featurePrefix = safeexec { git config --local --get "gitflow.prefix.$command" }
+    $branches = @(safeexec { git branch --no-color } | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
         foreach { $prefix + $_ }
 }
 
 function script:gitRemoteBranches($remote, $ref, $filter) {
-    exec { git branch --no-color -r } |
+    safeexec { git branch --no-color -r } |
         where { $_ -like "  $remote/$filter*" } |
         foreach { $ref + ($_ -replace "  $remote/","") }
 }
 
 function script:gitStashes($filter) {
-    (exec { git stash list } ) -replace ':.*','' |
+    (safeexec { git stash list } ) -replace ':.*','' |
         where { $_ -like "$filter*" } |
         foreach { "'$_'" }
 }
 
 function script:gitTfsShelvesets($filter) {
-    (exec { git tfs shelve-list }) |
+    (safeexec { git tfs shelve-list }) |
         where { $_ -like "$filter*" } |
         foreach { "'$_'" }
 }
@@ -135,7 +135,7 @@ function script:gitDeleted($filter) {
 }
 
 function script:gitAliases($filter) {
-    exec { git config --get-regexp ^alias\. } | foreach {
+    safeexec { git config --get-regexp ^alias\. } | foreach {
         if($_ -match "^alias\.(?<alias>\S+) .*") {
             $alias = $Matches['alias']
             if($alias -like "$filter*") {
@@ -146,7 +146,7 @@ function script:gitAliases($filter) {
 }
 
 function script:expandGitAlias($cmd, $rest) {
-    if((exec { git config --get-regexp "^alias\.$cmd`$" }) -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
+    if((safeexec { git config --get-regexp "^alias\.$cmd`$" }) -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
         return "git $($Matches['cmd'])$rest"
     } else {
         return "git $cmd$rest"
@@ -299,6 +299,7 @@ if (Test-Path Function:\TabExpansion) {
 }
 
 function TabExpansion($line, $lastWord) {
+    "line: $line, lastWord: $lastWord" > c:\dev\333.txt
     $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
 
     switch -regex ($lastBlock) {
