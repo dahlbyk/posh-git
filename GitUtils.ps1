@@ -46,7 +46,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             }
 
             $b = Invoke-NullCoalescing `
-                { dbg 'Trying symbolic-ref' $sw; safeexec { git symbolic-ref HEAD } } `
+                { dbg 'Trying symbolic-ref' $sw; safeexec { git symbolic-ref HEAD --quiet } } `
                 { '({0})' -f (Invoke-NullCoalescing `
                     {
                         dbg 'Trying describe' $sw
