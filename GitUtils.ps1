@@ -63,7 +63,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
 
                         if (Test-Path $gitDir\HEAD) {
                             dbg 'Reading from .git\HEAD' $sw
-                            $ref = Get-Content $gitDir\HEAD 2>$null
+                            $ref = Get-Content $gitDir\HEAD -ErrorAction SilentlyContinue
                         } else {
                             dbg 'Trying rev-parse' $sw
                             $ref = safeexec { git rev-parse HEAD }
@@ -295,7 +295,7 @@ function Start-SshAgent([switch]$Quiet) {
 function Get-SshPath($File = 'id_rsa')
 {
     $home = Resolve-Path (Invoke-NullCoalescing $Env:HOME ~)
-    Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
+    Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue
 }
 
 # Add a key to the SSH agent
