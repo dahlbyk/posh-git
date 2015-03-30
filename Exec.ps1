@@ -18,13 +18,22 @@ function Invoke-NativeApplication
         [ScriptBlock] $ScriptBlock,
         [int[]] $AllowedExitCodes = @(0)
     )
- 
+
     $backupErrorActionPreference = $ErrorActionPreference
- 
+
     $ErrorActionPreference = "Continue"
     try
     {
-        & $ScriptBlock 2>&1 | ForEach-Object -Process `
+        if (Test-CalledFromPrompt)
+        {
+            $lines = & $ScriptBlock
+        }
+        else
+        {
+            $lines = & $ScriptBlock 2>&1
+        }
+
+        $lines | ForEach-Object -Process `
             {
                 $isError = $_ -is [System.Management.Automation.ErrorRecord]
                 "$_" | Add-Member -Name IsError -MemberType NoteProperty -Value $isError -PassThru
@@ -49,6 +58,11 @@ function Invoke-NativeApplicationSafe
 
     Invoke-NativeApplication -ScriptBlock $ScriptBlock -AllowedExitCodes (0..255) | `
         Where-Object -FilterScript { -not $_.IsError }
+}
+
+function Test-CalledFromPrompt
+{
+    (Get-PSCallStack)[-2].Command -eq "prompt"
 }
 
 Set-Alias -Name exec -Value Invoke-NativeApplication
