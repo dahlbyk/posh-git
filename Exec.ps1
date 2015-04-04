@@ -16,7 +16,8 @@ function Invoke-NativeApplication
     param
     (
         [ScriptBlock] $ScriptBlock,
-        [int[]] $AllowedExitCodes = @(0)
+        [int[]] $AllowedExitCodes = @(0),
+        [switch] $IgnoreExitCode
     )
 
     $backupErrorActionPreference = $ErrorActionPreference
@@ -38,7 +39,7 @@ function Invoke-NativeApplication
                 $isError = $_ -is [System.Management.Automation.ErrorRecord]
                 "$_" | Add-Member -Name IsError -MemberType NoteProperty -Value $isError -PassThru
             }
-        if ($AllowedExitCodes -notcontains $LASTEXITCODE)
+        if ((-not $IgnoreExitCode) -and ($AllowedExitCodes -notcontains $LASTEXITCODE))
         {
             throw "Execution failed with exit code $LASTEXITCODE"
         }
@@ -56,7 +57,7 @@ function Invoke-NativeApplicationSafe
         [ScriptBlock] $ScriptBlock
     )
 
-    Invoke-NativeApplication -ScriptBlock $ScriptBlock -AllowedExitCodes (0..255) | `
+    Invoke-NativeApplication -ScriptBlock $ScriptBlock -IgnoreExitCode | `
         Where-Object -FilterScript { -not $_.IsError }
 }
 
