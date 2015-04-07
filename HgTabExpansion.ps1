@@ -157,7 +157,7 @@ function findBranchOrBookmarkOrTags($filter){
 function hgLocalBranches($filter) {
   hg branches -a | foreach {
     if($_ -match "(\S+) .*") {
-      if($filter -and $matches[1].StartsWith($filter)) {
+      if($filter -and $matches[1].StartsWith($filter, "CurrentCultureIgnoreCase")) {
         $matches[1]
       }
       elseif(-not $filter) {
@@ -170,7 +170,7 @@ function hgLocalBranches($filter) {
 function hgLocalTags($filter) {
   hg tags | foreach {
     if($_ -match "(\S+) .*") {
-      if($filter -and $matches[1].StartsWith($filter)) {
+      if($filter -and $matches[1].StartsWith($filter, "CurrentCultureIgnoreCase")) {
         $matches[1]
       }
       elseif(-not $filter) {
@@ -195,7 +195,7 @@ function hgLocalBookmarks($filter) {
   hg bookmarks --quiet | foreach {
     if($_ -match "(\S+) .*") {
       $bookmark = bookmarkName($matches[0])  
-      if($filter -and $bookmark.StartsWith($filter)) {
+      if($filter -and $bookmark.StartsWith($filter, "CurrentCultureIgnoreCase")) {
         $bookmark
       }
       elseif(-not $filter) {
@@ -208,7 +208,7 @@ function hgLocalBookmarks($filter) {
 function hgRemoteBookmarks($filter) {
   hg incoming -B | foreach {
     if($_ -match "(\S+) .*") {
-      if($filter -and $matches[1].StartsWith($filter)) {
+      if($filter -and $matches[1].StartsWith($filter, "CurrentCultureIgnoreCase")) {
         $matches[1]
       }
       elseif(-not $filter) {
