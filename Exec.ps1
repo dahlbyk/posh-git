@@ -27,14 +27,14 @@ function Invoke-NativeApplication
     {
         if (Test-CalledFromPrompt)
         {
-            $lines = & $ScriptBlock
+            $wrapperScriptBlock = { & $ScriptBlock }
         }
         else
         {
-            $lines = & $ScriptBlock 2>&1
+            $wrapperScriptBlock = { & $ScriptBlock 2>&1 }
         }
 
-        $lines | ForEach-Object -Process `
+        & $wrapperScriptBlock | ForEach-Object -Process `
             {
                 $isError = $_ -is [System.Management.Automation.ErrorRecord]
                 "$_" | Add-Member -Name IsError -MemberType NoteProperty -Value $isError -PassThru
