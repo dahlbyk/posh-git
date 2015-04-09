@@ -39,7 +39,7 @@ function Invoke-NativeApplication
                 $isError = $_ -is [System.Management.Automation.ErrorRecord]
                 "$_" | Add-Member -Name IsError -MemberType NoteProperty -Value $isError -PassThru
             }
-        if ((-not $IgnoreExitCode) -and ($AllowedExitCodes -notcontains $LASTEXITCODE))
+        if ((-not $IgnoreExitCode) -and (Test-Path -Path Variable:LASTEXITCODE) -and ($AllowedExitCodes -notcontains $LASTEXITCODE))
         {
             throw "Execution failed with exit code $LASTEXITCODE"
         }
