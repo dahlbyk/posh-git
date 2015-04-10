@@ -99,7 +99,7 @@ function Write-HgStatus($status = (get-hgStatus $global:PoshHgSettings.GetFileSt
           }
         }
 
-        if($status.Revision) {
+        if($s.ShowRevision -and $status.Revision) {
            Write-Prompt " <" -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
            Write-Prompt $status.Revision -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
            Write-Prompt ">" -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
