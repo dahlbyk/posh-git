@@ -8,10 +8,14 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
 $shortparams = @{
     add = 'n v f i p e u A N'
     branch = 'd D l f m M r a v vv q t u'
+    checkout = 'q f b B t l m p' 
     commit = 'a p C c z F m t s n e i o u v q S'
     diff = 'p u s U z B M C D l S G O R a b w W'
+    fetch = 'a f k p n t u q v'
     log = 'L n i E F g c c m r t'
     merge = 'e n s X q v S m'
+    pull = 'q v e n s X r a f k u'
+    push = 'n f u q v'
     status = 's b u z'
     rm = 'f n r q'
 }
@@ -19,10 +23,14 @@ $shortparams = @{
 $params = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
     branch = 'color no-color list abbrev= no-abbrev column no-column merged no-merged contains set-upstream track no-track set-upstream-to= unset-upstream edit-description delete create-reflog force move all verbose quiet'
+    checkout = 'quiet force ours theirs track no-track detach orphan ignore-skip-worktree-bits merge conflict= patch'
     commit = 'all patch reuse-message reedit-message fixup squash reset-author short branch porcelain long null file author date message template signoff no-verify allow-empty allow-empty-message cleanup= edit no-edit ammend no-post-rewrite include only untracked-files verbose quiet dry-run status no-status gpg-sign no-gpg-sign'
     diff = 'patch no-patch unified= raw patch-with-raw minimal patience histogram diff-algorithm= stat numstat shortstat dirstat summary patch-with-stat name-only name-status submodule color no-color word-diff word-diff-regex color-words no-renames check full-index binary apprev break-rewrites find-renames find-copies find-copies-harder irreversible-delete diff-filter= pickaxe-all pickaxe-regex relative text ignore-space-at-eol ignore-space-change ignore-all-space ignore-blank-lines inter-hunk-context= function-context exit-code quiet ext-diff no-ext-diff textconv no-textconv ignore-submodules src-prefix dst-prefix no-prefix'
+    fetch = 'all append depth= unshallow update-shallow dry-run force keep multiple prune no-tags tags recurse-submodules= no-recurse-submodules submodule-prefix= recurse-submodules-default= update-head-ok upload-pack quiet verbose progress'
     log = 'follow no-decorate decorate source use-mailmap full-diff log-size max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents max-parents no-min-parents no-max-parents first-parent not all branches tags remote glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk= do-walk pretty format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break '
     merge = 'commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy strategy-option verify-signatures no-verify-signatures summary no-summary quiet verbose progress no-progress gpg-sign rerere-autoupdate no-rerere-autoupdate abort'
+    pull = 'quiet verbose recurse-submodules= no-recurse-submodules= commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy= strategy-option= verify-signatures no-verify-signatures summary no-summary rebase= no-rebase all append depth= unshallow update-shallow force keep no-tags update-head-ok upload-pack progress'
+    push = 'all prune mirror dry-run porcelain delete tags follow-tags receive-pack= exec= force-with-lease= no-force-with-lease force repo= set-upstream thin no-thin quiet verbose progress recurse-submodules= verify no-verify'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     rm = 'force dry-run cached ignore-unmatch quiet'
 }
@@ -31,6 +39,8 @@ $paramvalues = @{
     branch = @{
         color = 'always never auto'
         abbrev = '7 8 9 10' }
+    checkout = @{
+        conflict = 'merge diff3' }
     commit = @{
         'cleanup' = 'strip whitespace verbatim scissors default' }
     diff = @{
@@ -42,6 +52,9 @@ $paramvalues = @{
         'diff-filter' = 'A C D M R T U X B *'
         'inter-hunk-context' = '0 1 2 3 4 5'
         'ignore-submodules' = 'none untracked dirty all' }
+    fetch = @{
+        'recurse-submodules' = 'yes on-demand no' 
+        'recurse-submodules-default' = 'yes on-demand' }
     log = @{
         decorate = 'short full no'
         'no-walk' = 'sorted unsorted'
@@ -51,6 +64,12 @@ $paramvalues = @{
         date = 'relative local default iso rfc short raw' }
     merge = @{
         log = '1 2 3 4 5 6 7 8 9' }
+    pull = @{
+        'recurse-submodules' = 'yes on-demand no'
+        'no-recurse-submodules' = 'yes on-demand no'
+        rebase = 'false true preserve' }
+    push = @{
+        'recurse-submodules' = 'check on-demand' }
     status = @{
         'untracked-files' = 'no normal all'
         'ignore-submodules' = 'none untracked dirty all' }
@@ -351,17 +370,17 @@ function GitTabExpansion($lastBlock) {
         }
 
         # Handles git <cmd> --<param>=<value>
-        "^(?<cmd>(?:add|branch|commit|diff|log|merge|rm|status)).* --(?<param>[^=]+)=(?<value>\S*)$" {
+        "^(?<cmd>(?:add|branch|checkout|commit|diff|fetch|log|merge|pull|push|rm|status)).* --(?<param>[^=]+)=(?<value>\S*)$" {
             expandParamValues $matches['cmd'] $matches['param'] $matches['value']
         }
 
         # Handles git <cmd> --<param>
-        "^(?<cmd>(?:add|branch|commit|diff|log|merge|rm|status)).* --(?<param>\S*)$" {
+        "^(?<cmd>(?:add|branch|checkout|commit|diff|fetch|log|merge|pull|push|rm|status)).* --(?<param>\S*)$" {
             expandParams $matches['cmd'] $matches['param']
         }
 
         # Handles git <cmd> -<shortparam>
-        "^(?<cmd>(?:add|branch|commit|diff|log|merge|rm|status)).* -(?<shortparam>\S*)$" {
+        "^(?<cmd>(?:add|branch|checkout|commit|diff|fetch|log|merge|pull|push|rm|status)).* -(?<shortparam>\S*)$" {
             expandShortParams $matches['cmd'] $matches['shortparam']
         }
     }
