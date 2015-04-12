@@ -9,10 +9,37 @@ $params = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
     branch = 'color no-color list abbrev= no-abbrev column no-column merged no-merged contains set-upstream track no-track set-upstream-to= unset-upstream edit-description delete create-reflog force move all verbose quiet'
     diff = 'patch no-patch unified= raw patch-with-raw minimal patience histogram diff-algorithm= stat numstat shortstat dirstat summary patch-with-stat name-only name-status submodule color no-color word-diff word-diff-regex color-words no-renames check full-index binary apprev break-rewrites find-renames find-copies find-copies-harder irreversible-delete diff-filter= pickaxe-all pickaxe-regex relative text ignore-space-at-eol ignore-space-change ignore-all-space ignore-blank-lines inter-hunk-context= function-context exit-code quiet ext-diff no-ext-diff textconv no-textconv ignore-submodules src-prefix dst-prefix no-prefix'
-    log = 'follow no-decorate decorate source use-mailmap full-diff log-size L max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents max-parents no-min-parents no-max-parents first-parent not all branches tags remote glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk do-walk pretty format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break '
+    log = 'follow no-decorate decorate source use-mailmap full-diff log-size L max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents max-parents no-min-parents no-max-parents first-parent not all branches tags remote glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk= do-walk pretty format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break '
     merge = 'commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy strategy-option verify-signatures no-verify-signatures summary no-summary quiet verbose progress no-progress gpg-sign rerere-autoupdate no-rerere-autoupdate abort'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     rm = 'force dry-run cached ignore-unmatch quiet'
+}
+
+$paramvalues = @{
+    branch = @{
+        color = 'always never auto'
+        abbrev = '7 8 9 10' }
+    diff = @{
+        unified = '0 1 2 3 4 5'
+        'diff-algorithm' = 'default patience minimal histogram myers'
+        color = 'always never auto'
+        'word-diff' = 'color plain porcelain none'
+        abbrev = '7 8 9 10'
+        'diff-filter' = 'A C D M R T U X B *'
+        'inter-hunk-context' = '0 1 2 3 4 5'
+        'ignore-submodules' = 'none untracked dirty all' }
+    log = @{
+        decorate = 'short full no'
+        'no-walk' = 'sorted unsorted'
+        pretty = 'oneline short medium full fuller email raw'
+        format = 'oneline short medium full fuller email raw'
+        encoding = 'UTF-8'
+        date = 'relative local default iso rfc short raw' }
+    merge = @{
+        log = '1 2 3 4 5 6 7 8 9' }
+    status = @{
+        'untracked-files' = 'no normal all'
+        'ignore-submodules' = 'none untracked dirty all' }
 }
 
 $subcommands = @{
@@ -170,6 +197,13 @@ function script:expandParams($cmd, $filter) {
         foreach { -join ("--", $_) }
 }
 
+function script:expandParamValues($cmd, $param, $filter) {
+    $paramvalues[$cmd][$param] -split ' ' |
+        where { $_ -like "$filter*" } |
+        sort |
+        foreach { -join ("--", $param, "=", $_) }
+}
+
 function GitTabExpansion($lastBlock) {
 
     if($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
@@ -295,9 +329,14 @@ function GitTabExpansion($lastBlock) {
             gitBranches $matches['ref'] $true
         }
 
+        # Handles git <cmd> --<param>=<value>
+        "^(?<cmd>(?:add|branch|diff|log|merge|rm|status)).* --(?<param>[^=]+)=(?<value>\S*)$" {
+            expandParamValues $matches['cmd'] $matches['param'] $matches['value']
+        }
+
         # Handles git <cmd> --<param>
-        "^(?<cmd>(?:add|branch|diff|log|merge|rm|status)).* --(?<parameters>\S*)$" {
-            expandParams $matches['cmd'] $matches['parameters']
+        "^(?<cmd>(?:add|branch|diff|log|merge|rm|status)).* --(?<param>\S*)$" {
+            expandParams $matches['cmd'] $matches['param']
         }
     }
 }
