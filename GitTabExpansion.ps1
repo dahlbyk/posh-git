@@ -8,6 +8,7 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
 $shortparams = @{
     add = 'n v f i p e u A N'
     branch = 'd D l f m M r a v vv q t u'
+    commit = 'a p C c z F m t s n e i o u v q S'
     diff = 'p u s U z B M C D l S G O R a b w W'
     log = 'L n i E F g c c m r t'
     merge = 'e n s X q v S m'
@@ -18,6 +19,7 @@ $shortparams = @{
 $params = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
     branch = 'color no-color list abbrev= no-abbrev column no-column merged no-merged contains set-upstream track no-track set-upstream-to= unset-upstream edit-description delete create-reflog force move all verbose quiet'
+    commit = 'all patch reuse-message reedit-message fixup squash reset-author short branch porcelain long null file author date message template signoff no-verify allow-empty allow-empty-message cleanup= edit no-edit ammend no-post-rewrite include only untracked-files verbose quiet dry-run status no-status gpg-sign no-gpg-sign'
     diff = 'patch no-patch unified= raw patch-with-raw minimal patience histogram diff-algorithm= stat numstat shortstat dirstat summary patch-with-stat name-only name-status submodule color no-color word-diff word-diff-regex color-words no-renames check full-index binary apprev break-rewrites find-renames find-copies find-copies-harder irreversible-delete diff-filter= pickaxe-all pickaxe-regex relative text ignore-space-at-eol ignore-space-change ignore-all-space ignore-blank-lines inter-hunk-context= function-context exit-code quiet ext-diff no-ext-diff textconv no-textconv ignore-submodules src-prefix dst-prefix no-prefix'
     log = 'follow no-decorate decorate source use-mailmap full-diff log-size max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents max-parents no-min-parents no-max-parents first-parent not all branches tags remote glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk= do-walk pretty format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break '
     merge = 'commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy strategy-option verify-signatures no-verify-signatures summary no-summary quiet verbose progress no-progress gpg-sign rerere-autoupdate no-rerere-autoupdate abort'
@@ -29,6 +31,8 @@ $paramvalues = @{
     branch = @{
         color = 'always never auto'
         abbrev = '7 8 9 10' }
+    commit = @{
+        'cleanup' = 'strip whitespace verbatim scissors default' }
     diff = @{
         unified = '0 1 2 3 4 5'
         'diff-algorithm' = 'default patience minimal histogram myers'
@@ -347,17 +351,17 @@ function GitTabExpansion($lastBlock) {
         }
 
         # Handles git <cmd> --<param>=<value>
-        "^(?<cmd>(?:add|branch|diff|log|merge|rm|status)).* --(?<param>[^=]+)=(?<value>\S*)$" {
+        "^(?<cmd>(?:add|branch|commit|diff|log|merge|rm|status)).* --(?<param>[^=]+)=(?<value>\S*)$" {
             expandParamValues $matches['cmd'] $matches['param'] $matches['value']
         }
 
         # Handles git <cmd> --<param>
-        "^(?<cmd>(?:add|branch|diff|log|merge|rm|status)).* --(?<param>\S*)$" {
+        "^(?<cmd>(?:add|branch|commit|diff|log|merge|rm|status)).* --(?<param>\S*)$" {
             expandParams $matches['cmd'] $matches['param']
         }
 
         # Handles git <cmd> -<shortparam>
-        "^(?<cmd>(?:add|branch|diff|log|merge|rm|status)).* -(?<shortparam>\S*)$" {
+        "^(?<cmd>(?:add|branch|commit|diff|log|merge|rm|status)).* -(?<shortparam>\S*)$" {
             expandShortParams $matches['cmd'] $matches['shortparam']
         }
     }
