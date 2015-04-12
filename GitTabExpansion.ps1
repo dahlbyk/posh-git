@@ -5,6 +5,11 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
 }
 
+$params = @{
+    branch = 'color no-color list abbrev= no-abbrev column no-column merged no-merged contains set-upstream track no-track set-upstream-to= unset-upstream edit-description delete create-reflog force move all verbose quiet'
+    log = 'follow no-decorate decorate source use-mailmap full-diff log-size L max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents max-parents no-min-parents no-max-parents first-parent not all branches tags remote glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk do-walk pretty format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break '
+}
+
 $subcommands = @{
     bisect = 'start bad good skip reset visualize replay log run'
     notes = 'edit show'
@@ -153,6 +158,13 @@ function script:expandGitAlias($cmd, $rest) {
     }
 }
 
+function script:expandParams($cmd, $filter) {
+    $params[$cmd] -split ' ' |
+        where { $_ -like "$filter*" } |
+        sort |
+        foreach { -join ("--", $_) }
+}
+
 function GitTabExpansion($lastBlock) {
 
     if($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
@@ -276,6 +288,11 @@ function GitTabExpansion($lastBlock) {
         # Handles git <cmd> <ref>
         "^(?:checkout|cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
+        }
+
+        # Handles git <cmd> --<param>
+        "^(?<cmd>(?:branch|log)).* --(?<parameters>\S*)$" {
+            expandParams $matches['cmd'] $matches['parameters']
         }
     }
 }
