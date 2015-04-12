@@ -16,6 +16,7 @@ $shortparams = @{
     merge = 'e n s X q v S m'
     pull = 'q v e n s X r a f k u'
     push = 'n f u q v'
+    rebase = 'm s X S q v n C f i p x'
     status = 's b u z'
     rm = 'f n r q'
 }
@@ -31,6 +32,7 @@ $params = @{
     merge = 'commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy strategy-option verify-signatures no-verify-signatures summary no-summary quiet verbose progress no-progress gpg-sign rerere-autoupdate no-rerere-autoupdate abort'
     pull = 'quiet verbose recurse-submodules= no-recurse-submodules= commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy= strategy-option= verify-signatures no-verify-signatures summary no-summary rebase= no-rebase all append depth= unshallow update-shallow force keep no-tags update-head-ok upload-pack progress'
     push = 'all prune mirror dry-run porcelain delete tags follow-tags receive-pack= exec= force-with-lease= no-force-with-lease force repo= set-upstream thin no-thin quiet verbose progress recurse-submodules= verify no-verify'
+    rebase = 'onto continue abort keep-empty skip edit-todo merge strategy= strategy-option= gpg-sign quiet verbose stat no-stat no-verify verify force-rebase fork-point no-fork-point ignore-whitespace whitespace= committer-date-is-author-date ignore-date interactive preserve-merges exec root autosquash no-autosquash autostash no-autostash no-ff'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     rm = 'force dry-run cached ignore-unmatch quiet'
 }
@@ -63,13 +65,17 @@ $paramvalues = @{
         encoding = 'UTF-8'
         date = 'relative local default iso rfc short raw' }
     merge = @{
+        strategy = 'resolve recursive octopus ours subtree'
         log = '1 2 3 4 5 6 7 8 9' }
     pull = @{
+        strategy = 'resolve recursive octopus ours subtree'
         'recurse-submodules' = 'yes on-demand no'
         'no-recurse-submodules' = 'yes on-demand no'
         rebase = 'false true preserve' }
     push = @{
         'recurse-submodules' = 'check on-demand' }
+    rebase = @{
+        strategy = 'resolve recursive octopus ours subtree' }
     status = @{
         'untracked-files' = 'no normal all'
         'ignore-submodules' = 'none untracked dirty all' }
