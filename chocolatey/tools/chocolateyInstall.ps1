@@ -20,7 +20,6 @@ try {
     }
 
     $poshGitInstall = if($env:poshGit -ne $null){ $env:poshGit } else {'https://github.com/dahlbyk/posh-git/zipball/master'}
-    #Install-ChocolateyZipPackage 'poshgit' 'https://github.com/dahlbyk/posh-git/zipball/v0.4' $poshgitPath
     Install-ChocolateyZipPackage 'poshgit' $poshGitInstall $poshgitPath
     $pgitDir = [Array](Dir "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime)[-1]
 
@@ -36,34 +35,28 @@ try {
             }
             if($line.Trim().Length -gt 0) {  $newProfile += $line }
         }
-        #Save any previous Prompt logic
+        # Save any previous Prompt logic
         Insert-Script ([REF]$newProfile) $oldPromptOverride
         Set-Content -path $profile -value $newProfile -Force
     }
 
-
-    #------- ADDITIONAL SETUP -------#
     $subfolder = get-childitem $poshgitPath -recurse -include 'dahlbyk-posh-git-*' | select -First 1
     write-debug "Found and using folder `'$subfolder`'"
-    #$installer = Join-Path $poshgitPath $subfolder #'dahlbyk-posh-git-60be436'
     $installer = Join-Path $subfolder 'install.ps1'
     & $installer
 
     $newProfile = [string[]](Get-Content $PROFILE)
     Insert-Script ([REF]$newProfile) "Rename-Item Function:\Prompt PoshGitPrompt -Force"
 
-    #function that will run previous prompt logic and then the poshgit logic
-    #all output from previous prompts will be swallowed
+    # function that will run previous prompt logic and then the poshgit logic
+    # all output from previous prompts will be swallowed
     Insert-Script ([REF]$newProfile) $newPromptOverride
     Set-Content -path $profile  -value $newProfile -Force
-
-    Write-ChocolateySuccess 'poshgit'
 } catch {
   try {
     if($oldProfile){ Set-Content -path $PROFILE -value $oldProfile -Force }
   }
-  catch{}
-  Write-ChocolateyFailure 'poshgit' $($_.Exception.Message)
+  catch {}
   throw
 }
 
