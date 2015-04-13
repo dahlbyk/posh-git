@@ -3,11 +3,11 @@
 }
 
 try {
-    $binRoot = join-path $env:systemdrive 'tools'
+    $binRoot = Get-BinRoot
+
     $oldPromptOverride = "if(Test-Path Function:\Prompt) {Rename-Item Function:\Prompt PrePoshGitPrompt -Force}"
     $newPromptOverride = "function Prompt() {if(Test-Path Function:\PrePoshGitPrompt){++`$global:poshScope; New-Item function:\script:Write-host -value `"param([object] ```$object, ```$backgroundColor, ```$foregroundColor, [switch] ```$nonewline) `" -Force | Out-Null;`$private:p = PrePoshGitPrompt; if(--`$global:poshScope -eq 0) {Remove-Item function:\Write-Host -Force}}PoshGitPrompt}"
-    ### Using an environment variable to to define the bin root until we implement YAML configuration ###
-    if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
+
     $poshgitPath = join-path $binRoot 'poshgit'
 
     try {
