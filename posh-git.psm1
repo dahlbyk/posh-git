@@ -1,5 +1,11 @@
 if (Get-Module posh-git) { return }
 
+if ($PSVersionTable.PSVersion.Major -lt 3) {
+    Write-Warning ("posh-git support for PowerShell 2.0 is deprecated; you have version $($Host.Version).`n" +
+    "To download version 3.0, please visit https://www.microsoft.com/en-us/download/details.aspx?id=34595`n" +
+    "For more information and to discuss this, please visit https://github.com/dahlbyk/posh-git/issues/163`n")
+}
+
 Push-Location $psScriptRoot
 .\CheckVersion.ps1 > $null
 
@@ -23,8 +29,8 @@ Export-ModuleMember `
         'Invoke-NullCoalescing',
         'Write-GitStatus',
         'Write-Prompt',
-        'Get-GitStatus', 
-        'Enable-GitColors', 
+        'Get-GitStatus',
+        'Enable-GitColors',
         'Get-GitDirectory',
         'TabExpansion',
         'Get-AliasPattern',
