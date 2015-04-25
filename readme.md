@@ -5,11 +5,11 @@ A set of PowerShell scripts which provide Git/PowerShell integration
 
 ### Prompt for Git repositories
    The prompt within Git repositories can show the current branch and the state of files (additions, modifications, deletions) within.
-   
+
 ### Tab completion
-   Provides tab completion for common commands when using git.  
+   Provides tab completion for common commands when using git.
    E.g. `git ch<tab>` --> `git checkout`
-   
+
 Usage
 -----
 
@@ -37,6 +37,8 @@ Installing (manual)
 2. Verify that `git` can be run from PowerShell.
    If the command is not found, you will need to add a git alias or add `%ProgramFiles(x86)%\Git\cmd`
    (or `%ProgramFiles%\Git\cmd` if you're still on 32-bit) to your PATH environment variable.
+   if your powershell have warning: could not find ssh-agent, you can add `%ProgramFiles(x86)%\Git\bin`
+   (or `%ProgramFiles%\Git\bin` if you're still on 32-bit) to your PATH environment variable.
 
 3. Clone the posh-git repository to your local machine.
 
