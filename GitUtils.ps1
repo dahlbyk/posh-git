@@ -120,7 +120,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
             $status = git -c color.status=false status --short --branch 2>$null
-            $stashCount = (git stash list) | measure-object | select -expand Count
+            $stashCount = $null | git stash list 2>$null | measure-object | select -expand Count
         } else {
             $status = @()
             $stashCount = 0
