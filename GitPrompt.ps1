@@ -140,7 +140,7 @@ function Write-GitStatus($status) {
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
             $Host.UI.RawUI.WindowTitle = "$prefix$repoName [$($status.Branch)]"
         }
-    } elseif ( $Global:PreviousWindowTitle ) {
+    } elseif ((Test-Path -Path Variable:Global:PreviousWindowTitle)) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
     }
 }
