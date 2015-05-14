@@ -123,7 +123,6 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             $stashCount = $null | git stash list 2>$null | measure-object | select -expand Count
         } else {
             $status = @()
-            $stashCount = 0
         }
 
         dbg 'Parsing status' $sw
