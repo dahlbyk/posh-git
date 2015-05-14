@@ -1,5 +1,9 @@
 #requires -version 2.0
 
+<#
+See https://github.com/mnaoumov/Invoke-NativeApplication for more details
+#>
+
 [CmdletBinding()]
 param
 (
