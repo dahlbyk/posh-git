@@ -52,6 +52,11 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     Debug                     = $false
 }
 
+$currentUser = [Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
+$isAdminProcess = $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+$adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
+
 $WindowTitleSupported = $true
 if (Get-Module NuGet) {
     $WindowTitleSupported = $false
@@ -138,20 +143,11 @@ function Write-GitStatus($status) {
             }
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-            $adminHeader = Get-AdminTitleHeader
-            $Host.UI.RawUI.WindowTitle = "$adminHeader$prefix$repoName [$($status.Branch)]"
+            $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($status.Branch)]"
         }
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
     }
-}
-
-function Get-AdminTitleHeader
-{
-    $currentUser = [Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdminProcess = $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-    if ($isAdminProcess) { return 'Administrator: ' }
 }
 
 if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
