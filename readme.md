@@ -30,13 +30,13 @@ Install-Module posh-git
 Installing (manual)
 -------------------
 
-0. Verify you have PowerShell 2.0 or better with $PSVersionTable.PSVersion
+0. Verify you have PowerShell 2.0 or better with `$PSVersionTable.PSVersion`
 
 1. Verify execution of scripts is allowed with `Get-ExecutionPolicy` (should be `RemoteSigned` or `Unrestricted`). If scripts are not enabled, run PowerShell as Administrator and call `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm`.
 
 2. Verify that `git` can be run from PowerShell.
    If the command is not found, you will need to add a git alias or add `%ProgramFiles(x86)%\Git\cmd`
-   (or `%ProgramFiles%\Git\cmd` if you're still on 32-bit) to your PATH environment variable.
+   (or `%ProgramFiles%\Git\cmd` if you're still on 32-bit) to your `PATH` environment variable.
 
 3. Clone the posh-git repository to your local machine.
 
