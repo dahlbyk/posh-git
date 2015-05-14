@@ -299,7 +299,6 @@ if (Test-Path Function:\TabExpansion) {
 }
 
 function TabExpansion($line, $lastWord) {
-    "line: $line, lastWord: $lastWord" > c:\dev\333.txt
     $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
 
     switch -regex ($lastBlock) {
