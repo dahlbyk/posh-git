@@ -34,8 +34,15 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     WorkingForegroundColor    = [ConsoleColor]::DarkRed
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
 
-    StashForegroundColor      = [ConsoleColor]::Red
+    EnableStashStatus         = $false
+    BeforeStashText           = ' ('
+    BeforeStashBackgroundColor = $Host.UI.RawUI.BackgroundColor
+    BeforeStashForegroundColor = [ConsoleColor]::Red
+    AfterStashText            = ')'
+    AfterStashBackgroundColor = $Host.UI.RawUI.BackgroundColor
+    AfterStashForegroundColor = [ConsoleColor]::Red
     StashBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    StashForegroundColor      = [ConsoleColor]::Red
 
     UntrackedText             = ' !'
     UntrackedForegroundColor  = [ConsoleColor]::DarkRed
@@ -133,8 +140,10 @@ function Write-GitStatus($status) {
             Write-Prompt $s.UntrackedText -BackgroundColor $s.UntrackedBackgroundColor -ForegroundColor $s.UntrackedForegroundColor
         }
 
-        if ($status.StashCount -gt 0) {
-            Write-Prompt " ($($status.StashCount))" -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor
+        if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
+            Write-Prompt $s.BeforeStashText -BackgroundColor $s.BeforeStashBackgroundColor -ForegroundColor $s.BeforeStashForegroundColor
+            Write-Prompt $status.StashCount -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor
+            Write-Prompt $s.AfterStashText -BackgroundColor $s.AfterStashBackgroundColor -ForegroundColor $s.AfterStashForegroundColor
         }
 
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
