@@ -23,8 +23,6 @@ function global:prompt {
     return "> "
 }
 
-Enable-GitColors
-
 Pop-Location
 
 Start-SshAgent -Quiet

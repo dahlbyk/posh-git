@@ -207,7 +207,7 @@ function InDisabledRepository {
 }
 
 function Enable-GitColors {
-    $env:TERM = 'cygwin'
+    Write-Warning 'Enable-GitColors is Obsolete and will be removed in a future version of posh-git.'
 }
 
 function Get-AliasPattern($exe) {
