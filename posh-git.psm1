@@ -17,6 +17,7 @@ Push-Location $psScriptRoot
 . .\Utils.ps1
 . .\GitUtils.ps1
 . .\GitPrompt.ps1
+. .\GitAsyncPrompt.ps1
 . .\GitTabExpansion.ps1
 . .\TortoiseGit.ps1
 Pop-Location
@@ -33,6 +34,12 @@ Export-ModuleMember `
     -Function @(
         'Invoke-NullCoalescing',
         'Write-GitStatus',
+        
+        'Write-GitStatusPromptAsync',
+        'Convert-GitStatusOutput',
+        'Get-GitStatusBufferCells',
+        'Write-BufferCellsToPosition',
+        
         'Write-Prompt',
         'Get-GitStatus',
         'Enable-GitColors',
