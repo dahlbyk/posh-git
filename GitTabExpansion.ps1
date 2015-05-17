@@ -76,7 +76,7 @@ function script:gitBranches($filter, $includeHEAD = $false) {
 
 function script:gitTags($filter) {
     git tag |
-		where { $_ -like "$filter*" }
+        where { $_ -like "$filter*" }
 }
 
 function script:gitFeatures($filter, $command){
