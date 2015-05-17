@@ -165,6 +165,11 @@ function GitTabExpansion($lastBlock) {
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
     }
 
+    # Handles gitk
+    if($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
+        return gitBranches $matches['ref'] $true
+    }
+
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
         # Handles git <cmd> <op>
@@ -305,6 +310,7 @@ function TabExpansion($line, $lastWord) {
         # Execute git tab completion for all git-related commands
         "^$(Get-AliasPattern git) (.*)" { GitTabExpansion $lastBlock }
         "^$(Get-AliasPattern tgit) (.*)" { GitTabExpansion $lastBlock }
+        "^$(Get-AliasPattern gitk) (.*)" { GitTabExpansion $lastBlock }
 
         # Fall back on existing tab expansion
         default { if (Test-Path Function:\TabExpansionBackup) { TabExpansionBackup $line $lastWord } }
