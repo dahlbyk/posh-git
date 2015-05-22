@@ -3,11 +3,17 @@ function IsNotCurrentLocal-GitBranch($branch)
     !$branch.StartsWith("*")
 }
 
-function TrimRemote-GitBranch()
+function Select-RemoteBranch($remoteName)
 {
     PROCESS
     {
-        $_ -replace "^(.*?)/(.*)$", "`$2"
+        if ($_ -match "^(.*?)/(.*)$")
+        {
+            if ($Matches[1] -eq $remoteName)
+            {
+                write $Matches[2]
+            }
+        }
     }
 }
 
@@ -18,14 +24,14 @@ function Get-MergedLocalGitBranches()
     return $trimmed | where {IsNotCurrentLocal-GitBranch $_}
 }
 
-function Get-MergedRemoteBranches()
+function Get-MergedRemoteBranches($remoteName)
 {
     $current = Get-GitBranch
     $branches = git branch -r --merged
     $trimmed = $branches | foreach {$_.Trim()}
     return $trimmed `
         | where {!$_.Contains("/HEAD ->")} `
-        | TrimRemote-GitBranch `
+        | Select-RemoteBranch $remoteName `
         | where {$_ -ne $current}
 }
 
@@ -52,12 +58,9 @@ function Remove-MergedLocalGitBranches
     }
 }
 
-function Remove-MergedRemoteGitBranches
+function Remove-MergedRemoteGitBranches($remoteName)
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
-    Param()
-
-    $branches = Get-MergedRemoteBranches `
+    $branches = Get-MergedRemoteBranches $remoteName `
         | where {$_ -notin $Global:GitPromptSettings.MergedBranchesToKeep}
     if ($branches.Length -eq 0)
     {
@@ -70,7 +73,7 @@ function Remove-MergedRemoteGitBranches
         if ($PSCmdlet.ShouldProcess($item, "delete remote branch"))
         {
             Write-Host "Deleting remote branch $item..."
-            git push origin :$item
+            git push $RemoteName :$item
         }
     }
 }
@@ -83,23 +86,23 @@ function Remove-MergedGitBranches()
         $Remote,
 
         [Switch]
-        $All
-    )
+        $All,
 
-    $PSBoundParameters.Remove('Remote') | Out-Null
-    $PSBoundParameters.Remove('All') | Out-Null
+        [string]
+        $RemoteName = 'origin'
+    )
 
     if ($All)
     {
-        Remove-MergedRemoteGitBranches @PSBoundParameters
-        Remove-MergedLocalGitBranches @PSBoundParameters
+        Remove-MergedRemoteGitBranches $RemoteName
+        Remove-MergedLocalGitBranches
     }
     elseif ($Remote)
     {
-        Remove-MergedRemoteGitBranches @PSBoundParameters
+        Remove-MergedRemoteGitBranches $RemoteName
     }
     else
     {
-        Remove-MergedLocalGitBranches @PSBoundParameters
+        Remove-MergedLocalGitBranches
     }
 }
