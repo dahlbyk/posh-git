@@ -37,6 +37,9 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     UntrackedText             = ' !'
     UntrackedForegroundColor  = [ConsoleColor]::DarkRed
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
+    
+    ErrorForegroundColor      = [ConsoleColor]::Red
+    ErrorBackgroundColor      = $Host.UI.RawUI.BackgroundColor
 
     ShowStatusWhenZero        = $true
 
@@ -167,7 +170,27 @@ function Write-GitStatus($status) {
 if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
 }
-function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
+
+function Global:Write-VcsStatus {
+    $Global:VcsPromptStatuses | foreach {
+        $vcsPromptErrors = $null
+        try {
+            Invoke-Command -ScriptBlock $_ -ErrorVariable vcsPromptErrors 2>$null
+        }
+        catch {
+            $vcsPromptErrors = $_
+        }
+        if ($vcsPromptErrors.Length -gt 0) {
+            $vcsPromptErrors | % { Write-Error -ErrorRecord $_ -ErrorAction SilentlyContinue }
+            $s = $Global:GitPromptSettings
+            if ($s) {
+                Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
+                Write-Prompt "Error" -BackgroundColor $s.ErrorBackgroundColor -ForegroundColor $s.ErrorForegroundColor
+                Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
+            }
+        }
+    }
+}
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
