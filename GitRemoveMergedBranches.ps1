@@ -11,14 +11,14 @@ function TrimRemote-GitBranch()
     }
 }
 
-function Get-MergedLocalGitBranches($ignore)
+function Get-MergedLocalGitBranches()
 {
     $branches = git branch --merged
     $trimmed = $branches | foreach {$_.Trim()}
     return $trimmed | where {IsNotCurrentLocal-GitBranch $_}
 }
 
-function Get-MergedRemoteBranches($ignore)
+function Get-MergedRemoteBranches()
 {
     $current = Get-GitBranch
     $branches = git branch -r --merged
@@ -32,13 +32,10 @@ function Get-MergedRemoteBranches($ignore)
 function Remove-MergedLocalGitBranches
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    Param(
-        [Parameter()]
-        [string[]]
-        $Ignore = $Global:GitPromptSettings.MergedBranchesToKeep
-    )
+    Param()
 
-    $branches = Get-MergedLocalGitBranches | where {$_ -notin $Ignore}
+    $branches = Get-MergedLocalGitBranches `
+        | where {$_ -notin $Global:GitPromptSettings.MergedBranchesToKeep}
     if ($branches.Length -eq 0)
     {
         Write-Host "No local merged branches"
@@ -58,13 +55,10 @@ function Remove-MergedLocalGitBranches
 function Remove-MergedRemoteGitBranches
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    Param(
-        [Parameter()]
-        [string[]]
-        $Ignore = $Global:GitPromptSettings.MergedBranchesToKeep
-    )
+    Param()
 
-    $branches = Get-MergedRemoteBranches | where {$_ -notin $Ignore}
+    $branches = Get-MergedRemoteBranches `
+        | where {$_ -notin $Global:GitPromptSettings.MergedBranchesToKeep}
     if ($branches.Length -eq 0)
     {
         Write-Host "No remote merged branches"
@@ -84,11 +78,7 @@ function Remove-MergedRemoteGitBranches
 function Remove-MergedGitBranches()
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    Param(
-        [Parameter()]
-        [string[]]
-        $Ignore = $Global:GitPromptSettings.MergedBranchesToKeep
-    )
+    Param()
 
     Remove-MergedLocalGitBranches @PSBoundParameters
     Remove-MergedRemoteGitBranches @PSBoundParameters
