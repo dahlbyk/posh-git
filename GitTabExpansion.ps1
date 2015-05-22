@@ -18,9 +18,9 @@ $subcommands = @{
 }
 
 $gitflowsubcommands = @{
-    feature = 'list start finish publish track diff rebase checkout pull'
-    release = 'list start finish publish track'
-    hotfix = 'list start finish publish track'
+    feature = 'list start finish publish track diff rebase checkout pull delete'
+    release = 'list start finish publish track delete'
+    hotfix = 'list start finish publish delete'
 }
 
 function script:gitCmdOperations($commands, $command, $filter) {
@@ -81,7 +81,7 @@ function script:gitTags($filter) {
 
 function script:gitFeatures($filter, $command){
 	$featurePrefix = git config --local --get "gitflow.prefix.$command"
-    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
+    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
         foreach { $prefix + $_ }
@@ -187,7 +187,7 @@ function GitTabExpansion($lastBlock) {
         "^flow (?<cmd>$($gitflowsubcommands.Keys -join '|'))\s+(?<op>\S*)$" {
             gitCmdOperations $gitflowsubcommands $matches['cmd'] $matches['op']
         }
-		
+
 		# Handles git flow <command> <op> <name>
         "^flow (?<command>\S*)\s+(?<op>\S*)\s+(?<name>\S*)$" {
 			gitFeatures $matches['name'] $matches['command']
