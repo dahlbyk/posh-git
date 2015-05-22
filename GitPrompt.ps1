@@ -3,7 +3,7 @@
 
 $global:GitPromptSettings = New-Object PSObject -Property @{
     DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor
-
+    
     BeforeText                = ' ['
     BeforeForegroundColor     = [ConsoleColor]::Yellow
     BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
@@ -51,8 +51,16 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     Debug                     = $false
 
-    MergedBranchesToKeep       = @("master", "develop")
+    BranchNameLimit           = 0
+    TruncatedBranchSuffix     = '...'
+
+    MergedBranchesToKeep      = @("master", "develop")
 }
+
+$currentUser = [Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
+$isAdminProcess = $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+$adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
 
 $WindowTitleSupported = $true
 if (Get-Module NuGet) {
@@ -65,6 +73,17 @@ function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
     } else {
         Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
     }
+}
+
+function Format-BranchName($branchName){
+    $s = $global:GitPromptSettings
+
+    if($s.BranchNameLimit -gt 0 -and $branchName.Length -gt $s.BranchNameLimit)
+    {
+        $branchName = "{0}{1}" -f $branchName.Substring(0,$s.BranchNameLimit), $s.TruncatedBranchSuffix
+    }
+
+    return $branchName
 }
 
 function Write-GitStatus($status) {
@@ -88,7 +107,7 @@ function Write-GitStatus($status) {
             $branchForegroundColor = $s.BranchAheadForegroundColor
         }
 
-        Write-Prompt $status.Branch -BackgroundColor $branchBackgroundColor -ForegroundColor $branchForegroundColor
+        Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchBackgroundColor -ForegroundColor $branchForegroundColor
 
         if($s.EnableFileStatus -and $status.HasIndex) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
@@ -140,7 +159,7 @@ function Write-GitStatus($status) {
             }
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-            $Host.UI.RawUI.WindowTitle = "$prefix$repoName [$($status.Branch)]"
+            $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($status.Branch)]"
         }
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
@@ -153,7 +172,9 @@ if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
-$Global:VcsPromptStatuses += {
+$PoshGitVcsPrompt = {
     $Global:GitStatus = Get-GitStatus
     Write-GitStatus $GitStatus
 }
+$Global:VcsPromptStatuses += $PoshGitVcsPrompt
+$ExecutionContext.SessionState.Module.OnRemove = { $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | ? { $_ -ne $PoshGitVcsPrompt} }

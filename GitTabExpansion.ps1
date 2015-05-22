@@ -74,6 +74,11 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         foreach { $prefix + $_ }
 }
 
+function script:gitTags($filter) {
+    git tag |
+        where { $_ -like "$filter*" }
+}
+
 function script:gitFeatures($filter, $command){
 	$featurePrefix = git config --local --get "gitflow.prefix.$command"
     $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
@@ -163,6 +168,11 @@ function GitTabExpansion($lastBlock) {
     if($lastBlock -match "^$(Get-AliasPattern tgit) (?<cmd>\S*)$") {
             # Need return statement to prevent fall-through.
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
+    }
+
+    # Handles gitk
+    if($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
+        return gitBranches $matches['ref'] $true
     }
 
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
@@ -276,6 +286,7 @@ function GitTabExpansion($lastBlock) {
         # Handles git <cmd> <ref>
         "^(?:checkout|cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
+            gitTags $matches['ref']
         }
     }
 }
@@ -305,6 +316,7 @@ function TabExpansion($line, $lastWord) {
         # Execute git tab completion for all git-related commands
         "^$(Get-AliasPattern git) (.*)" { GitTabExpansion $lastBlock }
         "^$(Get-AliasPattern tgit) (.*)" { GitTabExpansion $lastBlock }
+        "^$(Get-AliasPattern gitk) (.*)" { GitTabExpansion $lastBlock }
 
         # Fall back on existing tab expansion
         default { if (Test-Path Function:\TabExpansionBackup) { TabExpansionBackup $line $lastWord } }
