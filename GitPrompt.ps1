@@ -156,7 +156,9 @@ if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
-$Global:VcsPromptStatuses += {
+$PoshGitVcsPrompt = {
     $Global:GitStatus = Get-GitStatus
     Write-GitStatus $GitStatus
 }
+$Global:VcsPromptStatuses += $PoshGitVcsPrompt
+$ExecutionContext.SessionState.Module.OnRemove = { $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | ? { $_ -ne $PoshGitVcsPrompt} }
