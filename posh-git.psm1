@@ -36,8 +36,6 @@ Export-ModuleMember `
         'Get-SshPath',
         'Update-AllBranches',
         'tgit',
-        'Remove-MergedLocalGitBranches',
-        'Remove-MergedRemoteGitBranches',
         'Remove-MergedGitBranches')
 
 
