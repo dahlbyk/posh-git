@@ -35,9 +35,6 @@ function Get-MergedRemoteBranches($remoteName) {
 }
 
 function Remove-MergedLocalGitBranches {
-    [CmdletBinding(SupportsShouldProcess = $true)]
-    Param()
-
     $branches = Get-MergedLocalGitBranches `
         | where {$_ -notin $Global:GitPromptSettings.MergedBranchesToKeep}
     if ($branches.Length -eq 0) {
@@ -47,7 +44,6 @@ function Remove-MergedLocalGitBranches {
 
     foreach ($item in $branches) {
         if ($PSCmdlet.ShouldProcess($item, "delete branch")) {
-            Write-Host "Deleting branch $item..."
             git branch -d $item
         }
     }
@@ -63,7 +59,6 @@ function Remove-MergedRemoteGitBranches($remoteName) {
 
     foreach ($item in $branches) {
         if ($PSCmdlet.ShouldProcess($item.FullName, "delete remote branch")) {
-            Write-Host "Deleting remote branch $($item.FullName)..."
             git push $item.RemoteName :$($item.BranchName)
         }
     }
