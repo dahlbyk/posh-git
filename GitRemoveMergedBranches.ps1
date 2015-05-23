@@ -6,8 +6,13 @@ function Select-RemoteBranch($remoteName) {
     PROCESS
     {
         if ($_ -match "^(.*?)/(.*)$") {
-            if ($Matches[1] -eq $remoteName) {
-                write $Matches[2]
+            if ($Matches[1] -in $remoteName) {
+                $branchInfo = @{
+                    RemoteName=$Matches[1];
+                    BranchName=$Matches[2];
+                    FullName=$Matches[0]
+                }
+                write (New-Object -TypeName PSObject -Property $branchInfo)
             }
         }
     }
@@ -26,7 +31,7 @@ function Get-MergedRemoteBranches($remoteName) {
     return $trimmed `
         | where {!$_.Contains("/HEAD ->")} `
         | Select-RemoteBranch $remoteName `
-        | where {$_ -ne $current}
+        | where {$_.BranchName -ne $current}
 }
 
 function Remove-MergedLocalGitBranches {
@@ -57,9 +62,9 @@ function Remove-MergedRemoteGitBranches($remoteName) {
     }
 
     foreach ($item in $branches) {
-        if ($PSCmdlet.ShouldProcess($item, "delete remote branch")) {
-            Write-Host "Deleting remote branch $item..."
-            git push $RemoteName :$item
+        if ($PSCmdlet.ShouldProcess($item.FullName, "delete remote branch")) {
+            Write-Host "Deleting remote branch $($item.FullName)..."
+            git push $item.RemoteName :$($item.BranchName)
         }
     }
 }
@@ -73,7 +78,7 @@ function Remove-MergedGitBranches() {
         [Switch]
         $All,
 
-        [string]
+        [string[]]
         $RemoteName = 'origin'
     )
 
