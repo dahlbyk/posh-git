@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>poshgit</id>
+    <title>posh-git</title>
+    <version>0.5.0.201401009</version>
+    <authors>Keith Dahlby, Mark Embling, Jeremy Skinner</authors>
+    <owners>Rob Reynolds, Keith Dahlby</owners>
+    <description>posh-git - A set of PowerShell scripts which provide Git/PowerShell integration.
+    </description>
+    <summary>PoshGit - A PowerShell environment for Git</summary>
+    <tags>poshgit powershell git</tags>
+    <projectUrl>https://github.com/dahlbyk/posh-git</projectUrl>
+    <!--<licenseUrl></licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>-->
+    <dependencies>
+      <dependency id="git" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
+<!-- character encoding: “UTF-8” -->
