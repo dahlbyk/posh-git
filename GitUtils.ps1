@@ -313,7 +313,13 @@ function Start-SshAgent([switch]$Quiet) {
             }
         }
     }
-    Add-SshKey
+    $keyfiles = Get-ChildItem -Path "$home/.ssh/*" -Exclude *.*, known_hosts
+    $keyfilepaths = @()
+    foreach($f in $keyfiles)
+    {
+        $keyfilepaths = $keyfilepaths + $f.FullName -replace "c:", "/c" -replace "\\", "/" 
+    }
+    Add-SshKey($keyfilepaths)
 }
 
 function Get-SshPath($File = 'id_rsa')
