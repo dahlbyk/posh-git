@@ -5,7 +5,8 @@ function IsNotCurrentLocal-GitBranch($branch) {
 function Select-RemoteBranch($remoteName) {
     PROCESS
     {
-        if ($_ -match "^(.*?)/(.*)$") {
+        $trimmed = $_.Trim()
+        if ($trimmed -match "^(.*?)/(.*)$" -and !$trimmed.Contains('/HEAD ->')) {
             if ($Matches[1] -in $remoteName) {
                 $branchInfo = @{
                     RemoteName=$Matches[1];
@@ -24,14 +25,23 @@ function Get-MergedLocalGitBranches() {
     return $trimmed | where {IsNotCurrentLocal-GitBranch $_}
 }
 
-function Get-MergedRemoteBranches($remoteName) {
-    $current = Get-GitBranch
-    $branches = git branch -r --merged
-    $trimmed = $branches | foreach {$_.Trim()}
-    return $trimmed `
-        | where {!$_.Contains("/HEAD ->")} `
-        | Select-RemoteBranch $remoteName `
-        | where {$_.BranchName -ne $current}
+function Get-MergedRemoteBranches {
+    BEGIN
+    {
+        $current = Get-GitBranch
+        $branches = git branch -r
+    }
+
+    PROCESS
+    {
+        $remote = $_
+        $f = $branches | Select-RemoteBranch $remote
+        $currentRemote = $f | where {$_.RemoteName -eq $remote -and $_.BranchName -eq $current}
+        if ($currentRemote) {
+            $merged = git branch -r --merged $currentRemote.FullName
+            $merged | Select-RemoteBranch $remote | where {$_.BranchName -ne $current} | foreach {write $_}
+        }
+    }
 }
 
 function Remove-MergedLocalGitBranches {
@@ -50,7 +60,7 @@ function Remove-MergedLocalGitBranches {
 }
 
 function Remove-MergedRemoteGitBranches($remoteName) {
-    $branches = Get-MergedRemoteBranches $remoteName `
+    $branches = $remoteName | Get-MergedRemoteBranches `
         | where {$_ -notin $Global:GitPromptSettings.MergedBranchesToKeep}
     if ($branches.Length -eq 0) {
         Write-Host "No remote merged branches"
