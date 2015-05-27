@@ -68,23 +68,19 @@ function Remove-MergedGitBranches() {
     [CmdletBinding(SupportsShouldProcess = $true)]
     Param(
         [Switch]
-        $Remote,
-
-        [Switch]
-        $All,
+        $Local,
 
         [string[]]
-        $RemoteName = 'origin'
+        $Remote
     )
 
-    if ($All) {
-        Remove-MergedRemoteGitBranches $RemoteName
+    if (!$PSBoundParameters.ContainsKey('Local') -and !$PSBoundParameters.ContainsKey('Remote')) {
+        $Local = $true;
+    }
+    if ($Local) {
         Remove-MergedLocalGitBranches
     }
-    elseif ($Remote) {
-        Remove-MergedRemoteGitBranches $RemoteName
-    }
-    else {
-        Remove-MergedLocalGitBranches
+    if ($Remote.Length -gt 0) {
+        Remove-MergedRemoteGitBranches $Remote
     }
 }
