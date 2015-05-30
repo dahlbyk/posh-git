@@ -290,8 +290,10 @@ function Start-SshAgent {
     [parameter(Position=0)]
     [string[]]$KeyFile,
 
+    [parameter()]
     [switch]$UseAllKeys,
-
+    
+    [parameter()]
     [switch]$Quiet
     )
 
