@@ -313,13 +313,6 @@ function Start-SshAgent([switch]$Quiet) {
             }
         }
     }
-    $keyfiles = Get-ChildItem -Path "$home/.ssh/*" -Exclude *.*, known_hosts
-    $keyfilepaths = @()
-    foreach($f in $keyfiles)
-    {
-        $keyfilepaths = $keyfilepaths + $f.FullName -replace "c:", "/c" -replace "\\", "/" 
-    }
-    Add-SshKey($keyfilepaths)
 }
 
 function Get-SshPath($File = 'id_rsa')
@@ -328,36 +321,44 @@ function Get-SshPath($File = 'id_rsa')
     Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
 }
 
+function Get-SshDirectory {
+    Join-Path $HOME ".ssh"
+}
+
 # Add a key to the SSH agent
-function Add-SshKey() {
+function Add-SshKey {
+    param(
+        [parameter(Position=0)]
+        [string[]]$KeyFile,
+
+        [switch]$All
+    )
+    $keyPath = Get-SshDirectory
     if ($env:GIT_SSH -imatch 'plink') {
         $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
         $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
-
-        if ($args.Count -eq 0) {
-            $keystring = ""
-            $keyPath = Join-Path $Env:HOME ".ssh"
-            $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
-            foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
-            if ( $keystring ) { & $pageant "$keystring" }
-        } else {
-            foreach ($value in $args) {
-                & $pageant $value
-            }
+        
+        if ($All) {
+            $KeyFile = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty FullName
+        }
+        $keystring = ""
+        foreach ( $key in $KeyFile ) { $keystring += "`"$key`" " }
+        & $pageant "$keystring"
+        if([string]::IsNullOrWhiteSpace($keystring)) {
+            Write-Warning 'Pageant is started, but no keys were added.'
         }
     } else {
         $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
         $sshAdd = if ($sshAdd) {$sshAdd} else {Guess-Ssh('ssh-add')}
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-        if ($args.Count -eq 0) {
-            & $sshAdd
-        } else {
-            foreach ($value in $args) {
-                & $sshAdd $value
-            }
+        if($All) {
+            $KeyFile = Get-ChildItem -Path "$keypath/*" -Exclude *.*, known_hosts
         }
+        $keystring = ""
+        foreach($key in $KeyFile) { $keystring += "`"$key`" " }
+        & $sshAdd $keystring
     }
 }
 
