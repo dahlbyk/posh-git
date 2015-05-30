@@ -22,6 +22,4 @@ function global:prompt {
 
 Pop-Location
 
-Start-SshAgent -Quiet
-
-Add-SshKey -All
+Start-SshAgent -UseAllKeys -Quiet

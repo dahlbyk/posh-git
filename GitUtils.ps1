@@ -285,7 +285,16 @@ function Guess-Ssh($program = 'ssh-agent') {
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
-function Start-SshAgent([switch]$Quiet) {
+function Start-SshAgent {
+    param(
+    [parameter(Position=0)]
+    [string[]]$KeyFile,
+
+    [switch]$UseAllKeys,
+
+    [switch]$Quiet
+    )
+
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         if (!$Quiet) {
@@ -312,6 +321,11 @@ function Start-SshAgent([switch]$Quiet) {
                 setenv $Matches['key'] $Matches['value']
             }
         }
+    }
+    if($UseAllKeys) {
+        Add-SshKey -All
+    } else {
+        Add-SshKey $KeyFile
     }
 }
 
