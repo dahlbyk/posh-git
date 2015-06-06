@@ -174,11 +174,13 @@ if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
 $s = $global:GitPromptSettings
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.BeforeIndexForegroundColor = $s.BeforeIndexForegroundBrightColor }
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.IndexForegroundColor = $s.IndexForegroundBrightColor }
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { 
+    $s.BeforeIndexForegroundColor = $s.BeforeIndexForegroundBrightColor 
+    $s.IndexForegroundColor = $s.IndexForegroundBrightColor 
 
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.UntrackedForegroundColor = $s.UntrackedForegroundBrightColor }
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.WorkingForegroundColor = $s.WorkingForegroundBrightColor }
+    $s.UntrackedForegroundColor = $s.UntrackedForegroundBrightColor
+    $s.WorkingForegroundColor = $s.WorkingForegroundBrightColor 
+}
 
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
