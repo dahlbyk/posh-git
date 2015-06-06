@@ -25,17 +25,21 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchBehindAndAheadBackgroundColor = $Host.UI.RawUI.BackgroundColor
 
     BeforeIndexText           = ""
-    BeforeIndexForegroundColor= [ConsoleColor]::Green
+    BeforeIndexForegroundColor= [ConsoleColor]::DarkGreen
+	BeforeIndexForegroundBrightColor= [ConsoleColor]::Green
     BeforeIndexBackgroundColor= $Host.UI.RawUI.BackgroundColor
 
-    IndexForegroundColor      = [ConsoleColor]::Green
+    IndexForegroundColor      = [ConsoleColor]::DarkGreen
+	IndexForegroundBrightColor= [ConsoleColor]::Green
     IndexBackgroundColor      = $Host.UI.RawUI.BackgroundColor
 
-    WorkingForegroundColor    = [ConsoleColor]::Red
+    WorkingForegroundColor    = [ConsoleColor]::DarkRed
+	WorkingForegroundBrightColor = [ConsoleColor]::Red
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
 
     UntrackedText             = ' !'
-    UntrackedForegroundColor  = [ConsoleColor]::Red
+    UntrackedForegroundColor  = [ConsoleColor]::DarkRed
+	UntrackedForegroundBrightColor  = [ConsoleColor]::Red
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
 
     ShowStatusWhenZero        = $true
@@ -167,6 +171,15 @@ function Write-GitStatus($status) {
 if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
 }
+$s = $global:GitPromptSettings
+
+# Override some of the normal colors if the background color is set to the default DarkMagenta.
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.BeforeIndexForegroundColor = $s.BeforeIndexForegroundBrightColor }
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.IndexForegroundColor = $s.IndexForegroundBrightColor }
+
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.UntrackedForegroundColor = $s.UntrackedForegroundBrightColor }
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { $s.WorkingForegroundColor = $s.WorkingForegroundBrightColor }
+
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
