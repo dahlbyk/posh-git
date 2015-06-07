@@ -31,7 +31,7 @@ function script:gitCmdOperations($commands, $command, $filter) {
 
 $script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry','cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch','format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv','notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm','shortlog','show','stash','status','submodule','svn','tag','whatchanged')
 try {
-  if ((git help -a 2>&1 | Select-String flow) -ne $null) {
+  if ((safeexec { git help -a } | Select-String flow) -ne $null) {
       $script:someCommands += 'flow'
   }
 }
@@ -43,7 +43,7 @@ function script:gitCommands($filter, $includeAliases) {
     if (-not $global:GitTabSettings.AllCommands) {
         $cmdList += $someCommands -like "$filter*"
     } else {
-        $cmdList += git help --all |
+        $cmdList += safeexec{ git help --all } |
             where { $_ -match '^  \S.*' } |
             foreach { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
             where { $_ -like "$filter*" }
@@ -56,7 +56,7 @@ function script:gitCommands($filter, $includeAliases) {
 }
 
 function script:gitRemotes($filter) {
-    git remote |
+    safeexec { git remote } |
         where { $_ -like "$filter*" }
 }
 
@@ -66,8 +66,8 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         $prefix = $matches['from']
         $filter = $matches['to']
     }
-    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
-                @(git branch --no-color -r | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
+    $branches = @(safeexec { git branch --no-color } | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+                @(safeexec { git branch --no-color -r } | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
@@ -80,27 +80,27 @@ function script:gitTags($filter) {
 }
 
 function script:gitFeatures($filter, $command){
-	$featurePrefix = git config --local --get "gitflow.prefix.$command"
-    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
+	$featurePrefix = safeexec { git config --local --get "gitflow.prefix.$command" }
+    $branches = @(safeexec { git branch --no-color } | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
         foreach { $prefix + $_ }
 }
 
 function script:gitRemoteBranches($remote, $ref, $filter) {
-    git branch --no-color -r |
+    safeexec { git branch --no-color -r } |
         where { $_ -like "  $remote/$filter*" } |
         foreach { $ref + ($_ -replace "  $remote/","") }
 }
 
 function script:gitStashes($filter) {
-    (git stash list) -replace ':.*','' |
+    (safeexec { git stash list } ) -replace ':.*','' |
         where { $_ -like "$filter*" } |
         foreach { "'$_'" }
 }
 
 function script:gitTfsShelvesets($filter) {
-    (git tfs shelve-list) |
+    (safeexec { git tfs shelve-list }) |
         where { $_ -like "$filter*" } |
         foreach { "'$_'" }
 }
@@ -140,7 +140,7 @@ function script:gitDeleted($filter) {
 }
 
 function script:gitAliases($filter) {
-    git config --get-regexp ^alias\. | foreach {
+    safeexec { git config --get-regexp ^alias\. } | foreach {
         if($_ -match "^alias\.(?<alias>\S+) .*") {
             $alias = $Matches['alias']
             if($alias -like "$filter*") {
@@ -151,7 +151,7 @@ function script:gitAliases($filter) {
 }
 
 function script:expandGitAlias($cmd, $rest) {
-    if((git config --get-regexp "^alias\.$cmd`$") -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
+    if((safeexec { git config --get-regexp "^alias\.$cmd`$" }) -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
         return "git $($Matches['cmd'])$rest"
     } else {
         return "git $cmd$rest"

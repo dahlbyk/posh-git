@@ -12,6 +12,7 @@ if ($psv.Major -lt 3 -and !$NoVersionWarn) {
 }
 
 Push-Location $psScriptRoot
+. .\Exec.ps1
 .\CheckVersion.ps1 > $null
 
 . .\Utils.ps1

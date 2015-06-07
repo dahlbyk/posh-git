@@ -46,15 +46,15 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             }
 
             $b = Invoke-NullCoalescing `
-                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
+                { dbg 'Trying symbolic-ref' $sw; safeexec { git symbolic-ref HEAD } } `
                 { '({0})' -f (Invoke-NullCoalescing `
                     {
                         dbg 'Trying describe' $sw
                         switch ($Global:GitPromptSettings.DescribeStyle) {
-                            'contains' { git describe --contains HEAD 2>$null }
-                            'branch' { git describe --contains --all HEAD 2>$null }
-                            'describe' { git describe HEAD 2>$null }
-                            default { git describe --tags --exact-match HEAD 2>$null }
+                            'contains' { safeexec { git describe --contains HEAD } }
+                            'branch' { safeexec { git describe --contains --all HEAD } }
+                            'describe' { safeexec { git describe HEAD } }
+                            default { safeexec { git describe --tags --exact-match HEAD } }
                         }
                     } `
                     {
@@ -63,10 +63,10 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
 
                         if (Test-Path $gitDir\HEAD) {
                             dbg 'Reading from .git\HEAD' $sw
-                            $ref = Get-Content $gitDir\HEAD 2>$null
+                            $ref = Get-Content $gitDir\HEAD -ErrorAction SilentlyContinue
                         } else {
                             dbg 'Trying rev-parse' $sw
-                            $ref = git rev-parse HEAD 2>$null
+                            $ref = safeexec { git rev-parse HEAD }
                         }
 
                         if ($ref -match 'ref: (?<ref>.+)') {
@@ -81,9 +81,9 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
         }
 
         dbg 'Inside git directory?' $sw
-        if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
+        if ('true' -eq $(safeexec { git rev-parse --is-inside-git-dir })) {
             dbg 'Inside git directory' $sw
-            if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
+            if ('true' -eq $(safeexec { git rev-parse --is-bare-repository })) {
                 $c = 'BARE:'
             } else {
                 $b = 'GIT_DIR!'
@@ -118,7 +118,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
-            $status = git -c color.status=false status --short --branch 2>$null
+            $status = safeexec { git -c color.status=false status --short --branch }
         } else {
             $status = @()
         }
@@ -319,7 +319,7 @@ function Start-SshAgent([switch]$Quiet) {
 function Get-SshPath($File = 'id_rsa')
 {
     $home = Resolve-Path (Invoke-NullCoalescing $Env:HOME ~)
-    Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
+    Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue
 }
 
 # Add a key to the SSH agent
@@ -371,17 +371,17 @@ function Stop-SshAgent() {
 }
 
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
-    $head = git rev-parse --abbrev-ref HEAD
-    git checkout -q $Upstream
-    $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' }
+    $head = exec { git rev-parse --abbrev-ref HEAD }
+    exec { git checkout -q $Upstream }
+    $branches = (exec { git branch --no-color --no-merged }) | where { $_ -notmatch '^\* ' }
     foreach ($line in $branches) {
         $branch = $line.SubString(2)
         if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }
-        git rebase -q $Upstream $branch > $null 2> $null
+        safeexec { git rebase -q $Upstream $branch } > $null
         if ($LASTEXITCODE) {
-            git rebase --abort
+            exec { git rebase --abort }
             Write-Warning "Rebase failed for $branch"
         }
     }
-    git checkout -q $head
+    exec { git checkout -q $head }
 }
