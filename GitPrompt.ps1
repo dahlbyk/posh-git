@@ -2,61 +2,76 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $global:GitPromptSettings = New-Object PSObject -Property @{
-    DefaultForegroundColor    = $Host.UI.RawUI.ForegroundColor
+    BeforeText                                  = ' ['
+    BeforeForegroundColor                       = [ConsoleColor]::Yellow
+    BeforeBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
     
-    BeforeText                = ' ['
-    BeforeForegroundColor     = [ConsoleColor]::Yellow
-    BeforeBackgroundColor     = $Host.UI.RawUI.BackgroundColor
-    DelimText                 = ' |'
-    DelimForegroundColor      = [ConsoleColor]::Yellow
-    DelimBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    DelimText                                   = ' |'
+    DelimForegroundColor                        = [ConsoleColor]::Yellow
+    DelimBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
 
-    AfterText                 = ']'
-    AfterForegroundColor      = [ConsoleColor]::Yellow
-    AfterBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    AfterText                                   = ']'
+    AfterForegroundColor                        = [ConsoleColor]::Yellow
+    AfterBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
 
-    BranchForegroundColor       = [ConsoleColor]::Cyan
-    BranchBackgroundColor       = $Host.UI.RawUI.BackgroundColor
-    BranchAheadForegroundColor  = [ConsoleColor]::Green
-    BranchAheadBackgroundColor  = $Host.UI.RawUI.BackgroundColor
-    BranchBehindForegroundColor = [ConsoleColor]::Red
-    BranchBehindBackgroundColor = $Host.UI.RawUI.BackgroundColor
-    BranchBehindAndAheadForegroundColor = [ConsoleColor]::Yellow
-    BranchBehindAndAheadBackgroundColor = $Host.UI.RawUI.BackgroundColor
+    LocalDefaultStatusSymbol                    = $null
+    LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
+    LocalDefaultStatusForegroundBrightColor     = [ConsoleColor]::Green
+    LocalDefaultStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
+    
+    LocalWorkingStatusSymbol                    = '!'
+    LocalWorkingStatusForegroundColor           = [ConsoleColor]::DarkRed
+    LocalWorkingStatusForegroundBrightColor     = [ConsoleColor]::Red
+    LocalWorkingStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
+    
+    LocalStagedStatusSymbol                     = '~'
+    LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
+    LocalStagedStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
+    
+    BranchIdenticalStatusToSymbol               = [char]0x2261 # Three horizontal lines
+    BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Green
+    BranchIdenticalStatusToBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    
+    BranchAheadStatusSymbol                     = [char]0x2191 # Up arrow
+    BranchAheadStatusForegroundColor            = [ConsoleColor]::Cyan
+    BranchAheadStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
+    
+    BranchBehindStatusSymbol                    = [char]0x2193 # Down arrow
+    BranchBehindStatusForegroundColor           = [ConsoleColor]::Red
+    BranchBehindStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
+    
+    BranchBehindAndAheadStatusSymbol            = [char]0x2195 # Up & Down arrow
+    BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
+    BranchBehindAndAheadStatusBackgroundColor   = $Host.UI.RawUI.BackgroundColor
 
-    BeforeIndexText           = ""
-    BeforeIndexForegroundColor= [ConsoleColor]::DarkGreen
-    BeforeIndexForegroundBrightColor= [ConsoleColor]::Green
-    BeforeIndexBackgroundColor= $Host.UI.RawUI.BackgroundColor
+    BeforeIndexText                             = ""
+    BeforeIndexForegroundColor                  = [ConsoleColor]::DarkGreen
+    BeforeIndexForegroundBrightColor            = [ConsoleColor]::Green
+    BeforeIndexBackgroundColor                  = $Host.UI.RawUI.BackgroundColor
 
-    IndexForegroundColor      = [ConsoleColor]::DarkGreen
-    IndexForegroundBrightColor= [ConsoleColor]::Green
-    IndexBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    IndexForegroundColor                        = [ConsoleColor]::DarkGreen
+    IndexForegroundBrightColor                  = [ConsoleColor]::Green
+    IndexBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
 
-    WorkingForegroundColor    = [ConsoleColor]::DarkRed
-    WorkingForegroundBrightColor = [ConsoleColor]::Red
-    WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
+    WorkingForegroundColor                      = [ConsoleColor]::DarkRed
+    WorkingForegroundBrightColor                = [ConsoleColor]::Red
+    WorkingBackgroundColor                      = $Host.UI.RawUI.BackgroundColor
 
-    UntrackedText             = ' !'
-    UntrackedForegroundColor  = [ConsoleColor]::DarkRed
-    UntrackedForegroundBrightColor  = [ConsoleColor]::Red
-    UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
+    ShowStatusWhenZero                          = $true
 
-    ShowStatusWhenZero        = $true
+    AutoRefreshIndex                            = $true
 
-    AutoRefreshIndex          = $true
+    EnablePromptStatus                          = !$Global:GitMissing
+    EnableFileStatus                            = $true
+    RepositoriesInWhichToDisableFileStatus      = @( ) # Array of repository paths
+    DescribeStyle                               = ''
 
-    EnablePromptStatus        = !$Global:GitMissing
-    EnableFileStatus          = $true
-    RepositoriesInWhichToDisableFileStatus = @( ) # Array of repository paths
-    DescribeStyle             = ''
+    EnableWindowTitle                           = 'posh~git ~ '
 
-    EnableWindowTitle         = 'posh~git ~ '
+    Debug                                       = $false
 
-    Debug                     = $false
-
-    BranchNameLimit           = 0
-    TruncatedBranchSuffix     = '...'
+    BranchNameLimit                             = 0
+    TruncatedBranchSuffix                       = '...'
 }
 
 $currentUser = [Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -93,23 +108,36 @@ function Write-GitStatus($status) {
     if ($status -and $s) {
         Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
 
-        $branchBackgroundColor = $s.BranchBackgroundColor
-        $branchForegroundColor = $s.BranchForegroundColor
-        if ($status.BehindBy -gt 0 -and $status.AheadBy -gt 0) {
-            # We are behind and ahead of remote
-            $branchBackgroundColor = $s.BranchBehindAndAheadBackgroundColor
-            $branchForegroundColor = $s.BranchBehindAndAheadForegroundColor
-        } elseif ($status.BehindBy -gt 0) {
+        if ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
+            # We are aligned with remote
+            $branchStatusSymbol          = $s.BranchIdenticalStatusToSymbol
+            $branchStatusBackgroundColor = $s.BranchIdenticalStatusToBackgroundColor
+            $branchStatusForegroundColor = $s.BranchIdenticalStatusToForegroundColor
+        } elseif ($status.BehindBy -ge 1 -and $status.AheadBy -ge 1) {
+            # We are both behind and ahead of remote
+            $branchStatusSymbol          = $s.BranchBehindAndAheadStatusSymbol
+            $branchStatusBackgroundColor = $s.BranchBehindAndAheadStatusBackgroundColor
+            $branchStatusForegroundColor = $s.BranchBehindAndAheadStatusForegroundColor
+        } elseif ($status.BehindBy -ge 1) {
             # We are behind remote
-            $branchBackgroundColor = $s.BranchBehindBackgroundColor
-            $branchForegroundColor = $s.BranchBehindForegroundColor
-        } elseif ($status.AheadBy -gt 0) {
+            $branchStatusSymbol          = $s.BranchBehindStatusSymbol
+            $branchStatusBackgroundColor = $s.BranchBehindStatusBackgroundColor
+            $branchStatusForegroundColor = $s.BranchBehindStatusForegroundColor
+        } elseif ($status.AheadBy -ge 1) {
             # We are ahead of remote
-            $branchBackgroundColor = $s.BranchAheadBackgroundColor
-            $branchForegroundColor = $s.BranchAheadForegroundColor
+            $branchStatusSymbol          = $s.BranchAheadStatusSymbol
+            $branchStatusBackgroundColor = $s.BranchAheadStatusBackgroundColor
+            $branchStatusForegroundColor = $s.BranchAheadStatusForegroundColor
+        } else {
+            # This condition should not be possible but defaulting the variables to be safe
+            $branchStatusSymbol          = "?"
+            $branchStatusBackgroundColor = $Host.UI.RawUI.BackgroundColor
+            $branchStatusForegroundColor = $Host.UI.RawUI.ForegroundColor
         }
 
-        Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchBackgroundColor -ForegroundColor $branchForegroundColor
+        Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+        
+        Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
 
         if($s.EnableFileStatus -and $status.HasIndex) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
@@ -149,10 +177,27 @@ function Write-GitStatus($status) {
             }
         }
 
-        if ($status.HasUntracked) {
-            Write-Prompt $s.UntrackedText -BackgroundColor $s.UntrackedBackgroundColor -ForegroundColor $s.UntrackedForegroundColor
+        if ($status.HasWorking) {
+            # We have un-staged files in the working tree
+            $localStatusSymbol          = $s.LocalWorkingStatusSymbol
+            $localStatusBackgroundColor = $s.LocalWorkingStatusBackgroundColor
+            $localStatusForegroundColor = $s.LocalWorkingStatusForegroundColor
+        } elseif ($status.HasIndex) {
+            # We have staged but uncommited files
+            $localStatusSymbol          = $s.LocalStagedStatusSymbol
+            $localStatusBackgroundColor = $s.LocalStagedStatusBackgroundColor
+            $localStatusForegroundColor = $s.LocalStagedStatusForegroundColor
+        } else {
+            # No uncommited changes
+            $localStatusSymbol          = $s.LocalDefaultStatusSymbol
+            $localStatusBackgroundColor = $s.LocalDefaultStatusBackgroundColor
+            $localStatusForegroundColor = $s.LocalDefaultStatusForegroundColor
         }
-
+                
+        if ($localStatusSymbol) {
+            Write-Prompt (" {0}" -f $localStatusSymbol) -BackgroundColor $localStatusBackgroundColor -ForegroundColor $localStatusForegroundColor
+        }
+        
         Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
 
         if ($WindowTitleSupported -and $s.EnableWindowTitle) {
@@ -175,11 +220,13 @@ $s = $global:GitPromptSettings
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
 if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { 
-    $s.BeforeIndexForegroundColor = $s.BeforeIndexForegroundBrightColor 
-    $s.IndexForegroundColor = $s.IndexForegroundBrightColor 
+    $s.LocalDefaultStatusForegroundColor    = $s.LocalDefaultStatusForegroundBrightColor
+    $s.LocalWorkingStatusForegroundColor    = $s.LocalWorkingStatusForegroundBrightColor
+    
+    $s.BeforeIndexForegroundColor           = $s.BeforeIndexForegroundBrightColor 
+    $s.IndexForegroundColor                 = $s.IndexForegroundBrightColor 
 
-    $s.UntrackedForegroundColor = $s.UntrackedForegroundBrightColor
-    $s.WorkingForegroundColor = $s.WorkingForegroundBrightColor 
+    $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor 
 }
 
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
