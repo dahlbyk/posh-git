@@ -26,16 +26,20 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     BeforeIndexText           = ""
     BeforeIndexForegroundColor= [ConsoleColor]::DarkGreen
+    BeforeIndexForegroundBrightColor= [ConsoleColor]::Green
     BeforeIndexBackgroundColor= $Host.UI.RawUI.BackgroundColor
 
     IndexForegroundColor      = [ConsoleColor]::DarkGreen
+    IndexForegroundBrightColor= [ConsoleColor]::Green
     IndexBackgroundColor      = $Host.UI.RawUI.BackgroundColor
 
     WorkingForegroundColor    = [ConsoleColor]::DarkRed
+    WorkingForegroundBrightColor = [ConsoleColor]::Red
     WorkingBackgroundColor    = $Host.UI.RawUI.BackgroundColor
 
     UntrackedText             = ' !'
     UntrackedForegroundColor  = [ConsoleColor]::DarkRed
+    UntrackedForegroundBrightColor  = [ConsoleColor]::Red
     UntrackedBackgroundColor  = $Host.UI.RawUI.BackgroundColor
 
     ShowStatusWhenZero        = $true
@@ -167,6 +171,17 @@ function Write-GitStatus($status) {
 if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
 }
+$s = $global:GitPromptSettings
+
+# Override some of the normal colors if the background color is set to the default DarkMagenta.
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { 
+    $s.BeforeIndexForegroundColor = $s.BeforeIndexForegroundBrightColor 
+    $s.IndexForegroundColor = $s.IndexForegroundBrightColor 
+
+    $s.UntrackedForegroundColor = $s.UntrackedForegroundBrightColor
+    $s.WorkingForegroundColor = $s.WorkingForegroundBrightColor 
+}
+
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
 
 # Add scriptblock that will execute for Write-VcsStatus
