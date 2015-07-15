@@ -344,23 +344,31 @@ function Get-SshDirectory {
 # Add a key to the SSH agent
 function Add-SshKey {
     param(
-        [parameter(Position=0)]
+        [parameter(Position=0,
+                   ValueFromPipeline=$true)]
         [string[]]$KeyFile,
 
-        [switch]$All
+        [switch]$All,
+
+        [string]
+        $KeyPath="$HOME\.ssh"
     )
-    $keyPath = Get-SshDirectory
+    [System.IO.FileInfo[]]$Key
+    if($KeyFile.Count -gt 0) { 
+        foreach($k in $KeyFile) {
+            $keyFileExists = Test-Path -Path $k
+            if(!$keyFileExists) { Join-Path $KeyPath $k }
+            $Key += Get-ChildItem -Path $k
+        }
+    }
+
     if ($env:GIT_SSH -imatch 'plink') {
         $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
         $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
         
-        if ($All) {
-            $KeyFile = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty FullName
-        }
-        $keystring = ""
-        foreach ( $key in $KeyFile ) { $keystring += "`"$key`" " }
-        & $pageant "$keystring"
+        if ($All) { $Key = Get-ChildItem $KeyPath/"*.ppk" | Select -ExpandProperty FullName }
+        foreach ( $key in $Key ) { & $pageant $key }
         if([string]::IsNullOrWhiteSpace($keystring)) {
             Write-Warning 'Pageant is started, but no keys were added.'
         }
@@ -369,11 +377,11 @@ function Add-SshKey {
         $sshAdd = if ($sshAdd) {$sshAdd} else {Guess-Ssh('ssh-add')}
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-        if($All) {
-            $KeyFile = Get-ChildItem -Path "$keypath/*" -Exclude *.*, known_hosts
+        if($All) { $Key = Get-ChildItem -Path "$KeyPath/*" -Exclude *.*, known_hosts }
+        foreach($key in $KeyFile) { 
+            try{& $sshAdd $key}
+            finally {}
         }
-        foreach($key in $KeyFile) { & $sshAdd $key }
-        
     }
 }
 
