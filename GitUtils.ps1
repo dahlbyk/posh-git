@@ -372,9 +372,8 @@ function Add-SshKey {
         if($All) {
             $KeyFile = Get-ChildItem -Path "$keypath/*" -Exclude *.*, known_hosts
         }
-        $keystring = ""
-        foreach($key in $KeyFile) { $keystring += "`"$key`" " }
-        & $sshAdd $keystring
+        foreach($key in $KeyFile) { & $sshAdd $key }
+        
     }
 }
 
