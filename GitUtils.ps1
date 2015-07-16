@@ -344,32 +344,26 @@ function Get-SshDirectory {
 # Add a key to the SSH agent
 function Add-SshKey {
     param(
-        [parameter(Position=0,
-                   ValueFromPipeline=$true)]
-        [string[]]$KeyFile,
+        [parameter(Position=0)]
+        [string[]]$KeyFileName,
 
         [switch]$All,
 
         [string]
-        $KeyPath="$HOME\.ssh"
+        $KeyPath="$env:USERPROFILE\.ssh"
     )
-    [System.IO.FileInfo[]]$Key
-    if($KeyFile.Count -gt 0) { 
-        foreach($k in $KeyFile) {
-            $keyFileExists = Test-Path -Path $k
-            if(!$keyFileExists) { Join-Path $KeyPath $k }
-            $Key += Get-ChildItem -Path $k
-        }
+    for($i=0; $i -lt $KeyFileName.Count; $i++) {
+        $keyFileExists = Test-Path -Path $KeyFileName[$i]
+        if(!$keyFileExists) { $KeyFileName[$i] = Join-Path $KeyPath $KeyFileName[$i] }
     }
-
     if ($env:GIT_SSH -imatch 'plink') {
         $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
         $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
         
-        if ($All) { $Key = Get-ChildItem $KeyPath/"*.ppk" | Select -ExpandProperty FullName }
-        foreach ( $key in $Key ) { & $pageant $key }
-        if([string]::IsNullOrWhiteSpace($keystring)) {
+        if ($All) { $KeyFileName = Get-ChildItem $KeyPath/"*.ppk" | Select -ExpandProperty FullName }
+        foreach ( $key in $KeyFileName ) { & $pageant $key }
+        if([string]::IsNullOrWhiteSpace($key)) {
             Write-Warning 'Pageant is started, but no keys were added.'
         }
     } else {
@@ -377,11 +371,8 @@ function Add-SshKey {
         $sshAdd = if ($sshAdd) {$sshAdd} else {Guess-Ssh('ssh-add')}
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-        if($All) { $Key = Get-ChildItem -Path "$KeyPath/*" -Exclude *.*, known_hosts }
-        foreach($key in $KeyFile) { 
-            try{& $sshAdd $key}
-            finally {}
-        }
+        if($All) { $KeyFileName = Get-ChildItem -Path "$KeyPath/*" -Exclude *.p*, known_hosts | Select -ExpandProperty FullName}
+        foreach($key in $KeyFileName) { & $sshAdd $key }
     }
 }
 
