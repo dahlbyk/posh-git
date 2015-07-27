@@ -117,44 +117,64 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = @()
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
-            dbg 'Getting status' $sw
-            $status = git -c color.status=false status --short --branch 2>$null
-        } else {
-            $status = @()
-        }
+            if ($settings.EnableFileStatusFromCache) {
+                $cacheResponse = Get-GitStatusFromCache
 
-        dbg 'Parsing status' $sw
-        $status | foreach {
-            dbg "Status: $_" $sw
-            if($_) {
-                switch -regex ($_) {
-                    '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
-                        switch ($matches['index']) {
-                            'A' { $indexAdded += $matches['path1'] }
-                            'M' { $indexModified += $matches['path1'] }
-                            'R' { $indexModified += $matches['path1'] }
-                            'C' { $indexModified += $matches['path1'] }
-                            'D' { $indexDeleted += $matches['path1'] }
-                            'U' { $indexUnmerged += $matches['path1'] }
+                $indexAdded = $cacheResponse.IndexAdded
+                $indexModified = $cacheResponse.IndexModified
+                $cacheResponse.IndexRenamed | foreach { $indexModified += $_ }
+                $indexDeleted = $cacheResponse.IndexDeleted
+
+                $filesAdded = $cacheResponse.WorkingAdded
+                $filesModified = $cacheResponse.WorkingModified
+                $cacheResponse.WorkingRenamed | foreach { $filesModified += $_ }
+                $filesDeleted = $cacheResponse.WorkingDeleted
+
+                $branch = $cacheResponse.Branch
+                $upstream = $cacheResponse.Upstream
+                $aheadBy = $cacheResponse.AheadBy
+                $behindBy = $cacheResponse.BehindBy
+
+                if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
+            }
+            else {
+                dbg 'Getting status' $sw
+                $status = git -c color.status=false status --short --branch 2>$null
+
+                dbg 'Parsing status' $sw
+                $status | foreach {
+                    dbg "Status: $_" $sw
+                    if($_) {
+                        switch -regex ($_) {
+                            '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
+                                switch ($matches['index']) {
+                                    'A' { $indexAdded += $matches['path1'] }
+                                    'M' { $indexModified += $matches['path1'] }
+                                    'R' { $indexModified += $matches['path1'] }
+                                    'C' { $indexModified += $matches['path1'] }
+                                    'D' { $indexDeleted += $matches['path1'] }
+                                    'U' { $indexUnmerged += $matches['path1'] }
+                                }
+                                switch ($matches['working']) {
+                                    '?' { $filesAdded += $matches['path1'] }
+                                    'A' { $filesAdded += $matches['path1'] }
+                                    'M' { $filesModified += $matches['path1'] }
+                                    'D' { $filesDeleted += $matches['path1'] }
+                                    'U' { $filesUnmerged += $matches['path1'] }
+                                }
+                            }
+
+                            '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                                $branch = $matches['branch']
+                                $upstream = $matches['upstream']
+                                $aheadBy = [int]$matches['ahead']
+                                $behindBy = [int]$matches['behind']
+                            }
+
+                            '^## Initial commit on (?<branch>\S+)$' {
+                                $branch = $matches['branch']
+                            }
                         }
-                        switch ($matches['working']) {
-                            '?' { $filesAdded += $matches['path1'] }
-                            'A' { $filesAdded += $matches['path1'] }
-                            'M' { $filesModified += $matches['path1'] }
-                            'D' { $filesDeleted += $matches['path1'] }
-                            'U' { $filesUnmerged += $matches['path1'] }
-                        }
-                    }
-
-                    '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
-                        $branch = $matches['branch']
-                        $upstream = $matches['upstream']
-                        $aheadBy = [int]$matches['ahead']
-                        $behindBy = [int]$matches['behind']
-                    }
-
-                    '^## Initial commit on (?<branch>\S+)$' {
-                        $branch = $matches['branch']
                     }
                 }
             }
