@@ -118,17 +118,20 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             if ($settings.EnableFileStatusFromCache) {
+                dbg 'Getting status from cache' $sw
                 $cacheResponse = Get-GitStatusFromCache
 
                 $indexAdded = $cacheResponse.IndexAdded
                 $indexModified = $cacheResponse.IndexModified
                 $cacheResponse.IndexRenamed | foreach { $indexModified += $_ }
                 $indexDeleted = $cacheResponse.IndexDeleted
+                $indexUnmerged = $cacheResponse.Conflicted
 
                 $filesAdded = $cacheResponse.WorkingAdded
                 $filesModified = $cacheResponse.WorkingModified
                 $cacheResponse.WorkingRenamed | foreach { $filesModified += $_ }
                 $filesDeleted = $cacheResponse.WorkingDeleted
+                $filesUnmerged = $cacheResponse.Conflicted
 
                 $branch = $cacheResponse.Branch
                 $upstream = $cacheResponse.Upstream
