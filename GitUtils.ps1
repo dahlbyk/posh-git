@@ -120,6 +120,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             if ($settings.EnableFileStatusFromCache) {
                 dbg 'Getting status from cache' $sw
                 $cacheResponse = Get-GitStatusFromCache
+                dbg 'Parsing status' $sw 
 
                 $indexAdded = $cacheResponse.IndexAdded
                 $indexModified = $cacheResponse.IndexModified
