@@ -124,13 +124,13 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
                 $indexAdded = $cacheResponse.IndexAdded
                 $indexModified = $cacheResponse.IndexModified
-                $cacheResponse.IndexRenamed | foreach { $indexModified += $_ }
+                $cacheResponse.IndexRenamed | foreach { $indexModified += $_.Old }
                 $indexDeleted = $cacheResponse.IndexDeleted
                 $indexUnmerged = $cacheResponse.Conflicted
 
                 $filesAdded = $cacheResponse.WorkingAdded
                 $filesModified = $cacheResponse.WorkingModified
-                $cacheResponse.WorkingRenamed | foreach { $filesModified += $_ }
+                $cacheResponse.WorkingRenamed | foreach { $filesModified += $_.Old }
                 $filesDeleted = $cacheResponse.WorkingDeleted
                 $filesUnmerged = $cacheResponse.Conflicted
 
