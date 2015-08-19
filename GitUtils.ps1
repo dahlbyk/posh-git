@@ -117,9 +117,9 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = @()
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
-			if ($settings.EnableFileStatusFromCache -eq $null) {
-				$settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
-			}
+            if ($settings.EnableFileStatusFromCache -eq $null) {
+                $settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
+            }
 
             if ($settings.EnableFileStatusFromCache) {
                 dbg 'Getting status from cache' $sw
