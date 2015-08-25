@@ -21,7 +21,7 @@ try {
 
     $poshGitInstall = if($env:poshGit -ne $null){ $env:poshGit } else {'https://github.com/dahlbyk/posh-git/zipball/master'}
     Install-ChocolateyZipPackage 'poshgit' $poshGitInstall $poshgitPath
-    $pgitDir = [Array](Dir "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime)[-1]
+    $pgitDir = Dir "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select -Last 1
 
     if(Test-Path $PROFILE) {
         $oldProfile = [string[]](Get-Content $PROFILE)
