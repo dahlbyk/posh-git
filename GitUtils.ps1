@@ -278,10 +278,12 @@ function Guess-Ssh($program = 'ssh-agent') {
     Write-Verbose "$program not in path. Trying to guess location."
     $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
     if ($gitItem -eq $null) { Write-Warning 'git not in path'; return }
-    $sshLocation = join-path $gitItem.directory.parent.fullname bin
-    $sshLocation = join-path $sshLocation $program
-    if (!(get-command $sshLocation -Erroraction SilentlyContinue)) { return }     # Guessing failed.
-    else { return $sshLocation }
+
+    $sshLocation = join-path $gitItem.directory.parent.fullname bin/$program
+    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
+
+    $sshLocation = join-path $gitItem.directory.parent.fullname usr/bin/$program
+    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
