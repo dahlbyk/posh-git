@@ -144,8 +144,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 $behindBy = $cacheResponse.BehindBy
 
                 if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
-            }
-            else {
+            } else {
                 dbg 'Getting status' $sw
                 $status = git -c color.status=false status --short --branch 2>$null
 
