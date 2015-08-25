@@ -24,7 +24,7 @@ try {
     $pgitDir = Dir "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select -Last 1
 
     if(Test-Path $PROFILE) {
-        $oldProfile = [string[]](Get-Content $PROFILE)
+        $oldProfile = @(Get-Content $PROFILE)
         $newProfile = @()
         #If old profile exists replace with new one and make sure prompt preservation function is on top
         $pgitExample = "$pgitDir\profile.example.ps1"
@@ -45,7 +45,7 @@ try {
     $installer = Join-Path $subfolder 'install.ps1'
     & $installer
 
-    $newProfile = [string[]](Get-Content $PROFILE)
+    $newProfile = @(Get-Content $PROFILE)
     Insert-Script ([REF]$newProfile) "Rename-Item Function:\Prompt PoshGitPrompt -Force"
 
     # function that will run previous prompt logic and then the poshgit logic
