@@ -29,7 +29,10 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     LocalStagedStatusSymbol                     = '~'
     LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
     LocalStagedStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
-    
+
+    BranchForegroundColor                       = [ConsoleColor]::Cyan
+    BranchBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
+
     BranchIdenticalStatusToSymbol               = [char]0x2261 # Three horizontal lines
     BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
     BranchIdenticalStatusToBackgroundColor      = $Host.UI.RawUI.BackgroundColor
@@ -110,6 +113,10 @@ function Write-GitStatus($status) {
     if ($status -and $s) {
         Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
 
+        $branchStatusSymbol          = $null
+        $branchStatusBackgroundColor = $s.BranchBackgroundColor
+        $branchStatusForegroundColor = $s.BranchForegroundColor
+
         if ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
             # We are aligned with remote
             $branchStatusSymbol          = $s.BranchIdenticalStatusToSymbol
@@ -133,13 +140,13 @@ function Write-GitStatus($status) {
         } else {
             # This condition should not be possible but defaulting the variables to be safe
             $branchStatusSymbol          = "?"
-            $branchStatusBackgroundColor = $Host.UI.RawUI.BackgroundColor
-            $branchStatusForegroundColor = $Host.UI.RawUI.ForegroundColor
         }
 
         Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
         
-        Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+        if ($branchStatusSymbol) {
+            Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+        }
 
         if($s.EnableFileStatus -and $status.HasIndex) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
