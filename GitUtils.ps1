@@ -244,7 +244,7 @@ function Set-TempEnv($key, $value) {
 # is a running agent.
 function Get-SshAgent() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select -ExpandProperty Id
+        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select -ExpandProperty Id -First 1
         if ($null -ne $pageantPid) { return $pageantPid }
     } else {
         $agentPid = $Env:SSH_AGENT_PID
