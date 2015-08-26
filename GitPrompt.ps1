@@ -31,11 +31,11 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     LocalStagedStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
     
     BranchIdenticalStatusToSymbol               = [char]0x2261 # Three horizontal lines
-    BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Green
+    BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
     BranchIdenticalStatusToBackgroundColor      = $Host.UI.RawUI.BackgroundColor
     
     BranchAheadStatusSymbol                     = [char]0x2191 # Up arrow
-    BranchAheadStatusForegroundColor            = [ConsoleColor]::Cyan
+    BranchAheadStatusForegroundColor            = [ConsoleColor]::Green
     BranchAheadStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
     
     BranchBehindStatusSymbol                    = [char]0x2193 # Down arrow
