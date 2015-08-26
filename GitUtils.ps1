@@ -303,7 +303,7 @@ function Start-SshAgent([switch]$Quiet) {
         $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
         $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning "Could not find Pageant."; return }
-        & $pageant
+         Start-Process -NoNewWindow $pageant
     } else {
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
         $sshAgent = if ($sshAgent) {$sshAgent} else {Guess-Ssh('ssh-agent')}
