@@ -30,6 +30,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
     LocalStagedStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
 
+    BranchUntrackedSymbol                       = $null
     BranchForegroundColor                       = [ConsoleColor]::Cyan
     BranchBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
 
@@ -117,7 +118,9 @@ function Write-GitStatus($status) {
         $branchStatusBackgroundColor = $s.BranchBackgroundColor
         $branchStatusForegroundColor = $s.BranchForegroundColor
 
-        if ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
+        if (!$status.Upstream) {
+            $branchStatusSymbol          = $s.BranchUntrackedSymbol
+        } elseif ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
             # We are aligned with remote
             $branchStatusSymbol          = $s.BranchIdenticalStatusToSymbol
             $branchStatusBackgroundColor = $s.BranchIdenticalStatusToBackgroundColor
