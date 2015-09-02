@@ -188,7 +188,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             HasWorking      = [bool]$working
             Working         = $working
             HasUntracked    = [bool]$filesAdded
-            stashCount      = $stashCount
+            StashCount      = $stashCount
         }
 
         dbg 'Finished' $sw
