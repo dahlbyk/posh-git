@@ -144,6 +144,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 $aheadBy = $cacheResponse.AheadBy
                 $behindBy = $cacheResponse.BehindBy
 
+                if ($cacheResponse.Stashes) { $stashCount = $cacheResponse.Stashes.Length }
                 if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
             } else {
                 dbg 'Getting status' $sw
