@@ -248,7 +248,7 @@ function Set-TempEnv($key, $value) {
 # is a running agent.
 function Get-SshAgent() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select -ExpandProperty Id
+        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select -ExpandProperty Id -First 1
         if ($null -ne $pageantPid) { return $pageantPid }
     } else {
         $agentPid = $Env:SSH_AGENT_PID
@@ -307,7 +307,7 @@ function Start-SshAgent([switch]$Quiet) {
         $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
         $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning "Could not find Pageant."; return }
-        & $pageant
+        Start-Process -NoNewWindow $pageant
     } else {
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
         $sshAgent = if ($sshAgent) {$sshAgent} else {Guess-Ssh('ssh-agent')}
