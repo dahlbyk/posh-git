@@ -12,13 +12,13 @@ if ($psv.Major -lt 3 -and !$NoVersionWarn) {
 }
 
 Push-Location $psScriptRoot
-.\CheckVersion.ps1 > $null
+.\scripts\CheckVersion.ps1 > $null
 
-. .\Utils.ps1
-. .\GitUtils.ps1
-. .\GitPrompt.ps1
-. .\GitTabExpansion.ps1
-. .\TortoiseGit.ps1
+. .\scripts\Utils.ps1
+. .\scripts\GitUtils.ps1
+. .\scripts\GitPrompt.ps1
+. .\scripts\GitTabExpansion.ps1
+. .\scripts\TortoiseGit.ps1
 Pop-Location
 
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
