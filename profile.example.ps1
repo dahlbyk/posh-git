@@ -7,19 +7,4 @@ Import-Module .\posh-git
 # use this instead (see about_Modules for more information):
 # Import-Module posh-git
 
-
-# Set up a simple prompt, adding the git prompt parts inside git repos
-function global:prompt {
-    $realLASTEXITCODE = $LASTEXITCODE
-
-    Write-Host("PS $($pwd.ProviderPath)") -nonewline
-
-    Write-VcsStatus
-
-    $global:LASTEXITCODE = $realLASTEXITCODE
-    return "> "
-}
-
-Pop-Location
-
 Start-SshAgent -Quiet
