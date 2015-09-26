@@ -119,7 +119,10 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
+            $currentEncoding = [Console]::OutputEncoding
+            [Console]::OutputEncoding = [Text.Encoding]::UTF8
             $status = git -c color.status=false status --short --branch 2>$null
+            [Console]::OutputEncoding = $currentEncoding
             if($settings.EnableStashStatus) {
                 dbg 'Getting stash count' $sw
                 $stashCount = $null | git stash list 2>$null | measure-object | select -expand Count
