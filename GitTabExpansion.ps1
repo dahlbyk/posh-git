@@ -18,9 +18,9 @@ $subcommands = @{
 }
 
 $gitflowsubcommands = @{
-    feature = 'list start finish publish track diff rebase checkout pull'
-    release = 'list start finish publish track'
-    hotfix = 'list start finish publish track'
+    feature = 'list start finish publish track diff rebase checkout pull delete'
+    release = 'list start finish publish track delete'
+    hotfix = 'list start finish publish delete'
 }
 
 function script:gitCmdOperations($commands, $command, $filter) {
@@ -74,9 +74,14 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         foreach { $prefix + $_ }
 }
 
+function script:gitTags($filter) {
+    git tag |
+        where { $_ -like "$filter*" }
+}
+
 function script:gitFeatures($filter, $command){
 	$featurePrefix = git config --local --get "gitflow.prefix.$command"
-    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } }) 
+    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
         where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
         foreach { $prefix + $_ }
@@ -165,6 +170,11 @@ function GitTabExpansion($lastBlock) {
             return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
     }
 
+    # Handles gitk
+    if($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
+        return gitBranches $matches['ref'] $true
+    }
+
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
         # Handles git <cmd> <op>
@@ -177,7 +187,7 @@ function GitTabExpansion($lastBlock) {
         "^flow (?<cmd>$($gitflowsubcommands.Keys -join '|'))\s+(?<op>\S*)$" {
             gitCmdOperations $gitflowsubcommands $matches['cmd'] $matches['op']
         }
-		
+
 		# Handles git flow <command> <op> <name>
         "^flow (?<command>\S*)\s+(?<op>\S*)\s+(?<name>\S*)$" {
 			gitFeatures $matches['name'] $matches['command']
@@ -276,6 +286,7 @@ function GitTabExpansion($lastBlock) {
         # Handles git <cmd> <ref>
         "^(?:checkout|cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
+            gitTags $matches['ref']
         }
     }
 }
@@ -305,6 +316,7 @@ function TabExpansion($line, $lastWord) {
         # Execute git tab completion for all git-related commands
         "^$(Get-AliasPattern git) (.*)" { GitTabExpansion $lastBlock }
         "^$(Get-AliasPattern tgit) (.*)" { GitTabExpansion $lastBlock }
+        "^$(Get-AliasPattern gitk) (.*)" { GitTabExpansion $lastBlock }
 
         # Fall back on existing tab expansion
         default { if (Test-Path Function:\TabExpansionBackup) { TabExpansionBackup $line $lastWord } }

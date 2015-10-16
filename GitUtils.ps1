@@ -115,10 +115,15 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesModified = @()
         $filesDeleted = @()
         $filesUnmerged = @()
+        $stashCount = 0
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
             $status = git -c color.status=false status --short --branch 2>$null
+            if($settings.EnableStashStatus) {
+                dbg 'Getting stash count' $sw
+                $stashCount = $null | git stash list 2>$null | measure-object | select -expand Count
+            }
         } else {
             $status = @()
         }
@@ -180,11 +185,13 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             Branch          = $branch
             AheadBy         = $aheadBy
             BehindBy        = $behindBy
+            Upstream        = $upstream
             HasIndex        = [bool]$index
             Index           = $index
             HasWorking      = [bool]$working
             Working         = $working
             HasUntracked    = [bool]$filesAdded
+            StashCount      = $stashCount
         }
 
         dbg 'Finished' $sw
@@ -207,7 +214,7 @@ function InDisabledRepository {
 }
 
 function Enable-GitColors {
-    $env:TERM = 'cygwin'
+    Write-Warning 'Enable-GitColors is Obsolete and will be removed in a future version of posh-git.'
 }
 
 function Get-AliasPattern($exe) {
@@ -246,13 +253,13 @@ function Set-TempEnv($key, $value) {
 # is a running agent.
 function Get-SshAgent() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = Get-Process pageant -ErrorAction SilentlyContinue | Select -ExpandProperty Id
-        if ($pageantPid) { return $pageantPid }
+        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select -ExpandProperty Id -First 1
+        if ($null -ne $pageantPid) { return $pageantPid }
     } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-            $sshAgentProcess = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
-            if ($sshAgentProcess -and ($sshAgentProcess.Name -eq 'ssh-agent')) {
+            $sshAgentProcess = Get-Process | Where-Object { $_.Id -eq $agentPid -and $_.Name -eq 'ssh-agent' }
+            if ($null -ne $sshAgentProcess) {
                 return $agentPid
             } else {
                 setenv 'SSH_AGENT_PID', $null
@@ -262,6 +269,30 @@ function Get-SshAgent() {
     }
 
     return 0
+}
+
+# Attempt to guess Pageant's location
+function Guess-Pageant() {
+    Write-Verbose "Pageant not in path. Trying to guess location."
+    $gitSsh = $env:GIT_SSH
+    if ($gitSsh -and (test-path $gitSsh)) {
+        $pageant = join-path (split-path $gitSsh) pageant
+    }
+    if (!(get-command $pageant -Erroraction SilentlyContinue)) { return }     # Guessing failed.
+    else { return $pageant }
+}
+
+# Attempt to guess $program's location. For ssh-agent/ssh-add.
+function Guess-Ssh($program = 'ssh-agent') {
+    Write-Verbose "$program not in path. Trying to guess location."
+    $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
+    if ($gitItem -eq $null) { Write-Warning 'git not in path'; return }
+
+    $sshLocation = join-path $gitItem.directory.parent.fullname bin/$program
+    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
+
+    $sshLocation = join-path $gitItem.directory.parent.fullname usr/bin/$program
+    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
@@ -279,10 +310,12 @@ function Start-SshAgent([switch]$Quiet) {
     if ($env:GIT_SSH -imatch 'plink') {
         Write-Host "GIT_SSH set to $($env:GIT_SSH), using Pageant as SSH agent."
         $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
+        $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning "Could not find Pageant."; return }
-        & $pageant
+        Start-Process -NoNewWindow $pageant
     } else {
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
+        $sshAgent = if ($sshAgent) {$sshAgent} else {Guess-Ssh('ssh-agent')}
         if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
         & $sshAgent | foreach {
@@ -303,7 +336,8 @@ function Get-SshPath($File = 'id_rsa')
 # Add a key to the SSH agent
 function Add-SshKey() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -ExpandProperty Name
+        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
+        $pageant = if ($pageant) {$pageant} else {Guess-Pageant}
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
 
         if ($args.Count -eq 0) {
@@ -319,6 +353,7 @@ function Add-SshKey() {
         }
     } else {
         $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
+        $sshAdd = if ($sshAdd) {$sshAdd} else {Guess-Ssh('ssh-add')}
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
         if ($args.Count -eq 0) {

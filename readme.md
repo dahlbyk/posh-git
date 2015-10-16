@@ -5,11 +5,11 @@ A set of PowerShell scripts which provide Git/PowerShell integration
 
 ### Prompt for Git repositories
    The prompt within Git repositories can show the current branch and the state of files (additions, modifications, deletions) within.
-   
+
 ### Tab completion
-   Provides tab completion for common commands when using git.  
+   Provides tab completion for common commands when using git.
    E.g. `git ch<tab>` --> `git checkout`
-   
+
 Usage
 -----
 
@@ -18,16 +18,25 @@ Prompt formatting, among other things, can be customized using `$GitPromptSettin
 
 Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
 
-Installing
-----------
+Installing via PsGet
+--------------------
 
-0. Verify you have PowerShell 2.0 or better with $PSVersionTable.PSVersion
+If you have [PsGet](http://psget.net/) installed just run:
+
+```
+Install-Module posh-git
+```
+
+Installing (manual)
+-------------------
+
+0. Verify you have PowerShell 2.0 or better with `$PSVersionTable.PSVersion`. PowerShell 3.0 is preferred as 2.0 support is deprecated.
 
 1. Verify execution of scripts is allowed with `Get-ExecutionPolicy` (should be `RemoteSigned` or `Unrestricted`). If scripts are not enabled, run PowerShell as Administrator and call `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm`.
 
 2. Verify that `git` can be run from PowerShell.
    If the command is not found, you will need to add a git alias or add `%ProgramFiles(x86)%\Git\cmd`
-   (or `%ProgramFiles%\Git\cmd` if you're still on 32-bit) to your PATH environment variable.
+   (or `%ProgramFiles%\Git\cmd` if you're still on 32-bit) to your `PATH` environment variable.
 
 3. Clone the posh-git repository to your local machine.
 
