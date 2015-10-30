@@ -213,6 +213,10 @@ function InDisabledRepository {
     return $false
 }
 
+function Get-Tag {
+    return git name-rev --tags --name-only $(git rev-parse HEAD)
+}
+
 function Enable-GitColors {
     Write-Warning 'Enable-GitColors is Obsolete and will be removed in a future version of posh-git.'
 }
