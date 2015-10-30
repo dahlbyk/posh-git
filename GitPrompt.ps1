@@ -49,6 +49,10 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchBehindAndAheadStatusSymbol            = [char]0x2195 # Up & Down arrow
     BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
     BranchBehindAndAheadStatusBackgroundColor   = $Host.UI.RawUI.BackgroundColor
+    
+    TagForegroundColor                        = [ConsoleColor]::DarkGray
+    TagForegroundBrightColor                  = [ConsoleColor]::Gray
+    TagBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
 
     BeforeIndexText                             = ""
     BeforeIndexForegroundColor                  = [ConsoleColor]::DarkGreen
@@ -156,6 +160,11 @@ function Write-GitStatus($status) {
         }
 
         Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+        
+        $tag = Get-Tag
+        if ($tag -ne "undefined") {
+            Write-Prompt "|$($tag)" -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
+        }
         
         if ($branchStatusSymbol) {
             Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
