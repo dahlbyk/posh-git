@@ -14,13 +14,17 @@ $subcommands = @{
     submodule = 'add status init update summary foreach sync'
     svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
     tfs = 'bootstrap checkin checkintool ct cleanup cleanup-workspaces clone diagnostics fetch help init pull quick-clone rcheckin shelve shelve-list unshelve verify'
-    flow = 'init feature release hotfix'
+    flow = 'init feature bugfix release hotfix support help version config finish delete publish rebase'
 }
 
 $gitflowsubcommands = @{
-    feature = 'list start finish publish track diff rebase checkout pull delete'
-    release = 'list start finish publish track delete'
-    hotfix = 'list start finish publish delete'
+    init = 'help'
+    feature = 'list start finish publish track diff rebase checkout pull help delete'
+    bugfix = 'list start finish publish track diff rebase checkout pull help delete'
+    release = 'list start finish track publish help delete'
+    hotfix = 'list start finish track publish help delete'
+    support = 'list start help'
+    config = 'list set base'
 }
 
 function script:gitCmdOperations($commands, $command, $filter) {
