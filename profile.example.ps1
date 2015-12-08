@@ -22,4 +22,6 @@ function global:prompt {
 
 Pop-Location
 
-Start-SshAgent -Quiet
+If ((Test-Path env:\SESSIONNAME) -And ($env:SESSIONNAME -eq "Console")) {
+  Start-SshAgent -Quiet
+}
