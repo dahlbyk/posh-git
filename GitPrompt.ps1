@@ -170,7 +170,14 @@ function Write-GitStatus($status) {
         }
         
         if ($branchStatusSymbol) {
-            Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            Write-Prompt  (" ") -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            if ($status.AheadBy -ge 1) {
+                Write-Prompt  ("{0}" -f $status.AheadBy) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            }
+            Write-Prompt  ("{0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            if ($status.BehindBy -ge 1) {
+                Write-Prompt  ("{0}" -f $status.BehindBy) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            }
         }
 
         if($s.EnableFileStatus -and $status.HasIndex) {
