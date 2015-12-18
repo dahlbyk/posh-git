@@ -164,7 +164,7 @@ function Write-GitStatus($status) {
         
         if ($s.EnableTagDisplay) {
             $tag = Get-Tag
-            if ($tag -ne "undefined") {
+            if ($tag) {
                 Write-Prompt "|$($tag)" -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
             }
         }
