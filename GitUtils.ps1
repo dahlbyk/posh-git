@@ -214,7 +214,7 @@ function InDisabledRepository {
 }
 
 function Get-Tag {
-    return git name-rev --tags --name-only $(git rev-parse HEAD)
+    return git tag --points-at HEAD
 }
 
 function Enable-GitColors {
