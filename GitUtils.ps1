@@ -243,7 +243,7 @@ function Set-TempEnv($key, $value) {
         }
     } else {
         New-Item $path -Force -ItemType File > $null
-        $value > $path
+        $value | Out-File -FilePath $path -Encoding ascii -Force
     }
 }
 
