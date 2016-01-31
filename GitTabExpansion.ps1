@@ -74,6 +74,16 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         foreach { $prefix + $_ }
 }
 
+function script:gitRemoteUniqueBranches($filter) {
+    git branch --no-color -r |
+        where { $_ -notlike '* -> ' } |
+        foreach { if ($_ -match '/(?<Branch>.+)') { $matches['Branch'] } } |
+        Group-Object -NoElement |
+        where { $_.Count -eq 1 } |
+        Select-Object -ExpandProperty Name |
+        where { $_ -like "$filter*" }
+}
+
 function script:gitTags($filter) {
     git tag |
         where { $_ -like "$filter*" }
@@ -283,8 +293,15 @@ function GitTabExpansion($lastBlock) {
             gitMergeFiles $matches['files']
         }
 
+        # Handles git checkout <ref>
+        "^(?:checkout).* (?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
+            gitRemoteUniqueBranches $matches['ref']
+            gitTags $matches['ref']
+        }
+
         # Handles git <cmd> <ref>
-        "^(?:checkout|cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
+        "^(?:cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
             gitTags $matches['ref']
         }
