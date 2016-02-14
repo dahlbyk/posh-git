@@ -341,9 +341,8 @@ function Add-SshKey() {
         if ($args.Count -eq 0) {
             $keystring = ""
             $keyPath = Join-Path $Env:HOME ".ssh"
-            $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
-            foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
-            if ( $keystring ) { & $pageant "$keystring" }
+            $keys = Get-ChildItem $keyPath/"*.ppk" -ErrorAction SilentlyContinue | Select -ExpandProperty FullName
+            & $pageant $keys
         } else {
             foreach ($value in $args) {
                 & $pageant $value
