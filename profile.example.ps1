@@ -20,6 +20,10 @@ function global:prompt {
     return "> "
 }
 
+# Settings for the prompt are in GitPrompt.ps1, so add any desired settings changes here.
+# Example:
+#     $Global:GitPromptSettings.BranchBehindAndAheadDisplayType = "Compact"
+
 Pop-Location
 
 Start-SshAgent -Quiet
