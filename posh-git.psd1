@@ -22,16 +22,30 @@ Description = 'A PowerShell environment for Git'
 PowerShellVersion = '2.0'
 
 # Functions to export from this module
-FunctionsToExport = '*'
+FunctionsToExport = @('Invoke-NullCoalescing',
+        'Write-GitStatus',
+        'Write-Prompt',
+        'Get-GitStatus',
+        'Enable-GitColors',
+        'Get-GitDirectory',
+        'TabExpansion',
+        'Get-AliasPattern',
+        'Get-SshAgent',
+        'Start-SshAgent',
+        'Stop-SshAgent',
+        'Add-SshKey',
+        'Get-SshPath',
+        'Update-AllBranches',
+        'tgit')
 
 # Cmdlets to export from this module
-CmdletsToExport = '*'
+CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = '*'
+VariablesToExport = @()
 
 # Aliases to export from this module
-AliasesToExport = '*'
+AliasesToExport = @('??')
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
