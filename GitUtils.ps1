@@ -294,7 +294,18 @@ function Find-Ssh($program = 'ssh-agent') {
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
-function Start-SshAgent([switch]$Quiet) {
+function Start-SshAgent {
+    param(
+    [parameter(Position=0)]
+    [string[]]$KeyFile,
+
+    [parameter()]
+    [switch]$UseAllKeys,
+    
+    [parameter()]
+    [switch]$Quiet
+    )
+
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         if (!$Quiet) {
@@ -322,7 +333,11 @@ function Start-SshAgent([switch]$Quiet) {
             }
         }
     }
-    Add-SshKey
+    if($UseAllKeys) {
+        Add-SshKey -All
+    } else {
+        Add-SshKey $KeyFile
+    }
 }
 
 function Get-SshPath($File = 'id_rsa')
@@ -331,36 +346,42 @@ function Get-SshPath($File = 'id_rsa')
     Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
 }
 
+function Get-SshDirectory {
+    Join-Path $HOME ".ssh"
+}
+
 # Add a key to the SSH agent
-function Add-SshKey() {
+function Add-SshKey {
+    param(
+        [parameter(Position=0)]
+        [string[]]$KeyFileName,
+
+        [switch]$All,
+
+        [string]
+        $KeyPath="$env:USERPROFILE\.ssh"
+    )
+    for($i=0; $i -lt $KeyFileName.Count; $i++) {
+        $keyFileExists = Test-Path -Path $KeyFileName[$i]
+        if(!$keyFileExists) { $KeyFileName[$i] = Join-Path $KeyPath $KeyFileName[$i] }
+    }
     if ($env:GIT_SSH -imatch 'plink') {
         $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
         $pageant = if ($pageant) {$pageant} else {Find-Pageant}
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
-
-        if ($args.Count -eq 0) {
-            $keystring = ""
-            $keyPath = Join-Path $Env:HOME ".ssh"
-            $keys = Get-ChildItem $keyPath/"*.ppk" | Select -ExpandProperty Name
-            foreach ( $key in $keys ) { $keystring += "`"$keyPath\$key`" " }
-            if ( $keystring ) { & $pageant "$keystring" }
-        } else {
-            foreach ($value in $args) {
-                & $pageant $value
-            }
+        
+        if ($All) { $KeyFileName = Get-ChildItem $KeyPath/"*.ppk" | Select -ExpandProperty FullName }
+        foreach ( $key in $KeyFileName ) { & $pageant $key }
+        if([string]::IsNullOrWhiteSpace($key)) {
+            Write-Warning 'Pageant is started, but no keys were added.'
         }
     } else {
         $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
         $sshAdd = if ($sshAdd) {$sshAdd} else {Find-Ssh('ssh-add')}
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
 
-        if ($args.Count -eq 0) {
-            & $sshAdd
-        } else {
-            foreach ($value in $args) {
-                & $sshAdd $value
-            }
-        }
+        if($All) { $KeyFileName = Get-ChildItem -Path "$KeyPath/*" -Exclude *.p*, known_hosts | Select -ExpandProperty FullName}
+        foreach($key in $KeyFileName) { & $sshAdd $key }
     }
 }
 
