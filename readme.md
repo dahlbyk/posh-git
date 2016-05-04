@@ -46,6 +46,7 @@ Then do this:
 git clone https://github.com/dahlbyk/posh-git.git
 cd posh-git
 .\install.ps1
+. $PROFILE
 ```
 
 And you're set!
