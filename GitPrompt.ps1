@@ -49,6 +49,11 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchBehindAndAheadStatusSymbol            = [char]0x2195 # Up & Down arrow
     BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
     BranchBehindAndAheadStatusBackgroundColor   = $Host.UI.RawUI.BackgroundColor
+    
+    EnableTagDisplay                            = $true
+    TagForegroundColor                          = [ConsoleColor]::DarkGray
+    TagForegroundBrightColor                    = [ConsoleColor]::Gray
+    TagBackgroundColor                          = $Host.UI.RawUI.BackgroundColor
 
     BeforeIndexText                             = ""
     BeforeIndexForegroundColor                  = [ConsoleColor]::DarkGreen
@@ -157,8 +162,22 @@ function Write-GitStatus($status) {
 
         Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
         
+        if ($s.EnableTagDisplay) {
+            $tag = Get-Tag
+            if ($tag) {
+                Write-Prompt "|$($tag)" -BackgroundColor $s.TagBackgroundColor -ForegroundColor $s.TagForegroundColor
+            }
+        }
+        
         if ($branchStatusSymbol) {
-            Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            Write-Prompt  (" ") -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            if ($status.AheadBy -ge 1) {
+                Write-Prompt  ("{0}" -f $status.AheadBy) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            }
+            Write-Prompt  ("{0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            if ($status.BehindBy -ge 1) {
+                Write-Prompt  ("{0}" -f $status.BehindBy) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+            }
         }
 
         if($s.EnableFileStatus -and $status.HasIndex) {
