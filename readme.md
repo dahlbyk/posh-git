@@ -56,26 +56,34 @@ The Prompt
 
 PowerShell generates its prompt by executing a `prompt` function, if one exists. posh-git defines such a function in `profile.example.ps1` that outputs the current working directory followed by an abbreviated `git status`:
 
-    C:\Users\Keith [master]>
+    C:\Users\Keith [master ≡]>
 
 By default, the status summary has the following format:
 
-    [{HEAD-name} +A ~B -C !D | +E ~F -G !H !]
+    [{HEAD-name} S +A ~B -C !D | +E ~F -G !H W]
 
 * `{HEAD-name}` is the current branch, or the SHA of a detached HEAD
  * Cyan means the branch matches its remote
  * Green means the branch is ahead of its remote (green light to push)
  * Red means the branch is behind its remote
  * Yellow means the branch is both ahead of and behind its remote
+* S represents the branch status in relation to remote (tracked origin) branch
+  * ≡ = The local branch in at the same commit level as the remote branch
+  * ↑ = The local branch is ahead of the remote branch, a 'git push' is required to update the remote branch
+  * ↓ = The local branch is behind the remote branch, a 'git pull' is required to update the local branch
+  * ↕ = The local branch is both ahead and behind the remote branch, a rebase of the local branch is required before pushing local changes to the remote branch
 * ABCD represent the index; EFGH represent the working directory
  * `+` = Added files
  * `~` = Modified files
  * `-` = Removed files
  * `!` = Conflicted files
  * As in `git status`, index status is dark green and working directory status is dark red
- * The trailing `!` means there are untracked files
+* W represents the status of the working folder
+ * '!' = There are untracked changes in the working tree
+ * '~' = There are staged changes in the working tree waiting to be committed
+ * None = There are no uncommitted or unstaged changes to the working tree
 
-For example, a status of `[master +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
+For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
 
     # On branch master
     #
