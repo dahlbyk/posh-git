@@ -16,6 +16,11 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     AfterForegroundColor                        = [ConsoleColor]::Yellow
     AfterBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
 
+    AddedText                                   = '+'
+    ModifiedText                                = '~'
+    RemovedText                                 = '-'
+    ConflictedText                              = '!'
+
     LocalDefaultStatusSymbol                    = $null
     LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
     LocalDefaultStatusForegroundBrightColor     = [ConsoleColor]::Green
@@ -63,15 +68,15 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     WorkingForegroundBrightColor                = [ConsoleColor]::Red
     WorkingBackgroundColor                      = $Host.UI.RawUI.BackgroundColor
 
-    EnableStashStatus         = $false
-    BeforeStashText           = ' ('
-    BeforeStashBackgroundColor = $Host.UI.RawUI.BackgroundColor
-    BeforeStashForegroundColor = [ConsoleColor]::Red
-    AfterStashText            = ')'
-    AfterStashBackgroundColor = $Host.UI.RawUI.BackgroundColor
-    AfterStashForegroundColor = [ConsoleColor]::Red
-    StashBackgroundColor      = $Host.UI.RawUI.BackgroundColor
-    StashForegroundColor      = [ConsoleColor]::Red
+    EnableStashStatus                           = $false
+    BeforeStashText                             = ' ('
+    BeforeStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
+    BeforeStashForegroundColor                   = [ConsoleColor]::Red
+    AfterStashText                              = ')'
+    AfterStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
+    AfterStashForegroundColor                   = [ConsoleColor]::Red
+    StashBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
+    StashForegroundColor                        = [ConsoleColor]::Red
 
     ShowStatusWhenZero                          = $true
 
@@ -165,17 +170,17 @@ function Write-GitStatus($status) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
 
             if($s.ShowStatusWhenZero -or $status.Index.Added) {
-              Write-Prompt " +$($status.Index.Added.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt (" " + $s.AddedText + "$($status.Index.Added.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Modified) {
-              Write-Prompt " ~$($status.Index.Modified.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt (" " + $s.ModifiedText + "$($status.Index.Modified.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
-              Write-Prompt " -$($status.Index.Deleted.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+              Write-Prompt (" " + $s.RemovedText + "$($status.Index.Deleted.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if ($status.Index.Unmerged) {
-                Write-Prompt " !$($status.Index.Unmerged.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+                Write-Prompt (" " + $s.ConflictedText + "$($status.Index.Unmerged.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if($status.HasWorking) {
@@ -185,17 +190,17 @@ function Write-GitStatus($status) {
 
         if($s.EnableFileStatus -and $status.HasWorking) {
             if($s.ShowStatusWhenZero -or $status.Working.Added) {
-              Write-Prompt " +$($status.Working.Added.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt (" " + $s.AddedText + "$($status.Working.Added.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Modified) {
-              Write-Prompt " ~$($status.Working.Modified.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt (" " + $s.ModifiedText + "$($status.Working.Modified.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
-              Write-Prompt " -$($status.Working.Deleted.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+              Write-Prompt (" " + $s.RemovedText + "$($status.Working.Deleted.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
 
             if ($status.Working.Unmerged) {
-                Write-Prompt " !$($status.Working.Unmerged.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+                Write-Prompt (" " + $s.ConflictedText + "$($status.Working.Unmerged.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
         }
 
