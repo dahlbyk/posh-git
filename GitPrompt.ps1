@@ -16,10 +16,10 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     AfterForegroundColor                        = [ConsoleColor]::Yellow
     AfterBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
 
-    FileAddedText                                   = '+'
-    FileModifiedText                                = '~'
-    FileRemovedText                                 = '-'
-    FileConflictedText                              = '!'
+    FileAddedText                               = '+'
+    FileModifiedText                            = '~'
+    FileRemovedText                             = '-'
+    FileConflictedText                          = '!'
 
     LocalDefaultStatusSymbol                    = $null
     LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
