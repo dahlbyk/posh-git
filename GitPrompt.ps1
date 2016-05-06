@@ -7,7 +7,7 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BeforeText                                  = ' ['
     BeforeForegroundColor                       = [ConsoleColor]::Yellow
     BeforeBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
-    
+
     DelimText                                   = ' |'
     DelimForegroundColor                        = [ConsoleColor]::Yellow
     DelimBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
@@ -16,16 +16,21 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     AfterForegroundColor                        = [ConsoleColor]::Yellow
     AfterBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
 
+    FileAddedText                               = '+'
+    FileModifiedText                            = '~'
+    FileRemovedText                             = '-'
+    FileConflictedText                          = '!'
+
     LocalDefaultStatusSymbol                    = $null
     LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
     LocalDefaultStatusForegroundBrightColor     = [ConsoleColor]::Green
     LocalDefaultStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
-    
+
     LocalWorkingStatusSymbol                    = '!'
     LocalWorkingStatusForegroundColor           = [ConsoleColor]::DarkRed
     LocalWorkingStatusForegroundBrightColor     = [ConsoleColor]::Red
     LocalWorkingStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
-    
+
     LocalStagedStatusSymbol                     = '~'
     LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
     LocalStagedStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
@@ -37,15 +42,15 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchIdenticalStatusToSymbol               = [char]0x2261 # Three horizontal lines
     BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
     BranchIdenticalStatusToBackgroundColor      = $Host.UI.RawUI.BackgroundColor
-    
+
     BranchAheadStatusSymbol                     = [char]0x2191 # Up arrow
     BranchAheadStatusForegroundColor            = [ConsoleColor]::Green
     BranchAheadStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
-    
+
     BranchBehindStatusSymbol                    = [char]0x2193 # Down arrow
     BranchBehindStatusForegroundColor           = [ConsoleColor]::Red
     BranchBehindStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
-    
+
     BranchBehindAndAheadStatusSymbol            = [char]0x2195 # Up & Down arrow
     BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
     BranchBehindAndAheadStatusBackgroundColor   = $Host.UI.RawUI.BackgroundColor
@@ -63,15 +68,15 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     WorkingForegroundBrightColor                = [ConsoleColor]::Red
     WorkingBackgroundColor                      = $Host.UI.RawUI.BackgroundColor
 
-    EnableStashStatus         = $false
-    BeforeStashText           = ' ('
-    BeforeStashBackgroundColor = $Host.UI.RawUI.BackgroundColor
-    BeforeStashForegroundColor = [ConsoleColor]::Red
-    AfterStashText            = ')'
-    AfterStashBackgroundColor = $Host.UI.RawUI.BackgroundColor
-    AfterStashForegroundColor = [ConsoleColor]::Red
-    StashBackgroundColor      = $Host.UI.RawUI.BackgroundColor
-    StashForegroundColor      = [ConsoleColor]::Red
+    EnableStashStatus                           = $false
+    BeforeStashText                             = ' ('
+    BeforeStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
+    BeforeStashForegroundColor                   = [ConsoleColor]::Red
+    AfterStashText                              = ')'
+    AfterStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
+    AfterStashForegroundColor                   = [ConsoleColor]::Red
+    StashBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
+    StashForegroundColor                        = [ConsoleColor]::Red
 
     ShowStatusWhenZero                          = $true
 
@@ -156,7 +161,7 @@ function Write-GitStatus($status) {
         }
 
         Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
-        
+
         if ($branchStatusSymbol) {
             Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
         }
@@ -165,17 +170,17 @@ function Write-GitStatus($status) {
             Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
 
             if($s.ShowStatusWhenZero -or $status.Index.Added) {
-              Write-Prompt " +$($status.Index.Added.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+                Write-Prompt (" $($s.FileAddedText)$($status.Index.Added.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Modified) {
-              Write-Prompt " ~$($status.Index.Modified.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+                Write-Prompt (" $($s.FileModifiedText)$($status.Index.Modified.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
-              Write-Prompt " -$($status.Index.Deleted.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+                Write-Prompt (" $($s.FileRemovedText)$($status.Index.Deleted.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if ($status.Index.Unmerged) {
-                Write-Prompt " !$($status.Index.Unmerged.Count)" -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
+                Write-Prompt (" $($s.FileConflictedText)$($status.Index.Unmerged.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if($status.HasWorking) {
@@ -185,17 +190,17 @@ function Write-GitStatus($status) {
 
         if($s.EnableFileStatus -and $status.HasWorking) {
             if($s.ShowStatusWhenZero -or $status.Working.Added) {
-              Write-Prompt " +$($status.Working.Added.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+                Write-Prompt (" $($s.FileAddedText)$($status.Working.Added.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Modified) {
-              Write-Prompt " ~$($status.Working.Modified.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+                Write-Prompt (" $($s.FileModifiedText)$($status.Working.Modified.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
-              Write-Prompt " -$($status.Working.Deleted.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+                Write-Prompt (" $($s.FileRemovedText)$($status.Working.Deleted.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
 
             if ($status.Working.Unmerged) {
-                Write-Prompt " !$($status.Working.Unmerged.Count)" -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
+                Write-Prompt (" $($s.FileConflictedText)$($status.Working.Unmerged.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
         }
 
@@ -215,11 +220,11 @@ function Write-GitStatus($status) {
             $localStatusBackgroundColor = $s.LocalDefaultStatusBackgroundColor
             $localStatusForegroundColor = $s.LocalDefaultStatusForegroundColor
         }
-                
+
         if ($localStatusSymbol) {
             Write-Prompt (" {0}" -f $localStatusSymbol) -BackgroundColor $localStatusBackgroundColor -ForegroundColor $localStatusForegroundColor
         }
-        
+
         if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
              Write-Prompt $s.BeforeStashText -BackgroundColor $s.BeforeStashBackgroundColor -ForegroundColor $s.BeforeStashForegroundColor
              Write-Prompt $status.StashCount -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor
@@ -250,7 +255,7 @@ $s = $global:GitPromptSettings
 if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { 
     $s.LocalDefaultStatusForegroundColor    = $s.LocalDefaultStatusForegroundBrightColor
     $s.LocalWorkingStatusForegroundColor    = $s.LocalWorkingStatusForegroundBrightColor
-    
+
     $s.BeforeIndexForegroundColor           = $s.BeforeIndexForegroundBrightColor 
     $s.IndexForegroundColor                 = $s.IndexForegroundBrightColor 
 
