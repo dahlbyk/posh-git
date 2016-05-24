@@ -25,6 +25,7 @@ PowerShellVersion = '2.0'
 FunctionsToExport = @('Invoke-NullCoalescing',
         'Write-GitStatus',
         'Write-Prompt',
+        'Write-VcsStatus',
         'Get-GitStatus',
         'Enable-GitColors',
         'Get-GitDirectory',
