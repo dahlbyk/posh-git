@@ -234,10 +234,11 @@ function GitTabExpansion($lastBlock) {
             gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch']
         }
 
-        # Handles git push remote <branch>
-        # Handles git pull remote <branch>
-        "^(?:push|pull).* (?:\S+) (?<branch>[^\s\:]*)$" {
-            gitBranches $matches['branch']
+        # Handles git push remote <ref>
+        # Handles git pull remote <ref>
+        "^(?:push|pull).* (?:\S+) (?<ref>[^\s\:]*)$" {
+            gitBranches $matches['ref']
+            gitTags $matches['ref']
         }
 
         # Handles git pull <remote>
