@@ -373,15 +373,6 @@ function Add-SshKey() {
     }
 }
 
-function Get-SshAdd()
-{
-    $sshPath = Split-Path -Parent $Global:GitSshSettings.DefaultSshPath -ErrorAction SilentlyContinue
-    $sshAdd = Get-Command $sshPath/ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
-    if($sshAdd){
-        return $sshAdd;
-    }
-}
-
 # Stop a running SSH agent
 function Stop-SshAgent() {
     [int]$agentPid = Get-SshAgent
