@@ -256,8 +256,7 @@ function Get-SshAgent() {
     } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-            $sshAgentProcess = Get-Process | Where-Object { $_.Id -eq $agentPid -and $_.Name -eq 'ssh-agent' }
-            if ($null -ne $sshAgentProcess) {
+           if (((Get-Process -Id $agentPid -FileVersionInfo).Filename).Contains("Git")) {
                 return $agentPid
             } else {
                 setenv 'SSH_AGENT_PID', $null
@@ -282,6 +281,15 @@ function Find-Pageant() {
 
 # Attempt to guess $program's location. For ssh-agent/ssh-add.
 function Find-Ssh($program = 'ssh-agent') {
+    $sshLocation = 'C:\Program Files\Git\usr\bin\'
+
+    if($sshLocation -and (get-command (join-path $sshLocation $program))){
+        return join-path $sshLocation $program
+    }
+
+    $sshLocation = Get-Command $program -TotalCount 1 -ErrorAction SilentlyContinue
+    if($sshLocation){ return $sshLocation }
+
     Write-Verbose "$program not in path. Trying to guess location."
     $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
     if ($gitItem -eq $null) { Write-Warning 'git not in path'; return }
@@ -312,8 +320,7 @@ function Start-SshAgent([switch]$Quiet) {
         if (!$pageant) { Write-Warning "Could not find Pageant."; return }
         Start-Process -NoNewWindow $pageant
     } else {
-        $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
-        $sshAgent = if ($sshAgent) {$sshAgent} else {Find-Ssh('ssh-agent')}
+        $sshAgent = Find-Ssh('ssh-agent')
         if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
         & $sshAgent | foreach {
@@ -339,7 +346,6 @@ function Add-SshKey() {
         if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
 
         if ($args.Count -eq 0) {
-            $keystring = ""
             $keyPath = Join-Path $Env:HOME ".ssh"
             $keys = Get-ChildItem $keyPath/"*.ppk" -ErrorAction SilentlyContinue | Select -ExpandProperty FullName
             & $pageant $keys
@@ -349,10 +355,8 @@ function Add-SshKey() {
             }
         }
     } else {
-        $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
-        $sshAdd = if ($sshAdd) {$sshAdd} else {Find-Ssh('ssh-add')}
+        $sshAdd = Find-Ssh('ssh-add')
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
-
         if ($args.Count -eq 0) {
             & $sshAdd
         } else {
