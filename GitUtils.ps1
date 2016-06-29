@@ -256,7 +256,7 @@ function Get-SshAgent() {
     } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-           if (((Get-Process -Id $agentPid -FileVersionInfo).Filename).Contains("Git")) {
+            if (((Get-Process -Id $agentPid -FileVersionInfo -ErrorAction SilentlyContinue).Filename).Contains("Git")) {
                 return $agentPid
             } else {
                 setenv 'SSH_AGENT_PID', $null
@@ -288,17 +288,23 @@ function Find-Ssh($program = 'ssh-agent') {
     }
 
     $sshLocation = Get-Command $program -TotalCount 1 -ErrorAction SilentlyContinue
-    if($sshLocation){ return $sshLocation }
+    if($sshLocation){
+        return $sshLocation
+    }
 
     Write-Verbose "$program not in path. Trying to guess location."
     $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
     if ($gitItem -eq $null) { Write-Warning 'git not in path'; return }
 
     $sshLocation = join-path $gitItem.directory.parent.fullname bin/$program
-    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
+    if (get-command $sshLocation -Erroraction SilentlyContinue) { 
+        return $sshLocation 
+    }
 
     $sshLocation = join-path $gitItem.directory.parent.fullname usr/bin/$program
-    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
+    if (get-command $sshLocation -Erroraction SilentlyContinue) { 
+        return $sshLocation 
+    }
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
@@ -364,6 +370,15 @@ function Add-SshKey() {
                 & $sshAdd $value
             }
         }
+    }
+}
+
+function Get-SshAdd()
+{
+    $sshPath = Split-Path -Parent $Global:GitSshSettings.DefaultSshPath -ErrorAction SilentlyContinue
+    $sshAdd = Get-Command $sshPath/ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
+    if($sshAdd){
+        return $sshAdd;
     }
 }
 
