@@ -222,20 +222,20 @@ function Get-AliasPattern($exe) {
    "($($aliases -join '|'))"
 }
 
-function setenv($key, $value) {
-    [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
-    Set-TempEnv $key $value
+function Set-Env($Key, $Value) {
+    Set-Item Env:$Key -Value $Value -ErrorAction SilentlyContinue
+    Set-TempEnv -Key $Key -Value $Value
 }
 
 function Get-TempEnv($key) {
     $path = Join-Path ($Env:TEMP) ".ssh\$key.env"
     if (Test-Path $path) {
         $value =  Get-Content $path
-        [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+        Set-Item Env:$key -Value $value -ErrorAction SilentlyContinue
     }
 }
 
-function Set-TempEnv($key, $value) {
+function Set-TempEnv($Key, $Value) {
     $path = Join-Path ($Env:TEMP) ".ssh\$key.env"
     if ($value -eq $null) {
         if (Test-Path $path) {
@@ -256,13 +256,13 @@ function Get-SshAgent() {
     } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-            if (((Get-Process -Id $agentPid -FileVersionInfo -ErrorAction SilentlyContinue).Filename).Contains("Git")) {
+            $pid = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
+            if ($pid) {
                 return $agentPid
-            } else {
-                setenv 'SSH_AGENT_PID', $null
-                setenv 'SSH_AUTH_SOCK', $null
             }
         }
+        Set-Env 'SSH_AGENT_PID', $null
+        Set-Env 'SSH_AUTH_SOCK', $null
     }
 
     return 0
@@ -281,12 +281,6 @@ function Find-Pageant() {
 
 # Attempt to guess $program's location. For ssh-agent/ssh-add.
 function Find-Ssh($program = 'ssh-agent') {
-    $sshLocation = 'C:\Program Files\Git\usr\bin\'
-
-    if($sshLocation -and (get-command (join-path $sshLocation $program))){
-        return join-path $sshLocation $program
-    }
-
     $sshLocation = Get-Command $program -TotalCount 1 -ErrorAction SilentlyContinue
     if($sshLocation){
         return $sshLocation
@@ -305,6 +299,16 @@ function Find-Ssh($program = 'ssh-agent') {
     if (get-command $sshLocation -Erroraction SilentlyContinue) { 
         return $sshLocation 
     }
+}
+
+function Find-Service($service = 'ssh-agent') {
+     # Find if wind32-openssh available and use it
+    return Get-Service -Name $service -ErrorAction SilentlyContinue
+}
+
+function Find-SericePID($service = 'ssh-agent') {
+    # Find if wind32-openssh available and use it
+    return (get-wmiobject win32_service | where { $_.name -eq $service}).processID
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
@@ -326,12 +330,19 @@ function Start-SshAgent([switch]$Quiet) {
         if (!$pageant) { Write-Warning "Could not find Pageant."; return }
         Start-Process -NoNewWindow $pageant
     } else {
-        $sshAgent = Find-Ssh('ssh-agent')
-        if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
+        $sshService = Find-Service('ssh-agent')
+        if($sshService) {
+            Start-Service ssh-agent -ErrorAction SilentlyContinue 
+            $pid = Find-SericePID('ssh-agent')
+            Set-Env -Key 'SSH_AGENT_PID' -Value $pid
+        } else {
+            $sshAgent = Find-Ssh('ssh-agent')
+            if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
-        & $sshAgent | foreach {
-            if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
-                setenv $Matches['key'] $Matches['value']
+            & $sshAgent | foreach {
+                if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
+                    Set-Env -Key $Matches['key'] -Value $Matches['value']
+                }
             }
         }
     }
@@ -361,7 +372,20 @@ function Add-SshKey() {
             }
         }
     } else {
-        $sshAdd = Find-Ssh('ssh-add')
+        $agentPid = (Get-Item Env:SSH_AGENT_PID -ErrorAction SilentlyContinue).Value
+        $sshAdd = '';
+        if($agentPid){
+            $agentPath = (Get-Process -Id $agentPid -FileVersionInfo -ErrorAction SilentlyContinue).Filename
+            if($agentPath){
+                $sshPath = Split-Path ($agentPath) -Parent
+            }
+            if($sshPath){
+                $sshAdd = Get-Command (Join-Path $sshPath 'ssh-add')
+            }
+        }
+        if(!$sshAdd){
+            $sshAdd = Find-Ssh('ssh-add')
+        }
         if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
         if ($args.Count -eq 0) {
             & $sshAdd
@@ -370,6 +394,15 @@ function Add-SshKey() {
                 & $sshAdd $value
             }
         }
+    }
+}
+
+function Get-SshAdd()
+{
+    $sshPath = Split-Path -Parent $Global:GitSshSettings.DefaultSshPath -ErrorAction SilentlyContinue
+    $sshAdd = Get-Command $sshPath/ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
+    if($sshAdd){
+        return $sshAdd;
     }
 }
 
@@ -383,8 +416,8 @@ function Stop-SshAgent() {
             Stop-Process $agentPid
         }
 
-        setenv 'SSH_AGENT_PID', $null
-        setenv 'SSH_AUTH_SOCK', $null
+        Set-Env -Key 'SSH_AGENT_PID' -Value $null
+        Set-Env -Key 'SSH_AUTH_SOCK' -Value $null
     }
 }
 
