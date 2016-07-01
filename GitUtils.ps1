@@ -306,9 +306,9 @@ function Find-Service($service = 'ssh-agent') {
     return Get-Service -Name $service -ErrorAction SilentlyContinue
 }
 
-function Find-SericePID($service = 'ssh-agent') {
+function Find-ServicePID($service = 'ssh-agent') {
     # Find if wind32-openssh available and use it
-    return (get-wmiobject win32_service | where { $_.name -eq $service}).processID
+    return (Get-Service $service -ErrorAction SilentlyContinue | Get-Process).Id
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
@@ -333,7 +333,7 @@ function Start-SshAgent([switch]$Quiet) {
         $sshService = Find-Service('ssh-agent')
         if($sshService) {
             Start-Service ssh-agent -ErrorAction SilentlyContinue 
-            $pid = Find-SericePID('ssh-agent')
+            $pid = Find-ServicePID('ssh-agent')
             Set-Env -Key 'SSH_AGENT_PID' -Value $pid
         } else {
             $sshAgent = Find-Ssh('ssh-agent')
@@ -394,15 +394,6 @@ function Add-SshKey() {
                 & $sshAdd $value
             }
         }
-    }
-}
-
-function Get-SshAdd()
-{
-    $sshPath = Split-Path -Parent $Global:GitSshSettings.DefaultSshPath -ErrorAction SilentlyContinue
-    $sshAdd = Get-Command $sshPath/ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
-    if($sshAdd){
-        return $sshAdd;
     }
 }
 
