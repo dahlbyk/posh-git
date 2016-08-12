@@ -236,7 +236,7 @@ function Get-TempEnv($key) {
 }
 
 function Set-TempEnv($key, $value) {
-    $path = Join-Path ($Env:TEMP) ".ssh\$key.env"
+    $path = Join-Path ([System.IO.Path]::GetTempPath()) ".ssh\$key.env"
     if ($value -eq $null) {
         if (Test-Path $path) {
             Remove-Item $path
