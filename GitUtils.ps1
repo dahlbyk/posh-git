@@ -261,8 +261,8 @@ function Get-SshAgent() {
                 return $agentPid
             }
         }
-        Set-Env 'SSH_AGENT_PID', $null
-        Set-Env 'SSH_AUTH_SOCK', $null
+        Set-Env -Key 'SSH_AGENT_PID' -Value $null
+        Set-Env -Key 'SSH_AUTH_SOCK' -Value $null
     }
 
     return 0
