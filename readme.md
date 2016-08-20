@@ -1,44 +1,56 @@
 posh-git
 ========
 
-A set of PowerShell scripts which provide Git/PowerShell integration
-
+A set of PowerShell scripts that integrate Git and PowerShell.
 ### Prompt for Git repositories
-   The prompt within Git repositories can show the current branch and the state of files (additions, modifications, deletions) within.
+   The prompt in Git repositories show the current branch and the status of files (additions, modifications, deletions).
 
 ### Tab completion
    Provides tab completion for common commands when using git.
    E.g. `git ch<tab>` --> `git checkout`
 
-Usage
+Notes
 -----
+Posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`. For an example of integrating the tab completion and/or git prompt into your profile, see `profile.example.ps1`. 
 
-See `profile.example.ps1` as to how you can integrate the tab completion and/or git prompt into your own profile.
-Prompt formatting, among other things, can be customized using `$GitPromptSettings`, `$GitTabSettings` and `$TortoiseGitSettings`.
+Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
 
-Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
 
-Installing via PsGet
---------------------
+Installing Posh-git with PowerShellGet
+-----------------------------
+The PowerShellGet module is installed with Windows PowerShell 5.0 and greater. To get PowerShellGet (and the PackageManagement module that it requires) for PowerShell 3.0 and 4.0, use the [PackageManagement PowerShell Modules Preview](https://www.microsoft.com/en-us/download/details.aspx?id=51451) in the Microsoft Download Center. 
 
-If you have [PsGet](http://psget.net/) installed just run:
+PackageManagement and PowerShellGet are available for PowerShell on Mac OS X and Linux, but are not yet working correctly. Check frequently for updates: [PowerShellGet Issues](https://github.com/PowerShell/PowerShell/labels/Area-PowerShellGet)
+
+If PowerShellGet is installed, to install posh-git:
 
 ```
 Install-Module posh-git
 ```
+
+To download the module without installing it:
+
+```
+Save-Module posh-git
+```
+
 
 Installing (manual)
 -------------------
 
 **Pre-requisites:**
 
-0. Verify you have PowerShell 2.0 or better with `$PSVersionTable.PSVersion`. PowerShell 3.0 is preferred as 2.0 support is deprecated.
+<!---
+Previous version said that PowerShell 2.0 is deprecated. Although people have requested that it be deprecated, I don't think it has been, so I removed that line.
+-->
 
-1. Verify execution of scripts is allowed with `Get-ExecutionPolicy` (should be `RemoteSigned` or `Unrestricted`). If scripts are not enabled, run PowerShell as Administrator and call `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm`.
+0. Verify that you have PowerShell 2.0 or greater (`$PSVersionTable.PSVersion`). PowerShell 3.0 is preferred. 
 
-2. Verify that `git` can be run from PowerShell.
-   If the command is not found, you will need to add a git alias or add `%ProgramFiles(x86)%\Git\cmd`
-   (or `%ProgramFiles%\Git\cmd` if you're still on 32-bit) to your `PATH` environment variable.
+1. Use `Get-ExecutionPolicy` to verify that the local execution policy allows you to run scripts. `RemoteSigned` or `Unrestricted` are sufficient. 
+To change the execution policy so that scripts can run, start PowerShell with the 'Run as Administrator' option and then use `Set-ExecutionPolicy`. For example: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm`.
+
+2. Verify that `git` can run in the PowerShell console. If you get a  "command not found" error, you need to add a git alias or add `%ProgramFiles(x86)%\Git\cmd` (or `%ProgramFiles%\Git\cmd` if you're still on 32-bit) to your `PATH` environment variable.
+
 
 Then do this:
 
