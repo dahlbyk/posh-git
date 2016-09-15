@@ -3,6 +3,7 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 & $PSScriptRoot\CheckRequirements.ps1 > $null
 
 . $PSScriptRoot\Utils.ps1
+. $PSScriptRoot\AnsiUtils.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
 . $PSScriptRoot\GitParamTabExpansion.ps1
@@ -70,18 +71,20 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
             $currentPath = "~" + $currentPath.SubString($Home.Length)
         }
 
+        $res = ''
+
         # Display default prompt prefix if not empty.
         $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
         if ($defaultPromptPrefix) {
             $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-            Write-Host $expandedDefaultPromptPrefix -NoNewline
+            $res += Write-Prompt $expandedDefaultPromptPrefix -ForegroundColor $GitPromptSettings.DefaultForegroundColor
         }
 
         # Write the abbreviated current path
-        Write-Host $currentPath -NoNewline
+        $res += Write-Prompt $currentPath -ForegroundColor $GitPromptSettings.DefaultForegroundColor
 
         # Write the Git status summary information
-        Write-VcsStatus
+        $res += Write-VcsStatus
 
         # If stopped in the debugger, the prompt needs to indicate that in some fashion
         $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-Member -Name InBreakpoint -MemberType property
@@ -99,11 +102,11 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw.Stop()
             $elapsed = $sw.ElapsedMilliseconds
-            Write-Host " ${elapsed}ms" -NoNewline
+            $res += Write-Prompt " ${elapsed}ms" -ForegroundColor $GitPromptSettings.DefaultForegroundColor
         }
 
         $global:LASTEXITCODE = $origLastExitCode
-        $expandedPromptSuffix
+        $res + $expandedPromptSuffix
     }
 
     # Set the posh-git prompt as the default prompt
