@@ -14,10 +14,10 @@ function global:prompt {
 
     Write-Host($pwd.ProviderPath) -nonewline
 
-    Write-VcsStatus
+    $p = Write-VcsStatus
 
     $global:LASTEXITCODE = $realLASTEXITCODE
-    return "> "
+    return $p + "> "
 }
 
 Pop-Location
