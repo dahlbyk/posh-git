@@ -2,6 +2,7 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 
 & $PSScriptRoot\CheckRequirements.ps1 > $null
 
+. $PSScriptRoot\ConsoleMode.ps1
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\AnsiUtils.ps1
 . $PSScriptRoot\GitUtils.ps1

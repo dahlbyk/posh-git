@@ -317,6 +317,7 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
 }
 
 function Global:Write-VcsStatus {
+    Set-ConsoleMode -ANSI
     $Global:VcsPromptStatuses | ForEach-Object { & $_ }
 }
 
