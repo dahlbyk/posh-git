@@ -32,50 +32,40 @@ function Get-LocalOrParentPath($path) {
 }
 
 # Color codes from https://msdn.microsoft.com/en-us/library/windows/desktop/mt638032(v=vs.85).aspx
-function Get-ForegroundVirtualTerminalSequence($Color) {
-    $e = [char]27 + "["
-    switch ($Color) {
-      ([ConsoleColor]::Black)       { "${e}30m" }
-      ([ConsoleColor]::DarkRed)     { "${e}31m" }
-      ([ConsoleColor]::DarkGreen)   { "${e}32m" }
-      ([ConsoleColor]::DarkYellow)  { "${e}33m" }
-      ([ConsoleColor]::DarkBlue)    { "${e}34m" }
-      ([ConsoleColor]::DarkMagenta) { "${e}35m" }
-      ([ConsoleColor]::DarkCyan)    { "${e}36m" }
-      ([ConsoleColor]::Gray)        { "${e}37m" }
-      ([ConsoleColor]::DarkGray)    { "${e}90m" }
-      ([ConsoleColor]::Red)         { "${e}91m" }
-      ([ConsoleColor]::Green)       { "${e}92m" }
-      ([ConsoleColor]::Yellow)      { "${e}93m" }
-      ([ConsoleColor]::Blue)        { "${e}94m" }
-      ([ConsoleColor]::Magenta)     { "${e}95m" }
-      ([ConsoleColor]::Cyan)        { "${e}96m" }
-      ([ConsoleColor]::White)       { "${e}97m" }
-      default                       { "${e}39m" }
+$ConsoleColorToAnsi = @(
+    30 # Black
+    34 # DarkBlue
+    32 # DarkGreen
+    36 # DarkCyan
+    31 # DarkRed
+    35 # DarkMagenta
+    33 # DarkYellow
+    37 # Gray
+    90 # DarkGray
+    94 # Blue
+    92 # Green
+    96 # Cyan
+    91 # Red
+    95 # Magenta
+    93 # Yellow
+    97 # White
+)
+$AnsiDefaultColor = 39
+$AnsiEscape = [char]27 + "["
+
+function Get-VirtualTerminalSequence ([ConsoleColor]$color, [int]$offset = 0) {
+    if (($color -lt 0) -or ($color -gt 15)) {
+        return "${AnsiEscape}$($AnsiDefaultColor + $offset)m"
     }
+    return "${AnsiEscape}$($ConsoleColorToAnsi[$color] + $offset)m"
+}
+
+function Get-ForegroundVirtualTerminalSequence($Color) {
+    return Get-VirtualTerminalSequence $Color
 }
 
 function Get-BackgroundVirtualTerminalSequence($Color) {
-    $e = [char]27 + "["
-    switch ($Color) {
-      ([ConsoleColor]::Black)       { "${e}40m" }
-      ([ConsoleColor]::DarkRed)     { "${e}41m" }
-      ([ConsoleColor]::DarkGreen)   { "${e}42m" }
-      ([ConsoleColor]::DarkYellow)  { "${e}43m" }
-      ([ConsoleColor]::DarkBlue)    { "${e}44m" }
-      ([ConsoleColor]::DarkMagenta) { "${e}45m" }
-      ([ConsoleColor]::DarkCyan)    { "${e}46m" }
-      ([ConsoleColor]::Gray)        { "${e}47m" }
-      ([ConsoleColor]::DarkGray)    { "${e}100m" }
-      ([ConsoleColor]::Red)         { "${e}101m" }
-      ([ConsoleColor]::Green)       { "${e}102m" }
-      ([ConsoleColor]::Yellow)      { "${e}103m" }
-      ([ConsoleColor]::Blue)        { "${e}104m" }
-      ([ConsoleColor]::Magenta)     { "${e}105m" }
-      ([ConsoleColor]::Cyan)        { "${e}106m" }
-      ([ConsoleColor]::White)       { "${e}107m" }
-      default                       { "${e}49m" }
-    }
+    return Get-VirtualTerminalSequence $Color 10
 }
 
 function dbg ($Message, [Diagnostics.Stopwatch]$Stopwatch) {
