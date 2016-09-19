@@ -273,7 +273,10 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor 
 }
 
-function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
+function Global:Write-VcsStatus {
+  Set-ConsoleMode -ANSI
+  $Global:VcsPromptStatuses | foreach { & $_ }
+}
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
