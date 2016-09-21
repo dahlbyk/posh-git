@@ -89,6 +89,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnableWindowTitle                           = 'posh~git ~ '
 
+    AnsiConsole                                 = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
+
     Debug                                       = $false
 
     BranchNameLimit                             = 0
@@ -106,7 +108,7 @@ if (Get-Module NuGet) {
 }
 
 function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
-    if ($Host.UI.SupportsVirtualTerminal) {
+    if ($GitPromptSettings.AnsiConsole) {
       $e = [char]27 + "["
       $f = Get-ForegroundVirtualTerminalSequence $ForegroundColor
       $b = Get-BackgroundVirtualTerminalSequence $BackgroundColor
