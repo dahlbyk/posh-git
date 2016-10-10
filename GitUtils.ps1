@@ -46,7 +46,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             }
 
             $b = Invoke-NullCoalescing `
-                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD 2>$null } `
+                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD -q 2>$null } `
                 { '({0})' -f (Invoke-NullCoalescing `
                     {
                         dbg 'Trying describe' $sw
@@ -54,7 +54,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                             'contains' { git describe --contains HEAD 2>$null }
                             'branch' { git describe --contains --all HEAD 2>$null }
                             'describe' { git describe HEAD 2>$null }
-                            default { git describe --tags --exact-match HEAD 2>$null }
+                            default { git tag --points-at HEAD 2>$null }
                         }
                     } `
                     {
