@@ -7,7 +7,7 @@ A set of PowerShell scripts which provide Git/PowerShell integration
    The prompt within Git repositories can show the current branch and the state of files (additions, modifications, deletions) within.
 
 ### Tab completion
-   Provides tab completion for common commands when using git.
+   Provides tab completion for common commands and branch names when using git.
    E.g. `git ch<tab>` --> `git checkout`
 
 Usage
@@ -17,6 +17,22 @@ See `profile.example.ps1` as to how you can integrate the tab completion and/or 
 Prompt formatting, among other things, can be customized using `$GitPromptSettings`, `$GitTabSettings` and `$TortoiseGitSettings`.
 
 Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
+
+Installing from the PowerShell Gallery
+--------------------
+
+If you are on PowerShell version 5 or higher, execute the command below to install from the [PowerShell Gallery](https://www.powershellgallery.com/):
+
+```
+Install-Module posh-git -Scope CurrentUser
+```
+
+If you are on PowerShell version 3 or 4, you will need to install the [Package Management Preview for PowerShell 3 & 4](https://www.microsoft.com/en-us/download/details.aspx?id=51451) in order to run the command above.
+
+After you have installed from the PowerShell Gallery you can update posh-git to a newer version by executing the command:
+```
+Update-Module posh-git
+```
 
 Installing via PsGet
 --------------------
@@ -79,7 +95,7 @@ By default, the status summary has the following format:
  * `-` = Removed files
  * `!` = Conflicted files
  * As in `git status`, index status is dark green and working directory status is dark red
-* 
+*
 * W represents the status of the working folder
  * `!` = There are untracked changes in the working tree (`LocalStagedStatus`)
  * `~` = There are staged changes in the working tree waiting to be committed (`LocalWorkingStatus`)
