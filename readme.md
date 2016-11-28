@@ -18,6 +18,16 @@ Prompt formatting, among other things, can be customized using `$GitPromptSettin
 
 Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
 
+Installing via Chocolatey
+--------------------
+If you have [Chocolatey](https://chocolatey.org/) installed, open a PowerShell terminal as Administrator and just run:
+
+```
+choco install poshgit
+```
+
+More information can be found at posh-git Chocolatey package [page](https://chocolatey.org/packages/poshgit).
+
 Installing via PsGet
 --------------------
 
