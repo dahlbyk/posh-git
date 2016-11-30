@@ -254,10 +254,31 @@ function Get-TempEnvPath($key){
 
 # Retrieve the current SSH agent PID (or zero). Can be used to determine if there
 # is a running agent.
-function Get-SshAgent() {
+function Get-SshAgent(){
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select -ExpandProperty Id -First 1
-        if ($null -ne $pageantPid) { return $pageantPid }
+        $sig=@'
+            using System;
+            using System.Runtime.InteropServices;
+
+            public static class Win32Api
+            {
+                [System.Runtime.InteropServices.DllImportAttribute("User32.dll", EntryPoint = "GetWindowThreadProcessId")]
+                public static extern int GetWindowThreadProcessId([System.Runtime.InteropServices.InAttribute()] System.IntPtr hWnd, out int lpdwProcessId);
+
+                [DllImport("User32.dll", CharSet = CharSet.Auto)]
+                public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+            }
+'@
+        Add-Type -TypeDefinition $sig
+        $HWND = [Win32Api]::FindWindow('pageant', 'pageant')
+
+        $myPid = [IntPtr]::Zero
+        [void][Win32Api]::GetWindowThreadProcessId($HWND, [ref] $myPid);
+        $pageantPid = Get-Process | Where-Object { $_.Id -eq $myPid }
+
+        if ($null -ne $pageantPid) {
+            return $pageantPid.Id
+        }
     } else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
@@ -347,7 +368,9 @@ function Add-SshKey() {
             $keystring = ""
             $keyPath = Join-Path $Env:HOME ".ssh"
             $keys = Get-ChildItem $keyPath/"*.ppk" -ErrorAction SilentlyContinue | Select -ExpandProperty FullName
-            & $pageant $keys
+            if ($keys){
+                & $pageant $keys
+            }
         } else {
             foreach ($value in $args) {
                 & $pageant $value
