@@ -223,7 +223,7 @@ function Get-AliasPattern($exe) {
 }
 
 function setenv($key, $value) {
-    [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+    [void][Environment]::SetEnvironmentVariable($key, $value)
     Set-TempEnv $key $value
 }
 
@@ -231,7 +231,7 @@ function Get-TempEnv($key) {
     $path = Get-TempEnvPath($key)
     if (Test-Path $path) {
         $value =  Get-Content $path
-        [void][Environment]::SetEnvironmentVariable($key, $value, [EnvironmentVariableTarget]::Process)
+        [void][Environment]::SetEnvironmentVariable($key, $value)
     }
 }
 
