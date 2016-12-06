@@ -95,8 +95,16 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     TruncatedBranchSuffix                       = '...'
 }
 
-$currentUser = [Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
-$isAdminProcess = $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+# PowerShell 5.x only runs on Windows so use .NET types to determine isAdminProcess
+# Or if we are on v6 or higher, check the $IsWindows pre-defined variable.
+if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
+    $currentUser = [Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
+    $isAdminProcess = $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+else {
+    # Must be Linux or OSX, so use the id util. Root has userid of 0.
+    $isAdminProcess = 0 -eq (id -u)
+}
 
 $adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
 
@@ -252,14 +260,14 @@ if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
 $s = $global:GitPromptSettings
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) { 
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.LocalDefaultStatusForegroundColor    = $s.LocalDefaultStatusForegroundBrightColor
     $s.LocalWorkingStatusForegroundColor    = $s.LocalWorkingStatusForegroundBrightColor
 
-    $s.BeforeIndexForegroundColor           = $s.BeforeIndexForegroundBrightColor 
-    $s.IndexForegroundColor                 = $s.IndexForegroundBrightColor 
+    $s.BeforeIndexForegroundColor           = $s.BeforeIndexForegroundBrightColor
+    $s.IndexForegroundColor                 = $s.IndexForegroundBrightColor
 
-    $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor 
+    $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor
 }
 
 function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
