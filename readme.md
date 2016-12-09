@@ -126,6 +126,30 @@ For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the f
     #
     #        new.file
 
+Aliases 
+-------
+Requires [http://powertab.codeplex.com/](Power Tab Module)
+
+For common git commands it is sometimes tempting to want to write
+
+    gco master
+
+instead of
+
+    git checkout master
+
+in the shell. However by writing a function __gco__ you lose the tab completion
+capability of POSH. The correct way to do this is in your $profile do the following
+
+    Register-TabExpansions-Alias "gco" "git checkout"
+
+this will enable you to do
+
+    gco m<tab>
+
+and have it complete to __gco master__
+
+
 ### Based on work by:
 
  - Keith Dahlby, http://solutionizing.net/
