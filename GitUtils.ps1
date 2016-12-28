@@ -94,6 +94,18 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     }
 }
 
+function GetUniquePaths([System.Collections.Generic.IEnumerable[string][]] $pathCollections) {
+    $hash = New-Object System.Collections.Specialized.OrderedDictionary
+    foreach ($pathCollection in $pathCollections)
+    {
+        foreach ($path in $pathCollection)
+        {
+            $hash[$path] = 1
+        }
+    }
+    $hash.Keys
+}
+
 function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $settings = $Global:GitPromptSettings
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
@@ -107,14 +119,14 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $branch = $null
         $aheadBy = 0
         $behindBy = 0
-        $indexAdded = @()
-        $indexModified = @()
-        $indexDeleted = @()
-        $indexUnmerged = @()
-        $filesAdded = @()
-        $filesModified = @()
-        $filesDeleted = @()
-        $filesUnmerged = @()
+        $indexAdded = New-Object System.Collections.Generic.List[string]
+        $indexModified = New-Object System.Collections.Generic.List[string]
+        $indexDeleted = New-Object System.Collections.Generic.List[string]
+        $indexUnmerged = New-Object System.Collections.Generic.List[string]
+        $filesAdded = New-Object System.Collections.Generic.List[string]
+        $filesModified = New-Object System.Collections.Generic.List[string]
+        $filesDeleted = New-Object System.Collections.Generic.List[string]
+        $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
@@ -129,56 +141,69 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         }
 
         dbg 'Parsing status' $sw
-        $status | foreach {
-            dbg "Status: $_" $sw
-            if($_) {
-                switch -regex ($_) {
-                    '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
-                        switch ($matches['index']) {
-                            'A' { $indexAdded += $matches['path1'] }
-                            'M' { $indexModified += $matches['path1'] }
-                            'R' { $indexModified += $matches['path1'] }
-                            'C' { $indexModified += $matches['path1'] }
-                            'D' { $indexDeleted += $matches['path1'] }
-                            'U' { $indexUnmerged += $matches['path1'] }
-                        }
-                        switch ($matches['working']) {
-                            '?' { $filesAdded += $matches['path1'] }
-                            'A' { $filesAdded += $matches['path1'] }
-                            'M' { $filesModified += $matches['path1'] }
-                            'D' { $filesDeleted += $matches['path1'] }
-                            'U' { $filesUnmerged += $matches['path1'] }
-                        }
-                    }
+        switch -regex ($status) {
+            '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
+                if ($sw) { dbg "Status: $_" $sw }
 
-                    '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
-                        $branch = $matches['branch']
-                        $upstream = $matches['upstream']
-                        $aheadBy = [int]$matches['ahead']
-                        $behindBy = [int]$matches['behind']
-                    }
-
-                    '^## Initial commit on (?<branch>\S+)$' {
-                        $branch = $matches['branch']
-                    }
+                switch ($matches['index']) {
+                    'A' { $null = $indexAdded.Add($matches['path1']); break }
+                    'M' { $null = $indexModified.Add($matches['path1']); break }
+                    'R' { $null = $indexModified.Add($matches['path1']); break }
+                    'C' { $null = $indexModified.Add($matches['path1']); break }
+                    'D' { $null = $indexDeleted.Add($matches['path1']); break }
+                    'U' { $null = $indexUnmerged.Add($matches['path1']); break }
                 }
+                switch ($matches['working']) {
+                    '?' { $null = $filesAdded.Add($matches['path1']); break }
+                    'A' { $null = $filesAdded.Add($matches['path1']); break }
+                    'M' { $null = $filesModified.Add($matches['path1']); break }
+                    'D' { $null = $filesDeleted.Add($matches['path1']); break }
+                    'U' { $null = $filesUnmerged.Add($matches['path1']); break }
+                }
+                continue
             }
+
+            '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+                if ($sw) { dbg "Status: $_" $sw }
+
+                $branch = $matches['branch']
+                $upstream = $matches['upstream']
+                $aheadBy = [int]$matches['ahead']
+                $behindBy = [int]$matches['behind']
+                continue
+            }
+
+            '^## Initial commit on (?<branch>\S+)$' {
+                if ($sw) { dbg "Status: $_" $sw }
+
+                $branch = $matches['branch']
+                continue
+            }
+
+            default { if ($sw) { dbg "Status: $_" $sw } }
+
         }
 
         if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
+
         dbg 'Building status object' $sw
-        $indexPaths = $indexAdded + $indexModified + $indexDeleted + $indexUnmerged
-        $workingPaths = $filesAdded + $filesModified + $filesDeleted + $filesUnmerged
-        $index = New-Object PSObject @(,@($indexPaths | ?{ $_ } | Select -Unique)) |
-            Add-Member -PassThru NoteProperty Added    $indexAdded |
-            Add-Member -PassThru NoteProperty Modified $indexModified |
-            Add-Member -PassThru NoteProperty Deleted  $indexDeleted |
-            Add-Member -PassThru NoteProperty Unmerged $indexUnmerged
-        $working = New-Object PSObject @(,@($workingPaths | ?{ $_ } | Select -Unique)) |
+        #
+        # This collection is used twice, so create the array just once
+        $filesAdded = $filesAdded.ToArray()
+
+        $indexPaths = @(GetUniquePaths $indexAdded,$indexModified,$indexDeleted,$indexUnmerged)
+        $workingPaths = @(GetUniquePaths $filesAdded,$filesModified,$filesDeleted,$filesUnmerged)
+        $index = Write-Output -NoEnumerate $indexPaths |
+            Add-Member -PassThru NoteProperty Added    $indexAdded.ToArray() |
+            Add-Member -PassThru NoteProperty Modified $indexModified.ToArray() |
+            Add-Member -PassThru NoteProperty Deleted  $indexDeleted.ToArray() |
+            Add-Member -PassThru NoteProperty Unmerged $indexUnmerged.ToArray()
+
+        $working = Write-Output -NoEnumerate $workingPaths|
             Add-Member -PassThru NoteProperty Added    $filesAdded |
-            Add-Member -PassThru NoteProperty Modified $filesModified |
-            Add-Member -PassThru NoteProperty Deleted  $filesDeleted |
-            Add-Member -PassThru NoteProperty Unmerged $filesUnmerged
+            Add-Member -PassThru NoteProperty Modified $filesModified.ToArray() |
+            Add-Member -PassThru NoteProperty Deleted  $filesDeleted.ToArray() |
+            Add-Member -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
 
         $result = New-Object PSObject -Property @{
             GitDir          = $gitDir
