@@ -14,7 +14,8 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
 Posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
 For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the `Customizing Your PowerShell Prompt` section below.
 
-Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
+Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
+Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
 
 ## Installation
 ### Prerequisites
@@ -67,7 +68,7 @@ In the profile script, add the following line:
 Import-Module posh-git
 ```
 Save the profile script, then close PowerShell and open a new PowerShell session.
-Type `git fe` and then press tab. If posh-git has been imported, that command should tab complete to `git fetch`.
+Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to `git fetch`.
 
 The second step is setting up your PowerShell prompt to display Git status summary information and that is covered in the next section.
 
