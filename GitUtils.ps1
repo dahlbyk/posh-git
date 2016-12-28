@@ -408,18 +408,48 @@ function Stop-SshAgent() {
     }
 }
 
-function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
+function Update-AllBranches($Upstream = 'master', [switch]$Quiet, [switch]$PreserveNestedBranches) {
     $head = git rev-parse --abbrev-ref HEAD
     git checkout -q $Upstream
-    $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' }
-    foreach ($line in $branches) {
-        $branch = $line.SubString(2)
-        if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }
-        git rebase -q $Upstream $branch > $null 2> $null
+
+    $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' } | foreach { $_.Substring(2) }
+    $latestCommitPerBranch = (git for-each-ref --sort=-refname --sort=-committerdate refs/heads/ --format='%(refname:short) %(objectname)')
+    $orderedBranches = @()
+    $commitToBranchMap = @{}
+    foreach ($commitBranchPair in $latestCommitPerBranch) {
+        $splitCommitBranchPair = $commitBranchPair.Split(' ')
+        $branch = $splitCommitBranchPair[0]
+        $commit = $splitCommitBranchPair[1]
+
+        if ($branches.Contains($branch)) {
+            $orderedBranches = ,$branch + $orderedBranches
+            $commitToBranchMap[$commit] = $branch
+        }
+    }
+
+    $branchToUpstreamMap = @{}
+    if ($PreserveNestedBranches) {
+        $upstreamBranches = $orderedBranches[($orderedBranches.Length-1)..0] | where { $commitToBranchMap.ContainsValue($_) }
+        foreach ($upstreamBranch in $upstreamBranches) {
+            $branchesWithUpstream = (git branch --contains $upstreamBranch) | foreach { $_.Substring(2) }
+            foreach ($branchWithUpstream in $branchesWithUpstream) {
+                if (-not ($branchWithUpstream -eq $upstreamBranch) -and -not ($branchToUpstreamMap.ContainsKey($branchWithUpstream))) {
+                    $branchToUpstreamMap.Add($branchWithUpstream, $upstreamBranch)
+                }
+            }
+        }
+    }
+
+    foreach ($branch in $orderedBranches) {
+        $targetUpstream = $Upstream
+        if ($branchToUpstreamMap.ContainsKey($branch)) { $targetUpstream = $branchToUpstreamMap[$branch] }
+        if (!$Quiet) { Write-Host "Rebasing $branch onto $targetUpstream..." }
+        git rebase -q $targetUpstream $branch > $null 2> $null
         if ($LASTEXITCODE) {
             git rebase --abort
             Write-Warning "Rebase failed for $branch"
         }
     }
+
     git checkout -q $head
 }
