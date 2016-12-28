@@ -43,6 +43,15 @@ If you have [PsGet](http://psget.net/) installed just run:
 Install-Module posh-git
 ```
 
+Installing via Chocolatey
+--------------------
+
+If you have [Chocolatey](https://chocolatey.org/) installed just run:
+
+```
+choco install poshgit
+```
+
 Installing (manual)
 -------------------
 
