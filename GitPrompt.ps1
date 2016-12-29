@@ -186,7 +186,7 @@ function Write-GitStatus($status) {
         }
 
         Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
-        
+
         if ($branchStatusText) {
             Write-Prompt  (" {0}" -f $branchStatusText) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
         }
