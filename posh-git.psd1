@@ -19,7 +19,7 @@ Copyright = '(c) 2010-2017 Keith Dahlby and contributors'
 Description = 'A PowerShell environment for Git'
 
 # Minimum version of the Windows PowerShell engine required by this module
-PowerShellVersion = '3.0'
+PowerShellVersion = '2.0'
 
 # Functions to export from this module
 FunctionsToExport = @(
