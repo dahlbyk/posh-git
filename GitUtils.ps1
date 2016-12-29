@@ -106,7 +106,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     }
 }
 
-function GetUniquePaths([System.Collections.Generic.IEnumerable[string][]] $pathCollections) {
+function GetUniquePaths($pathCollections) {
     $hash = New-Object System.Collections.Specialized.OrderedDictionary
 
     foreach ($pathCollection in $pathCollections) {
