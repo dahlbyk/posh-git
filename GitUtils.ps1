@@ -394,10 +394,9 @@ function Start-SshAgent([switch]$Quiet) {
     Add-SshKey
 }
 
-function Get-SshPath($File = 'id_rsa')
-{
-    $home = Resolve-Path (Invoke-NullCoalescing $Env:HOME ~)
-    Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
+function Get-SshPath($File = 'id_rsa') {
+    # Avoid paths with path separator char since it is different on Linux/macOS.
+    Join-Path $Home (Join-Path .ssh $File)
 }
 
 <#
