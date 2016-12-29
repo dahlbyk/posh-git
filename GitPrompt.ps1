@@ -270,12 +270,18 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor
 }
 
-function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
+function Global:Write-VcsStatus {
+    $Global:VcsPromptStatuses | ForEach-Object { & $_ }
+}
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
     $Global:GitStatus = Get-GitStatus
     Write-GitStatus $GitStatus
 }
+
+# Install handler for removal/unload of the module
 $Global:VcsPromptStatuses += $PoshGitVcsPrompt
-$ExecutionContext.SessionState.Module.OnRemove = { $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | ? { $_ -ne $PoshGitVcsPrompt} }
+$ExecutionContext.SessionState.Module.OnRemove = {
+    $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
+}
