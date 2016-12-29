@@ -132,6 +132,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $branch = $null
         $aheadBy = 0
         $behindBy = 0
+        $gone = $false
         $indexAdded = New-Object System.Collections.Generic.List[string]
         $indexModified = New-Object System.Collections.Generic.List[string]
         $indexDeleted = New-Object System.Collections.Generic.List[string]
@@ -177,13 +178,14 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 continue
             }
 
-            '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+            '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?(?<gone>gone)?\])?$' {
                 if ($sw) { dbg "Status: $_" $sw }
 
                 $branch = $matches['branch']
                 $upstream = $matches['upstream']
                 $aheadBy = [int]$matches['ahead']
                 $behindBy = [int]$matches['behind']
+                $gone = [string]$matches['gone'] -eq 'gone'
                 continue
             }
 
@@ -224,6 +226,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             Branch          = $branch
             AheadBy         = $aheadBy
             BehindBy        = $behindBy
+            UpstreamGone    = $gone
             Upstream        = $upstream
             HasIndex        = [bool]$index
             Index           = $index

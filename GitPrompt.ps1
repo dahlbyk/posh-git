@@ -39,6 +39,10 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchForegroundColor                       = [ConsoleColor]::Cyan
     BranchBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
 
+    BranchGoneStatusSymbol                      = [char]0x00D7 # × Multiplication sign
+    BranchGoneStatusForegroundColor             = [ConsoleColor]::DarkCyan
+    BranchGoneStatusBackgroundColor             = $Host.UI.RawUI.BackgroundColor
+
     BranchIdenticalStatusToSymbol               = [char]0x2261 # ≡ Three horizontal lines
     BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
     BranchIdenticalStatusToBackgroundColor      = $Host.UI.RawUI.BackgroundColor
@@ -143,6 +147,11 @@ function Write-GitStatus($status) {
 
         if (!$status.Upstream) {
             $branchStatusSymbol          = $s.BranchUntrackedSymbol
+        } elseif ($status.UpstreamGone -eq $true) {
+            # Upstream branch is gone
+            $branchStatusSymbol          = $s.BranchGoneStatusSymbol
+            $branchStatusBackgroundColor = $s.BranchGoneStatusBackgroundColor
+            $branchStatusForegroundColor = $s.BranchGoneStatusForegroundColor
         } elseif ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
             # We are aligned with remote
             $branchStatusSymbol          = $s.BranchIdenticalStatusToSymbol

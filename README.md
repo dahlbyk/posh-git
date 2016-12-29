@@ -232,6 +232,7 @@ By default, the status summary has the following format:
   * ↑ = The local branch is ahead of the remote branch, a 'git push' is required to update the remote branch (`BranchAheadStatus`)
   * ↓ = The local branch is behind the remote branch, a 'git pull' is required to update the local branch (`BranchBehindStatus`)
   * ↕ = The local branch is both ahead and behind the remote branch, a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`)
+  * × = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus')
 * ABCD represent the index; ` | ` (`DelimText`); EFGH represent the working directory
  * `+` = Added files
  * `~` = Modified files
