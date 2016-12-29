@@ -14,6 +14,7 @@ if ($psv.Major -lt 3 -and !$NoVersionWarn) {
 Push-Location $psScriptRoot
 .\CheckVersion.ps1 > $null
 
+. .\ConsoleMode.ps1
 . .\Utils.ps1
 . .\GitUtils.ps1
 . .\GitPrompt.ps1
