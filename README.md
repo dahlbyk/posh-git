@@ -162,7 +162,8 @@ This is better with spaces in the right places.
 
 Hopefully, you can see various ways you can customize your prompt to your liking.
 
-One last variation I will show you will collapse the home dir part of your path e.g. `C:\Users\<your-username>` to just `~`:
+Here are a couple of more variations on the prompt function that deal with long paths.
+First, here is an example that will collapse the home dir part of your path e.g. `C:\Users\<your-username>` to just `~`:
 ```
 Import-Module posh-git
 $global:GitPromptSettings.BeforeText = '['
@@ -185,6 +186,31 @@ function prompt {
 This gives us a prompt with a shortened current path:
 ```
 [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ~\GitHub\rkeithhill\posh-git
+> _
+```
+The following prompt function allows you to set a max length for the current path:
+```
+Import-Module posh-git
+$global:GitPromptSettings.BeforeText = '['
+$global:GitPromptSettings.AfterText  = '] '
+function prompt {
+    $origLastExitCode = $LASTEXITCODE
+    Write-VcsStatus
+
+    $maxPathLength = 40
+    $curPath = $ExecutionContext.SessionState.Path.CurrentLocation.Path
+    if ($curPath.Length -gt $maxPathLength) {
+        $curPath = '...' + $curPath.SubString($curPath.Length - $maxPathLength + 3)
+    }
+
+    Write-Host $curPath -ForegroundColor Green
+    $LASTEXITCODE = $origLastExitCode
+    "$('>' * ($nestedPromptLevel + 1)) "
+}
+```
+This gives us a prompt with a current path that is never greater than 40 characters.
+```
+[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ...sers\Keith\GitHub\rkeithhill\posh-git
 > _
 ```
 
