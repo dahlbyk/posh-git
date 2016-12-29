@@ -15,7 +15,7 @@ Posh-git adds variables to your session to let you customize it, including `$Git
 For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the `Customizing Your PowerShell Prompt` section below.
 
 Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
-Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
+Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus = $false`), you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
 
 ## Installation
 ### Prerequisites
