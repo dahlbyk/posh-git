@@ -12,7 +12,7 @@ Import-Module .\posh-git
 function global:prompt {
     $realLASTEXITCODE = $LASTEXITCODE
 
-    Write-Host($pwd.ProviderPath) -nonewline
+    Write-Host $ExecutionContext.SessionState.Path.CurrentLocation.ProviderPath -nonewline
 
     Write-VcsStatus
 
