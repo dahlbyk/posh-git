@@ -229,9 +229,9 @@ By default, the status summary has the following format:
  * Yellow means the branch is both ahead of and behind its remote
 * S represents the branch status in relation to remote (tracked origin) branch. Note: This information reflects the state of the remote tracked branch after the last `git fetch/pull` of the remote.
   * ≡ = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
-  * ↑ = The local branch is ahead of the remote branch, a 'git push' is required to update the remote branch (`BranchAheadStatus`)
-  * ↓ = The local branch is behind the remote branch, a 'git pull' is required to update the local branch (`BranchBehindStatus`)
-  * ↕ = The local branch is both ahead and behind the remote branch, a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`)
+  * ↑ = The local branch is ahead of the remote branch; a 'git push' is required to update the remote branch (`BranchAheadStatus`)
+  * ↓ = The local branch is behind the remote branch; a 'git pull' is required to update the local branch (`BranchBehindStatus`)
+  * ↕ = The local branch is both ahead and behind the remote branch; a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`)
   * × = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus')
 * ABCD represent the index; ` | ` (`DelimText`); EFGH represent the working directory
  * `+` = Added files
