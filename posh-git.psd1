@@ -1,7 +1,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = 'posh-git.psm1'
+ModuleToProcess = 'posh-git.psm1'
 
 # Version number of this module.
 ModuleVersion = '0.7.0'
