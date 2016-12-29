@@ -4,7 +4,8 @@
 function Get-GitDirectory {
     if ($Env:GIT_DIR) {
         $Env:GIT_DIR
-    } else {
+    }
+    else {
         Get-LocalOrParentPath .git
     }
 }
@@ -17,30 +18,37 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             dbg 'Found rebase-merge\interactive' $sw
             $r = '|REBASE-i'
             $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
-        } elseif (Test-Path $gitDir\rebase-merge) {
+        }
+        elseif (Test-Path $gitDir\rebase-merge) {
             dbg 'Found rebase-merge' $sw
             $r = '|REBASE-m'
             $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
-        } else {
+        }
+        else {
             if (Test-Path $gitDir\rebase-apply) {
                 dbg 'Found rebase-apply' $sw
                 if (Test-Path $gitDir\rebase-apply\rebasing) {
                     dbg 'Found rebase-apply\rebasing' $sw
                     $r = '|REBASE'
-                } elseif (Test-Path $gitDir\rebase-apply\applying) {
+                }
+                elseif (Test-Path $gitDir\rebase-apply\applying) {
                     dbg 'Found rebase-apply\applying' $sw
                     $r = '|AM'
-                } else {
+                }
+                else {
                     dbg 'Found rebase-apply' $sw
                     $r = '|AM/REBASE'
                 }
-            } elseif (Test-Path $gitDir\MERGE_HEAD) {
+            }
+            elseif (Test-Path $gitDir\MERGE_HEAD) {
                 dbg 'Found MERGE_HEAD' $sw
                 $r = '|MERGING'
-            } elseif (Test-Path $gitDir\CHERRY_PICK_HEAD) {
+            }
+            elseif (Test-Path $gitDir\CHERRY_PICK_HEAD) {
                 dbg 'Found CHERRY_PICK_HEAD' $sw
                 $r = '|CHERRY-PICKING'
-            } elseif (Test-Path $gitDir\BISECT_LOG) {
+            }
+            elseif (Test-Path $gitDir\BISECT_LOG) {
                 dbg 'Found BISECT_LOG' $sw
                 $r = '|BISECTING'
             }
@@ -64,16 +72,19 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                         if (Test-Path $gitDir\HEAD) {
                             dbg 'Reading from .git\HEAD' $sw
                             $ref = Get-Content $gitDir\HEAD 2>$null
-                        } else {
+                        }
+                        else {
                             dbg 'Trying rev-parse' $sw
                             $ref = git rev-parse HEAD 2>$null
                         }
 
                         if ($ref -match 'ref: (?<ref>.+)') {
                             return $Matches['ref']
-                        } elseif ($ref -and $ref.Length -ge 7) {
+                        }
+                        elseif ($ref -and $ref.Length -ge 7) {
                             return $ref.Substring(0,7)+'...'
-                        } else {
+                        }
+                        else {
                             return 'unknown'
                         }
                     }
@@ -85,7 +96,8 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             dbg 'Inside git directory' $sw
             if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
                 $c = 'BARE:'
-            } else {
+            }
+            else {
                 $b = 'GIT_DIR!'
             }
         }
@@ -96,26 +108,27 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
 
 function GetUniquePaths([System.Collections.Generic.IEnumerable[string][]] $pathCollections) {
     $hash = New-Object System.Collections.Specialized.OrderedDictionary
-    foreach ($pathCollection in $pathCollections)
-    {
-        foreach ($path in $pathCollection)
-        {
+
+    foreach ($pathCollection in $pathCollections) {
+        foreach ($path in $pathCollection) {
             $hash[$path] = 1
         }
     }
+
     $hash.Keys
 }
 
 function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $settings = $Global:GitPromptSettings
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
-    if ($enabled -and $gitDir)
-    {
+    if ($enabled -and $gitDir) {
         if($settings.Debug) {
             $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
-        } else {
+        }
+        else {
             $sw = $null
         }
+
         $branch = $null
         $aheadBy = 0
         $behindBy = 0
@@ -134,9 +147,10 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             $status = git -c color.status=false status --short --branch 2>$null
             if($settings.EnableStashStatus) {
                 dbg 'Getting stash count' $sw
-                $stashCount = $null | git stash list 2>$null | measure-object | select -expand Count
+                $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
             }
-        } else {
+        }
+        else {
             $status = @()
         }
 
@@ -228,8 +242,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 function InDisabledRepository {
     $currentLocation = Get-Location
 
-    foreach ($repo in $Global:GitPromptSettings.RepositoriesInWhichToDisableFileStatus)
-    {
+    foreach ($repo in $Global:GitPromptSettings.RepositoriesInWhichToDisableFileStatus) {
         if ($currentLocation -like "$repo*") {
             return $true
         }
@@ -243,7 +256,7 @@ function Enable-GitColors {
 }
 
 function Get-AliasPattern($exe) {
-   $aliases = @($exe) + @(Get-Alias | where { $_.Definition -eq $exe } | select -Exp Name)
+   $aliases = @($exe) + @(Get-Alias | Where-Object { $_.Definition -eq $exe } | Select-Object -Exp Name)
    "($($aliases -join '|'))"
 }
 
@@ -266,7 +279,8 @@ function Set-TempEnv($key, $value) {
         if (Test-Path $path) {
             Remove-Item $path
         }
-    } else {
+    }
+    else {
         New-Item $path -Force -ItemType File > $null
         $value | Out-File -FilePath $path -Encoding ascii -Force
     }
@@ -281,15 +295,17 @@ function Get-TempEnvPath($key){
 # is a running agent.
 function Get-SshAgent() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select -ExpandProperty Id -First 1
+        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select-Object -ExpandProperty Id -First 1
         if ($null -ne $pageantPid) { return $pageantPid }
-    } else {
+    }
+    else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-            $sshAgentProcess = Get-Process | Where-Object { $_.Id -eq $agentPid -and $_.Name -eq 'ssh-agent' }
+            $sshAgentProcess = Get-Process | Where-Object { ($_.Id -eq $agentPid) -and ($_.Name -eq 'ssh-agent') }
             if ($null -ne $sshAgentProcess) {
                 return $agentPid
-            } else {
+            }
+            else {
                 setenv 'SSH_AGENT_PID' $null
                 setenv 'SSH_AUTH_SOCK' $null
             }
@@ -302,25 +318,38 @@ function Get-SshAgent() {
 # Attempt to guess Pageant's location
 function Find-Pageant() {
     Write-Verbose "Pageant not in path. Trying to guess location."
+
     $gitSsh = $env:GIT_SSH
     if ($gitSsh -and (test-path $gitSsh)) {
         $pageant = join-path (split-path $gitSsh) pageant
     }
-    if (!(get-command $pageant -Erroraction SilentlyContinue)) { return }     # Guessing failed.
-    else { return $pageant }
+
+    if (!(get-command $pageant -Erroraction SilentlyContinue)) {
+        return # Guessing failed.
+    }
+    else {
+        return $pageant
+    }
 }
 
 # Attempt to guess $program's location. For ssh-agent/ssh-add.
 function Find-Ssh($program = 'ssh-agent') {
     Write-Verbose "$program not in path. Trying to guess location."
     $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
-    if ($gitItem -eq $null) { Write-Warning 'git not in path'; return }
+    if ($gitItem -eq $null) {
+        Write-Warning 'git not in path'
+        return
+    }
 
     $sshLocation = join-path $gitItem.directory.parent.fullname bin/$program
-    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
+    if (get-command $sshLocation -Erroraction SilentlyContinue) {
+        return $sshLocation
+    }
 
     $sshLocation = join-path $gitItem.directory.parent.fullname usr/bin/$program
-    if (get-command $sshLocation -Erroraction SilentlyContinue) { return $sshLocation }
+    if (get-command $sshLocation -Erroraction SilentlyContinue) {
+        return $sshLocation
+    }
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
@@ -328,7 +357,7 @@ function Start-SshAgent([switch]$Quiet) {
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         if (!$Quiet) {
-            $agentName = Get-Process -Id $agentPid | Select -ExpandProperty Name
+            $agentName = Get-Process -Id $agentPid | Select-Object -ExpandProperty Name
             if (!$agentName) { $agentName = "SSH Agent" }
             Write-Host "$agentName is already running (pid $($agentPid))"
         }
@@ -337,21 +366,31 @@ function Start-SshAgent([switch]$Quiet) {
 
     if ($env:GIT_SSH -imatch 'plink') {
         Write-Host "GIT_SSH set to $($env:GIT_SSH), using Pageant as SSH agent."
-        $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
-        $pageant = if ($pageant) {$pageant} else {Find-Pageant}
-        if (!$pageant) { Write-Warning "Could not find Pageant."; return }
-        Start-Process -NoNewWindow $pageant
-    } else {
-        $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
-        $sshAgent = if ($sshAgent) {$sshAgent} else {Find-Ssh('ssh-agent')}
-        if (!$sshAgent) { Write-Warning 'Could not find ssh-agent'; return }
 
-        & $sshAgent | foreach {
-            if($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
+        $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
+        $pageant = if ($pageant) { $pageant } else { Find-Pageant }
+        if (!$pageant) {
+            Write-Warning "Could not find Pageant."
+            return
+        }
+
+        Start-Process -NoNewWindow $pageant
+    }
+    else {
+        $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
+        $sshAgent = if ($sshAgent) { $sshAgent } else { Find-Ssh('ssh-agent') }
+        if (!$sshAgent) {
+            Write-Warning 'Could not find ssh-agent'
+            return
+        }
+
+        & $sshAgent | ForEach-Object {
+            if ($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
                 setenv $Matches['key'] $Matches['value']
             }
         }
     }
+
     Add-SshKey
 }
 
@@ -361,31 +400,54 @@ function Get-SshPath($File = 'id_rsa')
     Resolve-Path (Join-Path $home ".ssh\$File") -ErrorAction SilentlyContinue 2> $null
 }
 
-# Add a key to the SSH agent
+<#
+.SYNOPSIS
+    Add a key to the SSH agent
+.DESCRIPTION
+    Adds one or more SSH keys to the SSH agent.
+.EXAMPLE
+    PS C:\> Add-SshKey
+    Adds ~\.ssh\id_rsa to the SSH agent.
+.EXAMPLE
+    PS C:\> Add-SshKey ~\.ssh\mykey, ~\.ssh\myotherkey
+    Adds ~\.ssh\mykey and ~\.ssh\myotherkey to the SSH agent.
+.INPUTS
+    None.
+    You cannot pipe input to this cmdlet.
+#>
 function Add-SshKey() {
     if ($env:GIT_SSH -imatch 'plink') {
-        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select -First 1 -ExpandProperty Name
-        $pageant = if ($pageant) {$pageant} else {Find-Pageant}
-        if (!$pageant) { Write-Warning 'Could not find Pageant'; return }
+        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select-Object -First 1 -ExpandProperty Name
+        $pageant = if ($pageant) { $pageant } else { Find-Pageant }
+        if (!$pageant) {
+            Write-Warning 'Could not find Pageant'
+            return
+        }
 
         if ($args.Count -eq 0) {
             $keystring = ""
             $keyPath = Join-Path $Env:HOME ".ssh"
-            $keys = Get-ChildItem $keyPath/"*.ppk" -ErrorAction SilentlyContinue | Select -ExpandProperty FullName
+            $keys = Get-ChildItem $keyPath/"*.ppk" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
             & $pageant $keys
-        } else {
+        }
+        else {
             foreach ($value in $args) {
                 & $pageant $value
             }
         }
-    } else {
+    }
+    else {
         $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
-        $sshAdd = if ($sshAdd) {$sshAdd} else {Find-Ssh('ssh-add')}
-        if (!$sshAdd) { Write-Warning 'Could not find ssh-add'; return }
+        $sshAdd = if ($sshAdd) { $sshAdd } else { Find-Ssh('ssh-add') }
+        if (!$sshAdd) {
+            Write-Warning 'Could not find ssh-add'
+            return
+        }
 
         if ($args.Count -eq 0) {
             & $sshAdd
-        } else {
+        }
+        else {
             foreach ($value in $args) {
                 & $sshAdd $value
             }
@@ -411,10 +473,11 @@ function Stop-SshAgent() {
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
     $head = git rev-parse --abbrev-ref HEAD
     git checkout -q $Upstream
-    $branches = (git branch --no-color --no-merged) | where { $_ -notmatch '^\* ' }
+    $branches = (git branch --no-color --no-merged) | Where-Object { $_ -notmatch '^\* ' }
     foreach ($line in $branches) {
         $branch = $line.SubString(2)
         if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }
+
         git rebase -q $Upstream $branch > $null 2> $null
         if ($LASTEXITCODE) {
             git rebase --abort
