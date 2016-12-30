@@ -3,6 +3,7 @@
 Describe 'SSH Function Tests' {
     Context 'Get-SshPath Tests' {
         BeforeAll {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
             $sepChar = [System.IO.Path]::DirectorySeparatorChar
         }
         It 'Returns the correct default path' {
