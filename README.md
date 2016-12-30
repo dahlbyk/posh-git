@@ -33,7 +33,7 @@ Before installing posh-git make sure the following prerequisites have been met.
    If not, install Git from [http://git-scm.org](http://git-scm.org).
    If you have Git installed, make sure the path to git.exe is in your PATH environment variable.
 
-### Installing posh-git
+### Installing posh-git via PowerShellGet
 If you are on PowerShell version 5 or higher, execute the command below to install from the [PowerShell Gallery](https://www.powershellgallery.com/):
 
 ```
@@ -48,15 +48,25 @@ Note: If you get an error message from Install-Module about NuGet being required
 Install-PackageProvider NuGet -Force
 Import-PackageProvider NuGet -Force
 ```
+Then retry the Install-Module command above.
 
 After you have successfully installed the posh-git module from the PowerShell Gallery, you will be able to update to a newer version by executing the command:
 ```
 Update-Module posh-git
 ```
+
+### Installing posh-git via Chocolatey
+If you have PowerShell version 2 or are having issues using Install-Module with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
+If you don't have Chocolatey, you can install it from the [Chocolately Install page](https://chocolatey.org/install).
+With Chocolatey installed, execute the following command to install posh-git:
+```
+choco install poshgit
+```
+
 ## Using posh-git
 After you have installed posh-git, you need to configure your PowerShell session to use the posh-git module.
 
-### Import posh-git
+### Step 1: Import posh-git
 The first step is to import the module into your PowerShell session which will enable git tab completion.
 You can do this with the command `Import-Module posh-git`.
 However, you do not want to have to do that every time you open a new PowerShell prompt.
@@ -72,7 +82,7 @@ Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that
 
 The second step is setting up your PowerShell prompt to display Git status summary information and that is covered in the next section.
 
-### Customizing Your PowerShell Prompt
+### Step 2: Customize Your PowerShell Prompt
 Your PowerShell prompt can be customized to show whatever information you want.
 In PowerShell, the "prompt" text is provided by a function named `prompt`.
 PowerShell provides you with a default `prompt` function that is defined as:
@@ -229,9 +239,10 @@ By default, the status summary has the following format:
  * Yellow means the branch is both ahead of and behind its remote
 * S represents the branch status in relation to remote (tracked origin) branch. Note: This information reflects the state of the remote tracked branch after the last `git fetch/pull` of the remote.
   * ≡ = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
-  * ↑ = The local branch is ahead of the remote branch, a 'git push' is required to update the remote branch (`BranchAheadStatus`)
-  * ↓ = The local branch is behind the remote branch, a 'git pull' is required to update the local branch (`BranchBehindStatus`)
-  * ↕ = The local branch is both ahead and behind the remote branch, a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`)
+  * ↑ = The local branch is ahead of the remote branch; a 'git push' is required to update the remote branch (`BranchAheadStatus`)
+  * ↓ = The local branch is behind the remote branch; a 'git pull' is required to update the local branch (`BranchBehindStatus`)
+  * ↕ = The local branch is both ahead and behind the remote branch; a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`)
+  * × = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus')
 * ABCD represent the index; ` | ` (`DelimText`); EFGH represent the working directory
  * `+` = Added files
  * `~` = Modified files

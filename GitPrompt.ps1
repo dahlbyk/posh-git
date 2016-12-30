@@ -1,4 +1,4 @@
-# Inspired by Mark Embling
+﻿# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $global:GitPromptSettings = New-Object PSObject -Property @{
@@ -39,19 +39,23 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     BranchForegroundColor                       = [ConsoleColor]::Cyan
     BranchBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
 
-    BranchIdenticalStatusToSymbol               = [char]0x2261 # Three horizontal lines
+    BranchGoneStatusSymbol                      = [char]0x00D7 # × Multiplication sign
+    BranchGoneStatusForegroundColor             = [ConsoleColor]::DarkCyan
+    BranchGoneStatusBackgroundColor             = $Host.UI.RawUI.BackgroundColor
+
+    BranchIdenticalStatusToSymbol               = [char]0x2261 # ≡ Three horizontal lines
     BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
     BranchIdenticalStatusToBackgroundColor      = $Host.UI.RawUI.BackgroundColor
 
-    BranchAheadStatusSymbol                     = [char]0x2191 # Up arrow
+    BranchAheadStatusSymbol                     = [char]0x2191 # ↑ Up arrow
     BranchAheadStatusForegroundColor            = [ConsoleColor]::Green
     BranchAheadStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
 
-    BranchBehindStatusSymbol                    = [char]0x2193 # Down arrow
+    BranchBehindStatusSymbol                    = [char]0x2193 # ↓ Down arrow
     BranchBehindStatusForegroundColor           = [ConsoleColor]::Red
     BranchBehindStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
 
-    BranchBehindAndAheadStatusSymbol            = [char]0x2195 # Up & Down arrow
+    BranchBehindAndAheadStatusSymbol            = [char]0x2195 # ↕ Up & Down arrow
     BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
     BranchBehindAndAheadStatusBackgroundColor   = $Host.UI.RawUI.BackgroundColor
 
@@ -146,6 +150,11 @@ function Write-GitStatus($status) {
 
         if (!$status.Upstream) {
             $branchStatusText            = $s.BranchUntrackedSymbol
+        } elseif ($status.UpstreamGone -eq $true) {
+            # Upstream branch is gone
+            $branchStatusText            = $s.BranchGoneStatusSymbol
+            $branchStatusBackgroundColor = $s.BranchGoneStatusBackgroundColor
+            $branchStatusForegroundColor = $s.BranchGoneStatusForegroundColor
         } elseif ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
             # We are aligned with remote
             $branchStatusText            = $s.BranchIdenticalStatusToSymbol
@@ -287,12 +296,18 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor
 }
 
-function Global:Write-VcsStatus { $Global:VcsPromptStatuses | foreach { & $_ } }
+function Global:Write-VcsStatus {
+    $Global:VcsPromptStatuses | ForEach-Object { & $_ }
+}
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
     $Global:GitStatus = Get-GitStatus
     Write-GitStatus $GitStatus
 }
+
+# Install handler for removal/unload of the module
 $Global:VcsPromptStatuses += $PoshGitVcsPrompt
-$ExecutionContext.SessionState.Module.OnRemove = { $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | ? { $_ -ne $PoshGitVcsPrompt} }
+$ExecutionContext.SessionState.Module.OnRemove = {
+    $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
+}

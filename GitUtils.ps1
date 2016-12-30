@@ -106,7 +106,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     }
 }
 
-function GetUniquePaths([System.Collections.Generic.IEnumerable[string][]] $pathCollections) {
+function GetUniquePaths($pathCollections) {
     $hash = New-Object System.Collections.Specialized.OrderedDictionary
 
     foreach ($pathCollection in $pathCollections) {
@@ -132,6 +132,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $branch = $null
         $aheadBy = 0
         $behindBy = 0
+        $gone = $false
         $indexAdded = New-Object System.Collections.Generic.List[string]
         $indexModified = New-Object System.Collections.Generic.List[string]
         $indexDeleted = New-Object System.Collections.Generic.List[string]
@@ -177,13 +178,14 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 continue
             }
 
-            '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?\])?$' {
+            '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?(?<gone>gone)?\])?$' {
                 if ($sw) { dbg "Status: $_" $sw }
 
                 $branch = $matches['branch']
                 $upstream = $matches['upstream']
                 $aheadBy = [int]$matches['ahead']
                 $behindBy = [int]$matches['behind']
+                $gone = [string]$matches['gone'] -eq 'gone'
                 continue
             }
 
@@ -207,23 +209,40 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         $indexPaths = @(GetUniquePaths $indexAdded,$indexModified,$indexDeleted,$indexUnmerged)
         $workingPaths = @(GetUniquePaths $filesAdded,$filesModified,$filesDeleted,$filesUnmerged)
-        $index = Write-Output -NoEnumerate $indexPaths |
-            Add-Member -PassThru NoteProperty Added    $indexAdded.ToArray() |
-            Add-Member -PassThru NoteProperty Modified $indexModified.ToArray() |
-            Add-Member -PassThru NoteProperty Deleted  $indexDeleted.ToArray() |
-            Add-Member -PassThru NoteProperty Unmerged $indexUnmerged.ToArray()
 
-        $working = Write-Output -NoEnumerate $workingPaths|
-            Add-Member -PassThru NoteProperty Added    $filesAdded |
-            Add-Member -PassThru NoteProperty Modified $filesModified.ToArray() |
-            Add-Member -PassThru NoteProperty Deleted  $filesDeleted.ToArray() |
-            Add-Member -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
+        # PowerShell v2 and v3 Write-Output doesn't have a NoEnumerate parameter
+        if ($PSVersionTable.PSVersion.Major -le 3) {
+            $index = New-Object PSObject @(,@($indexPaths | Where-Object { $_ })) |
+                Add-Member -PassThru NoteProperty Added    $indexAdded |
+                Add-Member -PassThru NoteProperty Modified $indexModified |
+                Add-Member -PassThru NoteProperty Deleted  $indexDeleted |
+                Add-Member -PassThru NoteProperty Unmerged $indexUnmerged
+            $working = New-Object PSObject @(,@($workingPaths | Where-Object { $_ })) |
+                Add-Member -PassThru NoteProperty Added    $filesAdded |
+                Add-Member -PassThru NoteProperty Modified $filesModified |
+                Add-Member -PassThru NoteProperty Deleted  $filesDeleted |
+                Add-Member -PassThru NoteProperty Unmerged $filesUnmerged
+        }
+        else {
+            $index = Write-Output -NoEnumerate $indexPaths |
+                Add-Member -PassThru NoteProperty Added    $indexAdded.ToArray() |
+                Add-Member -PassThru NoteProperty Modified $indexModified.ToArray() |
+                Add-Member -PassThru NoteProperty Deleted  $indexDeleted.ToArray() |
+                Add-Member -PassThru NoteProperty Unmerged $indexUnmerged.ToArray()
+
+            $working = Write-Output -NoEnumerate $workingPaths|
+                Add-Member -PassThru NoteProperty Added    $filesAdded |
+                Add-Member -PassThru NoteProperty Modified $filesModified.ToArray() |
+                Add-Member -PassThru NoteProperty Deleted  $filesDeleted.ToArray() |
+                Add-Member -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
+        }
 
         $result = New-Object PSObject -Property @{
             GitDir          = $gitDir
             Branch          = $branch
             AheadBy         = $aheadBy
             BehindBy        = $behindBy
+            UpstreamGone    = $gone
             Upstream        = $upstream
             HasIndex        = [bool]$index
             Index           = $index
