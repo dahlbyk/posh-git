@@ -74,8 +74,8 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnableStashStatus                           = $false
     BeforeStashText                             = ' ('
-    BeforeStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
-    BeforeStashForegroundColor                   = [ConsoleColor]::Red
+    BeforeStashBackgroundColor                  = $Host.UI.RawUI.BackgroundColor
+    BeforeStashForegroundColor                  = [ConsoleColor]::Red
     AfterStashText                              = ')'
     AfterStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
     AfterStashForegroundColor                   = [ConsoleColor]::Red
@@ -85,6 +85,9 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
     ShowStatusWhenZero                          = $true
 
     AutoRefreshIndex                            = $true
+
+    # Valid values are "Full", "Compact", and "Minimal"
+    BranchBehindAndAheadDisplay                 = "Full"
 
     EnablePromptStatus                          = !$Global:GitMissing
     EnableFileStatus                            = $true
@@ -141,46 +144,60 @@ function Write-GitStatus($status) {
     if ($status -and $s) {
         Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
 
-        $branchStatusSymbol          = $null
+        $branchStatusText            = $null
         $branchStatusBackgroundColor = $s.BranchBackgroundColor
         $branchStatusForegroundColor = $s.BranchForegroundColor
 
         if (!$status.Upstream) {
-            $branchStatusSymbol          = $s.BranchUntrackedSymbol
+            $branchStatusText            = $s.BranchUntrackedSymbol
         } elseif ($status.UpstreamGone -eq $true) {
             # Upstream branch is gone
-            $branchStatusSymbol          = $s.BranchGoneStatusSymbol
+            $branchStatusText            = $s.BranchGoneStatusSymbol
             $branchStatusBackgroundColor = $s.BranchGoneStatusBackgroundColor
             $branchStatusForegroundColor = $s.BranchGoneStatusForegroundColor
         } elseif ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
             # We are aligned with remote
-            $branchStatusSymbol          = $s.BranchIdenticalStatusToSymbol
+            $branchStatusText            = $s.BranchIdenticalStatusToSymbol
             $branchStatusBackgroundColor = $s.BranchIdenticalStatusToBackgroundColor
             $branchStatusForegroundColor = $s.BranchIdenticalStatusToForegroundColor
         } elseif ($status.BehindBy -ge 1 -and $status.AheadBy -ge 1) {
             # We are both behind and ahead of remote
-            $branchStatusSymbol          = $s.BranchBehindAndAheadStatusSymbol
+            if ($s.BranchBehindAndAheadDisplay -eq "Full") {
+                $branchStatusText        = ("{0}{1} {2}{3}" -f $s.BranchBehindStatusSymbol, $status.BehindBy, $s.BranchAheadStatusSymbol, $status.AheadBy)
+            } elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
+                $branchStatusText        = ("{0}{1}{2}" -f $status.BehindBy, $s.BranchBehindAndAheadStatusSymbol, $status.AheadBy)
+            } else {
+                $branchStatusText        = $s.BranchBehindAndAheadStatusSymbol
+            }
             $branchStatusBackgroundColor = $s.BranchBehindAndAheadStatusBackgroundColor
             $branchStatusForegroundColor = $s.BranchBehindAndAheadStatusForegroundColor
         } elseif ($status.BehindBy -ge 1) {
             # We are behind remote
-            $branchStatusSymbol          = $s.BranchBehindStatusSymbol
+            if ($s.BranchBehindAndAheadDisplay -eq "Full" -Or $s.BranchBehindAndAheadDisplay -eq "Compact") {
+                $branchStatusText        = ("{0}{1}" -f $s.BranchBehindStatusSymbol, $status.BehindBy)
+            } else {
+                $branchStatusText        = $s.BranchBehindStatusSymbol
+            }
             $branchStatusBackgroundColor = $s.BranchBehindStatusBackgroundColor
             $branchStatusForegroundColor = $s.BranchBehindStatusForegroundColor
         } elseif ($status.AheadBy -ge 1) {
             # We are ahead of remote
-            $branchStatusSymbol          = $s.BranchAheadStatusSymbol
+            if ($s.BranchBehindAndAheadDisplay -eq "Full" -Or $s.BranchBehindAndAheadDisplay -eq "Compact") {
+                $branchStatusText        = ("{0}{1}" -f $s.BranchAheadStatusSymbol, $status.AheadBy)
+            } else {
+                $branchStatusText        = $s.BranchAheadStatusSymbol
+            }
             $branchStatusBackgroundColor = $s.BranchAheadStatusBackgroundColor
             $branchStatusForegroundColor = $s.BranchAheadStatusForegroundColor
         } else {
             # This condition should not be possible but defaulting the variables to be safe
-            $branchStatusSymbol          = "?"
+            $branchStatusText            = "?"
         }
 
         Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
 
-        if ($branchStatusSymbol) {
-            Write-Prompt  (" {0}" -f $branchStatusSymbol) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
+        if ($branchStatusText) {
+            Write-Prompt  (" {0}" -f $branchStatusText) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
         }
 
         if($s.EnableFileStatus -and $status.HasIndex) {
