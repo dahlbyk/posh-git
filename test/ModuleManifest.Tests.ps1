@@ -5,7 +5,7 @@ Describe 'Module Manifest Tests' {
         $moduleManifestPath = "$PSScriptRoot\..\posh-git.psd1"
     }
     It 'Passes Test-ModuleManifest' {
-        Test-ModuleManifest -Path $moduleManifestPath
+        Test-ModuleManifest -Path $moduleManifestPath | Should Not BeNullOrEmpty
         $? | Should Be $true
     }
 }
