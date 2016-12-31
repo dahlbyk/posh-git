@@ -1,24 +1,38 @@
 ﻿TOPIC
-    Posh-Git
+    posh-git
 
 SHORT DESCRIPTION
-    A set of PowerShell scripts which provide Git/PowerShell integration.
+    posh-git integrates Git and PowerShell with tab completion and Git
+    status summary information displayed in the PowerShell prompt.
 
 LONG DESCRIPTION
-    posh-git enables better Git/PowerShell integration via two primary
-    features: a Git prompt that displays Git repository status information as
-    part of your PowerShell prompt and tab completion for git.exe commands
-    and branch names.
+    posh-git integrates Git and PowerShell. Tab completion is supported for
+    Git subcommands, branch and remote names. Git also provides commands to
+    display colored Git status summary information.  If you would like fine
+    grained control over how the Git status summary information is displayed
+    in your prompt function, you can get the raw status summary information
+    via the Get-GitStatus command. Then you can display the information in
+    your prompt however you would like.
 
 GIT TAB COMPLETION
-    You can tab complete most common Git commands e.g.:
+    You can tab complete most common Git subcommands e.g.:
 
     C:\GitHub\posh-git> git ch<tab> --> git checkout
 
-    You can also tab complete branch names.  Assume you are current on the
-    develop branch and want to checkout master e.g.:
+    You can also tab complete branch names and even remote names such as
+    origin and upstream. For instance, type the following inside of a Git
+    repo to see tab completion in action:
 
-    C:\GitHub\posh-git> git checkout ma<tab> --> git checkout master
+    C:\GitHub\posh-git> git fe<tab> or<tab> ma<tab>
+
+    The above will expand to:
+
+    C:\GitHub\posh-git> git fetch origin master
+
+    And like tab completion in other parts of PowerShell, you can press tab
+    multiple times to cycle through all matches.  For instance, type
+    "git ch" and press the tab key multiple times to cycle through "checkout",
+    "cherry" and "cherry-pick".
 
 GIT STATUS PROMPT
     PowerShell generates its prompt by executing a prompt function, if one
@@ -40,13 +54,15 @@ GIT STATUS PROMPT
       * S represents the branch status in relation to remote (tracked origin) branch
         * ≡ = Local branch is at the same commit level as the remote branch
               (BranchIdenticalStatus)
-        * ↑ = Local branch is ahead of the remote branch, a 'git push' is
+        * ↑ = Local branch is ahead of the remote branch; a 'git push' is
               required to update the remote branch (BranchAheadStatus)
-        * ↓ = Local branch is behind the remote branch, a 'git pull' is
+        * ↓ = Local branch is behind the remote branch; a 'git pull' is
               required to update the local branch (BranchBehindStatus)
-        * ↕ = Local branch is both ahead and behind the remote branch, a
+        * ↕ = Local branch is both ahead and behind the remote branch; a
               rebase of the local branch is required before pushing local
-              changes to the remote branch (`BranchBehindAndAheadStatus`)
+              changes to the remote branch (BranchBehindAndAheadStatus)
+        * × = The local branch is tracking a branch that is gone from the remote
+              (BranchGoneStatus)
 
       * ABCD represents the index | EFGH represents the working directory
         * + = Added files
