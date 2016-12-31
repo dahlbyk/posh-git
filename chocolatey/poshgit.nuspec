@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>poshgit</id>
+    <title>posh-git</title>
+    <version>0.6.1.20160330</version>
+    <authors>Keith Dahlby, Mark Embling, Jeremy Skinner</authors>
+    <owners>Keith Dahlby</owners>
+    <description>### posh-git
+A set of PowerShell scripts which provide Git/PowerShell integration
+
+### Prompt for Git repositories
+
+The prompt within Git repositories can show the current branch and the state of files (additions, modifications, deletions) within.
+
+### Tab completion
+
+Provides tab completion for common commands when using git.
+E.g. `git ch&lt;tab&gt;` --&gt; `git checkout`
+
+### Usage
+
+See profile.example.ps1 as to how you can integrate the tab completion and/or git prompt into your own profile. Prompt formatting, among other things, can be customized using `$GitPromptSettings`, `$GitTabSettings` and `$TortoiseGitSettings`.
+
+Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
+    </description>
+    <summary>PoshGit - A PowerShell environment for Git</summary>
+    <tags>poshgit posh-git powershell git</tags>
+    <projectUrl>https://github.com/dahlbyk/posh-git</projectUrl>
+    <licenseUrl>https://github.com/dahlbyk/posh-git/blob/master/LICENSE.txt</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <dependencies>
+      <dependency id="git" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
+<!-- character encoding: “UTF-8” -->
