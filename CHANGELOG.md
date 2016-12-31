@@ -11,3 +11,6 @@ v0.7.0 - 2016-12-30
 - Remove error thrown by symbolic-ref and describe
 - Add about_posh-git help topic
 - profile.example.ps1 updated
+- Add new branch status to indicate upstream is gone ([#326](https://github.com/dahlbyk/posh-git/pull/326))
+- Add ahead/behind count to prompt ([#256](https://github.com/dahlbyk/posh-git/pull/256))
+- Add BranchBehindAndAheadDisplay setting to control count display (Full (default), Compact, Minimal)
