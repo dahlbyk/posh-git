@@ -1,8 +1,4 @@
 {
-    "editor.insertSpaces": true,
-    "editor.tabSize": 4,
     "editor.rulers": [ 120 ],
-    "files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true,
     "powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1"
 }
