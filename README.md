@@ -23,7 +23,7 @@ Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus 
 ### Prerequisites
 Before installing posh-git make sure the following prerequisites have been met.
 
-1. PowerShell 3.0 or higher. Check your PowerShell version by executing `$PSVersionTable.PSVersion`.
+1. PowerShell 2.0 or higher. Check your PowerShell version by executing `$PSVersionTable.PSVersion`.
 
 2. Script execution policy must be set to either `RemoteSigned` or `Unrestricted`.
    Check the script execution policy setting by executing `Get-ExecutionPolicy`.
