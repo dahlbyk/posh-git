@@ -153,17 +153,17 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 $cacheResponse = Get-GitStatusFromCache
                 dbg 'Parsing status' $sw
 
-                $cacheResponse.IndexAdded | foreach { $indexAdded.Add($_) }
-                $cacheResponse.IndexModified | foreach { $indexModified.Add($_) }
-                $cacheResponse.IndexRenamed | foreach { $indexModified.Add($_.Old) }
-                $cacheResponse.IndexDeleted | foreach { $indexDeleted.Add($_) } 
-                $cacheResponse.Conflicted | foreach { $indexUnmerged.Add($_) } 
+                $indexAdded.AddRange([string[]]$cacheResponse.IndexAdded)
+                $indexModified.AddRange([string[]]$cacheResponse.IndexModified)
+                $indexModified.AddRange([string[]]@($cacheResponse.IndexRenamed | Select-Object -ExpandProperty Old))
+                $indexDeleted.AddRange([string[]]$cacheResponse.IndexDeleted)
+                $indexUnmerged.AddRange([string[]]$cacheResponse.Conflicted)
 
-                $cacheResponse.WorkingAdded | foreach { $filesAdded.Add($_) } 
-                $cacheResponse.WorkingModified | foreach { $filesModified.Add($_) } 
-                $cacheResponse.WorkingRenamed | foreach { $filesModified.Add($_.Old) }
-                $cacheResponse.WorkingDeleted | foreach { $filesDeleted.Add($_) } 
-                $cacheResponse.Conflicted | foreach { $filesUnmerged.Add($_) } 
+                $filesAdded.AddRange([string[]]$cacheResponse.WorkingAdded)
+                $filesModified.AddRange([string[]]$cacheResponse.WorkingModified)
+                $filesModified.AddRange([string[]]@($cacheResponse.WorkingRenamed | Select-Object -ExpandProperty Old))
+                $filesDeleted.AddRange([string[]]$cacheResponse.WorkingDeleted)
+                $filesUnmerged.AddRange([string[]]$cacheResponse.Conflicted)
 
                 $branch = $cacheResponse.Branch
                 $upstream = $cacheResponse.Upstream
