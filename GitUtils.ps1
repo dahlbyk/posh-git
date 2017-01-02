@@ -233,7 +233,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         #
         # This collection is used twice, so create the array just once
         $filesAdded = $filesAdded.ToArray()
-        
+
         $indexPaths = @(GetUniquePaths $indexAdded,$indexModified,$indexDeleted,$indexUnmerged)
         $workingPaths = @(GetUniquePaths $filesAdded,$filesModified,$filesDeleted,$filesUnmerged)
         $index = (,$indexPaths) |
