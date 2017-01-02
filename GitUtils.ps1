@@ -153,17 +153,17 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 $cacheResponse = Get-GitStatusFromCache
                 dbg 'Parsing status' $sw
 
-                $indexAdded = $cacheResponse.IndexAdded
-                $indexModified = $cacheResponse.IndexModified
-                $cacheResponse.IndexRenamed | foreach { $indexModified += $_.Old }
-                $indexDeleted = $cacheResponse.IndexDeleted
-                $indexUnmerged = $cacheResponse.Conflicted
+                $cacheResponse.IndexAdded | foreach { $indexAdded.Add($_) }
+                $cacheResponse.IndexModified | foreach { $indexModified.Add($_) }
+                $cacheResponse.IndexRenamed | foreach { $indexModified.Add($_.Old) }
+                $cacheResponse.IndexDeleted | foreach { $indexDeleted.Add($_) } 
+                $cacheResponse.Conflicted | foreach { $indexUnmerged.Add($_) } 
 
-                $filesAdded = $cacheResponse.WorkingAdded
-                $filesModified = $cacheResponse.WorkingModified
-                $cacheResponse.WorkingRenamed | foreach { $filesModified += $_.Old }
-                $filesDeleted = $cacheResponse.WorkingDeleted
-                $filesUnmerged = $cacheResponse.Conflicted
+                $cacheResponse.WorkingAdded | foreach { $filesAdded.Add($_) } 
+                $cacheResponse.WorkingModified | foreach { $filesModified.Add($_) } 
+                $cacheResponse.WorkingRenamed | foreach { $filesModified.Add($_.Old) }
+                $cacheResponse.WorkingDeleted | foreach { $filesDeleted.Add($_) } 
+                $cacheResponse.Conflicted | foreach { $filesUnmerged.Add($_) } 
 
                 $branch = $cacheResponse.Branch
                 $upstream = $cacheResponse.Upstream
@@ -233,7 +233,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         #
         # This collection is used twice, so create the array just once
         $filesAdded = $filesAdded.ToArray()
-
+        
         $indexPaths = @(GetUniquePaths $indexAdded,$indexModified,$indexDeleted,$indexUnmerged)
         $workingPaths = @(GetUniquePaths $filesAdded,$filesModified,$filesDeleted,$filesUnmerged)
         $index = (,$indexPaths) |
