@@ -22,22 +22,25 @@ Description = 'A PowerShell environment for Git'
 PowerShellVersion = '2.0'
 
 # Functions to export from this module
-FunctionsToExport = @('Invoke-NullCoalescing',
-        'Write-GitStatus',
-        'Write-Prompt',
-        'Write-VcsStatus',
-        'Get-GitStatus',
-        'Enable-GitColors',
-        'Get-GitDirectory',
-        'TabExpansion',
-        'Get-AliasPattern',
-        'Get-SshAgent',
-        'Start-SshAgent',
-        'Stop-SshAgent',
-        'Add-SshKey',
-        'Get-SshPath',
-        'Update-AllBranches',
-        'tgit')
+FunctionsToExport = @(
+    'Invoke-NullCoalescing',
+    'Write-GitStatus',
+    'Write-Prompt',
+    'Write-VcsStatus',
+    'Get-GitStatus',
+    'Enable-GitColors',
+    'Get-GitDirectory',
+    'TabExpansion',
+    'Get-AliasPattern',
+    'Get-SshAgent',
+    'Start-SshAgent',
+    'Stop-SshAgent',
+    'Add-SshKey',
+    'Get-SshPath',
+    'Update-AllBranches',
+    'prompt',
+    'tgit'
+)
 
 # Cmdlets to export from this module
 CmdletsToExport = @()
