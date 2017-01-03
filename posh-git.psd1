@@ -38,7 +38,6 @@ FunctionsToExport = @(
     'Add-SshKey',
     'Get-SshPath',
     'Update-AllBranches',
-    'prompt',
     'tgit'
 )
 
