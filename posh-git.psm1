@@ -13,9 +13,6 @@ if ($psv.Major -lt 3 -and !$NoVersionWarn) {
 
 & $PSScriptRoot\CheckVersion.ps1 > $null
 
-# Get the current prompt function *before* we define a prompt function by dot sourcing GitPrompt.ps1.
-$currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
-
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
@@ -38,6 +35,7 @@ else {
 
 # If there is no prompt function or the prompt function is the default, export the posh-git prompt function.
 $promptReplaced = $false
+$currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
 if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
     Set-Item Function:\prompt -Value {
         $origLastExitCode = $LASTEXITCODE
