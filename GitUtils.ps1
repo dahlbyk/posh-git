@@ -118,6 +118,16 @@ function GetUniquePaths($pathCollections) {
     $hash.Keys
 }
 
+$castStringSeq = [Linq.Enumerable].GetMethod("Cast").MakeGenericMethod([string])
+$emptyStringSeq = [Linq.Enumerable].GetMethod("Empty").MakeGenericMethod([string])
+function ConvertTo-StringSeq ([Parameter(ValueFromPipeline=$true)][Object[]]$source) {
+    if (!$source) {
+        return ,$emptyStringSeq.Invoke($null, @())
+    }
+
+    return ,$castStringSeq.Invoke($null, (,$source))
+}
+
 function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $settings = $Global:GitPromptSettings
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
@@ -153,17 +163,17 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 $cacheResponse = Get-GitStatusFromCache
                 dbg 'Parsing status' $sw
 
-                $indexAdded.AddRange([string[]]$cacheResponse.IndexAdded)
-                $indexModified.AddRange([string[]]$cacheResponse.IndexModified)
-                $indexModified.AddRange([string[]]@($cacheResponse.IndexRenamed | Select-Object -ExpandProperty Old))
-                $indexDeleted.AddRange([string[]]$cacheResponse.IndexDeleted)
-                $indexUnmerged.AddRange([string[]]$cacheResponse.Conflicted)
+                $indexAdded.AddRange(($cacheResponse.IndexAdded | ConvertTo-StringSeq))
+                $indexModified.AddRange(($cacheResponse.IndexModified | ConvertTo-StringSeq))
+                $indexModified.AddRange(($cacheResponse.IndexRenamed | Select-Object -ExpandProperty Old | ConvertTo-StringSeq))
+                $indexDeleted.AddRange(($cacheResponse.IndexDeleted | ConvertTo-StringSeq))
+                $indexUnmerged.AddRange(($cacheResponse.Conflicted | ConvertTo-StringSeq))
 
-                $filesAdded.AddRange([string[]]$cacheResponse.WorkingAdded)
-                $filesModified.AddRange([string[]]$cacheResponse.WorkingModified)
-                $filesModified.AddRange([string[]]@($cacheResponse.WorkingRenamed | Select-Object -ExpandProperty Old))
-                $filesDeleted.AddRange([string[]]$cacheResponse.WorkingDeleted)
-                $filesUnmerged.AddRange([string[]]$cacheResponse.Conflicted)
+                $filesAdded.AddRange(($cacheResponse.WorkingAdded | ConvertTo-StringSeq))
+                $filesModified.AddRange(($cacheResponse.WorkingModified | ConvertTo-StringSeq))
+                $filesModified.AddRange(($cacheResponse.WorkingRenamed | Select-Object -ExpandProperty Old | ConvertTo-StringSeq))
+                $filesDeleted.AddRange(($cacheResponse.WorkingDeleted | ConvertTo-StringSeq))
+                $filesUnmerged.AddRange(($cacheResponse.Conflicted | ConvertTo-StringSeq))
 
                 $branch = $cacheResponse.Branch
                 $upstream = $cacheResponse.Upstream
