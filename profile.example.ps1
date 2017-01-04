@@ -1,7 +1,8 @@
 # Import the posh-git module, first via installed posh-git module.
 # If the module isn't installed, then attempt to load it from the cloned posh-git Git repo.
-if (Get-Module posh-git -ListAvailable) {
-    Import-Module posh-git
+$poshGitModule = Get-Module posh-git -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1
+if ($poshGitModule) {
+    $poshGitModule | Import-Module
 }
 elseif (Test-Path -LiteralPath $PSScriptRoot\posh-git.psd1) {
     Import-Module $PSScriptRoot\posh-git.psd1
