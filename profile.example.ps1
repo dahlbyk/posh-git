@@ -33,4 +33,4 @@ function global:prompt {
 # Example:
 #     $Global:GitPromptSettings.BranchBehindAndAheadDisplay = "Compact"
 
-Start-SshAgent -Quiet
+Start-Ssh-Agent -Quiet
