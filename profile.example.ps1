@@ -4,8 +4,8 @@ $poshGitModule = Get-Module posh-git -ListAvailable | Sort-Object Version -Desce
 if ($poshGitModule) {
     $poshGitModule | Import-Module
 }
-elseif (Test-Path -LiteralPath $PSScriptRoot\posh-git.psd1) {
-    Import-Module $PSScriptRoot\posh-git.psd1
+elseif (Test-Path -LiteralPath ($modulePath = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) 'posh-git.psd1')) {
+    Import-Module $modulePath
 }
 else {
     throw "Failed to import posh-git."
