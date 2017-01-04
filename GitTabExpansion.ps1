@@ -69,10 +69,9 @@ function script:gitRemotes($filter) {
         Where-Object { $_ -like "$filter*" }
 }
 
-function script:gitBranches($filter, $includeHEAD = $false) {
-    $prefix = $null
+function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
     if ($filter -match "^(?<from>\S*\.{2,3})(?<to>.*)") {
-        $prefix = $matches['from']
+        $prefix += $matches['from']
         $filter = $matches['to']
     }
     $branches = @(git branch --no-color | ForEach-Object { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
@@ -83,9 +82,10 @@ function script:gitBranches($filter, $includeHEAD = $false) {
         ForEach-Object { $prefix + $_ }
 }
 
-function script:gitTags($filter) {
+function script:gitTags($filter, $prefix = '') {
     git tag |
-        Where-Object { $_ -like "$filter*" }
+        Where-Object { $_ -like "$filter*" } |
+        ForEach-Object { $prefix + $_ }
 }
 
 function script:gitFeatures($filter, $command){
@@ -96,10 +96,10 @@ function script:gitFeatures($filter, $command){
         ForEach-Object { $prefix + $_ }
 }
 
-function script:gitRemoteBranches($remote, $ref, $filter) {
+function script:gitRemoteBranches($remote, $ref, $filter, $prefix = '') {
     git branch --no-color -r |
         Where-Object { $_ -like "  $remote/$filter*" } |
-        ForEach-Object { $ref + ($_ -replace "  $remote/","") }
+        ForEach-Object { $prefix + $ref + ($_ -replace "  $remote/","") }
 }
 
 function script:gitStashes($filter) {
@@ -241,15 +241,17 @@ function GitTabExpansion($lastBlock) {
         }
 
         # Handles git push remote <ref>:<branch>
-        "^push.* (?<remote>\S+) (?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
-            gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch']
+        # Handles git push remote +<ref>:<branch>
+        "^push.* (?<remote>\S+) (?<force>\+?)(?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
+            gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch'] -prefix $matches['force']
         }
 
         # Handles git push remote <ref>
+        # Handles git push remote +<ref>
         # Handles git pull remote <ref>
-        "^(?:push|pull).* (?:\S+) (?<ref>[^\s\:]*)$" {
-            gitBranches $matches['ref']
-            gitTags $matches['ref']
+        "^(?:push|pull).* (?:\S+) (?<force>\+?)(?<ref>[^\s\:]*)$" {
+            gitBranches $matches['ref'] -prefix $matches['force']
+            gitTags $matches['ref'] -prefix $matches['force']
         }
 
         # Handles git pull <remote>
