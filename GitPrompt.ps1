@@ -96,6 +96,9 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnableWindowTitle                           = 'posh~git ~ '
 
+    PromptSuffix                                = '> '
+    PromptDebugSuffix                           = ' [DBG]>> '
+
     Debug                                       = $false
 
     BranchNameLimit                             = 0
@@ -306,8 +309,4 @@ $PoshGitVcsPrompt = {
     Write-GitStatus $GitStatus
 }
 
-# Install handler for removal/unload of the module
 $Global:VcsPromptStatuses += $PoshGitVcsPrompt
-$ExecutionContext.SessionState.Module.OnRemove = {
-    $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
-}
