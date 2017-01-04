@@ -35,9 +35,12 @@ else {
 
 # If there is no prompt function or the prompt function is the default, export the posh-git prompt function.
 $promptReplaced = $false
+$origPsrlExtraPromptLineCount = 0
+$poshGitPromptScriptBlock = $null
+
 $currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
 if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
-    Set-Item Function:\prompt -Value {
+    $poshGitPromptScriptBlock = {
         $origLastExitCode = $LASTEXITCODE
 
         # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
@@ -69,6 +72,20 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
         $promptSuffix
     }
 
+    # Install the posh-git prompt as the default prompt
+    Set-Item Function:\prompt -Value $poshGitPromptScriptBlock
+
+    # If default posh-git prompt is two lines then we should ensure PSReadline is set to handle that
+    if (Get-Command Set-PSReadlineOption -ErrorAction SilentlyContinue) {
+        try {
+            $origPsrlExtraPromptLineCount = (Get-PSReadlineOption).ExtraPromptLineCount
+            Set-PSReadlineOption -ExtraPromptLineCount 1 -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Debug "Failed to get or set PSReadline ExtraPromptLineCount. Error: $_"
+        }
+    }
+
     $promptReplaced = $true
 }
 
@@ -77,7 +94,21 @@ $ExecutionContext.SessionState.Module.OnRemove = {
     $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
 
     if ($promptReplaced) {
-        Set-Item Function:\prompt -Value ([scriptblock]::Create($defaultPromptDef))
+        # Check if the posh-git prompt function itself has been replaced. If so, do not restore the prompt function
+        $promptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
+        if ($promptDef -eq $poshGitPromptScriptBlock) {
+            Set-Item Function:\prompt -Value ([scriptblock]::Create($defaultPromptDef))
+
+            # If present, put PSReadline ExtraPromptLineCount back to original value
+            if (Get-Command Set-PSReadlineOption -ErrorAction SilentlyContinue) {
+                try {
+                    Set-PSReadlineOption -ExtraPromptLineCount $origPsrlExtraPromptLineCount -ErrorAction SilentlyContinue
+                }
+                catch {
+                    Write-Debug "Failed to get or set PSReadline ExtraPromptLineCount. Error: $_"
+                }
+            }
+        }
     }
 }
 
