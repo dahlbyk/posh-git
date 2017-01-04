@@ -84,8 +84,7 @@ function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
 
 function script:gitRemoteUniqueBranches($filter) {
     git branch --no-color -r |
-        Where-Object { $_ -notlike '* -> ' } |
-        ForEach-Object { if ($_ -match '/(?<Branch>.+)') { $matches['Branch'] } } |
+        ForEach-Object { if($_ -match "^  (?<remote>[^/]+)/(?<branch>\S+)(?! -> .+)?$") { $matches['branch'] } } |
         Group-Object -NoElement |
         Where-Object { $_.Count -eq 1 } |
         Select-Object -ExpandProperty Name |
