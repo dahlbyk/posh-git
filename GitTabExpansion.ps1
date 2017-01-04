@@ -84,12 +84,12 @@ function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
 
 function script:gitRemoteUniqueBranches($filter) {
     git branch --no-color -r |
-        where { $_ -notlike '* -> ' } |
-        foreach { if ($_ -match '/(?<Branch>.+)') { $matches['Branch'] } } |
+        Where-Object { $_ -notlike '* -> ' } |
+        ForEach-Object { if ($_ -match '/(?<Branch>.+)') { $matches['Branch'] } } |
         Group-Object -NoElement |
-        where { $_.Count -eq 1 } |
+        Where-Object { $_.Count -eq 1 } |
         Select-Object -ExpandProperty Name |
-        where { $_ -like "$filter*" }
+        Where-Object { $_ -like "$filter*" }
 }
 
 function script:gitTags($filter, $prefix = '') {
