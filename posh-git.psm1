@@ -34,7 +34,6 @@ else {
 }
 
 # If there is no prompt function or the prompt function is the default, replace the current prompt function definition
-$promptReplaced = $false
 $poshGitPromptScriptBlock = $null
 
 $currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
@@ -80,24 +79,20 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
 
     # Set the posh-git prompt as the default prompt
     Set-Item Function:\prompt -Value $poshGitPromptScriptBlock
-
-    $promptReplaced = $true
 }
 
 # Install handler for removal/unload of the module
 $ExecutionContext.SessionState.Module.OnRemove = {
     $global:VcsPromptStatuses = $global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
 
-    if ($promptReplaced) {
-        # Check if the posh-git prompt function itself has been replaced. If so, do not restore the prompt function
-        $promptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
-        if ($promptDef -eq $poshGitPromptScriptBlock) {
-            Set-Item Function:\prompt -Value ([scriptblock]::Create($defaultPromptDef))
-            return
-        }
+    # Check if the posh-git prompt function itself has been replaced. If so, do not restore the prompt function
+    $promptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
+    if ($promptDef -eq $poshGitPromptScriptBlock) {
+        Set-Item Function:\prompt -Value ([scriptblock]::Create($defaultPromptDef))
+        return
     }
 
-    Write-Warning 'If your prompt function uses any posh-git commands, it may cause the module to be re-imported.'
+    Write-Warning 'If your prompt function uses any posh-git commands, it will cause posh-git to be re-imported every time your prompt function is invoked.'
 }
 
 $exportModuleMemberParams = @{
