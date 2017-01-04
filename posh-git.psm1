@@ -73,6 +73,11 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
         $debugMode = (Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint
         $promptSuffix = if ($debugMode) { $GitPromptSettings.PromptDebugSuffix } else { $GitPromptSettings.PromptSuffix }
 
+        # If user specifies $null or empty string, set to ' ' to avoid "PS>" unexpectedly being displayed
+        if (!$promptSuffix) {
+            $promptSuffix = ' '
+        }
+
         $global:LASTEXITCODE = $origLastExitCode
         $promptSuffix
 '@)
