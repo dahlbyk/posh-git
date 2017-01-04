@@ -33,83 +33,71 @@ else {
     $defaultPromptDef = [Runspace]::DefaultRunspace.InitialSessionState.Commands['prompt'].Definition
 }
 
-# If there is no prompt function or the prompt function is the default, export the posh-git prompt function.
+# If there is no prompt function or the prompt function is the default, replace the current prompt function definition
 $promptReplaced = $false
-$origPsrlExtraPromptLineCount = 0
 $poshGitPromptScriptBlock = $null
 
 $currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
 if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
-    $poshGitPromptScriptBlock = {
-        $origLastExitCode = $LASTEXITCODE
+    # Have to use [scriptblock]::Create() to get debugger detection to work in PS v2
+    $poshGitPromptScriptBlock = [scriptblock]::Create(@'
+        $origLastExitCode = $global:LASTEXITCODE
 
         # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
         # However for any path with a drive defined, it's better to use the Path property.
         # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
         # The latter is more desirable.
         $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
-        $curPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-        if ($curPath -and $curPath.ToLower().StartsWith($Home.ToLower()))
-        {
-            $curPath = "~" + $curPath.SubString($Home.Length)
-        }
+        $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
 
-        # Write the current path.
-        Write-Host $curPath -NoNewline
-
-        # Write the Git status summary information.
-        Write-VcsStatus
-
-        # When in debug mode, let user know
-        if ((Test-Path Variable:\PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint) {
-            $promptSuffix = "`n[DBG]: PS>> "
+        # File system paths are case-sensitive on Linux and case-insensitive on Windows and macOS
+        if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsLinux) {
+            $stringComparison = [System.StringComparison]::Ordinal
         }
         else {
-            $promptSuffix = "`nPS> "
+            $stringComparison = [System.StringComparison]::OrdinalIgnoreCase
         }
+
+        # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
+        if ($currentPath -and $currentPath.StartsWith($Home, $stringComparison))
+        {
+            $currentPath = "~" + $currentPath.SubString($Home.Length)
+        }
+
+        # Write the abbreviated current path
+        Write-Host $currentPath -NoNewline
+
+        # Write the Git status summary information
+        Write-VcsStatus
+
+        # If stopped in the debugger, the prompt needs to indicate that in some fashion
+        $debugMode = (Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint
+        $promptSuffix = if ($debugMode) { $GitPromptSettings.PromptDebugSuffix } else { $GitPromptSettings.PromptSuffix }
 
         $global:LASTEXITCODE = $origLastExitCode
         $promptSuffix
-    }
+'@)
 
-    # Install the posh-git prompt as the default prompt
+    # Set the posh-git prompt as the default prompt
     Set-Item Function:\prompt -Value $poshGitPromptScriptBlock
-
-    # If default posh-git prompt is two lines then we should ensure PSReadline is set to handle that
-    if (Get-Command Set-PSReadlineOption -ErrorAction SilentlyContinue) {
-        try {
-            $origPsrlExtraPromptLineCount = (Get-PSReadlineOption).ExtraPromptLineCount
-            Set-PSReadlineOption -ExtraPromptLineCount 1 -ErrorAction SilentlyContinue
-        }
-        catch {
-            Write-Debug "Failed to get or set PSReadline ExtraPromptLineCount. Error: $_"
-        }
-    }
 
     $promptReplaced = $true
 }
 
 # Install handler for removal/unload of the module
 $ExecutionContext.SessionState.Module.OnRemove = {
-    $Global:VcsPromptStatuses = $Global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
+    $global:VcsPromptStatuses = $global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
 
     if ($promptReplaced) {
         # Check if the posh-git prompt function itself has been replaced. If so, do not restore the prompt function
         $promptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
         if ($promptDef -eq $poshGitPromptScriptBlock) {
             Set-Item Function:\prompt -Value ([scriptblock]::Create($defaultPromptDef))
-
-            # If present, put PSReadline ExtraPromptLineCount back to original value
-            if (Get-Command Set-PSReadlineOption -ErrorAction SilentlyContinue) {
-                try {
-                    Set-PSReadlineOption -ExtraPromptLineCount $origPsrlExtraPromptLineCount -ErrorAction SilentlyContinue
-                }
-                catch {
-                    Write-Debug "Failed to get or set PSReadline ExtraPromptLineCount. Error: $_"
-                }
-            }
+            return
         }
     }
+
+    Write-Warning 'If your prompt function uses any posh-git commands, it may cause the module to be re-imported.'
 }
 
 $exportModuleMemberParams = @{

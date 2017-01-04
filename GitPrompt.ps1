@@ -96,6 +96,9 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnableWindowTitle                           = 'posh~git ~ '
 
+    PromptSuffix                                = '> '
+    PromptDebugSuffix                           = ' [DBG]>> '
+
     Debug                                       = $false
 
     BranchNameLimit                             = 0
