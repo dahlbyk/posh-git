@@ -37,6 +37,12 @@ else {
 $poshGitPromptScriptBlock = $null
 
 $currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
+
+# HACK: If prompt is missing, create a global one we can overwrite with Set-Item
+if (!$currentPromptDef) {
+    function global:prompt { ' ' }
+}
+
 if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
     # Have to use [scriptblock]::Create() to get debugger detection to work in PS v2
     $poshGitPromptScriptBlock = [scriptblock]::Create(@'
