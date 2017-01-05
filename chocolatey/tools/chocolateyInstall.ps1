@@ -1,9 +1,5 @@
 ﻿try {
     $binRoot = Get-BinRoot
-
-    $oldPromptOverride = "if(Test-Path Function:\Prompt) {Rename-Item Function:\Prompt PrePoshGitPrompt -Force}"
-    $newPromptOverride = "function Prompt() {if(Test-Path Function:\PrePoshGitPrompt){++`$global:poshScope; New-Item function:\script:Write-host -value `"param([object] ```$object, ```$backgroundColor, ```$foregroundColor, [switch] ```$nonewline) `" -Force | Out-Null;`$private:p = PrePoshGitPrompt; if(--`$global:poshScope -eq 0) {Remove-Item function:\Write-Host -Force}}PoshGitPrompt}"
-
     $poshgitPath = join-path $binRoot 'poshgit'
 
     try {
@@ -25,6 +21,8 @@
         #If old profile exists replace with new one and make sure prompt preservation function is on top
         $pgitExample = "$pgitDir\profile.example.ps1"
         foreach($line in $oldProfile) {
+            if ($line -like '*PoshGitPrompt*') { continue; }
+
             if($line.ToLower().Contains("$poshgitPath".ToLower())) {
                 $line = ". '$pgitExample'"
             }
