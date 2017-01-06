@@ -14,28 +14,37 @@ $subcommands = @{
     submodule = 'add status init update summary foreach sync'
     svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
     tfs = 'bootstrap checkin checkintool ct cleanup cleanup-workspaces clone diagnostics fetch help init pull quick-clone rcheckin shelve shelve-list unshelve verify'
-    flow = 'init feature release hotfix'
+    flow = 'init feature bugfix release hotfix support help version config finish delete publish rebase'
 }
 
 $gitflowsubcommands = @{
-    feature = 'list start finish publish track diff rebase checkout pull delete'
-    release = 'list start finish publish track delete'
-    hotfix = 'list start finish publish delete'
+    init = 'help'
+    feature = 'list start finish publish track diff rebase checkout pull help delete'
+    bugfix = 'list start finish publish track diff rebase checkout pull help delete'
+    release = 'list start finish track publish help delete'
+    hotfix = 'list start finish track publish help delete'
+    support = 'list start help'
+    config = 'list set base'
 }
 
 function script:gitCmdOperations($commands, $command, $filter) {
     $commands.$command -split ' ' |
-        where { $_ -like "$filter*" }
+        Where-Object { $_ -like "$filter*" }
 }
 
 
-$script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry','cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch','format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv','notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm','shortlog','show','stash','status','submodule','svn','tag','whatchanged')
+$script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry',
+                         'cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch',
+                         'format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv',
+                         'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm',
+                         'shortlog','show','stash','status','submodule','svn','tag','whatchanged')
 try {
-  if ((git help -a 2>&1 | Select-String flow) -ne $null) {
+  if ($null -ne (git help -a 2>&1 | Select-String flow)) {
       $script:someCommands += 'flow'
   }
 }
 catch {
+    Write-Debug "Search for 'flow' in 'git help' output failed with error: $_"
 }
 
 function script:gitCommands($filter, $includeAliases) {
@@ -44,71 +53,80 @@ function script:gitCommands($filter, $includeAliases) {
         $cmdList += $someCommands -like "$filter*"
     } else {
         $cmdList += git help --all |
-            where { $_ -match '^  \S.*' } |
-            foreach { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
-            where { $_ -like "$filter*" }
+            Where-Object { $_ -match '^  \S.*' } |
+            ForEach-Object { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
+            Where-Object { $_ -like "$filter*" }
     }
 
     if ($includeAliases) {
         $cmdList += gitAliases $filter
     }
-    $cmdList | sort
+    $cmdList | Sort-Object
 }
 
 function script:gitRemotes($filter) {
     git remote |
-        where { $_ -like "$filter*" }
+        Where-Object { $_ -like "$filter*" }
 }
 
-function script:gitBranches($filter, $includeHEAD = $false) {
-    $prefix = $null
+function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
     if ($filter -match "^(?<from>\S*\.{2,3})(?<to>.*)") {
-        $prefix = $matches['from']
+        $prefix += $matches['from']
         $filter = $matches['to']
     }
-    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
-                @(git branch --no-color -r | foreach { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
+    $branches = @(git branch --no-color | ForEach-Object { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+                @(git branch --no-color -r | ForEach-Object { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
     $branches |
-        where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
-        foreach { $prefix + $_ }
+        Where-Object { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
+        ForEach-Object { $prefix + $_ }
 }
 
-function script:gitTags($filter) {
+function script:gitRemoteUniqueBranches($filter) {
+    git branch --no-color -r |
+        ForEach-Object { if($_ -match "^  (?<remote>[^/]+)/(?<branch>\S+)(?! -> .+)?$") { $matches['branch'] } } |
+        Group-Object -NoElement |
+        Where-Object { $_.Count -eq 1 } |
+        Select-Object -ExpandProperty Name |
+        Where-Object { $_ -like "$filter*" }
+}
+
+function script:gitTags($filter, $prefix = '') {
     git tag |
-        where { $_ -like "$filter*" }
+        Where-Object { $_ -like "$filter*" } |
+        ForEach-Object { $prefix + $_ }
 }
 
 function script:gitFeatures($filter, $command){
 	$featurePrefix = git config --local --get "gitflow.prefix.$command"
-    $branches = @(git branch --no-color | foreach { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
+    $branches = @(git branch --no-color | ForEach-Object { if($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
-        where { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
-        foreach { $prefix + $_ }
+        Where-Object { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
+        ForEach-Object { $prefix + $_ }
 }
 
-function script:gitRemoteBranches($remote, $ref, $filter) {
+function script:gitRemoteBranches($remote, $ref, $filter, $prefix = '') {
     git branch --no-color -r |
-        where { $_ -like "  $remote/$filter*" } |
-        foreach { $ref + ($_ -replace "  $remote/","") }
+        Where-Object { $_ -like "  $remote/$filter*" } |
+        ForEach-Object { $prefix + $ref + ($_ -replace "  $remote/","") }
 }
 
 function script:gitStashes($filter) {
     (git stash list) -replace ':.*','' |
-        where { $_ -like "$filter*" } |
-        foreach { "'$_'" }
+        Where-Object { $_ -like "$filter*" } |
+        ForEach-Object { "'$_'" }
 }
 
 function script:gitTfsShelvesets($filter) {
     (git tfs shelve-list) |
-        where { $_ -like "$filter*" } |
-        foreach { "'$_'" }
+        Where-Object { $_ -like "$filter*" } |
+        ForEach-Object { "'$_'" }
 }
 
 function script:gitFiles($filter, $files) {
-    $files | sort |
-        where { $_ -like "$filter*" } |
-        foreach { if($_ -like '* *') { "'$_'" } else { $_ } }
+    $files | Sort-Object |
+        Where-Object { $_ -like "$filter*" } |
+        ForEach-Object { if($_ -like '* *') { "'$_'" } else { $_ } }
 }
 
 function script:gitIndex($filter) {
@@ -126,7 +144,8 @@ function script:gitCheckoutFiles($filter) {
 function script:gitDiffFiles($filter, $staged) {
     if ($staged) {
         gitFiles $filter $GitStatus.Index.Modified
-    } else {
+    }
+    else {
         gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Index.Modified))
     }
 }
@@ -140,38 +159,39 @@ function script:gitDeleted($filter) {
 }
 
 function script:gitAliases($filter) {
-    git config --get-regexp ^alias\. | foreach {
+    git config --get-regexp ^alias\. | ForEach-Object{
         if($_ -match "^alias\.(?<alias>\S+) .*") {
             $alias = $Matches['alias']
             if($alias -like "$filter*") {
                 $alias
             }
         }
-    } | Sort
+    } | Sort-Object
 }
 
 function script:expandGitAlias($cmd, $rest) {
-    if((git config --get-regexp "^alias\.$cmd`$") -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
+    if ((git config --get-regexp "^alias\.$cmd`$") -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
         return "git $($Matches['cmd'])$rest"
-    } else {
+    }
+    else {
         return "git $cmd$rest"
     }
 }
 
 function GitTabExpansion($lastBlock) {
 
-    if($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
+    if ($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
     }
 
     # Handles tgit <command> (tortoisegit)
-    if($lastBlock -match "^$(Get-AliasPattern tgit) (?<cmd>\S*)$") {
-            # Need return statement to prevent fall-through.
-            return $tortoiseGitCommands | where { $_ -like "$($matches['cmd'])*" }
+    if ($lastBlock -match "^$(Get-AliasPattern tgit) (?<cmd>\S*)$") {
+        # Need return statement to prevent fall-through.
+        return $tortoiseGitCommands | Where-Object { $_ -like "$($matches['cmd'])*" }
     }
 
     # Handles gitk
-    if($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
+    if ($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
         return gitBranches $matches['ref'] $true
     }
 
@@ -230,14 +250,17 @@ function GitTabExpansion($lastBlock) {
         }
 
         # Handles git push remote <ref>:<branch>
-        "^push.* (?<remote>\S+) (?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
-            gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch']
+        # Handles git push remote +<ref>:<branch>
+        "^push.* (?<remote>\S+) (?<force>\+?)(?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
+            gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch'] -prefix $matches['force']
         }
 
-        # Handles git push remote <branch>
-        # Handles git pull remote <branch>
-        "^(?:push|pull).* (?:\S+) (?<branch>[^\s\:]*)$" {
-            gitBranches $matches['branch']
+        # Handles git push remote <ref>
+        # Handles git push remote +<ref>
+        # Handles git pull remote <ref>
+        "^(?:push|pull).* (?:\S+) (?<force>\+?)(?<ref>[^\s\:]*)$" {
+            gitBranches $matches['ref'] -prefix $matches['force']
+            gitTags $matches['ref'] -prefix $matches['force']
         }
 
         # Handles git pull <remote>
@@ -283,8 +306,15 @@ function GitTabExpansion($lastBlock) {
             gitMergeFiles $matches['files']
         }
 
+        # Handles git checkout <ref>
+        "^(?:checkout).* (?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
+            gitRemoteUniqueBranches $matches['ref']
+            gitTags $matches['ref']
+        }
+
         # Handles git <cmd> <ref>
-        "^(?:checkout|cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
+        "^(?:cherry|cherry-pick|diff|difftool|log|merge|rebase|reflog\s+show|reset|revert|show).* (?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
             gitTags $matches['ref']
         }
@@ -292,8 +322,7 @@ function GitTabExpansion($lastBlock) {
 }
 
 $PowerTab_RegisterTabExpansion = if (Get-Module -Name powertab) { Get-Command Register-TabExpansion -Module powertab -ErrorAction SilentlyContinue }
-if ($PowerTab_RegisterTabExpansion)
-{
+if ($PowerTab_RegisterTabExpansion) {
     & $PowerTab_RegisterTabExpansion "git.exe" -Type Command {
         param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
 

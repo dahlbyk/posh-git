@@ -1,25 +1,18 @@
-Push-Location (Split-Path -Path $MyInvocation.MyCommand.Definition -Parent)
-
-# Load posh-git module from current directory
-Import-Module .\posh-git
-
-# If module is installed in a default location ($env:PSModulePath),
-# use this instead (see about_Modules for more information):
-# Import-Module posh-git
-
-
-# Set up a simple prompt, adding the git prompt parts inside git repos
-function global:prompt {
-    $realLASTEXITCODE = $LASTEXITCODE
-
-    Write-Host($pwd.ProviderPath) -nonewline
-
-    Write-VcsStatus
-
-    $global:LASTEXITCODE = $realLASTEXITCODE
-    return "> "
+# Import the posh-git module, first via installed posh-git module.
+# If the module isn't installed, then attempt to load it from the cloned posh-git Git repo.
+$poshGitModule = Get-Module posh-git -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1
+if ($poshGitModule) {
+    $poshGitModule | Import-Module
+}
+elseif (Test-Path -LiteralPath ($modulePath = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) 'posh-git.psd1')) {
+    Import-Module $modulePath
+}
+else {
+    throw "Failed to import posh-git."
 }
 
-Pop-Location
+# Settings for the prompt are in GitPrompt.ps1, so add any desired settings changes here.
+# Example:
+#     $Global:GitPromptSettings.BranchBehindAndAheadDisplay = "Compact"
 
 Start-SshAgent -Quiet

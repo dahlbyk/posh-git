@@ -20,7 +20,7 @@ function Get-LocalOrParentPath($path) {
     if ($checkIn.PSProvider.Name -ne 'FileSystem') {
         return $null
     }
-    while ($checkIn -ne $NULL) {
+    while ($null -ne $checkIn) {
         $pathToTest = [System.IO.Path]::Combine($checkIn.fullname, $path)
         if (Test-Path -LiteralPath $pathToTest) {
             return $pathToTest
