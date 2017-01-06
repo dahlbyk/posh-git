@@ -179,6 +179,12 @@ function script:expandGitAlias($cmd, $rest) {
 }
 
 function GitTabExpansion($lastBlock) {
+    Invoke-Utf8ConsoleCommand {
+        GitTabExpansionInternal $lastBlock
+    }
+}
+
+function GitTabExpansionInternal($lastBlock) {
 
     if ($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']

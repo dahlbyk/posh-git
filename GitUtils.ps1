@@ -11,7 +11,9 @@ function Get-GitDirectory {
 }
 
 function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw) {
-    if ($gitDir) {
+    if (!$gitDir) { return }
+
+    Invoke-Utf8ConsoleCommand {
         dbg 'Finding branch' $sw
         $r = ''; $b = ''; $c = ''
         if (Test-Path $gitDir\rebase-merge\interactive) {
@@ -145,7 +147,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
             dbg 'Getting status' $sw
-            $status = git -c color.status=false status --short --branch 2>$null
+            $status = Invoke-Utf8ConsoleCommand { git -c color.status=false status --short --branch 2>$null }
             if($settings.EnableStashStatus) {
                 dbg 'Getting stash count' $sw
                 $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
@@ -475,7 +477,7 @@ function Stop-SshAgent() {
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
     $head = git rev-parse --abbrev-ref HEAD
     git checkout -q $Upstream
-    $branches = (git branch --no-color --no-merged) | Where-Object { $_ -notmatch '^\* ' }
+    $branches = Invoke-Utf8ConsoleCommand { (git branch --no-color --no-merged) } | Where-Object { $_ -notmatch '^\* ' }
     foreach ($line in $branches) {
         $branch = $line.SubString(2)
         if (!$Quiet) { Write-Host "Rebasing $branch onto $Upstream..." }

@@ -15,6 +15,17 @@ function Invoke-NullCoalescing {
 
 Set-Alias ?? Invoke-NullCoalescing -Force
 
+function Invoke-Utf8ConsoleCommand ([ScriptBlock]$cmd) {
+    $currentEncoding = [Console]::OutputEncoding
+    try {
+        [Console]::OutputEncoding = [Text.Encoding]::UTF8
+        & $cmd
+    }
+    finally {
+        [Console]::OutputEncoding = $currentEncoding
+    }
+}
+
 function Get-LocalOrParentPath($path) {
     $checkIn = Get-Item -Force .
     if ($checkIn.PSProvider.Name -ne 'FileSystem') {
