@@ -11,25 +11,6 @@ else {
     throw "Failed to import posh-git."
 }
 
-# Set up a simple prompt that displays Git status summary info when inside of a Git repo.
-function global:prompt {
-    $origLastExitCode = $LASTEXITCODE
-
-    # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
-    # However for any path with a drive defined, it's better to use the Path property.
-    # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
-    # The latter is more desirable.
-    $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
-    $curPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-    Write-Host $curPath -NoNewline
-
-    # Write the Git status summary information to the host.
-    Write-VcsStatus
-
-    $global:LASTEXITCODE = $origLastExitCode
-    "> "
-}
-
 # Settings for the prompt are in GitPrompt.ps1, so add any desired settings changes here.
 # Example:
 #     $Global:GitPromptSettings.BranchBehindAndAheadDisplay = "Compact"
