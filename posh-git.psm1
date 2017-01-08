@@ -1,4 +1,4 @@
-param([switch]$NoVersionWarn)
+param([switch]$NoVersionWarn, [switch]$NoProfileCheck)
 
 if (Get-Module posh-git) { return }
 
@@ -90,6 +90,57 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
 
     # Set the posh-git prompt as the default prompt
     Set-Item Function:\prompt -Value $poshGitPromptScriptBlock
+}
+
+# If running interactive, check if user want's `import-module posh-git` added to their profile
+if (!$NoProfileCheck -and ($MyInvocation.ScriptName.Length -eq 0)) {
+    # Search the current user profiles for current host & all host for the string "posh-git" which covers the
+    # way Chocolatey installs modify the profile e.g. . C:\tools\posh-git\...  Also handle the case where there are no
+    # profile scripts created yet.
+    $importedInProfile = Test-PoshGitImportedInScript $PROFILE.CurrentUserCurrentHost
+    if (!$importedInProfile) {
+        $importedInProfile = Test-PoshGitImportedInScript $PROFILE.CurrentUserAllHosts
+    }
+    if (!$importedInProfile) {
+        $importedInProfile = Test-PoshGitImportedInScript $PROFILE.AllUsersCurrentHost
+    }
+    if (!$importedInProfile) {
+        $importedInProfile = Test-PoshGitImportedInScript $PROFILE.AllUsersAllHosts
+    }
+
+    # If we have not detected "posh-git" in the user's profile scripts, ask if they want their profile to import posh-git
+    if (!$importedInProfile) {
+        $title = "Modify Profile"
+        $message = "Do you want posh-git to modify your profile to automatically import this module whenever your start PowerShell?"
+
+        $argList = @(
+            "&Yes, for the current PowerShell host",
+            "Modify the profile for $($Host.Name) to automatically import posh-git."
+        )
+        $yesCurrent = New-Object System.Management.Automation.Host.ChoiceDescription -ArgumentList $argList
+
+        $argList = @(
+            "Yes, for &all PowerShell hosts",
+            "Modify the profile for all hosts to automatically import posh-git."
+        )
+        $yesAll = New-Object System.Management.Automation.Host.ChoiceDescription -ArgumentList $argList
+
+        $argList = @(
+            "&No",
+            "Do not modify my profile. To suppress this prompt in the future, execute: Import-Module posh-git -Arg `$false, `$true"
+        )
+        $no = New-Object System.Management.Automation.Host.ChoiceDescription -ArgumentList $argList
+
+        $options = [System.Management.Automation.Host.ChoiceDescription[]]($yesCurrent, $yesAll, $no)
+
+        $result = $host.UI.PromptForChoice($title, $message, $options, 0)
+        switch ($result) {
+            0 { Add-ImportModuleToProfile $PROFILE.CurrentUserCurrentHost $PSScriptRoot }
+            1 { Add-ImportModuleToProfile $PROFILE.CurrentUserAllHosts $PSScriptRoot }
+            2 { } # Nothing to do if user picks 'No'
+            default { throw "Unexpected choice result: $result" }
+        }
+    }
 }
 
 # Install handler for removal/unload of the module
