@@ -1,8 +1,8 @@
 param([switch]$WhatIf = $false)
 
 # Dot source for Get-FileEncoding
-$scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
-. $scriptRoot\Utils.ps1
+$installDir = Split-Path $MyInvocation.MyCommand.Path -Parent
+. $installDir\Utils.ps1
 
 if($PSVersionTable.PSVersion.Major -lt 2) {
     Write-Warning "posh-git requires PowerShell 2.0 or better; you have version $($Host.Version)."
@@ -19,7 +19,6 @@ if(!(Get-Command git -ErrorAction SilentlyContinue)) {
     return
 }
 
-$installDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 if(!(. (Join-Path $installDir "CheckVersion.ps1"))) {
     return
 }
