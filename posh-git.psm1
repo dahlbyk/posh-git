@@ -85,7 +85,7 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
         }
 
         $global:LASTEXITCODE = $origLastExitCode
-        $promptSuffix
+        $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptSuffix)
 '@)
 
     # Set the posh-git prompt as the default prompt
