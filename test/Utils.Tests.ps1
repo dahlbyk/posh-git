@@ -64,41 +64,38 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         }
     }
 
-    Context 'Test-InModulePath Tests' {
-        BeforeAll {
-            $standardPSModulePath = "C:\Users\Keith\Documents\WindowsPowerShell\Modules;C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\"
-        }
-        BeforeEach {
-            $origPSModulePath = $env:PSModulePath
-        }
-        AfterEach {
-            $env:PSModulePath = $origPSModulePath
-        }
-        It 'Works for install from PSGallery to current user modules location' {
-            $env:PSModulePath = $standardPSModulePath
+    Context 'Test-InPSModulePath Tests' {
+        It 'Returns false for install not under any PSModulePaths' {
+            Mock Get-PoshGitModulePath { }
             $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
-            Test-InModulePath $path | Should Be $true
+            Test-InPSModulePath $path | Should Be $false
+            Assert-MockCalled Get-PoshGitModulePath
         }
-        It 'Works for install from Chocolatey not in any modules path' {
-            $env:PSModulePath = $standardPSModulePath
+        It 'Returns true for install under single PSModulePath' {
+            Mock Get-PoshGitModulePath {
+                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0'
+            }
+            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
+            Test-InPSModulePath $path | Should Be $true
+            Assert-MockCalled Get-PoshGitModulePath
+        }
+        It 'Returns true for install under multiple PSModulePaths' {
+            Mock Get-PoshGitModulePath {
+                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0',
+                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330'
+            }
+            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
+            Test-InPSModulePath $path | Should Be $true
+            Assert-MockCalled Get-PoshGitModulePath
+        }
+        It 'Returns false when current posh-git module location is not under PSModulePaths' {
+            Mock Get-PoshGitModulePath {
+                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0',
+                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330'
+            }
             $path = "C:\tools\posh-git\dahlbyk-posh-git-18d600a"
-            Test-InModulePath $path | Should Be $false
-        }
-        It 'Works for running from posh-git Git repo and location not in modules path' {
-            $env:PSModulePath = $standardPSModulePath
-            $path = "C:\Users\Keith\GitHub\posh-git"
-            Test-InModulePath $path | Should Be $false
-        }
-        It 'Returns false when PSModulePath is empty' {
-            $env:PSModulePath = ''
-            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
-            Test-InModulePath $path | Should Be $false
-        }
-        It 'Returns false when PSModulePath is missing' {
-            Remove-Item Env:\PSModulePath
-            Test-Path Env:\PSModulePath | Should Be $false
-            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
-            Test-InModulePath $path | Should Be $false
+            Test-InPSModulePath $path | Should Be $false
+            Assert-MockCalled Get-PoshGitModulePath
         }
     }
 }

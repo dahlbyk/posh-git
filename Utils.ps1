@@ -16,7 +16,7 @@ function Invoke-NullCoalescing {
 
 Set-Alias ?? Invoke-NullCoalescing -Force
 
-function Invoke-Utf8ConsoleCommand ([ScriptBlock]$cmd) {
+function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
     $currentEncoding = [Console]::OutputEncoding
     try {
         [Console]::OutputEncoding = [Text.Encoding]::UTF8
@@ -38,7 +38,7 @@ function Add-ImportModuleToProfile {
         [Parameter(Position = 1, Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]
-        $ScriptRoot
+        $ModuleBasePath
     )
 
     # Check if profile script exists
@@ -55,11 +55,11 @@ function Add-ImportModuleToProfile {
     }
 
     # Check if the location of this module file is in the PSModulePath
-    if (Test-InModulePath $ScriptRoot) {
+    if (Test-InPSModulePath $ModuleBasePath) {
         $profileContent += "Import-Module posh-git"
     }
     else {
-        $profileContent += "Import-Module '$ScriptRoot\posh-git.psd1'"
+        $profileContent += "Import-Module '$ModuleBasePath\posh-git.psd1'"
     }
 
     Set-Content -LiteralPath $profilePath -Value $profileContent -Encoding $encoding
@@ -136,7 +136,11 @@ function Get-LocalOrParentPath($path) {
     return $null
 }
 
-function Test-InModulePath {
+function Get-PoshGitModulePath {
+    Get-Module posh-git -ListAvailable | ForEach-Object { $_.ModuleBase }
+}
+
+function Test-InPSModulePath {
     param (
         [Parameter(Position=0, Mandatory=$true)]
         [ValidateNotNull()]
@@ -144,7 +148,7 @@ function Test-InModulePath {
         $Path
     )
 
-    $modulePaths = $env:PSModulePath -split ';'
+    $modulePaths = Get-PoshGitModulePath
     if (!$modulePaths) { return $false }
 
     $pathStringComparison = Get-PathStringComparison
@@ -166,7 +170,7 @@ function Test-PoshGitImportedInScript {
     @((Get-Content $Path -ErrorAction SilentlyContinue) -match 'posh-git').Count -gt 0
 }
 
-function dbg ($Message, [Diagnostics.Stopwatch]$Stopwatch) {
+function dbg($Message, [Diagnostics.Stopwatch]$Stopwatch) {
     if ($Stopwatch) {
         Write-Verbose ('{0:00000}:{1}' -f $Stopwatch.ElapsedMilliseconds,$Message) -Verbose # -ForegroundColor Yellow
     }
