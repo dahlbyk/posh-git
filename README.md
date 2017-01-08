@@ -225,6 +225,7 @@ This gives us a prompt with a current path that is never greater than 40 charact
 [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ...sers\Keith\GitHub\rkeithhill\posh-git
 > _
 ```
+For more in-depth information on PowerShell prompts, see the online PowerShell help topic [about_prompts](https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.core/about/about_prompts).
 
 ## Git Status Summary Information
 The Git status summary information provides a wealth of "Git status" information at a glance, all the time in your prompt.
