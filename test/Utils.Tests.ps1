@@ -5,80 +5,62 @@ Describe 'Utils Function Tests' {
         BeforeAll {
            $newLine = [System.Environment]::NewLine
         }
-        It 'Creates profile file if it does not exist' {
+        BeforeEach {
             $profilePath = [System.IO.Path]::GetTempFileName()
+        }
+        AfterEach {
+            Remove-Item $profilePath -ErrorAction SilentlyContinue
+        }
+        It 'Creates profile file if it does not exist' {
             Remove-Item -LiteralPath $profilePath
             Test-Path -LiteralPath $profilePath | Should Be $false
-            try {
-                $scriptRoot = Split-Path $profilePath -Parent
-                Add-ImportModuleToProfile $profilePath $scriptRoot
-                Test-Path -LiteralPath $profilePath | Should Be $true
-                Get-FileEncoding $profilePath | Should Be 'ascii'
-                $content = Get-Content $profilePath
-                $content.Count | Should Be 1
-                @($content)[0] | Should BeExactly "Import-Module '$scriptRoot\posh-git.psd1'"
-            }
-            finally {
-                Remove-Item $profilePath -ErrorAction SilentlyContinue
-            }
+            $scriptRoot = Split-Path $profilePath -Parent
+            Add-ImportModuleToProfile $profilePath $scriptRoot
+            Test-Path -LiteralPath $profilePath | Should Be $true
+            Get-FileEncoding $profilePath | Should Be 'utf8'
+            $content = Get-Content $profilePath
+            $content.Count | Should Be 1
+            @($content)[0] | Should BeExactly "Import-Module '$scriptRoot\posh-git.psd1'"
         }
         It 'Modifies existing (Unicode) profile file correctly' {
-            $profilePath = [System.IO.Path]::GetTempFileName()
             $profileContent = @'
 Import-Module PSCX
 
 New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-core\bin\Debug\netcoreapp1.1\win10-x64\powershell.exe
 '@
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
-            try {
-                $scriptRoot = Split-Path $profilePath -Parent
-                Add-ImportModuleToProfile $profilePath $scriptRoot
-                Test-Path -LiteralPath $profilePath | Should Be $true
-                Get-FileEncoding $profilePath | Should Be 'unicode'
-                $content = Get-Content $profilePath
-                $content.Count | Should Be 5
-                $profileContent += "${newLine}${newLine}Import-Module '$scriptRoot\posh-git.psd1'"
-                $content -join $newLine | Should BeExactly $profileContent
-            }
-            finally {
-                Remove-Item $profilePath -ErrorAction SilentlyContinue
-            }
+            $scriptRoot = Split-Path $profilePath -Parent
+            Add-ImportModuleToProfile $profilePath $scriptRoot
+            Test-Path -LiteralPath $profilePath | Should Be $true
+            Get-FileEncoding $profilePath | Should Be 'unicode'
+            $content = Get-Content $profilePath
+            $content.Count | Should Be 5
+            $profileContent += "${newLine}${newLine}Import-Module '$scriptRoot\posh-git.psd1'"
+            $content -join $newLine | Should BeExactly $profileContent
         }
     }
 
     Context 'Test-PoshGitImportedInScript Tests' {
-        It 'Detects Import-Module posh-git in profile script' {
+        BeforeEach {
             $profilePath = [System.IO.Path]::GetTempFileName()
+        }
+        AfterEach {
+            Remove-Item $profilePath -ErrorAction SilentlyContinue
+        }
+        It 'Detects Import-Module posh-git in profile script' {
             $profileContent = "Import-Module posh-git"
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
-            try {
-                Test-PoshGitImportedInScript $profilePath | Should Be $true
-            }
-            finally {
-                Remove-Item $profilePath -ErrorAction SilentlyContinue
-            }
+            Test-PoshGitImportedInScript $profilePath | Should Be $true
         }
         It 'Detects chocolatey installed line in profile script' {
-            $profilePath = [System.IO.Path]::GetTempFileName()
             $profileContent = ". 'C:\tools\poshgit\dahlbyk-posh-git-18d600a\profile.example.ps1"
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
-            try {
-                Test-PoshGitImportedInScript $profilePath | Should Be $true
-            }
-            finally {
-                Remove-Item $profilePath -ErrorAction SilentlyContinue
-            }
+            Test-PoshGitImportedInScript $profilePath | Should Be $true
         }
         It 'Returns false when profile script does not import posh-git' {
-            $profilePath = [System.IO.Path]::GetTempFileName()
             $profileContent = "Import-Module Pscx`nImport-Module platyPS`nImport-Module Plaster"
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
-            try {
-                Test-PoshGitImportedInScript $profilePath | Should Be $false
-            }
-            finally {
-                Remove-Item $profilePath -ErrorAction SilentlyContinue
-            }
+            Test-PoshGitImportedInScript $profilePath | Should Be $false
         }
     }
 

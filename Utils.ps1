@@ -51,7 +51,7 @@ function Add-ImportModuleToProfile {
         # Doesn't exist, so create it
         New-Item -Path $profilePath -ItemType File
         $profileContent = @()
-        $encoding = 'ascii'
+        $encoding = 'utf8'
     }
 
     # Check if the location of this module file is in the PSModulePath
