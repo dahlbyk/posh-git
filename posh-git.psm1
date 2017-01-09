@@ -93,7 +93,7 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
 }
 
 # IFF running interactive, check if user wants their profile script to be modified to import the module
-if (!$NoProfileCheck -and !$MyInvocation.ScriptName) {
+if (!$NoProfileCheck -and ($stack = Get-PSCallStack) -and ($stack.Count -eq 2)) {
     # Search the user's profiles to see if any are using posh-git already
     $importedInProfile = Test-PoshGitImportedInScript $PROFILE.CurrentUserCurrentHost
     if (!$importedInProfile) {
