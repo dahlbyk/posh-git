@@ -14,7 +14,7 @@ build: false
 
 test_script:
   - ps: |
-      $PSVersionTable
+      $PSVersionTable | Format-Table PSVersion, BuildVersion, CLRVersion
       $Host
       $testResultsFile = Join-Path $Env:APPVEYOR_BUILD_FOLDER TestResults.xml
       $pesterParams = @{
