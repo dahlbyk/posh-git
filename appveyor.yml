@@ -10,12 +10,14 @@ install:
       Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
       Install-Module Pester -MinimumVersion 3.4.0 -Scope CurrentUser -Force | Out-Null
 
-build_script:
+build: false
+
+test_script:
   - ps: |
-      # Nothing to build at this point, just run Pester tests
-      $testResultsFile = Join-Path $pwd TestResults.xml
+      $PSVersionTable
+      $testResultsFile = Join-Path $Env:APPVEYOR_BUILD_FOLDER TestResults.xml
       $pesterParams = @{
-          Script       = "$pwd\test"
+          Script       = "$Env:APPVEYOR_BUILD_FOLDER\test"
           OutputFile   = $testResultsFile
           OutputFormat = "NUnitXml"
           PassThru     = $true
