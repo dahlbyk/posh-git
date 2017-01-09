@@ -14,19 +14,19 @@ build_script:
   - ps: |
       # Nothing to build at this point, just run Pester tests
       $testResultsFile = Join-Path $pwd TestResults.xml
-      $testing = @{
-          Script       =
+      $pesterParams = @{
+          Script       = "$pwd\test"
           OutputFile   = $testResultsFile
           OutputFormat = "NUnitXml"
           PassThru     = $true
           Verbose      = $VerbosePreference
       }
       Import-Module Pester
-      Invoke-Pester @testing
+      $res = Invoke-Pester @pesterParams
       if (Test-Path $testResultsFile) {
           (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $testResultsFile)
       }
-      else {
+      if ($res.FailedCount -gt 0) {
           # Terminate the script to fail the build
           $Error | Format-List * -Force
           exit 1;
