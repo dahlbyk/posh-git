@@ -5,10 +5,7 @@ Describe 'SSH Function Tests' {
         It 'Returns the correct default path' {
             Get-SshPath | Should BeExactly (MakeNativePath $Home\.ssh\id_rsa)
         }
-        It 'Returns the correct path given a file' {
-            Get-SshPath mykey | Should BeExactly (MakeNativePath $Home\.ssh\mykey)
-        }
-        It 'Returns the correct path even for a non-existin key file' {
+        It 'Returns the correct path for a given filename' {
             $filename = 'xyzzy-eb2ff0a9-81ee-4983-b32d-530286600a51'
             Get-SshPath $filename | Should BeExactly (MakeNativePath $Home\.ssh\$filename)
         }
