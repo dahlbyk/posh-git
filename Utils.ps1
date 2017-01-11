@@ -1,3 +1,6 @@
+# Need this variable as long as we support PS v2
+$ModuleBasePath = Split-Path $MyInvocation.MyCommand.Path -Parent
+
 # General Utility Functions
 
 function Invoke-NullCoalescing {
@@ -27,42 +30,78 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
     }
 }
 
-function Add-ImportModuleToProfile {
-    param (
-        [Parameter(Position = 0, Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $ProfilePath,
+<#
+.SYNOPSIS
+    Configures your PowerShell profile (startup) script to import the posh-git
+    module when PowerShell starts.
+.DESCRIPTION
+    Checks if your PowerShell profile script is not already importing posh-git
+    and if not, adds a command to import the posh-git module. This will cause
+    PowerShell to load posh-git whenever PowerShell starts.
+    imprt
+.PARAMETER AllHosts
+    By default, this command modifies the CurrentUserCurrentHost profile
+    script.  By specifying the AllHosts switch, the command updates the
+    CurrentUserAllHosts profile.
+.PARAMETER Force
+    Do not check if the specified profile script is already importing
+    posh-git. Just add Import-Module posh-git command.
+.EXAMPLE
+    PS C:\> Add-PoshGitToProfile
+    Updates your profile script for the current PowerShell host to import the
+    posh-git module when the current PowerShell host starts.
+.EXAMPLE
+    PS C:\> Add-PoshGitToProfile -AllHost
+    Updates your profile script for all PowerShell hosts to import the posh-git
+    module whenever any PowerShell host starts.
+.INPUTS
+    None.
+.OUTPUTS
+    None.
+#>
+function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force) {
+    $underTest = $false
 
-        # This is only required to support PS v2 there $PSScriptRoot only works in a .psm1 file
-        [Parameter(Position = 1, Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $ModuleBasePath
-    )
-
-    # Check if profile script exists
-    if (Test-Path -LiteralPath $profilePath) {
-        $profileContent = @(Get-Content -LiteralPath $profilePath)
-        $profileContent += [string]::Empty # Empty line between previous profile script and import statement
-        $encoding = Get-FileEncoding $profilePath
+    $profilePath = if ($AllHosts) { $PROFILE.CurrentUserAllHosts } else { $PROFILE.CurrentUserCurrentHost }
+    if ($args -gt 0) {
+        $profilePath = [string]$args[0]
+        $underTest = $true
     }
-    else {
-        # Doesn't exist, so create it
-        New-Item -Path $profilePath -ItemType File
-        $profileContent = @()
-        $encoding = 'utf8'
+
+    if (!$Force) {
+        # Search the user's profiles to see if any are using posh-git already, there is an extra search
+        # ($profilePath) taking place to accomodate the Pester tests.
+        $importedInProfile = Test-PoshGitImportedInScript $profilePath
+        if (!$importedInProfile -and !$underTest) {
+            $importedInProfile = Test-PoshGitImportedInScript $PROFILE.CurrentUserCurrentHost
+        }
+        if (!$importedInProfile -and !$underTest) {
+            $importedInProfile = Test-PoshGitImportedInScript $PROFILE.CurrentUserAllHosts
+        }
+        if (!$importedInProfile -and !$underTest) {
+            $importedInProfile = Test-PoshGitImportedInScript $PROFILE.AllUsersCurrentHost
+        }
+        if (!$importedInProfile -and !$underTest) {
+            $importedInProfile = Test-PoshGitImportedInScript $PROFILE.AllUsersAllHosts
+        }
+
+        if ($importedInProfile) {
+            Write-Warning "Skipping add of posh-git import to file '$profilePath'."
+            Write-Warning "posh-git appears to already be imported in one of your profile scripts."
+            Write-Warning "If you want to force the add, use the -Force parameter."
+            return
+        }
     }
 
     # Check if the location of this module file is in the PSModulePath
     if (Test-InPSModulePath $ModuleBasePath) {
-        $profileContent += "Import-Module posh-git"
+        $profileContent = "`nImport-Module posh-git"
     }
     else {
-        $profileContent += "Import-Module '$ModuleBasePath\posh-git.psd1'"
+        $profileContent = "`nImport-Module '$ModuleBasePath\posh-git.psd1'"
     }
 
-    Set-Content -LiteralPath $profilePath -Value $profileContent -Encoding $encoding
+    Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
 }
 
 <#

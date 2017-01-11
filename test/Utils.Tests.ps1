@@ -1,7 +1,7 @@
 . $PSScriptRoot\..\Utils.ps1
 
 Describe 'Utils Function Tests' {
-    Context 'Add-ImportModuleToProfile Tests' {
+    Context 'Add-PoshGitToProfile Tests' {
         BeforeAll {
            $newLine = [System.Environment]::NewLine
         }
@@ -14,13 +14,13 @@ Describe 'Utils Function Tests' {
         It 'Creates profile file if it does not exist' {
             Remove-Item -LiteralPath $profilePath
             Test-Path -LiteralPath $profilePath | Should Be $false
-            $scriptRoot = Split-Path $profilePath -Parent
-            Add-ImportModuleToProfile $profilePath $scriptRoot
+            Add-PoshGitToProfile $profilePath
             Test-Path -LiteralPath $profilePath | Should Be $true
             Get-FileEncoding $profilePath | Should Be 'utf8'
             $content = Get-Content $profilePath
-            $content.Count | Should Be 1
-            @($content)[0] | Should BeExactly "Import-Module '$scriptRoot\posh-git.psd1'"
+            $content.Count | Should Be 2
+            $modulePath = Resolve-Path $PSScriptRoot\..
+            @($content)[1] | Should BeExactly "Import-Module '$modulePath\posh-git.psd1'"
         }
         It 'Modifies existing (Unicode) profile file correctly' {
             $profileContent = @'
@@ -29,13 +29,13 @@ Import-Module PSCX
 New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-core\bin\Debug\netcoreapp1.1\win10-x64\powershell.exe
 '@
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
-            $scriptRoot = Split-Path $profilePath -Parent
-            Add-ImportModuleToProfile $profilePath $scriptRoot
+            Add-PoshGitToProfile $profilePath
             Test-Path -LiteralPath $profilePath | Should Be $true
             Get-FileEncoding $profilePath | Should Be 'unicode'
             $content = Get-Content $profilePath
             $content.Count | Should Be 5
-            $profileContent += "${newLine}${newLine}Import-Module '$scriptRoot\posh-git.psd1'"
+            $modulePath = Resolve-Path $PSScriptRoot\..
+            $profileContent += "${newLine}${newLine}Import-Module '$modulePath\posh-git.psd1'"
             $content -join $newLine | Should BeExactly $profileContent
         }
     }

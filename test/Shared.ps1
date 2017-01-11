@@ -1,1 +1,1 @@
-Import-Module $PSScriptRoot\..\posh-git.psd1
+$module = Import-Module $PSScriptRoot\..\posh-git.psd1 -PassThru
