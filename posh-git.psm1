@@ -26,7 +26,7 @@ Get-TempEnv 'SSH_AGENT_PID'
 Get-TempEnv 'SSH_AUTH_SOCK'
 
 # Get the default prompt definition.
-if ($psv.Major -eq 2) {
+if (($psv.Major -eq 2) -or ![Runspace]::DefaultRunspace.InitialSessionState.Commands) {
     $defaultPromptDef = "`$(if (test-path variable:/PSDebugContext) { '[DBG]: ' } else { '' }) + 'PS ' + `$(Get-Location) + `$(if (`$nestedpromptlevel -ge 1) { '>>' }) + '> '"
 }
 else {

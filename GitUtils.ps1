@@ -405,7 +405,7 @@ function Get-SshPath($File = 'id_rsa') {
     # Also, apparently using the PowerShell built-in $HOME variable may not cut it for msysGit with has different
     # ideas about the path to the user's home dir e.g. /c/Users/Keith
     $homePath = Invoke-NullCoalescing $Env:HOME $Home
-    Resolve-Path (Join-Path $homePath (Join-Path .ssh $File)) -ErrorAction SilentlyContinue 2> $null
+    Join-Path $homePath (Join-Path .ssh $File)
 }
 
 <#
