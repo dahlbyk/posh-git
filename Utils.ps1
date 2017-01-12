@@ -63,9 +63,14 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force) {
     $underTest = $false
 
     $profilePath = if ($AllHosts) { $PROFILE.CurrentUserAllHosts } else { $PROFILE.CurrentUserCurrentHost }
-    if ($args -gt 0) {
+
+    # Under test, we override some variables using $args as a backdoor.
+    if ($args.Count -gt 0) {
         $profilePath = [string]$args[0]
         $underTest = $true
+        if ($args.Count -gt 1) {
+            $ModuleBasePath = [string]$args[1]
+        }
     }
 
     if (!$Force) {
@@ -175,8 +180,9 @@ function Get-LocalOrParentPath($path) {
     return $null
 }
 
-function Get-PoshGitModulePath {
-    Get-Module posh-git -ListAvailable | ForEach-Object { $_.ModuleBase }
+function Get-PSModulePath {
+    $modulePaths = $Env:PSModulePath -split ';'
+    $modulePaths
 }
 
 function Test-InPSModulePath {
@@ -187,7 +193,7 @@ function Test-InPSModulePath {
         $Path
     )
 
-    $modulePaths = Get-PoshGitModulePath
+    $modulePaths = Get-PSModulePath
     if (!$modulePaths) { return $false }
 
     $pathStringComparison = Get-PathStringComparison
