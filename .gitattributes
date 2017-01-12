@@ -1,2 +1,3 @@
 # Disable LF normalization for all files
 * -text
+*.yml text=auto

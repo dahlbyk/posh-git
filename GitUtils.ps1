@@ -341,7 +341,7 @@ function Find-Pageant() {
 function Find-Ssh($program = 'ssh-agent') {
     Write-Verbose "$program not in path. Trying to guess location."
     $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
-    if ($gitItem -eq $null) {
+    if ($null -eq $gitItem) {
         Write-Warning 'git not in path'
         return
     }
@@ -401,7 +401,11 @@ function Start-SshAgent([switch]$Quiet) {
 
 function Get-SshPath($File = 'id_rsa') {
     # Avoid paths with path separator char since it is different on Linux/macOS.
-    Join-Path $Home (Join-Path .ssh $File)
+    # Also avoid ~ as it is invalid if the user is cd'd into say cert:\ or hklm:\.
+    # Also, apparently using the PowerShell built-in $HOME variable may not cut it for msysGit with has different
+    # ideas about the path to the user's home dir e.g. /c/Users/Keith
+    $homePath = Invoke-NullCoalescing $Env:HOME $Home
+    Join-Path $homePath (Join-Path .ssh $File)
 }
 
 <#
@@ -429,9 +433,8 @@ function Add-SshKey() {
         }
 
         if ($args.Count -eq 0) {
-            $keystring = ""
-            $keyPath = Join-Path $Env:HOME ".ssh"
-            $keys = Get-ChildItem $keyPath/"*.ppk" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+            $keyPath = Join-Path $Env:HOME .ssh
+            $keys = Get-ChildItem $keyPath/*.ppk -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
             & $pageant $keys
         }
         else {
@@ -465,7 +468,7 @@ function Stop-SshAgent() {
     if ($agentPid -gt 0) {
         # Stop agent process
         $proc = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
-        if ($proc -ne $null) {
+        if ($null -ne $proc) {
             Stop-Process $agentPid
         }
 
