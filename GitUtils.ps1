@@ -120,6 +120,8 @@ function GetUniquePaths($pathCollections) {
     $hash.Keys
 }
 
+$castStringSeq = [Linq.Enumerable].GetMethod("Cast").MakeGenericMethod([string])
+
 function Get-GitStatus($gitDir = (Get-GitDirectory)) {
     $settings = $Global:GitPromptSettings
     $enabled = (-not $settings) -or $settings.EnablePromptStatus
@@ -146,60 +148,91 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $stashCount = 0
 
         if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
-            dbg 'Getting status' $sw
-            $status = Invoke-Utf8ConsoleCommand { git -c color.status=false status --short --branch 2>$null }
-            if($settings.EnableStashStatus) {
-                dbg 'Getting stash count' $sw
-                $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
+            if ($settings.EnableFileStatusFromCache -eq $null) {
+                $settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
             }
-        }
-        else {
-            $status = @()
-        }
 
-        dbg 'Parsing status' $sw
-        switch -regex ($status) {
-            '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
-                if ($sw) { dbg "Status: $_" $sw }
+            if ($settings.EnableFileStatusFromCache) {
+                dbg 'Getting status from cache' $sw
+                $cacheResponse = Get-GitStatusFromCache
+                dbg 'Parsing status' $sw
 
-                switch ($matches['index']) {
-                    'A' { $null = $indexAdded.Add($matches['path1']); break }
-                    'M' { $null = $indexModified.Add($matches['path1']); break }
-                    'R' { $null = $indexModified.Add($matches['path1']); break }
-                    'C' { $null = $indexModified.Add($matches['path1']); break }
-                    'D' { $null = $indexDeleted.Add($matches['path1']); break }
-                    'U' { $null = $indexUnmerged.Add($matches['path1']); break }
+                $indexAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexAdded))))
+                $indexModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexModified))))
+                foreach ($indexRenamed in $cacheResponse.IndexRenamed) {
+                    $indexModified.Add($indexRenamed.Old)
                 }
-                switch ($matches['working']) {
-                    '?' { $null = $filesAdded.Add($matches['path1']); break }
-                    'A' { $null = $filesAdded.Add($matches['path1']); break }
-                    'M' { $null = $filesModified.Add($matches['path1']); break }
-                    'D' { $null = $filesDeleted.Add($matches['path1']); break }
-                    'U' { $null = $filesUnmerged.Add($matches['path1']); break }
+                $indexDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexDeleted))))
+                $indexUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
+
+                $filesAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingAdded))))
+                $filesModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingModified))))
+                foreach ($workingRenamed in $cacheResponse.WorkingRenamed) {
+                    $filesModified.Add($workingRenamed.Old)
                 }
-                continue
+                $filesDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingDeleted))))
+                $filesUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
+
+                $branch = $cacheResponse.Branch
+                $upstream = $cacheResponse.Upstream
+                $aheadBy = $cacheResponse.AheadBy
+                $behindBy = $cacheResponse.BehindBy
+
+                if ($cacheResponse.Stashes) { $stashCount = $cacheResponse.Stashes.Length }
+                if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
+            } else {
+                dbg 'Getting status' $sw
+                $status = Invoke-Utf8ConsoleCommand { git -c color.status=false status --short --branch 2>$null }
+                if($settings.EnableStashStatus) {
+                    dbg 'Getting stash count' $sw
+                    $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
+                }
+
+                dbg 'Parsing status' $sw
+                switch -regex ($status) {
+                    '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
+                        if ($sw) { dbg "Status: $_" $sw }
+
+                        switch ($matches['index']) {
+                            'A' { $null = $indexAdded.Add($matches['path1']); break }
+                            'M' { $null = $indexModified.Add($matches['path1']); break }
+                            'R' { $null = $indexModified.Add($matches['path1']); break }
+                            'C' { $null = $indexModified.Add($matches['path1']); break }
+                            'D' { $null = $indexDeleted.Add($matches['path1']); break }
+                            'U' { $null = $indexUnmerged.Add($matches['path1']); break }
+                        }
+                        switch ($matches['working']) {
+                            '?' { $null = $filesAdded.Add($matches['path1']); break }
+                            'A' { $null = $filesAdded.Add($matches['path1']); break }
+                            'M' { $null = $filesModified.Add($matches['path1']); break }
+                            'D' { $null = $filesDeleted.Add($matches['path1']); break }
+                            'U' { $null = $filesUnmerged.Add($matches['path1']); break }
+                        }
+                        continue
+                    }
+
+                    '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?(?<gone>gone)?\])?$' {
+                        if ($sw) { dbg "Status: $_" $sw }
+
+                        $branch = $matches['branch']
+                        $upstream = $matches['upstream']
+                        $aheadBy = [int]$matches['ahead']
+                        $behindBy = [int]$matches['behind']
+                        $gone = [string]$matches['gone'] -eq 'gone'
+                        continue
+                    }
+
+                    '^## Initial commit on (?<branch>\S+)$' {
+                        if ($sw) { dbg "Status: $_" $sw }
+
+                        $branch = $matches['branch']
+                        continue
+                    }
+
+                    default { if ($sw) { dbg "Status: $_" $sw } }
+
+                }
             }
-
-            '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?(?<gone>gone)?\])?$' {
-                if ($sw) { dbg "Status: $_" $sw }
-
-                $branch = $matches['branch']
-                $upstream = $matches['upstream']
-                $aheadBy = [int]$matches['ahead']
-                $behindBy = [int]$matches['behind']
-                $gone = [string]$matches['gone'] -eq 'gone'
-                continue
-            }
-
-            '^## Initial commit on (?<branch>\S+)$' {
-                if ($sw) { dbg "Status: $_" $sw }
-
-                $branch = $matches['branch']
-                continue
-            }
-
-            default { if ($sw) { dbg "Status: $_" $sw } }
-
         }
 
         if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
