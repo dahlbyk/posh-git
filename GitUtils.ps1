@@ -159,18 +159,16 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
                 $indexAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexAdded))))
                 $indexModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexModified))))
-                $indexRenamedOld = $cacheResponse.IndexRenamed.Old
-                if ($indexRenamedOld) {
-                    $indexModified.AddRange($castStringSeq.Invoke($null, (,@($indexRenamedOld))))
+                foreach ($indexRenamed in $cacheResponse.IndexRenamed) {
+                    $indexModified.Add($indexRenamed.Old)
                 }
                 $indexDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexDeleted))))
                 $indexUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
 
                 $filesAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingAdded))))
                 $filesModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingModified))))
-                $workingRenamedOld = $cacheResponse.WorkingRenamed.Old
-                if ($workingRenamedOld) {
-                    $filesModified.AddRange($castStringSeq.Invoke($null, (,@($workingRenamedOld))))
+                foreach ($workingRenamed in $cacheResponse.WorkingRenamed) {
+                    $filesModified.Add($workingRenamed.Old)
                 }
                 $filesDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingDeleted))))
                 $filesUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
