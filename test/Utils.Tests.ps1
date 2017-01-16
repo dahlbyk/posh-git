@@ -99,6 +99,11 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
             Test-PoshGitImportedInScript $profilePath | Should Be $true
         }
+        It 'Returns false when one-line profile script does not import posh-git' {
+            $profileContent = "# Test"
+            Set-Content $profilePath -Value $profileContent -Encoding Unicode
+            Test-PoshGitImportedInScript $profilePath | Should Be $false
+        }
         It 'Returns false when profile script does not import posh-git' {
             $profileContent = "Import-Module Pscx`nImport-Module platyPS`nImport-Module Plaster"
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
