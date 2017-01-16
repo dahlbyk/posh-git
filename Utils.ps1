@@ -163,23 +163,6 @@ function Get-PathStringComparison {
     }
 }
 
-function Get-LocalOrParentPath($path) {
-    $checkIn = Get-Item -Force .
-    if ($checkIn.PSProvider.Name -ne 'FileSystem') {
-        return $null
-    }
-    while ($null -ne $checkIn) {
-        $pathToTest = [System.IO.Path]::Combine($checkIn.fullname, $path)
-        if (Test-Path -LiteralPath $pathToTest) {
-            return $pathToTest
-        }
-        else {
-            $checkIn = $checkIn.parent
-        }
-    }
-    return $null
-}
-
 function Get-PSModulePath {
     $modulePaths = $Env:PSModulePath -split ';'
     $modulePaths

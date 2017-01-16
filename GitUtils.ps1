@@ -1,12 +1,42 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
+<#
+.SYNOPSIS
+    Gets the path to the current repository's .git dir.
+.DESCRIPTION
+    Gets the path to the current repository's .git dir.  Or if the repository
+    is a bare repository, the root directory of the repository.
+.EXAMPLE
+    PS C:\GitHub\posh-git\tests> Get-GitDirectory
+    Returns C:\GitHub\posh-git\.git
+.INPUTS
+    None.
+.OUTPUTS
+    System.String
+#>
 function Get-GitDirectory {
-    if ($Env:GIT_DIR) {
+    $pathInfo = Microsoft.PowerShell.Management\Get-Location
+    if (!$pathInfo -or $pathInfo.Provider.Name -ne 'FileSystem') {
+        $null
+    }
+    elseif ($Env:GIT_DIR) {
         $Env:GIT_DIR
     }
     else {
-        Get-LocalOrParentPath .git
+        if (Test-Path .git) {
+            [System.IO.Path]::Combine($pathInfo.Path, '.git')
+        }
+        else {
+            $gitDir = git rev-parse --git-dir 2>$null
+            if ($gitDir -eq '.') {
+                # If in root or bare repo, we get '.' back
+                $pathInfo.Path
+            }
+            else {
+                $gitDir
+            }
+        }
     }
 }
 
