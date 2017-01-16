@@ -75,7 +75,7 @@ function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
         $prefix += $matches['from']
         $filter = $matches['to']
     }
-    $branches = @(git branch --no-color | ForEach-Object { if($_ -match "^\*?\s*(?<ref>.*)") { $matches['ref'] } }) +
+    $branches = @(git branch --no-color | ForEach-Object { if(!($_ -match "^\* \(HEAD detached .+\)$") -and ($_ -match "^\*?\s*(?<ref>.*)")) { $matches['ref'] } }) +
                 @(git branch --no-color -r | ForEach-Object { if($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
     $branches |
