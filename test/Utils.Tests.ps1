@@ -12,6 +12,9 @@ Describe 'Utils Function Tests' {
             Remove-Item $profilePath -ErrorAction SilentlyContinue
         }
         It 'Creates profile file if it does not exist that imports absolute path' {
+            Mock Get-PSModulePath {
+                 return @()
+            }
             Remove-Item -LiteralPath $profilePath
             Test-Path -LiteralPath $profilePath | Should Be $false
 
