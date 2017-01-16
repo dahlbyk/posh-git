@@ -15,6 +15,7 @@ $subcommands = @{
     svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
     tfs = 'bootstrap checkin checkintool ct cleanup cleanup-workspaces clone diagnostics fetch help init pull quick-clone rcheckin shelve shelve-list unshelve verify'
     flow = 'init feature bugfix release hotfix support help version config finish delete publish rebase'
+    worktree = 'add list prune'
 }
 
 $gitflowsubcommands = @{
@@ -37,7 +38,7 @@ $script:someCommands = @('add','am','annotate','archive','bisect','blame','branc
                          'cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch',
                          'format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv',
                          'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm',
-                         'shortlog','show','stash','status','submodule','svn','tag','whatchanged')
+                         'shortlog','show','stash','status','submodule','svn','tag','whatchanged', 'worktree')
 try {
   if ($null -ne (git help -a 2>&1 | Select-String flow)) {
       $script:someCommands += 'flow'
@@ -317,6 +318,11 @@ function GitTabExpansionInternal($lastBlock) {
             gitBranches $matches['ref'] $true
             gitRemoteUniqueBranches $matches['ref']
             gitTags $matches['ref']
+        }
+
+        # Handles git worktree add <path> <ref>
+        "^worktree add.* (?<files>\S+) (?<ref>\S*)$" {
+            gitBranches $matches['ref']
         }
 
         # Handles git <cmd> <ref>
