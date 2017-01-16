@@ -37,9 +37,8 @@ else {
 $poshGitPromptScriptBlock = $null
 
 $currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
-
-# HACK: If prompt is missing, create a global one we can overwrite with Set-Item
 if (!$currentPromptDef) {
+    # HACK: If prompt is missing, create a global one we can overwrite with Set-Item
     function global:prompt { ' ' }
 }
 
@@ -110,6 +109,7 @@ $exportModuleMemberParams = @{
     Alias = @('??') # TODO: Remove in 1.0.0
     Function = @(
         'Invoke-NullCoalescing',
+        'Add-PoshGitToProfile',
         'Write-GitStatus',
         'Write-Prompt',
         'Write-VcsStatus',

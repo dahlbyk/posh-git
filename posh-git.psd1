@@ -24,6 +24,7 @@ PowerShellVersion = '2.0'
 # Functions to export from this module
 FunctionsToExport = @(
     'Invoke-NullCoalescing',
+    'Add-PoshGitToProfile',
     'Write-GitStatus',
     'Write-Prompt',
     'Write-VcsStatus',
