@@ -321,7 +321,7 @@ function GitTabExpansionInternal($lastBlock) {
         }
 
         # Handles git worktree add <path> <ref>
-        "^worktree add.* (?<files>\S*) (?<ref>\S*)$" {
+        "^worktree add.* (?<files>\S+) (?<ref>\S*)$" {
             gitBranches $matches['ref']
         }
 
