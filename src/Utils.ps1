@@ -163,6 +163,62 @@ function Get-FileEncoding($Path) {
 
 <#
 .SYNOPSIS
+    Removes posh-git from all PowerShell profile (startup) scripts.
+.DESCRIPTION
+    Checks if your PowerShell profile scripts are importing posh-git
+    and if so, removes lines related to posh-git from the script.
+.EXAMPLE
+    PS C:\> Remove-PoshGitFromProfile
+    Updates your profile script for all PowerShell hosts to not import the
+    posh-git module when the current PowerShell host starts.
+.INPUTS
+    None.
+.OUTPUTS
+    None.
+#>
+function Remove-PoshGitFromProfile([switch]$WhatIf) {
+    $underTest = $false
+
+    $profilePath = $null
+
+    # Under test, we override some variables using $args as a backdoor.
+    if ($args.Count -gt 0) {
+        $profilePath = [string]$args[0]
+        $underTest = $true
+        if ($args.Count -gt 1) {
+            $ModuleBasePath = [string]$args[1]
+        }
+    }
+
+    @(
+        $profilePath,
+        $PROFILE.CurrentUserCurrentHost,
+        $PROFILE.CurrentUserAllHosts,
+        $PROFILE.AllUsersCurrentHost,
+        $PROFILE.AllUsersAllHosts
+    ) | Where-Object { $_ -and (Test-PoshGitImportedInScript $_) } |
+        ForEach-Object {
+            $path = $_
+            $oldProfile = @(Get-Content $path)
+            $newProfile = New-Object System.Collections.Generic.List[string]
+
+            switch -Wildcard ($oldProfile) {
+                '*PoshGitPrompt*' { if ($WhatIf) { Write-Host "What if: Removing line '$_' from '$path'." } continue; }
+                '*Load posh-git example profile*' { if ($WhatIf) { Write-Host "What if: Removing line '$_' from '$path'." } continue; }
+                '*posh-git*profile.example.ps1*' { if ($WhatIf) { Write-Host "What if: Removing line '$_' from '$path'." } continue; }
+                'Import-Module *posh-git*' { if ($WhatIf) { Write-Host "What if: Removing line '$_' from '$path'." } continue; }
+                default { $newProfile.Add($_) }
+            }
+
+            if ($newProfile.Count -lt $oldProfile.Length) {
+                $encoding = Get-FileEncoding $path
+                Set-Content -Path $path -Value $newProfile -WhatIf:$WhatIf -Encoding $encoding
+            }
+        }
+}
+
+<#
+.SYNOPSIS
     Gets a StringComparison enum value appropriate for comparing paths on the OS platform.
 .DESCRIPTION
     Gets a StringComparison enum value appropriate for comparing paths on the OS platform.
