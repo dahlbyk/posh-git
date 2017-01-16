@@ -2,12 +2,15 @@
 
 Describe 'Get-GitDiretory Tests' {
     Context "Test normal repository" {
+        BeforeAll {
+            $origPath = Get-Location
+        }
+        AfterAll {
+            Set-Location $origPath
+        }
+
         It 'Returns $null for not a Git repo' {
             Set-Location $env:windir
-            Get-GitDirectory | Should BeNullOrEmpty
-        }
-        It 'Returns $null for not a filesystem path' {
-            Set-Location Cert:\CurrentUser
             Get-GitDirectory | Should BeNullOrEmpty
         }
         It 'Returns $null for not a filesystem path' {
@@ -43,6 +46,7 @@ Describe 'Get-GitDiretory Tests' {
                 Remove-Item $bareRepoPath -Recurse -Force
             }
         }
+
         It 'Returns correct path when in the root of bare repo' {
             Set-Location $bareRepoPath
             Get-GitDirectory | Should BeExactly (MakeNativePath $bareRepoPath)
