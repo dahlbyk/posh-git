@@ -58,7 +58,6 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
     Checks if your PowerShell profile script is not already importing posh-git
     and if not, adds a command to import the posh-git module. This will cause
     PowerShell to load posh-git whenever PowerShell starts.
-    imprt
 .PARAMETER AllHosts
     By default, this command modifies the CurrentUserCurrentHost profile
     script.  By specifying the AllHosts switch, the command updates the
@@ -79,7 +78,7 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
 .OUTPUTS
     None.
 #>
-function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force) {
+function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf) {
     $underTest = $false
 
     $profilePath = if ($AllHosts) { $PROFILE.CurrentUserAllHosts } else { $PROFILE.CurrentUserCurrentHost }
@@ -126,7 +125,7 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force) {
         $profileContent = "`nImport-Module '$ModuleBasePath\posh-git.psd1'"
     }
 
-    Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
+    Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8 -WhatIf:$WhatIf
 }
 
 <#
