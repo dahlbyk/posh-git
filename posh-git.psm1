@@ -113,6 +113,7 @@ $exportModuleMemberParams = @{
         'Write-GitStatus',
         'Write-Prompt',
         'Write-VcsStatus',
+        'Get-GitBranch',
         'Get-GitStatus',
         'Enable-GitColors',
         'Get-GitDirectory',
