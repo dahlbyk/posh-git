@@ -45,6 +45,9 @@ if (!$currentPromptDef) {
 if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
     # Have to use [scriptblock]::Create() to get debugger detection to work in PS v2
     $poshGitPromptScriptBlock = [scriptblock]::Create(@'
+        if ($GitPromptSettings.DefaultPromptEnableTiming) {
+            $sw = [System.Diagnostics.Stopwatch]::StartNew()
+        }
         $origLastExitCode = $global:LASTEXITCODE
 
         # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
@@ -76,15 +79,24 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
 
         # If stopped in the debugger, the prompt needs to indicate that in some fashion
         $debugMode = (Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint
-        $promptSuffix = if ($debugMode) { $GitPromptSettings.PromptDebugSuffix } else { $GitPromptSettings.PromptSuffix }
+        $promptSuffix = if ($debugMode) { $GitPromptSettings.DefaultPromptDebugSuffix } else { $GitPromptSettings.DefaultPromptSuffix }
 
         # If user specifies $null or empty string, set to ' ' to avoid "PS>" unexpectedly being displayed
         if (!$promptSuffix) {
             $promptSuffix = ' '
         }
 
+        $expandedPromptSuffix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptSuffix)
+
+        # If prompt timing enabled, display elapsed milliseconds
+        if ($GitPromptSettings.DefaultPromptEnableTiming) {
+            $sw.Stop()
+            $elapsed = $sw.ElapsedMilliseconds
+            Write-Host " ${elapsed}ms" -NoNewline
+        }
+
         $global:LASTEXITCODE = $origLastExitCode
-        $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptSuffix)
+        $expandedPromptSuffix
 '@)
 
     # Set the posh-git prompt as the default prompt

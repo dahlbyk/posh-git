@@ -204,6 +204,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
 
                 $branch = $cacheResponse.Branch
                 $upstream = $cacheResponse.Upstream
+                $gone = $cacheResponse.UpstreamGone
                 $aheadBy = $cacheResponse.AheadBy
                 $behindBy = $cacheResponse.BehindBy
 
