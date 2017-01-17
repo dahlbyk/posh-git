@@ -22,6 +22,9 @@ Set-Alias ?? Invoke-NullCoalescing -Force
 function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
     $currentEncoding = [Console]::OutputEncoding
     try {
+        # A native executable that writes to stderr AND has its stderr redirected will generate non-terminating
+        # error records if the user has set $ErrorActionPreference to Stop. Override that value in this scope.
+        $ErrorActionPreference = 'Continue'
         [Console]::OutputEncoding = [Text.Encoding]::UTF8
         & $cmd
     }
