@@ -28,6 +28,9 @@ function Get-GitDirectory {
             [System.IO.Path]::Combine($pathInfo.Path, '.git')
         }
         else {
+            # A native executable that writes to stderr AND redirects stderr will generate non-terminating
+            # error records if $ErrorActionPreference is set to Stop.
+            $ErrorActionPreference = 'Continue'
             $gitDir = git rev-parse --git-dir 2>$null
             if ($gitDir -eq '.') {
                 # If in root or bare repo, we get '.' back
