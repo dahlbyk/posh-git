@@ -19,7 +19,12 @@ Describe 'Get-GitStatus Tests' {
         }
 
         It 'Returns the correct number of modified working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## rkeithill/improve-pester-tests
  M test/Foo.Tests.ps1
  M test/Bar.Tests.ps1
@@ -41,7 +46,12 @@ Describe 'Get-GitStatus Tests' {
             $status.Upstream -eq $null | Should Be $true
         }
         It 'Returns the correct number of modified index files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## rkeithill/improve-pester-tests
 M  test/Foo.Tests.ps1
 M  test/Bar.Tests.ps1
@@ -63,7 +73,12 @@ M  test/Bar.Tests.ps1
             $status.Upstream -eq $null | Should Be $true
         }
         It 'Returns the correct number of untracked working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## rkeithill/improve-pester-tests
 ?? test/Foo.Tests.ps1
 ?? test/Bar.Tests.ps1

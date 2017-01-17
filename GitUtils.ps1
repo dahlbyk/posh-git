@@ -29,12 +29,11 @@ function Get-GitDirectory {
         }
         else {
             $gitDir = Invoke-Utf8ConsoleCommand { git rev-parse --git-dir 2>$null }
-            if ($gitDir -eq '.') {
-                # If in root or bare repo, we get '.' back
-                $pathInfo.Path
+            if (!$gitDir -or !(Test-Path -LiteralPath $gitDir)) {
+                $null
             }
             else {
-                $gitDir -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
+                (Resolve-Path $gitDir).Path
             }
         }
     }
