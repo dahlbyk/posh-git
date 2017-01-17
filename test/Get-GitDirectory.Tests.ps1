@@ -25,7 +25,7 @@ Describe 'Get-GitDiretory Tests' {
         It 'Returns correct path when under a child folder of the root of repo' {
             $repoRoot = (Resolve-Path $PSScriptRoot\..).Path
             Set-Location $PSScriptRoot
-            MakeNativePath (Get-GitDirectory) | Should BeExactly (Join-Path $repoRoot .git)
+            Get-GitDirectory | Should BeExactly (Join-Path $repoRoot .git)
         }
     }
 

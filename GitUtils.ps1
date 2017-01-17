@@ -21,7 +21,7 @@ function Get-GitDirectory {
         $null
     }
     elseif ($Env:GIT_DIR) {
-        $Env:GIT_DIR
+        $Env:GIT_DIR -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
     }
     else {
         if (Test-Path .git) {
@@ -37,7 +37,7 @@ function Get-GitDirectory {
                 $pathInfo.Path
             }
             else {
-                $gitDir
+                $gitDir -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
             }
         }
     }
