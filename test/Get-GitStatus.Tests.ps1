@@ -1,4 +1,5 @@
 # For info on Pester mocking see - http://www.powershellmagazine.com/2014/09/30/pester-mock-and-testdrive/
+
 Describe 'Get-GitStatus Tests' {
     Context 'Get-GitStatus Working Directory Tests' {
         BeforeAll {
@@ -26,7 +27,7 @@ Describe 'Get-GitStatus Tests' {
                 }
                 return @'
 ## rkeithill/more-status-tests
-'@ -split [System.Environment]::NewLine
+'@
              } -ModuleName posh-git
 
             $status = Get-GitStatus
