@@ -92,7 +92,7 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw.Stop()
             $elapsed = $sw.ElapsedMilliseconds
-            Write-Host " $($elapsed)ms" -NoNewline
+            Write-Host " ${elapsed}ms" -NoNewline
         }
 
         $global:LASTEXITCODE = $origLastExitCode
