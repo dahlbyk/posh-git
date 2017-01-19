@@ -24,17 +24,26 @@ function Get-GitDirectory {
         $Env:GIT_DIR -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
     }
     else {
-        if (Test-Path .git) {
-            [System.IO.Path]::Combine($pathInfo.Path, '.git')
-        }
-        else {
-            $gitDir = Invoke-Utf8ConsoleCommand { git rev-parse --git-dir 2>$null }
-            if (!$gitDir -or !(Test-Path -LiteralPath $gitDir)) {
-                $null
+        $currentDir = Get-Item $pathInfo -Force
+        while ($currentDir) {
+            $gitDirPath = Join-Path $currentDir.FullName .git
+            if (Test-Path -LiteralPath $gitDirPath) {
+                return $gitDirPath
             }
-            else {
-                (Resolve-Path $gitDir).Path
+
+            $headPath = Join-Path $currentDir.FullName HEAD
+            if (Test-Path -LiteralPath $headPath -PathType Leaf) {
+                $refsPath = Join-Path $currentDir.FullName refs
+                if (Test-Path -LiteralPath $refsPath -PathType Container) {
+                    $bareDir = Invoke-Utf8ConsoleCommand { git rev-parse --git-dir 2>$null }
+                    if ($bareDir -and (Test-Path -LiteralPath $bareDir)) {
+                        $resolvedBareDir = (Resolve-Path $bareDir).Path
+                        return $resolvedBareDir
+                    }
+                }
             }
+
+            $currentDir = $currentDir.Parent
         }
     }
 }
