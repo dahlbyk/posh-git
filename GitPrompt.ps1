@@ -199,6 +199,7 @@ function Write-GitStatus($status) {
             $branchStatusText            = "?"
         }
 
+        $Global:GitBranch = $status.Branch
         Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
 
         if ($branchStatusText) {
