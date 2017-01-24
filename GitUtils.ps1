@@ -6,7 +6,7 @@
     Gets the path to the current repository's .git dir.
 .DESCRIPTION
     Gets the path to the current repository's .git dir.  Or if the repository
-    is a bare repository, the root directory of the repository.
+    is a bare repository, the root directory of the bare repository.
 .EXAMPLE
     PS C:\GitHub\posh-git\tests> Get-GitDirectory
     Returns C:\GitHub\posh-git\.git
