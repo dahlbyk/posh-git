@@ -17,7 +17,7 @@
 #>
 function Get-GitDirectory {
     $pathInfo = Microsoft.PowerShell.Management\Get-Location
-    if (!$pathInfo -or $pathInfo.Provider.Name -ne 'FileSystem') {
+    if (!$pathInfo -or ($pathInfo.Provider.Name -ne 'FileSystem')) {
         $null
     }
     elseif ($Env:GIT_DIR) {
@@ -27,16 +27,19 @@ function Get-GitDirectory {
         $currentDir = Get-Item $pathInfo -Force
         while ($currentDir) {
             $gitDirPath = Join-Path $currentDir.FullName .git
-            if (Test-Path -LiteralPath $gitDirPath) {
+            if (Test-Path -LiteralPath $gitDirPath -PathType Container) {
                 return $gitDirPath
             }
 
             $headPath = Join-Path $currentDir.FullName HEAD
             if (Test-Path -LiteralPath $headPath -PathType Leaf) {
                 $refsPath = Join-Path $currentDir.FullName refs
-                if (Test-Path -LiteralPath $refsPath -PathType Container) {
+                $objsPath = Join-Path $currentDir.FullName objects
+                if ((Test-Path -LiteralPath $refsPath -PathType Container) -and
+                    (Test-Path -LiteralPath $objsPath -PathType Container)) {
+
                     $bareDir = Invoke-Utf8ConsoleCommand { git rev-parse --git-dir 2>$null }
-                    if ($bareDir -and (Test-Path -LiteralPath $bareDir)) {
+                    if ($bareDir -and (Test-Path -LiteralPath $bareDir -PathType Container)) {
                         $resolvedBareDir = (Resolve-Path $bareDir).Path
                         return $resolvedBareDir
                     }
