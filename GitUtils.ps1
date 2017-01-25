@@ -188,7 +188,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir) -and !$(InDisabledRepository)) {
+        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $gitDir) -and !$(InDisabledRepository)) {
             if ($settings.EnableFileStatusFromCache -eq $null) {
                 $settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
             }

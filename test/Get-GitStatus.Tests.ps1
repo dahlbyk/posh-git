@@ -3,6 +3,8 @@
 Describe 'Get-GitStatus Tests' {
     Context 'Get-GitStatus Working Directory Tests' {
         BeforeAll {
+            Set-Location $PSScriptRoot
+
             function global:git {
                 $cmdline = "$args"
                 switch ($cmdline) {
