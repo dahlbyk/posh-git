@@ -188,7 +188,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
+        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir) -and !$(InDisabledRepository)) {
             if ($settings.EnableFileStatusFromCache -eq $null) {
                 $settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
             }
@@ -329,6 +329,17 @@ function InDisabledRepository {
     }
 
     return $false
+}
+
+function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
+    # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
+    # However for any path with a drive defined, it's better to use the Path property.
+    # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
+    # The latter is more desirable.
+    $pathInfo = Microsoft.PowerShell.Management\Get-Location
+    $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
+    $res = $currentPath.StartsWith($GitDir, (Get-PathStringComparison))
+    $res
 }
 
 function Enable-GitColors {
