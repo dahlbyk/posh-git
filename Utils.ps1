@@ -43,7 +43,7 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
             $numNewErrors = $global:Error.Count - $errorCount
             $invokeErrors.InsertRange(0, $global:Error.GetRange(0, $numNewErrors))
             if ($invokeErrors.Count -gt 256) {
-                $invokeErrors.RemoveRange(0, ($invokeErrors.Count - 256))
+                $invokeErrors.RemoveRange(256, ($invokeErrors.Count - 256))
             }
             $global:Error.RemoveRange(0, $numNewErrors)
         }
