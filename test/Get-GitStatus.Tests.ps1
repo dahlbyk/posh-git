@@ -1,7 +1,10 @@
 # For info on Pester mocking see - http://www.powershellmagazine.com/2014/09/30/pester-mock-and-testdrive/
+
 Describe 'Get-GitStatus Tests' {
     Context 'Get-GitStatus Working Directory Tests' {
         BeforeAll {
+            Set-Location $PSScriptRoot
+
             function global:git {
                 $cmdline = "$args"
                 switch ($cmdline) {
@@ -19,9 +22,14 @@ Describe 'Get-GitStatus Tests' {
         }
 
         It 'Returns the correct branch name' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## rkeithill/more-status-tests
-'@ -split [System.Environment]::NewLine
+'@
              } -ModuleName posh-git
 
             $status = Get-GitStatus
@@ -31,7 +39,12 @@ Describe 'Get-GitStatus Tests' {
 
 
         It 'Returns the correct number of added untracked working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 ?? test/Foo.Tests.ps1
 ?? test/Bar.Tests.ps1
@@ -51,7 +64,12 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Added[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of added working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
  A test/Foo.Tests.ps1
  A test/Bar.Tests.ps1
@@ -71,7 +89,12 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Added[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of deleted working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
  D test/Foo.Tests.ps1
  D test/Bar.Tests.ps1
@@ -91,7 +114,12 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Deleted[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of modified working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
  M test/Foo.Tests.ps1
  M test/Bar.Tests.ps1
@@ -111,7 +139,12 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Modified[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of unmerged working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
  U test/Foo.Tests.ps1
  U test/Bar.Tests.ps1
@@ -131,7 +164,12 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Unmerged[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of mixed working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
  ? test/Untracked.Tests.ps1
  A test/Added.Tests.ps1
@@ -158,7 +196,12 @@ Describe 'Get-GitStatus Tests' {
         }
 
         It 'Returns the correct number of added index files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 A  test/Foo.Tests.ps1
 A  test/Bar.Tests.ps1
@@ -178,7 +221,12 @@ A  test/Bar.Tests.ps1
             $status.Index.Added[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of deleted index files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 D  test/Foo.Tests.ps1
 D  test/Bar.Tests.ps1
@@ -198,7 +246,12 @@ D  test/Bar.Tests.ps1
             $status.Index.Deleted[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of copied index files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 C  test/Foo.Tests.ps1
 C  test/Bar.Tests.ps1
@@ -218,7 +271,12 @@ C  test/Bar.Tests.ps1
             $status.Index.Modified[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of modified index files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 M  test/Foo.Tests.ps1
 M  test/Bar.Tests.ps1
@@ -238,7 +296,12 @@ M  test/Bar.Tests.ps1
             $status.Index.Modified[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of modified index files for a rename' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 R  README.md -> README2.md
 '@ -split [System.Environment]::NewLine
@@ -256,7 +319,12 @@ R  README.md -> README2.md
             $status.Index.Modified[0] | Should Be "README.md"
         }
         It 'Returns the correct number of unmerged index files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 U  test/Foo.Tests.ps1
 U  test/Bar.Tests.ps1
@@ -276,7 +344,12 @@ U  test/Bar.Tests.ps1
             $status.Index.Unmerged[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of mixed index files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 A  test/Added.Tests.ps1
 D  test/Deleted.Tests.ps1
@@ -305,7 +378,12 @@ U  test/Unmerged.Tests.ps1
         }
 
         It 'Returns the correct number of mixed index and working files' {
-            Mock git { return @'
+            Mock git {
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "git.exe $args"
+                    return $res
+                }
+                return @'
 ## master
 A  test/Added.Tests.ps1
 D  test/Deleted.Tests.ps1

@@ -1,12 +1,53 @@
 # Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
+<#
+.SYNOPSIS
+    Gets the path to the current repository's .git dir.
+.DESCRIPTION
+    Gets the path to the current repository's .git dir.  Or if the repository
+    is a bare repository, the root directory of the bare repository.
+.EXAMPLE
+    PS C:\GitHub\posh-git\tests> Get-GitDirectory
+    Returns C:\GitHub\posh-git\.git
+.INPUTS
+    None.
+.OUTPUTS
+    System.String
+#>
 function Get-GitDirectory {
-    if ($Env:GIT_DIR) {
-        $Env:GIT_DIR
+    $pathInfo = Microsoft.PowerShell.Management\Get-Location
+    if (!$pathInfo -or ($pathInfo.Provider.Name -ne 'FileSystem')) {
+        $null
+    }
+    elseif ($Env:GIT_DIR) {
+        $Env:GIT_DIR -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
     }
     else {
-        Get-LocalOrParentPath .git
+        $currentDir = Get-Item $pathInfo -Force
+        while ($currentDir) {
+            $gitDirPath = Join-Path $currentDir.FullName .git
+            if (Test-Path -LiteralPath $gitDirPath -PathType Container) {
+                return $gitDirPath
+            }
+
+            $headPath = Join-Path $currentDir.FullName HEAD
+            if (Test-Path -LiteralPath $headPath -PathType Leaf) {
+                $refsPath = Join-Path $currentDir.FullName refs
+                $objsPath = Join-Path $currentDir.FullName objects
+                if ((Test-Path -LiteralPath $refsPath -PathType Container) -and
+                    (Test-Path -LiteralPath $objsPath -PathType Container)) {
+
+                    $bareDir = Invoke-Utf8ConsoleCommand { git rev-parse --git-dir 2>$null }
+                    if ($bareDir -and (Test-Path -LiteralPath $bareDir -PathType Container)) {
+                        $resolvedBareDir = (Resolve-Path $bareDir).Path
+                        return $resolvedBareDir
+                    }
+                }
+            }
+
+            $currentDir = $currentDir.Parent
+        }
     }
 }
 
@@ -147,7 +188,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if($settings.EnableFileStatus -and !$(InDisabledRepository)) {
+        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $gitDir) -and !$(InDisabledRepository)) {
             if ($settings.EnableFileStatusFromCache -eq $null) {
                 $settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
             }
@@ -288,6 +329,17 @@ function InDisabledRepository {
     }
 
     return $false
+}
+
+function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
+    # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
+    # However for any path with a drive defined, it's better to use the Path property.
+    # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
+    # The latter is more desirable.
+    $pathInfo = Microsoft.PowerShell.Management\Get-Location
+    $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
+    $res = $currentPath.StartsWith($GitDir, (Get-PathStringComparison))
+    $res
 }
 
 function Enable-GitColors {
