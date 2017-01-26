@@ -5,8 +5,7 @@
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt e.g.:
 ```
-[master +0 ~1 -0 | +1 ~0 -0 !]
-C:\GitHub\posh-git>
+~\GitHub\dahlbyk\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 posh-git also provides tab completion support for common git commands and branch names.
 For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing the <kbd>tab</kbd> key.
@@ -95,6 +94,7 @@ Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that
 ### Step 3 (optional): Customize Your PowerShell Prompt
 By default, posh-git will update your PowerShell prompt function to display Git status summary information when the current dir is inside a Git repository.
 posh-git will not update your PowerShell prompt function if you have a customized prompt function that has been defined before importing posh-git.
+
 The posh-git prompt is a single line prompt that looks like this:
 ```
 ~\GitHub\dahlbyk\posh-git [master ≡ +0 ~1 -0 !]>
