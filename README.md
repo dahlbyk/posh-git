@@ -1,5 +1,6 @@
 # posh-git
 
+[![Build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80?svg=true)](https://ci.appveyor.com/project/dahlbyk/posh-git)
 [![Join the chat at https://gitter.im/dahlbyk/posh-git](https://badges.gitter.im/dahlbyk/posh-git.svg)](https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt e.g.:
@@ -32,7 +33,7 @@ Before installing posh-git make sure the following prerequisites have been met.
 3. Git must be installed and available via the PATH environment variable.
    Check that `git` is accessible from PowerShell by executing `git --version` from PowerShell.
    If `git` is not recognized as the name of a command verify that you have Git installed.
-   If not, install Git from [http://git-scm.org](http://git-scm.org).
+   If not, install Git from [https://git-scm.com](git-scm.com).
    If you have Git installed, make sure the path to git.exe is in your PATH environment variable.
 
 ### Installing posh-git via PowerShellGet
@@ -71,9 +72,18 @@ After you have installed posh-git, you need to configure your PowerShell session
 ### Step 1: Import posh-git
 The first step is to import the module into your PowerShell session which will enable git tab completion.
 You can do this with the command `Import-Module posh-git`.
-However, you do not want to have to do that every time you open a new PowerShell prompt.
-So let's have PowerShell import this module for you in each new PowerShell session.
-We can do this by placing the import command in your PowerShell profile script.
+
+### Step 2: Import posh-git from Your PowerShell Profile
+You do not want to have to manually execute the `Import-Module` command every time you open a new PowerShell prompt.
+Let's have PowerShell import this module for you in each new PowerShell session.
+We can do this by either executing the command `Add-PoshGitToProfile` or by editing your PowerShell profile script and adding the command `Import-Module posh-git`.
+
+If you want posh-git to be available in all your PowerShell hosts (console, ISE, etc) then execute `Add-PoshGitToProfile -AllHosts`.
+This will add a line containing `Import-Module posh-git` to the file `$profile.CurrentUserAllHosts`.
+If you want posh-git to be available in just the current host, then execute `Add-PoshGitToProfile`.
+This will add the same command but to the file `$profile.CurrentUserCurrentHost`.
+
+If you'd prefer you can manually edit the desired PowerShell profile script.
 Open (or create) your profile script with the command `notepad $profile.CurrentUserAllHosts`.
 In the profile script, add the following line:
 ```
@@ -82,10 +92,24 @@ Import-Module posh-git
 Save the profile script, then close PowerShell and open a new PowerShell session.
 Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to `git fetch`.
 
-The second step is setting up your PowerShell prompt to display Git status summary information and that is covered in the next section.
-
-### Step 2: Customize Your PowerShell Prompt
-Your PowerShell prompt can be customized to show whatever information you want.
+### Step 3 (optional): Customize Your PowerShell Prompt
+By default, posh-git will update your PowerShell prompt function to display Git status summary information when the current dir is inside a Git repository.
+posh-git will not update your PowerShell prompt function if you have a customized prompt function that has been defined before importing posh-git.
+The posh-git prompt is a single line prompt that looks like this:
+```
+~\GitHub\dahlbyk\posh-git [master ≡ +0 ~1 -0 !]>
+```
+You can customize the posh-git prompt or define your own custom prompt function.
+The most common customization for the posh-git provided prompt is to make it span two lines which can be done with the following command:
+```
+$GitPromptSettings.DefaultPromptSuffix = '`n$(''>'' * ($nestedPromptLevel + 1)) '
+```
+This will change the prompt to:
+```
+~\GitHub\dahlbyk\posh-git [master ≡ +0 ~1 -0 !]
+>
+```
+You can also create your own prompt function to show whatever information you want.
 In PowerShell, the "prompt" text is provided by a function named `prompt`.
 PowerShell provides you with a default `prompt` function that is defined as:
 ```
@@ -114,9 +138,8 @@ C:\Users
 ```
 Now let's look at how to integrate posh-git's Git status summary information into your prompt.
 Open your profile script by executing `powershell_ise $profile.CurrentUserAllHosts`.
-Insert the following prompt function **after** the line that imports the posh-git module.
+Insert the following prompt function **before** the line that imports the posh-git module.
 ```
-Import-Module posh-git
 function prompt {
     $origLastExitCode = $LASTEXITCODE
     Write-Host $ExecutionContext.SessionState.Path.CurrentLocation -NoNewline
@@ -124,10 +147,12 @@ function prompt {
     $LASTEXITCODE = $origLastExitCode
     "$('>' * ($nestedPromptLevel + 1)) "
 }
+
+Import-Module posh-git
 ```
 This results in a PowerShell prompt with both the current path and Git status summary information on a single line:
 ```
-C:\Users\Keith\GitHub\rkeithhill\posh-git [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !]> _
+C:\Users\Keith\GitHub\dahlbyk\posh-git [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !]> _
 ```
 Nice!  But that doesn't leave much room to type a command without the command wrapping to the next line.
 Personally, I prefer to display my Git status summary information and current path on the line above the prompt, like this:
@@ -143,7 +168,7 @@ function prompt {
 ```
 This gives us the prompt:
 ```
- [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !]C:\Users\Keith\GitHub\rkeithhill\posh-git
+ [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !]C:\Users\Keith\GitHub\dahlbyk\posh-git
 > _
 ```
 This puts the prompt cursor on its own line giving me plenty of room to type commands without them wrapping.
@@ -167,7 +192,7 @@ function prompt {
 ```
 This gives us the prompt:
 ```
-[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] C:\Users\Keith\GitHub\rkeithhill\posh-git
+[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] C:\Users\Keith\GitHub\dahlbyk\posh-git
 > _
 ```
 This is better with spaces in the right places.
@@ -197,7 +222,7 @@ function prompt {
 ```
 This gives us a prompt with a shortened current path:
 ```
-[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ~\GitHub\rkeithhill\posh-git
+[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ~\GitHub\dahlbyk\posh-git
 > _
 ```
 The following prompt function allows you to set a max length for the current path:
@@ -222,7 +247,7 @@ function prompt {
 ```
 This gives us a prompt with a current path that is never greater than 40 characters.
 ```
-[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ...sers\Keith\GitHub\rkeithhill\posh-git
+[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ...sers\Keith\GitHub\dahlbyk\posh-git
 > _
 ```
 For more in-depth information on PowerShell prompts, see the online PowerShell help topic [about_prompts](https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.core/about/about_prompts).
