@@ -1,4 +1,5 @@
-. $PSScriptRoot\..\Utils.ps1
+. $PSScriptRoot\Shared.ps1
+. $modulePath\Utils.ps1
 
 Describe 'Utils Function Tests' {
     Context 'Add-PoshGitToProfile Tests' {
@@ -24,7 +25,6 @@ Describe 'Utils Function Tests' {
             Get-FileEncoding $profilePath | Should Be 'utf8'
             $content = Get-Content $profilePath
             $content.Count | Should Be 2
-            $modulePath = Resolve-Path $PSScriptRoot\..
             @($content)[1] | Should BeExactly "Import-Module '$modulePath\posh-git.psd1'"
         }
         It 'Creates profile file if it does not exist that imports from module path' {
