@@ -1,4 +1,5 @@
 # For info on Pester mocking see - http://www.powershellmagazine.com/2014/09/30/pester-mock-and-testdrive/
+. $PSScriptRoot\Shared.ps1
 
 Describe 'Get-GitStatus Tests' {
     Context 'Get-GitStatus Working Directory Tests' {

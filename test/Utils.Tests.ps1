@@ -1,4 +1,5 @@
-. $PSScriptRoot\..\Utils.ps1
+. $PSScriptRoot\Shared.ps1
+. $modulePath\Utils.ps1
 
 Describe 'Utils Function Tests' {
     Context 'Add-PoshGitToProfile Tests' {
@@ -12,6 +13,9 @@ Describe 'Utils Function Tests' {
             Remove-Item $profilePath -ErrorAction SilentlyContinue
         }
         It 'Creates profile file if it does not exist that imports absolute path' {
+            Mock Get-PSModulePath {
+                 return @()
+            }
             Remove-Item -LiteralPath $profilePath
             Test-Path -LiteralPath $profilePath | Should Be $false
 
@@ -21,7 +25,6 @@ Describe 'Utils Function Tests' {
             Get-FileEncoding $profilePath | Should Be 'utf8'
             $content = Get-Content $profilePath
             $content.Count | Should Be 2
-            $modulePath = Resolve-Path $PSScriptRoot\..
             @($content)[1] | Should BeExactly "Import-Module '$modulePath\posh-git.psd1'"
         }
         It 'Creates profile file if it does not exist that imports from module path' {
@@ -95,6 +98,11 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             $profileContent = ". 'C:\tools\poshgit\dahlbyk-posh-git-18d600a\profile.example.ps1"
             Set-Content $profilePath -Value $profileContent -Encoding Unicode
             Test-PoshGitImportedInScript $profilePath | Should Be $true
+        }
+        It 'Returns false when one-line profile script does not import posh-git' {
+            $profileContent = "# Test"
+            Set-Content $profilePath -Value $profileContent -Encoding Unicode
+            Test-PoshGitImportedInScript $profilePath | Should Be $false
         }
         It 'Returns false when profile script does not import posh-git' {
             $profileContent = "Import-Module Pscx`nImport-Module platyPS`nImport-Module Plaster"

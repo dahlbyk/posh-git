@@ -4,7 +4,7 @@ $poshGitModule = Get-Module posh-git -ListAvailable | Sort-Object Version -Desce
 if ($poshGitModule) {
     $poshGitModule | Import-Module
 }
-elseif (Test-Path -LiteralPath ($modulePath = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) 'posh-git.psd1')) {
+elseif (Test-Path -LiteralPath ($modulePath = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) (Join-Path src 'posh-git.psd1'))) {
     Import-Module $modulePath
 }
 else {
@@ -16,3 +16,5 @@ else {
 #     $Global:GitPromptSettings.BranchBehindAndAheadDisplay = "Compact"
 
 Start-SshAgent -Quiet
+
+Write-Warning "posh-git's profile.example.ps1 will be removed in a future version. To avoid a change in behavior, copy its contents into your $PROFILE."
