@@ -4,14 +4,14 @@
 
     try {
       if (test-path($poshgitPath)) {
-        Write-Host "Attempting to remove existing `'$poshgitPath`' prior to install."
+        Write-Host "Attempting to remove existing `'$poshgitPath`'."
         remove-item $poshgitPath -recurse -force
       }
     } catch {
       Write-Host "Could not remove `'$poshgitPath`'"
     }
 
-    $poshGitInstall = if($env:poshGit -ne $null){ $env:poshGit } else {'https://github.com/dahlbyk/posh-git/zipball/master'}
+    $poshGitInstall = if ($env:poshGit ) { $env:poshGit } else { 'https://github.com/dahlbyk/posh-git/zipball/master' }
     Install-ChocolateyZipPackage 'poshgit' $poshGitInstall $poshgitPath
     $pgitDir = Dir "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select -Last 1
 
@@ -26,7 +26,7 @@
             if($line.ToLower().Contains("$poshgitPath".ToLower())) {
                 $line = ". '$pgitExample'"
             }
-            if($line.Trim().Length -gt 0) {  $newProfile += $line }
+            $newProfile += $line
         }
         Set-Content -path $profile -value $newProfile -Force
     }
