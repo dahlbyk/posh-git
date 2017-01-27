@@ -82,7 +82,7 @@ This will add a line containing `Import-Module posh-git` to the file `$profile.C
 If you want posh-git to be available in just the current host, then execute `Add-PoshGitToProfile`.
 This will add the same command but to the file `$profile.CurrentUserCurrentHost`.
 
-If you'd prefer you can manually edit the desired PowerShell profile script.
+If you'd prefer, you can manually edit the desired PowerShell profile script.
 Open (or create) your profile script with the command `notepad $profile.CurrentUserAllHosts`.
 In the profile script, add the following line:
 ```
@@ -93,7 +93,7 @@ Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that
 
 ### Step 3 (optional): Customize Your PowerShell Prompt
 By default, posh-git will update your PowerShell prompt function to display Git status summary information when the current dir is inside a Git repository.
-posh-git will not update your PowerShell prompt function if you have a customized prompt function that has been defined before importing posh-git.
+posh-git will not update your PowerShell prompt function if you have your own customized prompt function that has been defined before importing posh-git.
 
 The posh-git prompt is a single line prompt that looks like this:
 ```
@@ -110,147 +110,7 @@ This will change the prompt to:
 >
 ```
 You can also create your own prompt function to show whatever information you want.
-In PowerShell, the "prompt" text is provided by a function named `prompt`.
-PowerShell provides you with a default `prompt` function that is defined as:
-```
-# Built-in, default PowerShell prompt
-function prompt {
-    "PS $($ExecutionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
-}
-```
-You can override the built-in `prompt` function by merely defining the following function in your profile script:
-```
-function prompt {
-    Write-Host $ExecutionContext.SessionState.Path.CurrentLocation -ForegroundColor Cyan
-    "$('>' * ($nestedPromptLevel + 1)) "
-}
-```
-This prompt function illustrates a few features of PowerShell prompt functions.
-First, a string that is output by a function can't indicate a color to use to display the string.
-Well, at least not on Windows 8.1 and below.
-In Windows 10 and on Linux and macOS, PowerShell can utilitize ANSI sequences to colorize parts of the string.
-For this example, let's assume we're running on PowerShell v4 on Windows 7.
-The `Write-Host` command allows us to output text, the current path in this case, with a different foreground and/or background color.
-`Write-Host` host also outputs a newline by default, so the `> ` prompt will appear on the line below the path e.g.:
-```
-C:\Users
-> _
-```
-Now let's look at how to integrate posh-git's Git status summary information into your prompt.
-Open your profile script by executing `powershell_ise $profile.CurrentUserAllHosts`.
-Insert the following prompt function **before** the line that imports the posh-git module.
-```
-function prompt {
-    $origLastExitCode = $LASTEXITCODE
-    Write-Host $ExecutionContext.SessionState.Path.CurrentLocation -NoNewline
-    Write-VcsStatus
-    $LASTEXITCODE = $origLastExitCode
-    "$('>' * ($nestedPromptLevel + 1)) "
-}
-
-Import-Module posh-git
-```
-This results in a PowerShell prompt with both the current path and Git status summary information on a single line:
-```
-C:\Users\Keith\GitHub\dahlbyk\posh-git [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !]> _
-```
-Nice!  But that doesn't leave much room to type a command without the command wrapping to the next line.
-Personally, I prefer to display my Git status summary information and current path on the line above the prompt, like this:
-```
-Import-Module posh-git
-function prompt {
-    $origLastExitCode = $LASTEXITCODE
-    Write-VcsStatus
-    Write-Host $ExecutionContext.SessionState.Path.CurrentLocation
-    $LASTEXITCODE = $origLastExitCode
-    "$('>' * ($nestedPromptLevel + 1)) "
-}
-```
-This gives us the prompt:
-```
- [rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !]C:\Users\Keith\GitHub\dahlbyk\posh-git
-> _
-```
-This puts the prompt cursor on its own line giving me plenty of room to type commands without them wrapping.
-However, this is not quite right.
-I have an extra space before the Git status summary and no space before the current path.
-This is where having the `$global:GitPromptSettings` is useful for further customization.
-The text that appears at the start of the Git status summary is provided by `$global:GitPromptSettings.BeforeText` which defaults to `" ["`.
-To see all the settings in `$global:GitPromptSettings`, simply execute `$global:GitPromptSettings` at the PowerShell prompt.
-Let's change that setting and add a space before the current path and let's put some color in our path as well:
-```
-Import-Module posh-git
-$global:GitPromptSettings.BeforeText = '['
-$global:GitPromptSettings.AfterText  = '] '
-function prompt {
-    $origLastExitCode = $LASTEXITCODE
-    Write-VcsStatus
-    Write-Host $ExecutionContext.SessionState.Path.CurrentLocation -ForegroundColor Green
-    $LASTEXITCODE = $origLastExitCode
-    "$('>' * ($nestedPromptLevel + 1)) "
-}
-```
-This gives us the prompt:
-```
-[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] C:\Users\Keith\GitHub\dahlbyk\posh-git
-> _
-```
-This is better with spaces in the right places.
-
-Hopefully, you can see various ways you can customize your prompt to your liking.
-
-Here are a couple of more variations on the prompt function that deal with long paths.
-First, here is an example that will collapse the home dir part of your path e.g. `C:\Users\<your-username>` to just `~`:
-```
-Import-Module posh-git
-$global:GitPromptSettings.BeforeText = '['
-$global:GitPromptSettings.AfterText  = '] '
-function prompt {
-    $origLastExitCode = $LASTEXITCODE
-    Write-VcsStatus
-
-    $curPath = $ExecutionContext.SessionState.Path.CurrentLocation.Path
-    if ($curPath.ToLower().StartsWith($Home.ToLower()))
-    {
-        $curPath = "~" + $curPath.SubString($Home.Length)
-    }
-
-    Write-Host $curPath -ForegroundColor Green
-    $LASTEXITCODE = $origLastExitCode
-    "$('>' * ($nestedPromptLevel + 1)) "
-}
-```
-This gives us a prompt with a shortened current path:
-```
-[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ~\GitHub\dahlbyk\posh-git
-> _
-```
-The following prompt function allows you to set a max length for the current path:
-```
-Import-Module posh-git
-$global:GitPromptSettings.BeforeText = '['
-$global:GitPromptSettings.AfterText  = '] '
-function prompt {
-    $origLastExitCode = $LASTEXITCODE
-    Write-VcsStatus
-
-    $maxPathLength = 40
-    $curPath = $ExecutionContext.SessionState.Path.CurrentLocation.Path
-    if ($curPath.Length -gt $maxPathLength) {
-        $curPath = '...' + $curPath.SubString($curPath.Length - $maxPathLength + 3)
-    }
-
-    Write-Host $curPath -ForegroundColor Green
-    $LASTEXITCODE = $origLastExitCode
-    "$('>' * ($nestedPromptLevel + 1)) "
-}
-```
-This gives us a prompt with a current path that is never greater than 40 characters.
-```
-[rkeithhill/more-readme-tweaks +0 ~1 -0 | +0 ~1 -0 !] ...sers\Keith\GitHub\dahlbyk\posh-git
-> _
-```
-For more in-depth information on PowerShell prompts, see the online PowerShell help topic [about_prompts](https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.core/about/about_prompts).
+See the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt) wiki page for details.
 
 ## Git Status Summary Information
 The Git status summary information provides a wealth of "Git status" information at a glance, all the time in your prompt.
