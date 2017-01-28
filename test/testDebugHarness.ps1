@@ -1,2 +1,2 @@
 
-Invoke-Pester $PSScriptRoot\Utils.Tests.ps1
+Invoke-Pester $PSScriptRoot
