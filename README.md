@@ -39,7 +39,7 @@ Before installing posh-git make sure the following prerequisites have been met.
 If you are on PowerShell version 5 or higher, execute the command below to install from the [PowerShell Gallery](https://www.powershellgallery.com/):
 
 ```
-Install-Module posh-git -Scope CurrentUser
+PowerShellGet\Install-Module posh-git -Scope CurrentUser
 ```
 You may be asked if you trust packages coming from the PowerShell Gallery. Answer yes to allow installation of this module to proceed.
 
