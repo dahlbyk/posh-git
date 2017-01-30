@@ -40,9 +40,7 @@ try {
         Set-Content -path $profile -value $newProfile -Force
     }
 
-    $subfolder = get-childitem $poshgitPath -recurse -include 'dahlbyk-posh-git-*' | select -First 1
-    write-debug "Found and using folder `'$subfolder`'"
-    $installer = Join-Path $subfolder 'install.ps1'
+    $installer = Join-Path $pgitDir 'install.ps1'
     & $installer
 
     $newProfile = @(Get-Content $PROFILE)
