@@ -24,6 +24,9 @@
             if($line -like '. *posh-git*profile.example.ps1*') {
                 $line = ". '$currentVersionPath\profile.example.ps1'"
             }
+            if($line -like 'Import-Module *\src\posh-git.psd1*') {
+                $line = "Import-Module '$currentVersionPath\src\posh-git.psd1'"
+            }
             $newProfile += $line
         }
         Set-Content -path $profile -value $newProfile -Force
