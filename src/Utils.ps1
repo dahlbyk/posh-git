@@ -205,7 +205,7 @@ function Test-InPSModulePath {
 
 function Test-PoshGitImportedInScript {
     param (
-        [Parameter(Position=0, Mandatory=$true)]
+        [Parameter(Position=0)]
         [string]
         $Path
     )
