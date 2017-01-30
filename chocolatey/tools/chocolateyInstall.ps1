@@ -40,6 +40,9 @@ try {
         Set-Content -path $profile -value $newProfile -Force
     }
 
+    $installer = Join-Path $pgitDir 'install.ps1'
+    & $installer
+
     $newProfile = @(Get-Content $PROFILE)
     Insert-Script ([REF]$newProfile) "Rename-Item Function:\Prompt PoshGitPrompt -Force"
 
