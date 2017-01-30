@@ -84,7 +84,8 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
     $profilePath = if ($AllHosts) { $PROFILE.CurrentUserAllHosts } else { $PROFILE.CurrentUserCurrentHost }
 
     # Under test, we override some variables using $args as a backdoor.
-    if ($args.Count -gt 0) {
+    # TODO: Can we just turn these into optional parameters with well-defined behavior?
+    if (($args.Count -gt 0) -and ($args[0] -is [string])) {
         $profilePath = [string]$args[0]
         $underTest = $true
         if ($args.Count -gt 1) {
@@ -205,7 +206,7 @@ function Test-InPSModulePath {
 
 function Test-PoshGitImportedInScript {
     param (
-        [Parameter(Position=0, Mandatory=$true)]
+        [Parameter(Position=0)]
         [string]
         $Path
     )
