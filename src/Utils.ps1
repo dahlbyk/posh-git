@@ -118,6 +118,11 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
         }
     }
 
+    if (!$profilePath) {
+        Write-Warning "Skipping add of posh-git import; no profile found."
+        return
+    }
+
     # Check if the location of this module file is in the PSModulePath
     if (Test-InPSModulePath $ModuleBasePath) {
         $profileContent = "`nImport-Module posh-git"
