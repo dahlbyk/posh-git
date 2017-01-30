@@ -14,7 +14,7 @@
     $version = "v$Env:chocolateyPackageVersion"
     if ($version -eq 'v') { $version = 'master' }
     $poshGitInstall = if ($env:poshGit ) { $env:poshGit } else { "https://github.com/dahlbyk/posh-git/zipball/$version" }
-    Install-ChocolateyZipPackage 'poshgit' $poshGitInstall $poshgitPath
+    $zip = Install-ChocolateyZipPackage 'poshgit' $poshGitInstall $poshgitPath
     $currentVersionPath = Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
 
     if(Test-Path $PROFILE) {
