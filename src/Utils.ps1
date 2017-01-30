@@ -121,6 +121,7 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
     if (!$profilePath) {
         Write-Warning "Skipping add of posh-git import; no profile found."
         Write-Verbose "`$profilePath          = '$profilePath'"
+        Write-Verbose "`$PROFILE              = '$PROFILE'"
         Write-Verbose "CurrentUserCurrentHost = '${PROFILE.CurrentUserCurrentHost}'"
         Write-Verbose "CurrentUserAllHosts    = '${PROFILE.CurrentUserAllHosts}'"
         Write-Verbose "AllUsersCurrentHost    = '${PROFILE.AllUsersCurrentHost}'"
