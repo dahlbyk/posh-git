@@ -120,6 +120,11 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
 
     if (!$profilePath) {
         Write-Warning "Skipping add of posh-git import; no profile found."
+        Write-Verbose "`$profilePath          = '$profilePath'"
+        Write-Verbose "CurrentUserCurrentHost = '${PROFILE.CurrentUserCurrentHost}'"
+        Write-Verbose "CurrentUserAllHosts    = '${PROFILE.CurrentUserAllHosts}'"
+        Write-Verbose "AllUsersCurrentHost    = '${PROFILE.AllUsersCurrentHost}'"
+        Write-Verbose "AllUsersAllHosts       = '${PROFILE.AllUsersAllHosts}'"
         return
     }
 
@@ -220,7 +225,9 @@ function Test-PoshGitImportedInScript {
         return $false
     }
 
-    (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'posh-git').Count -gt 0
+    $match = (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'posh-git').Count -gt 0
+    if ($match) { Write-Verbose "posh-git found in '$Path'" }
+    $match
 }
 
 function dbg($Message, [Diagnostics.Stopwatch]$Stopwatch) {
