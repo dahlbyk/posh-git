@@ -1,5 +1,7 @@
-**Check the [posh-git FAQ](https://github.com/dahlbyk/posh-git/wiki/FAQ) first and if your question is not answered, PLEASE fill in these details so that we can help you!**
-
+<!--
+Check the FAQ https://github.com/dahlbyk/posh-git/wiki/FAQ to see if your issue is addressed there.
+If not, PLEASE fill in these details so that we can help you!
+-->
 ### System Details
 
 - posh-git version:
@@ -7,10 +9,12 @@
 - Git version:
 - Operating system name and version:
 
-```powershell
-# To retrieve the above system details, paste the following line into PowerShell, press Enter and then copy the resulting output here
-"`nposh-git version: $((Get-Module posh-git).Version), PSVersion: $($PSVersionTable.PSVersion), $(git --version), OS: $([System.Environment]::OSVersion)"
-```
+<!--
+To retrieve the system details, paste the following line into PowerShell, press Enter
+and then copy/paste the resulting output above.
+
+"posh-git version: $((Get-Module posh-git).Version)`nPowerShell version: $($PSVersionTable.PSVersion)`n$(git --version)`nOS: $([System.Environment]::OSVersion)"
+-->
 
 ### Issue Description
 
