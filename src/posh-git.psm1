@@ -66,7 +66,7 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
         }
 
         # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
-        if ($currentPath -and $currentPath.StartsWith($Home, $stringComparison))
+        if ($GitPromptSettings.AbbreviateHomeDirectory -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison))
         {
             $currentPath = "~" + $currentPath.SubString($Home.Length)
         }
