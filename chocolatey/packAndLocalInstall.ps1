@@ -3,13 +3,14 @@ pushd $PSScriptRoot
 
 $nuspec = [xml](Get-Content poshgit.nuspec)
 $version = $nuspec.package.metadata.version
-
+$tag = "v$version"
 
 if ($Force) {
-    git push -f $Remote "HEAD:refs/tags/v$version"
+    git tag -f $tag
+    git push -f $Remote $tag
 }
-elseif (!$(git ls-remote $Remote "v$version")) {
-    Write-Warning "'$Remote/v$version' not found! Use -Force to create tag at HEAD."
+elseif (!$(git ls-remote $Remote $tag)) {
+    Write-Warning "'$Remote/$tag' not found! Use -Force to create tag at HEAD."
     return
 }
 
