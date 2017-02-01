@@ -114,13 +114,13 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
     Context 'Test-InPSModulePath Tests' {
         It 'Returns false for install not under any PSModulePaths' {
             Mock Get-PSModulePath { }
-            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
+            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0\"
             Test-InPSModulePath $path | Should Be $false
             Assert-MockCalled Get-PSModulePath
         }
         It 'Returns true for install under single PSModulePath' {
             Mock Get-PSModulePath {
-                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0'
+                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\'
             }
             $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
             Test-InPSModulePath $path | Should Be $true
@@ -128,8 +128,8 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         }
         It 'Returns true for install under multiple PSModulePaths' {
             Mock Get-PSModulePath {
-                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0',
-                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330'
+                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0\',
+                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330\'
             }
             $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
             Test-InPSModulePath $path | Should Be $true
@@ -137,8 +137,8 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         }
         It 'Returns false when current posh-git module location is not under PSModulePaths' {
             Mock Get-PSModulePath {
-                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0',
-                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330'
+                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0\',
+                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330\'
             }
             $path = "C:\tools\posh-git\dahlbyk-posh-git-18d600a"
             Test-InPSModulePath $path | Should Be $false

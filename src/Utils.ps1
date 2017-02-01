@@ -216,7 +216,7 @@ function Test-InPSModulePath {
     if (!$modulePaths) { return $false }
 
     $pathStringComparison = Get-PathStringComparison
-    $inModulePath = @($modulePaths | Where-Object { $Path.StartsWith($_, $pathStringComparison) }).Count -gt 0
+    $inModulePath = @($modulePaths | Where-Object { $Path.StartsWith($_.TrimEnd([System.IO.Path]::DirectorySeparatorChar), $pathStringComparison) }).Count -gt 0
 
     if ($inModulePath -and ('src' -eq (Split-Path $Path -Leaf))) {
         Write-Warning 'posh-git repository structure is incompatible with %PSModulePath%.'
