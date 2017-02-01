@@ -93,10 +93,15 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
         }
     }
 
+    if (!$profilePath) { $profilePath = $PROFILE }
+
     if (!$Force) {
         # Search the user's profiles to see if any are using posh-git already, there is an extra search
         # ($profilePath) taking place to accomodate the Pester tests.
         $importedInProfile = Test-PoshGitImportedInScript $profilePath
+        if (!$importedInProfile -and !$underTest) {
+            $importedInProfile = Test-PoshGitImportedInScript $PROFILE
+        }
         if (!$importedInProfile -and !$underTest) {
             $importedInProfile = Test-PoshGitImportedInScript $PROFILE.CurrentUserCurrentHost
         }
@@ -116,6 +121,17 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
             Write-Warning "If you want to force the add, use the -Force parameter."
             return
         }
+    }
+
+    if (!$profilePath) {
+        Write-Warning "Skipping add of posh-git import; no profile found."
+        Write-Verbose "`$profilePath          = '$profilePath'"
+        Write-Verbose "`$PROFILE              = '$PROFILE'"
+        Write-Verbose "CurrentUserCurrentHost = '$($PROFILE.CurrentUserCurrentHost)'"
+        Write-Verbose "CurrentUserAllHosts    = '$($PROFILE.CurrentUserAllHosts)'"
+        Write-Verbose "AllUsersCurrentHost    = '$($PROFILE.AllUsersCurrentHost)'"
+        Write-Verbose "AllUsersAllHosts       = '$($PROFILE.AllUsersAllHosts)'"
+        return
     }
 
     # Check if the location of this module file is in the PSModulePath
@@ -215,7 +231,9 @@ function Test-PoshGitImportedInScript {
         return $false
     }
 
-    (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'posh-git').Count -gt 0
+    $match = (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'posh-git').Count -gt 0
+    if ($match) { Write-Verbose "posh-git found in '$Path'" }
+    $match
 }
 
 function dbg($Message, [Diagnostics.Stopwatch]$Stopwatch) {
