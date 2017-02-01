@@ -35,12 +35,12 @@ Describe 'TabExpansion Tests' {
             $result | Should BeExactly ':master'
         }
         It 'Tab completes matching ref:branches' {
-            $result = & $module GitTabExpansionInternal 'git push origin /refs/heads/master:ma'
-            $result | Should BeExactly '/refs/heads/master:master'
+            $result = & $module GitTabExpansionInternal 'git push origin HEAD:ma'
+            $result | Should BeExactly 'HEAD:master'
         }
         It 'Tab completes matching +ref:branches' {
-            $result = & $module GitTabExpansionInternal 'git push origin +/refs/heads/master:ma'
-            $result | Should BeExactly '+/refs/heads/master:master'
+            $result = & $module GitTabExpansionInternal 'git push origin +HEAD:ma'
+            $result | Should BeExactly '+HEAD:master'
         }
         It 'Tab completes matching remote with preceding parameters' {
             $result = & $module GitTabExpansionInternal 'git push --follow-tags  -u   or'
@@ -63,10 +63,10 @@ Describe 'TabExpansion Tests' {
             $result | Should BeExactly 'master'
         }
         It 'Tab completes matching ref:branch with intermixed parameters' {
-            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags /refs/heads/master:ma'
-            $result | Should BeExactly '/refs/heads/master:master'
-            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags   +/refs/heads/master:ma'
-            $result | Should BeExactly '+/refs/heads/master:master'
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags HEAD:ma'
+            $result | Should BeExactly 'HEAD:master'
+            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags   +HEAD:ma'
+            $result | Should BeExactly '+HEAD:master'
         }
         It 'Tab complete returns empty result for missing remote' {
             $result = & $module GitTabExpansionInternal 'git push zy'
