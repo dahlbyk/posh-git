@@ -144,5 +144,13 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             Test-InPSModulePath $path | Should Be $false
             Assert-MockCalled Get-PSModulePath
         }
+        It 'Returns false when current posh-git module location is under PSModulePath, but in a src directory' {
+            Mock Get-PSModulePath {
+                return 'C:\GitHub'
+            }
+            $path = "C:\GitHub\posh-git\src"
+            Test-InPSModulePath $path | Should Be $false
+            Assert-MockCalled Get-PSModulePath
+        }
     }
 }
