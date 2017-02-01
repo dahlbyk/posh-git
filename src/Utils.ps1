@@ -216,6 +216,7 @@ function Test-InPSModulePath {
     if (!$modulePaths) { return $false }
 
     $pathStringComparison = Get-PathStringComparison
+    $Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
     $inModulePath = @($modulePaths | Where-Object { $Path.StartsWith($_.TrimEnd([System.IO.Path]::DirectorySeparatorChar), $pathStringComparison) }).Count -gt 0
 
     if ($inModulePath -and ('src' -eq (Split-Path $Path -Leaf))) {
