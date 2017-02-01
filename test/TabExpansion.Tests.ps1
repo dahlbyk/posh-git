@@ -6,43 +6,67 @@ Describe 'TabExpansion Tests' {
             $result = & $module GitTabExpansionInternal 'git push '
             $result | Should BeExactly 'origin'
         }
-        It 'Tab completes matching remotes' {
-            $result = & $module GitTabExpansionInternal 'git push or'
-            $result | Should BeExactly 'origin'
-        }
-        It 'Tab completes matching remote/branches' {
-            $result = & $module GitTabExpansionInternal 'git push origin origin/ma'
-            $result | Should BeExactly 'origin/master'
-        }
-        It 'Tab completes remote and all branches' {
+        It 'Tab completes all branches' {
             $result = & $module GitTabExpansionInternal 'git push origin '
             $result -contains 'master' | Should Be $true
             $result -contains 'origin/master' | Should Be $true
             $result -contains 'origin/HEAD' | Should Be $true
         }
-        It 'Tab completes remote and matching branches' {
+        It 'Tab completes all :branches' {
+            $result = & $module GitTabExpansionInternal 'git push origin :'
+            $result -contains ':master' | Should Be $true
+            # Is the following a valid branch name in a refspec?
+            $result -contains ':HEAD -> origin/master' | Should Be $true
+        }
+        It 'Tab completes matching remotes' {
+            $result = & $module GitTabExpansionInternal 'git push or'
+            $result | Should BeExactly 'origin'
+        }
+        It 'Tab completes matching branches' {
             $result = & $module GitTabExpansionInternal 'git push origin ma'
             $result | Should BeExactly 'master'
+        }
+        It 'Tab completes matching remote/branches' {
+            $result = & $module GitTabExpansionInternal 'git push origin origin/ma'
+            $result | Should BeExactly 'origin/master'
+        }
+        It 'Tab completes matching :branches' {
+            $result = & $module GitTabExpansionInternal 'git push origin :ma'
+            $result | Should BeExactly ':master'
+        }
+        It 'Tab completes matching ref:branches' {
+            $result = & $module GitTabExpansionInternal 'git push origin /refs/heads/master:ma'
+            $result | Should BeExactly '/refs/heads/master:master'
+        }
+        It 'Tab completes matching +ref:branches' {
+            $result = & $module GitTabExpansionInternal 'git push origin +/refs/heads/master:ma'
+            $result | Should BeExactly '+/refs/heads/master:master'
         }
         It 'Tab completes matching remote with preceding parameters' {
             $result = & $module GitTabExpansionInternal 'git push --follow-tags  -u   or'
             $result | Should BeExactly 'origin'
         }
-        It 'Tab completes remote and all branches with preceding parameters' {
+        It 'Tab completes all branches with preceding parameters' {
             $result = & $module GitTabExpansionInternal 'git push  --follow-tags  -u   origin '
             $result -contains 'master' | Should Be $true
             $result -contains 'origin/master' | Should Be $true
             $result -contains 'origin/HEAD' | Should Be $true
         }
-        It 'Tab completes remote and matching branch with preceding parameters' {
+        It 'Tab completes matching branch with preceding parameters' {
             $result = & $module GitTabExpansionInternal 'git push  --follow-tags  -u   origin ma'
             $result | Should BeExactly 'master'
         }
-        It 'Tab completes remote and matching branch with intermixed parameters' {
+        It 'Tab completes matching branch with intermixed parameters' {
             $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags ma'
             $result | Should BeExactly 'master'
             $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags   ma'
             $result | Should BeExactly 'master'
+        }
+        It 'Tab completes matching ref:branch with intermixed parameters' {
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags /refs/heads/master:ma'
+            $result | Should BeExactly '/refs/heads/master:master'
+            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags   +/refs/heads/master:ma'
+            $result | Should BeExactly '+/refs/heads/master:master'
         }
         It 'Tab complete returns empty result for missing remote' {
             $result = & $module GitTabExpansionInternal 'git push zy'

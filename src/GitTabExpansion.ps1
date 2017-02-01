@@ -258,14 +258,14 @@ function GitTabExpansionInternal($lastBlock) {
 
         # Handles git push remote <ref>:<branch>
         # Handles git push remote +<ref>:<branch>
-        "^push.* ${gitParams}(?<remote>\S+)${gitParams}\s+(?<force>\+?)(?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
+        "^push${gitParams}\s+(?<remote>[^\s-]\S*)${gitParams}\s+(?<force>\+?)(?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
             gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch'] -prefix $matches['force']
         }
 
         # Handles git push remote <ref>
         # Handles git push remote +<ref>
         # Handles git pull remote <ref>
-        "^(?:push|pull).* ${gitParams}(?<remote>[^\s-]\S*)${gitParams}\s+(?<force>\+?)(?<ref>[^\s\:]*)$" {
+        "^(?:push|pull)${gitParams}\s+(?<remote>[^\s-]\S*)${gitParams}\s+(?<force>\+?)(?<ref>[^\s\:]*)$" {
             gitBranches $matches['ref'] -prefix $matches['force']
             gitTags $matches['ref'] -prefix $matches['force']
         }
@@ -273,7 +273,7 @@ function GitTabExpansionInternal($lastBlock) {
         # Handles git pull <remote>
         # Handles git push <remote>
         # Handles git fetch <remote>
-        "^(?:push|pull|fetch).* ${gitParams}(?<remote>\S*)$" {
+        "^(?:push|pull|fetch)${gitParams}\s+(?<remote>\S*)$" {
             gitRemotes $matches['remote']
         }
 
