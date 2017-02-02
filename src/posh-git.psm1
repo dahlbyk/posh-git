@@ -1,4 +1,4 @@
-param([switch]$NoVersionWarn)
+param([switch]$NoVersionWarn,[switch]$ForcePoshGitPrompt)
 
 if (Get-Module posh-git) { return }
 
@@ -42,7 +42,7 @@ if (!$currentPromptDef) {
     function global:prompt { ' ' }
 }
 
-if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
+if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
     # Have to use [scriptblock]::Create() to get debugger detection to work in PS v2
     $poshGitPromptScriptBlock = [scriptblock]::Create(@'
         if ($GitPromptSettings.DefaultPromptEnableTiming) {

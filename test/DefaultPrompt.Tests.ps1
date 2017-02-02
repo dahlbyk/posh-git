@@ -6,14 +6,11 @@ Describe 'Default Prompt Tests' {
         $OFS = ''
     }
     BeforeEach {
-        $origPrefix = $GitPromptSettings.DefaultPromptPrefix
-        $origSuffix = $GitPromptSettings.DefaultPromptSuffix
-        $origAbbrevHome = $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory
-    }
-    AfterEach {
-        $GitPromptSettings.DefaultPromptPrefix = $origPrefix
-        $GitPromptSettings.DefaultPromptSuffix = $origSuffix
-        $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $origAbbrevHome
+        # Ensure these settings start out set to the default values
+        $GitPromptSettings.DefaultPromptPrefix = ''
+        $GitPromptSettings.DefaultPromptSuffix = '$(''>'' * ($nestedPromptLevel + 1)) '
+        $GitPromptSettings.DefaultPromptDebugSuffix = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+        $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $false
         $GitPromptSettings.DefaultPromptEnableTiming = $false
     }
 
@@ -73,18 +70,6 @@ Describe 'Default Prompt Tests' {
     Context 'Prompt with Git summary' {
         BeforeAll {
             Set-Location $PSScriptRoot
-
-            function global:git {
-                $cmdline = "$args"
-                switch ($cmdline) {
-                    '--version' { 'git version 2.11.0.windows.1' }
-                    'help'      { Get-Content $PSScriptRoot\git-help.txt  }
-                    default     {
-                        $res = Invoke-Expression "git.exe $cmdline"
-                        $res
-                    }
-                }
-            }
         }
 
         It 'Returns the expected prompt string with status' {
@@ -103,6 +88,7 @@ A  test/Foo.Tests.ps1
              } -ModuleName posh-git
 
             $res = [string](&$prompt 6>&1)
+            Assert-MockCalled git -ModuleName posh-git
             $res | Should BeExactly "$PSScriptRoot [master +1 ~0 -0 | +0 ~1 -1 !]> "
         }
     }

@@ -5,21 +5,6 @@ Describe 'Get-GitStatus Tests' {
     Context 'Get-GitStatus Working Directory Tests' {
         BeforeAll {
             Set-Location $PSScriptRoot
-
-            function global:git {
-                $cmdline = "$args"
-                switch ($cmdline) {
-                    '--version' { 'git version 2.11.0.windows.1' }
-                    'help'      { Get-Content $PSScriptRoot\git-help.txt  }
-                    default     {
-                        $res = Invoke-Expression "git.exe $cmdline"
-                        $res
-                    }
-                }
-            }
-
-          # Import module after we've overriden git command to return version, etc
-          . $PSScriptRoot\Shared.ps1
         }
 
         It 'Returns the correct branch name' {

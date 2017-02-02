@@ -3,11 +3,11 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80?svg=true)](https://ci.appveyor.com/project/dahlbyk/posh-git)
 [![Join the chat at https://gitter.im/dahlbyk/posh-git](https://badges.gitter.im/dahlbyk/posh-git.svg)](https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt e.g.:
+posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
 ```
 C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
-posh-git also provides tab completion support for common git commands and branch names.
+posh-git also provides tab completion support for common git commands, branch names, paths and more.
 For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing the <kbd>tab</kbd> key.
 That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will cycle through other command matches such as `cherry` and `cherry-pick`.
 You can also tab complete remote names and branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
@@ -111,7 +111,7 @@ C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]
 ```
 You can also customize the default prompt prefix text e.g.:
 ```
-$GitPromptSettings.DefaultPromptSuffix = '[$(hostname)] '
+$GitPromptSettings.DefaultPromptPrefix = '[$(hostname)] '
 ```
 This will change the prompt to:
 ```

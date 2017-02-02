@@ -3,8 +3,8 @@
 
 SHORT DESCRIPTION
     posh-git integrates Git and PowerShell providing tab completion of Git
-    commands, remotes and branch names. It also provides Git status summary
-    information that can be displayed in the PowerShell prompt.
+    commands, branch names, paths and more. It also provides Git status
+    summary information that can be displayed in the PowerShell prompt.
 
 LONG DESCRIPTION
     posh-git integrates Git and PowerShell. Tab completion is supported for
@@ -16,7 +16,7 @@ LONG DESCRIPTION
     your prompt however you would like.
 
     posh-git will install a prompt function if it detects the user does not
-    have their own customized prompt. This prompt displays Git status summary
+    have their own, customized prompt. This prompt displays Git status summary
     information when the current directory is located in a Git repository.
 
 GIT TAB COMPLETION
@@ -42,9 +42,9 @@ GIT TAB COMPLETION
 POWERSHELL PROMPT
     PowerShell generates its prompt by executing a function named "prompt", if
     one exists. posh-git will install its prompt function if it detects the
-    user does not have their own, customized prompt fucntion. This prompt
+    user does not have their own, customized prompt function. This prompt
     displays the current working directory followed by git status summary
-    information if the current directory is located in a Git repository e.g.:
+    information if the current directory is located in a Git repository, e.g.:
 
     C:\GitHub\posh-git [master ≡]>
 
@@ -58,6 +58,7 @@ POWERSHELL PROMPT
 
     For more information on customizing the posh-git prompt or creating your
     own custom PowerShell prompt see:
+
     https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
 
 GIT STATUS SUMMARY
@@ -147,6 +148,7 @@ USAGE AND CUSTOMIZATION
 
     For more information on customizing the posh-git default prompt or creating
     your own prompt fuction see:
+
     https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
 
 
