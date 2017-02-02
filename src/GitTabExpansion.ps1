@@ -182,23 +182,23 @@ function script:expandGitAlias($cmd, $rest) {
 
 function script:expandParams($cmd, $filter) {
     $params[$cmd] -split ' ' |
-        where { $_ -like "$filter*" } |
-        sort |
-        foreach { -join ("--", $_) }
+        Where-Object { $_ -like "$filter*" } |
+        Sort-Object |
+        ForEach-Object { -join ("--", $_) }
 }
 
 function script:expandShortParams($cmd, $filter) {
     $shortparams[$cmd] -split ' ' |
-        where { $_ -like "$filter*" } |
-        sort |
-        foreach { -join ("-", $_) }
+        Where-Object { $_ -like "$filter*" } |
+        Sort-Object |
+        ForEach-Object { -join ("-", $_) }
 }
 
 function script:expandParamValues($cmd, $param, $filter) {
     $paramvalues[$cmd][$param] -split ' ' |
-        where { $_ -like "$filter*" } |
-        sort |
-        foreach { -join ("--", $param, "=", $_) }
+        Where-Object { $_ -like "$filter*" } |
+        Sort-Object |
+        ForEach-Object { -join ("--", $param, "=", $_) }
 }
 
 function GitTabExpansion($lastBlock) {
