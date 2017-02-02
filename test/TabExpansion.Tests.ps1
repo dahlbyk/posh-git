@@ -4,7 +4,7 @@ Describe 'TabExpansion Tests' {
     Context 'Fetch/Push/Pull TabExpansion Tests' {
         It 'Tab completes all remotes' {
             $result = & $module GitTabExpansionInternal 'git push '
-            $result | Should BeExactly 'origin'
+            $result | Should BeExactly (git remote)
         }
         It 'Tab completes all branches' {
             $result = & $module GitTabExpansionInternal 'git push origin '
@@ -66,14 +66,23 @@ Describe 'TabExpansion Tests' {
             $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags   +HEAD:ma'
             $result | Should BeExactly '+HEAD:master'
         }
-        It 'Tab completes matching multiple ref:branch with intermixed parameters' {
-            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags :master HEAD:ma'
+        It 'Tab completes matching multiple push ref specs with intermixed parameters' {
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags one :two three:four  ma'
+            $result | Should BeExactly 'master'
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags one :two three:four  --crazy-param ma'
+            $result | Should BeExactly 'master'
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags one :two three:four  HEAD:ma'
             $result | Should BeExactly 'HEAD:master'
-            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags :master --crazy-param HEAD:ma'
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags one :two three:four  --crazy-param HEAD:ma'
             $result | Should BeExactly 'HEAD:master'
-            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags :master  +HEAD:ma'
+
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags one :two three:four  +ma'
+            $result | Should BeExactly '+master'
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags one :two three:four  --crazy-param +ma'
+            $result | Should BeExactly '+master'
+            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags one :two three:four  +HEAD:ma'
             $result | Should BeExactly '+HEAD:master'
-            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags  :master  --crazy-param  +HEAD:ma'
+            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags  one :two three:four  --crazy-param  +HEAD:ma'
             $result | Should BeExactly '+HEAD:master'
         }
         It 'Tab complete returns empty result for missing remote' {
