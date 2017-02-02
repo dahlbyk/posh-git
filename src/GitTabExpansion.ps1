@@ -194,7 +194,7 @@ function GitTabExpansionInternal($lastBlock) {
     # Handles tgit <command> (tortoisegit)
     if ($lastBlock -match "^$(Get-AliasPattern tgit) (?<cmd>\S*)$") {
         # Need return statement to prevent fall-through.
-        return $tortoiseGitCommands | Where-Object { $_ -like "$($matches['cmd'])*" }
+        return $Global:TortoiseGitSettings.TortoiseGitCommands.Keys.GetEnumerator() | sort | Where-Object { $_ -like "$($matches['cmd'])*" }
     }
 
     # Handles gitk
