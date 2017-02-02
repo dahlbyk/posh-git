@@ -17,6 +17,7 @@ if ($psv.Major -lt 3 -and !$NoVersionWarn) {
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
 . $PSScriptRoot\GitTabExpansion.ps1
+. $PSScriptRoot\ParamsExpansions.ps1
 . $PSScriptRoot\TortoiseGit.ps1
 
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }

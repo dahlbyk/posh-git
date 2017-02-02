@@ -5,9 +5,6 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
 }
 
-# load parameter expansion data
-. .\ParamsExpansions.ps1
-
 $subcommands = @{
     bisect = 'start bad good skip reset visualize replay log run'
     notes = 'edit show'
