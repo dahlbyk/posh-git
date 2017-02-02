@@ -4,10 +4,25 @@
         {
             "type": "PowerShell",
             "request": "launch",
+            "name": "PowerShell Launch Pester Tests",
+            "script": "${workspaceRoot}/test/testDebugHarness.ps1",
+            "args": [],
+            "cwd": "${file}"
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
             "name": "PowerShell Launch (current file)",
             "script": "${file}",
             "args": [],
             "cwd": "${file}"
+        },
+        {
+            "type": "PowerShell",
+            "request": "attach",
+            "name": "PowerShell Attach to Host Process",
+            "processId": "${command.PickPSHostProcess}",
+            "runspaceId": 1
         }
     ]
 }
