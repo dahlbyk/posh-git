@@ -15,8 +15,6 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes all :branches' {
             $result = & $module GitTabExpansionInternal 'git push origin :'
             $result -contains ':master' | Should Be $true
-            # Is the following a valid branch name in a refspec?
-            $result -contains ':HEAD -> origin/master' | Should Be $true
         }
         It 'Tab completes matching remotes' {
             $result = & $module GitTabExpansionInternal 'git push or'
@@ -68,6 +66,16 @@ Describe 'TabExpansion Tests' {
             $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags   +HEAD:ma'
             $result | Should BeExactly '+HEAD:master'
         }
+        It 'Tab completes matching multiple ref:branch with intermixed parameters' {
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags :master HEAD:ma'
+            $result | Should BeExactly 'HEAD:master'
+            $result = & $module GitTabExpansionInternal 'git push -u origin --follow-tags :master --crazy-param HEAD:ma'
+            $result | Should BeExactly 'HEAD:master'
+            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags :master  +HEAD:ma'
+            $result | Should BeExactly '+HEAD:master'
+            $result = & $module GitTabExpansionInternal 'git push  -u  origin  --follow-tags  :master  --crazy-param  +HEAD:ma'
+            $result | Should BeExactly '+HEAD:master'
+        }
         It 'Tab complete returns empty result for missing remote' {
             $result = & $module GitTabExpansionInternal 'git push zy'
             $result | Should BeNullOrEmpty
@@ -80,6 +88,7 @@ Describe 'TabExpansion Tests' {
             $result = & $module GitTabExpansionInternal 'git fetch origin/zy'
             $result | Should BeNullOrEmpty
         }
+
         It 'Tab completes branch names with - and -- in them' {
             $branchName = 'branch--for-Pester-tests'
             if (git branch --list -q $branchName) {
