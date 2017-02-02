@@ -1,0 +1,178 @@
+﻿TOPIC
+    posh-git
+
+SHORT DESCRIPTION
+    posh-git integrates Git and PowerShell providing tab completion of Git
+    commands, branch names, paths and more. It also provides Git status
+    summary information that can be displayed in the PowerShell prompt.
+
+LONG DESCRIPTION
+    posh-git integrates Git and PowerShell. Tab completion is supported for
+    Git subcommands, branch and remote names. Git also provides commands to
+    display colored Git status summary information.  If you would like fine
+    grained control over how the Git status summary information is displayed
+    in your prompt function, you can get the raw status summary information
+    via the Get-GitStatus command. Then you can display the information in
+    your prompt however you would like.
+
+    posh-git will install a prompt function if it detects the user does not
+    have their own, customized prompt. This prompt displays Git status summary
+    information when the current directory is located in a Git repository.
+
+GIT TAB COMPLETION
+    You can tab complete most common Git subcommands e.g.:
+
+    C:\GitHub\posh-git> git ch<tab> --> git checkout
+
+    You can also tab complete branch names and even remote names such as
+    origin and upstream. For instance, type the following inside of a Git
+    repo to see tab completion in action:
+
+    C:\GitHub\posh-git> git fe<tab> or<tab> ma<tab>
+
+    The above will expand to:
+
+    C:\GitHub\posh-git> git fetch origin master
+
+    And like tab completion in other parts of PowerShell, you can press tab
+    multiple times to cycle through all matches.  For instance, type
+    "git ch" and press the tab key multiple times to cycle through "checkout",
+    "cherry" and "cherry-pick".
+
+POWERSHELL PROMPT
+    PowerShell generates its prompt by executing a function named "prompt", if
+    one exists. posh-git will install its prompt function if it detects the
+    user does not have their own, customized prompt function. This prompt
+    displays the current working directory followed by git status summary
+    information if the current directory is located in a Git repository, e.g.:
+
+    C:\GitHub\posh-git [master ≡]>
+
+    You can customize the posh-git prompt with the following settings:
+
+    $GitPromptSettings.DefaultPromptPrefix
+    $GitPromptSettings.DefaultPromptSuffix
+    $GitPromptSettings.DefaultPromptDebugSuffix
+    $GitPromptSettings.DefaultPromptEnableTiming
+    $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory
+
+    For more information on customizing the posh-git prompt or creating your
+    own custom PowerShell prompt see:
+
+    https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
+
+GIT STATUS SUMMARY
+    [{HEAD-name} S +A ~B -C !D | +E ~F -G !H W]
+
+    * [ (BeforeText)
+      * {HEAD-name} is the current branch, or the SHA of a detached HEAD
+        * Cyan means the branch matches its remote
+        * Green means the branch is ahead of its remote (green light to push)
+        * Red means the branch is behind its remote
+        * Yellow means the branch is both ahead of and behind its remote
+
+      * S represents the branch status in relation to remote (tracked origin) branch
+        * ≡      = Local branch is at the same commit level as the remote
+                   branch (BranchIdenticalStatus).
+        * ↑<num> = Local branch is ahead of the remote branch by the specified
+                   number of commits; a 'git push' is required to update the
+                   remote branch (BranchAheadStatus).
+        * ↓<num> = Local branch is behind the remote branch by the specified
+                   number of commits; a 'git pull' is required to update the
+                   local branch (BranchBehindStatus).
+        * <a>↕<b>= Local branch is both ahead of the remote branch by the
+                   specified number of commits (<a>) and behind by the
+                   specified number of commits (<b>); a rebase of the local
+                   branch is required before pushing local changes to the
+                   remote branch (BranchBehindAndAheadStatus). NOTE: this
+                   status is only available if
+                   $GitPromptSettings.BranchBehindAndAheadDisplay is set to
+                   'Compact'.
+        * × =      The local branch is tracking a branch that is gone from the
+                   remote (BranchGoneStatus).
+
+      * ABCD represents the index | EFGH represents the working directory
+        * + = Added files
+        * ~ = Modified files
+        * - = Removed files
+        * ! = Conflicted files
+        * Index status is dark green and working directory status is dark red
+          reflecting the colors used by 'git status'.
+
+      * W represents the status of the working directory
+        * ! = There are untracked changes (LocalStagedStatus)
+        * ~ = There are staged changes waiting to be committed (LocalWorkingStatus)
+        * None = There are no uncommitted or unstaged changes (LocalDefault)
+    * ] (AfterText)
+
+    The (symbols) and surrounding text can be customized by the corresponding
+    properties of the global variable $GitPromptSettings.
+
+    For example, a status summary of [master ≡ +0 ~2 -1 | +1 ~1 -0 !]
+    corresponds to the following 'git status':
+
+        # On branch master
+        #
+        # Changes to be committed:
+        #   (use "git reset HEAD <file>..." to unstage)
+        #
+        #        modified:   this-changed.txt
+        #        modified:   this-too.txt
+        #        deleted:    gone.ps1
+        #
+        # Changed but not updated:
+        #   (use "git add <file>..." to update what will be committed)
+        #   (use "git checkout -- <file>..." to discard changes in working directory)
+        #
+        #        modified:   not-staged.ps1
+        #
+        # Untracked files:
+        #   (use "git add <file>..." to include in what will be committed)
+        #
+        #        new.file
+
+USAGE AND CUSTOMIZATION
+    You need to import the posh-git module into your PowerShell session to
+    use it.  Execute "Import-Module posh-git" to do this. After posh-git has
+    been imported, you can execute the command "Add-PoshGitToProfile" to have
+    your PowerShell profile updated to import posh-git whenever PowerShell
+    starts.
+
+    When posh-git is imported it will provide a basic prompt function that
+    displays Git status summary information, unless you have your own, custom
+    prompt function. Prompt formatting, among other things, can be customized
+    using the global variables: $GitPromptSettings, $GitTabSettings and
+    $TortoiseGitSettings. To see the available settings, simply type the
+    variable name at the PowerShell prompt (after posh-git has been imported)
+    and press Enter.
+
+    For more information on customizing the posh-git default prompt or creating
+    your own prompt fuction see:
+
+    https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
+
+
+PERFORMANCE
+    Displaying Git status in your prompt for a very large repository can
+    be prohibitively slow. Rather than turn off Git status entirely, you can
+    disable it on a repo-by-repo basis by adding individual repository paths
+    to $GitPromptSettings.RepositoriesInWhichToDisableFileStatus.
+
+PRIMARY COMMANDS
+    Get-GitStatus:
+    Returns information about the current Git repository as
+    well as the index and working directory.
+
+    Write-GitStatus:
+    Writes directly to host the formatted text, as described above in the
+    GIT STATUS PROMPT section, when passed in the repository information
+    returned by Get-GitStatus e.g. Write-GitStatus (Get-GitStatus)
+
+    Write-VcsStatus:
+    Gets the Git repository information and writes it formatted, as described
+    above in the GIT STATUS PROMPT section, directly to the host.
+
+BASED ON WORK BY:
+    Keith Dahlby, http://solutionizing.net/
+    Mark Embling, http://www.markembling.info/
+    Jeremy Skinner, http://www.jeremyskinner.co.uk/
