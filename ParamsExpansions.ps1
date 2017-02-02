@@ -1,5 +1,6 @@
 $shortparams = @{
     add = 'n v f i p e u A N'
+	bisect = ''
     blame = 'b L l t S p M C h c f n s e w'
     branch = 'd D l f m M r a v vv q t u'
     checkout = 'q f b B t l m p' 
@@ -25,7 +26,7 @@ $shortparams = @{
     push = 'n f u q v'
     rebase = 'm s X S q v n C f i p x'
     remote = 'v'
-    reset = 'q p '
+    reset = 'q p'
     revert = 'e m n S s X'
     rm = 'f n r q'
     shortlog = 'n s e w'
@@ -38,7 +39,8 @@ $shortparams = @{
 
 $params = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
-    blame = 'root show-stats reverse porcelain line-porcelain incremental encoding= contents date score-debug show-name show-number show-email abbrev'
+    bisect = 'no-checkout term-old term-new'
+	blame = 'root show-stats reverse porcelain line-porcelain incremental encoding= contents date score-debug show-name show-number show-email abbrev'
     branch = 'color no-color list abbrev= no-abbrev column no-column merged no-merged contains set-upstream track no-track set-upstream-to= unset-upstream edit-description delete create-reflog force move all verbose quiet'
     checkout = 'quiet force ours theirs track no-track detach orphan ignore-skip-worktree-bits merge conflict= patch'
     'cherry-pick' = 'edit mainline no-commit signoff gpg-sign ff allow-empty allow-empty-message keep-redundant-commits strategy= strategy-option= ´continue quit abort'
