@@ -97,6 +97,7 @@ $global:GitPromptSettings = [pscustomobject]@{
 
     EnableWindowTitle                           = 'posh~git ~ '
 
+    DefaultPromptPrefix                         = ''
     DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
     DefaultPromptDebugSuffix                    = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
     DefaultPromptEnableTiming                   = $false

@@ -1,4 +1,4 @@
-param([switch]$NoVersionWarn)
+param([switch]$NoVersionWarn,[switch]$ForcePoshGitPrompt)
 
 if (Get-Module posh-git) { return }
 
@@ -42,7 +42,7 @@ if (!$currentPromptDef) {
     function global:prompt { ' ' }
 }
 
-if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
+if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
     # Have to use [scriptblock]::Create() to get debugger detection to work in PS v2
     $poshGitPromptScriptBlock = [scriptblock]::Create(@'
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
@@ -66,9 +66,17 @@ if (!$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
         }
 
         # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
-        if ($GitPromptSettings.DefaultPromptAbbreviateHomeDirectory -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison))
+        $abbrevHomeDir = $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory
+        if ($abbrevHomeDir -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison))
         {
             $currentPath = "~" + $currentPath.SubString($Home.Length)
+        }
+
+        # Display default prompt prefix if not empty.
+        $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
+        if ($defaultPromptPrefix) {
+            $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
+            Write-Host $expandedDefaultPromptPrefix -NoNewline
         }
 
         # Write the abbreviated current path
