@@ -53,6 +53,7 @@ $Global:TortoiseGitSettings = new-object PSObject -Property @{
     "subupdate" = "subupdate";
     "switch" = "switch";
     "checkout" = "switch";
+    "fetch" = "sync";
     "sync" = "sync";
   }
 }
@@ -66,7 +67,7 @@ function tgit {
 
     if($args[0] -eq "help") {
       # Replace the built-in help behaviour with just a list of commands
-      $Global:TortoiseGitSettings.TortoiseGitCommands.Values.GetEnumerator() | sort | Get-Unique
+      $Global:TortoiseGitSettings.TortoiseGitCommands.Values.GetEnumerator() | Sort-Object | Get-Unique
       return
     }
 
@@ -76,7 +77,7 @@ function tgit {
     $cmd = $args[0]
 
     if($args.length -gt 1) {
-      $args[1..$args.length] | % { $newArgs += $_ }
+      $args[1..$args.length] | ForEach-Object { $newArgs += $_ }
     }
 
     & $Global:TortoiseGitSettings.TortoiseGitPath $newArgs
