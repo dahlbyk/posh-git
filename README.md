@@ -3,11 +3,11 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80?svg=true)](https://ci.appveyor.com/project/dahlbyk/posh-git)
 [![Join the chat at https://gitter.im/dahlbyk/posh-git](https://badges.gitter.im/dahlbyk/posh-git.svg)](https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt e.g.:
+posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
 ```
-~\GitHub\dahlbyk\posh-git [master ≡ +0 ~1 -0 !]>
+C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
-posh-git also provides tab completion support for common git commands and branch names.
+posh-git also provides tab completion support for common git commands, branch names, paths and more.
 For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing the <kbd>tab</kbd> key.
 That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will cycle through other command matches such as `cherry` and `cherry-pick`.
 You can also tab complete remote names and branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
@@ -32,7 +32,7 @@ Before installing posh-git make sure the following prerequisites have been met.
 3. Git must be installed and available via the PATH environment variable.
    Check that `git` is accessible from PowerShell by executing `git --version` from PowerShell.
    If `git` is not recognized as the name of a command verify that you have Git installed.
-   If not, install Git from [https://git-scm.com](git-scm.com).
+   If not, install Git from [https://git-scm.com](https://git-scm.com).
    If you have Git installed, make sure the path to git.exe is in your PATH environment variable.
 
 ### Installing posh-git via PowerShellGet
@@ -93,11 +93,11 @@ Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that
 
 ### Step 3 (optional): Customize Your PowerShell Prompt
 By default, posh-git will update your PowerShell prompt function to display Git status summary information when the current dir is inside a Git repository.
-posh-git will not update your PowerShell prompt function if you have your own customized prompt function that has been defined before importing posh-git.
+posh-git will not update your PowerShell prompt function if you have your own, customized prompt function that has been defined before importing posh-git.
 
 The posh-git prompt is a single line prompt that looks like this:
 ```
-~\GitHub\dahlbyk\posh-git [master ≡ +0 ~1 -0 !]>
+C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 You can customize the posh-git prompt or define your own custom prompt function.
 The most common customization for the posh-git provided prompt is to make it span two lines which can be done with the following command:
@@ -106,9 +106,26 @@ $GitPromptSettings.DefaultPromptSuffix = '`n$(''>'' * ($nestedPromptLevel + 1)) 
 ```
 This will change the prompt to:
 ```
-~\GitHub\dahlbyk\posh-git [master ≡ +0 ~1 -0 !]
+C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]
 >
 ```
+You can also customize the default prompt prefix text e.g.:
+```
+$GitPromptSettings.DefaultPromptPrefix = '[$(hostname)] '
+```
+This will change the prompt to:
+```
+[KEITH1] C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
+```
+And if you would prefer to have any path under your home directory abbreviated with ~, you can change this setting:
+```
+$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
+```
+This will change the prompt to the one shown below:
+```
+~\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
+```
+
 You can also create your own prompt function to show whatever information you want.
 See the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt) wiki page for details.
 
@@ -127,9 +144,9 @@ By default, the status summary has the following format:
  * Yellow means the branch is both ahead of and behind its remote
 * S represents the branch status in relation to remote (tracked origin) branch. Note: This information reflects the state of the remote tracked branch after the last `git fetch/pull` of the remote.
   * ≡ = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
-  * ↑ = The local branch is ahead of the remote branch; a 'git push' is required to update the remote branch (`BranchAheadStatus`)
-  * ↓ = The local branch is behind the remote branch; a 'git pull' is required to update the local branch (`BranchBehindStatus`)
-  * ↕ = The local branch is both ahead and behind the remote branch; a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`)
+  * ↑`<num>` = The local branch is ahead of the remote branch by the specified number of commits; a 'git push' is required to update the remote branch (`BranchAheadStatus`)
+  * ↓`<num>` = The local branch is behind the remote branch by the specified number of commits; a 'git pull' is required to update the local branch (`BranchBehindStatus`)
+  * `<a>`↕`<b>` = The local branch is both ahead of the remote branch by the specified number of commits (a) and behind by the specified number of commits (b); a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`).  NOTE: this status is only available if $GitPromptSettings.BranchBehindAndAheadDisplay is set to 'Compact'.
   * × = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus')
 * ABCD represent the index; ` | ` (`DelimText`); EFGH represent the working directory
  * `+` = Added files

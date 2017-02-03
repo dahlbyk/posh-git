@@ -1,7 +1,7 @@
 ﻿# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
-$global:GitPromptSettings = New-Object PSObject -Property @{
+$global:GitPromptSettings = [pscustomobject]@{
     DefaultForegroundColor                      = $Host.UI.RawUI.ForegroundColor
 
     BeforeText                                  = ' ['
@@ -97,9 +97,11 @@ $global:GitPromptSettings = New-Object PSObject -Property @{
 
     EnableWindowTitle                           = 'posh~git ~ '
 
+    DefaultPromptPrefix                         = ''
     DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
     DefaultPromptDebugSuffix                    = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
     DefaultPromptEnableTiming                   = $false
+    DefaultPromptAbbreviateHomeDirectory        = $false
 
     Debug                                       = $false
 

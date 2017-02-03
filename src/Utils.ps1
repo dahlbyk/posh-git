@@ -32,11 +32,15 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
         # A native executable that writes to stderr AND has its stderr redirected will generate non-terminating
         # error records if the user has set $ErrorActionPreference to Stop. Override that value in this scope.
         $ErrorActionPreference = 'Continue'
-        [Console]::OutputEncoding = [Text.Encoding]::UTF8
+        if ($currentEncoding.IsSingleByte) {
+            [Console]::OutputEncoding = [Text.Encoding]::UTF8
+        }
         & $cmd
     }
     finally {
-        [Console]::OutputEncoding = $currentEncoding
+        if ($currentEncoding.IsSingleByte) {
+            [Console]::OutputEncoding = $currentEncoding
+        }
 
         # Clear out stderr output that was added to the $Error collection, putting those errors in a module variable
         if ($global:Error.Count -gt $errorCount) {
@@ -216,7 +220,15 @@ function Test-InPSModulePath {
     if (!$modulePaths) { return $false }
 
     $pathStringComparison = Get-PathStringComparison
-    $inModulePath = @($modulePaths | Where-Object { $Path.StartsWith($_, $pathStringComparison) }).Count -gt 0
+    $Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+    $inModulePath = @($modulePaths | Where-Object { $Path.StartsWith($_.TrimEnd([System.IO.Path]::DirectorySeparatorChar), $pathStringComparison) }).Count -gt 0
+
+    if ($inModulePath -and ('src' -eq (Split-Path $Path -Leaf))) {
+        Write-Warning 'posh-git repository structure is incompatible with %PSModulePath%.'
+        Write-Warning 'Importing with absolute path instead.'
+        return $false
+    }
+
     $inModulePath
 }
 

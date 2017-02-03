@@ -22,3 +22,4 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 - Add new branch status to indicate upstream is gone ([#326](https://github.com/dahlbyk/posh-git/pull/326))
 - Add ahead/behind count to prompt ([#256](https://github.com/dahlbyk/posh-git/pull/256))
 - Add BranchBehindAndAheadDisplay setting to control count display (Full (default), Compact, Minimal)
+- Switch $GitPromptSettings type from PSObject to PSCustomObject. On PowerShell v5 and higher, this preserves the definition order of properties in $GitPromptSettings making it easier to find properties.
