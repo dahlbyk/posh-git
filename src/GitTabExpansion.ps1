@@ -195,7 +195,7 @@ function GitTabExpansionInternal($lastBlock) {
     # Handles tgit <command> (tortoisegit)
     if ($lastBlock -match "^$(Get-AliasPattern tgit) (?<cmd>\S*)$") {
         # Need return statement to prevent fall-through.
-        return $tortoiseGitCommands | Where-Object { $_ -like "$($matches['cmd'])*" }
+        return $Global:TortoiseGitSettings.TortoiseGitCommands.Keys.GetEnumerator() | Sort-Object | Where-Object { $_ -like "$($matches['cmd'])*" }
     }
 
     # Handles gitk
@@ -215,9 +215,9 @@ function GitTabExpansionInternal($lastBlock) {
             gitCmdOperations $gitflowsubcommands $matches['cmd'] $matches['op']
         }
 
-		# Handles git flow <command> <op> <name>
+        # Handles git flow <command> <op> <name>
         "^flow (?<command>\S*)\s+(?<op>\S*)\s+(?<name>\S*)$" {
-			gitFeatures $matches['name'] $matches['command']
+            gitFeatures $matches['name'] $matches['command']
         }
 
         # Handles git remote (rename|rm|set-head|set-branches|set-url|show|prune) <stash>
