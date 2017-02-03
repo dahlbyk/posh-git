@@ -32,7 +32,7 @@ Before installing posh-git make sure the following prerequisites have been met.
 3. Git must be installed and available via the PATH environment variable.
    Check that `git` is accessible from PowerShell by executing `git --version` from PowerShell.
    If `git` is not recognized as the name of a command verify that you have Git installed.
-   If not, install Git from [https://git-scm.com](git-scm.com).
+   If not, install Git from [https://git-scm.com](https://git-scm.com).
    If you have Git installed, make sure the path to git.exe is in your PATH environment variable.
 
 ### Installing posh-git via PowerShellGet
