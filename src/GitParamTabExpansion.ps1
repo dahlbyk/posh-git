@@ -40,7 +40,7 @@ $shortparams = @{
 $params = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
     bisect = 'no-checkout term-old term-new'
-	blame = 'root show-stats reverse porcelain line-porcelain incremental encoding= contents date score-debug show-name show-number show-email abbrev'
+    blame = 'root show-stats reverse porcelain line-porcelain incremental encoding= contents date score-debug show-name show-number show-email abbrev'
     branch = 'color no-color list abbrev= no-abbrev column no-column merged no-merged contains set-upstream track no-track set-upstream-to= unset-upstream edit-description delete create-reflog force move all verbose quiet'
     checkout = 'quiet force ours theirs track no-track detach orphan ignore-skip-worktree-bits merge conflict= patch'
     'cherry-pick' = 'edit mainline no-commit signoff gpg-sign ff allow-empty allow-empty-message keep-redundant-commits strategy= strategy-option= ´continue quit abort'
@@ -81,16 +81,21 @@ $params = @{
 
 $paramvalues = @{
     blame = @{
-        encoding = 'utf-8 none' }
+        encoding = 'utf-8 none'
+    }
     branch = @{
         color = 'always never auto'
-        abbrev = '7 8 9 10' }
+        abbrev = '7 8 9 10'
+    }
     checkout = @{
-        conflict = 'merge diff3' }
+        conflict = 'merge diff3'
+    }
     'cherry-pick' = @{
-        strategy = 'resolve recursive octopus ours subtree' }
+        strategy = 'resolve recursive octopus ours subtree'
+    }
     commit = @{
-        'cleanup' = 'strip whitespace verbatim scissors default' }
+        'cleanup' = 'strip whitespace verbatim scissors default'
+    }
     diff = @{
         unified = '0 1 2 3 4 5'
         'diff-algorithm' = 'default patience minimal histogram myers'
@@ -99,45 +104,59 @@ $paramvalues = @{
         abbrev = '7 8 9 10'
         'diff-filter' = 'A C D M R T U X B *'
         'inter-hunk-context' = '0 1 2 3 4 5'
-        'ignore-submodules' = 'none untracked dirty all' }
+        'ignore-submodules' = 'none untracked dirty all'
+    }
     difftool = @{
-        tool = 'vimdiff vimdiff2 araxis bc3 codecompare deltawalker diffmerge diffuse ecmerge emerge gvimdiff gvimdiff2 kdiff3 kompare meld opendiff p4merge tkdiff xxdiff' }
+        tool = 'vimdiff vimdiff2 araxis bc3 codecompare deltawalker diffmerge diffuse ecmerge emerge gvimdiff gvimdiff2 kdiff3 kompare meld opendiff p4merge tkdiff xxdiff'
+    }
     fetch = @{
         'recurse-submodules' = 'yes on-demand no'
-        'recurse-submodules-default' = 'yes on-demand' }
+        'recurse-submodules-default' = 'yes on-demand'
+    }
     init = @{
-        shared = 'false true umask group all world everybody o' }
+        shared = 'false true umask group all world everybody o'
+    }
     log = @{
         decorate = 'short full no'
         'no-walk' = 'sorted unsorted'
         pretty = 'oneline short medium full fuller email raw'
         format = 'oneline short medium full fuller email raw'
         encoding = 'UTF-8'
-        date = 'relative local default iso rfc short raw' }
+        date = 'relative local default iso rfc short raw'
+    }
     merge = @{
         strategy = 'resolve recursive octopus ours subtree'
-        log = '1 2 3 4 5 6 7 8 9' }
+        log = '1 2 3 4 5 6 7 8 9'
+    }
     mergetool = @{
-        tool = 'vimdiff vimdiff2 araxis bc3 codecompare deltawalker diffmerge diffuse ecmerge emerge gvimdiff gvimdiff2 kdiff3 kompare meld opendiff p4merge tkdiff xxdiff' }
+        tool = 'vimdiff vimdiff2 araxis bc3 codecompare deltawalker diffmerge diffuse ecmerge emerge gvimdiff gvimdiff2 kdiff3 kompare meld opendiff p4merge tkdiff xxdiff'
+    }
     notes = @{
-        strategy = 'manual ours theirs union cat_sort_uniq' }
+        strategy = 'manual ours theirs union cat_sort_uniq'
+    }
     pull = @{
         strategy = 'resolve recursive octopus ours subtree'
         'recurse-submodules' = 'yes on-demand no'
         'no-recurse-submodules' = 'yes on-demand no'
-        rebase = 'false true preserve' }
+        rebase = 'false true preserve'
+    }
     push = @{
-        'recurse-submodules' = 'check on-demand' }
+        'recurse-submodules' = 'check on-demand'
+    }
     rebase = @{
-        strategy = 'resolve recursive octopus ours subtree' }
+        strategy = 'resolve recursive octopus ours subtree'
+    }
     revert = @{
-        strategy = 'resolve recursive octopus ours subtree' }
+        strategy = 'resolve recursive octopus ours subtree'
+    }
     show = @{
         pretty = 'oneline short medium full fuller email raw'
         format = 'oneline short medium full fuller email raw'
-        encoding = 'utf-8' }
+        encoding = 'utf-8'
+    }
     status = @{
         'untracked-files' = 'no normal all'
-        'ignore-submodules' = 'none untracked dirty all' }
+        'ignore-submodules' = 'none untracked dirty all'
+    }
 }
 
