@@ -16,7 +16,7 @@ Author = 'Keith Dahlby and contributors'
 Copyright = '(c) 2010-2017 Keith Dahlby and contributors'
 
 # Description of the functionality provided by this module
-Description = 'A PowerShell environment for Git'
+Description = 'Provides prompt with Git status summary information and tab completion for Git commands, parameters, remotes and branch names.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '2.0'
