@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 0.7.0 - January 31, 2017
+## 0.7.0 - February 7, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that
 modifies the user's PowerShell profile script to import the posh-git module whenever PowerShell starts.
 When posh-git is imported, it will automatically install a posh-git prompt that displays Git status summary information.
@@ -12,9 +12,14 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 - Fix syntax error on setenv calls
 - Fix temp path issue with ~ in 8.3 filenames
 - Fix unable to find type [EnvironmentVariableTarget] in PowerShell on .NET Core
+- Fix incorrect tab expansion for `git push --option <remote>` ([#234](https://github.com/dahlbyk/posh-git/issues/234))
 - Fix support for bare repository ([#291](https://github.com/dahlbyk/posh-git/issues/291))
+- Fix syntax error on setenv calls ([#297](https://github.com/dahlbyk/posh-git/pull/297))
+- Fix remove-item error after startup ([#298](https://github.com/dahlbyk/posh-git/issues/298))
+- Fix Git prompts not display correctly in codepage using DBCS ([#389](https://github.com/dahlbyk/posh-git/issues/389))
 - Fewer errors generated in global $Error collection
 - Remove error thrown by symbolic-ref and describe
+- Export command Write-VcsStatus to improve module auto-loading ([#284](https://github.com/dahlbyk/posh-git/pull/284))
 - Update module import so that it sets the prompt function *iff* the user does not have a customized prompt function ([#217](https://github.com/dahlbyk/posh-git/issues/217))
 - Update profile.example.ps1 to remove prompt function and tweak how module is imported
 - Add new commmand Add-PoshGitToProfile
@@ -22,4 +27,44 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 - Add new branch status to indicate upstream is gone ([#326](https://github.com/dahlbyk/posh-git/pull/326))
 - Add ahead/behind count to prompt ([#256](https://github.com/dahlbyk/posh-git/pull/256))
 - Add BranchBehindAndAheadDisplay setting to control count display (Full (default), Compact, Minimal)
+- Add alias support for TortoiseGit commands ([#394](https://github.com/dahlbyk/posh-git/pull/394/files))
+- Add 'push' to list of commands that tab-complete ([#286](https://github.com/dahlbyk/posh-git/pull/286))
+- Add Worktree tab completion ([#366](https://github.com/dahlbyk/posh-git/pull/366))
+- Add support for tab-completion of Git parameters, long and short ([#395](https://github.com/dahlbyk/posh-git/pull/395))
+- Add new settings for default posh-git prompt: DefaultPromptPrefix, DefaultPromptSuffix, DefaultPromptDebugSuffix, DefaultPromptEnableTiming and DefaultPromptAbbreviateHomeDirectory
+- Add new settings for prompt status summary text: FileAddedText, FileModifiedText, FileRemovedText and FileConflictText ([#277](https://github.com/dahlbyk/posh-git/pull/277/files))
 - Switch $GitPromptSettings type from PSObject to PSCustomObject. On PowerShell v5 and higher, this preserves the definition order of properties in $GitPromptSettings making it easier to find properties.
+
+## Thank You:
+Thank you to the following folks who contributed their time and scripting skills to make posh-git better:
+
+- Marcus Reid (@cmarcusreid)
+  * Use GitStatusCache when it's installed [PR #208](https://github.com/dahlbyk/posh-git/pull/208)
+  * Report UpstreamGone from GitStatusCache response [PR #372](https://github.com/dahlbyk/posh-git/pull/372)
+- Jason Shirk (@lzybkr)
+  * Speed up Git-Status [PR #319](https://github.com/dahlbyk/posh-git/pull/319)
+  * Use PSCustomObject case for sorted output of $GitPromptSettings [PR #383](https://github.com/dahlbyk/posh-git/pull/382)
+- Ralf Müller (@seamlessintegrations)
+  * Add support for tab-completion of Git parameters [PR #395](https://github.com/dahlbyk/posh-git/pull/395)
+- Aksel Kvitberg (@Flueworks)
+  * Add Worktree tab completion [PR #366](https://github.com/dahlbyk/posh-git/pull/366)
+- Eric Amodio (@eamodio)
+  * Add aliasing support for TortoiseGit commands [PR #394](https://github.com/dahlbyk/posh-git/pull/394)
+- Kevin Shaw (@shawmanz32na)
+  * Add DefaultPromptAbbreviateHomeDirectory setting [PR #387](https://github.com/dahlbyk/posh-git/pull/387)
+- KanjiBates (@KanjiBates)
+  * Fix link to git-scm.com in README.md [PR #396](https://github.com/dahlbyk/posh-git/pull/396)
+- Joel Rowley (@hjoelr)
+  * Fix syntax error on setenv calls [PR #297](https://github.com/dahlbyk/posh-git/pull/297)
+- Hui Sun (@JimAmuro)
+  * Fix remove-item error after startup [PR #298](https://github.com/dahlbyk/posh-git/issues/298)
+- Josh (@joshgo)
+  * Add 'push' to list of commands that tab-complete [PR #286](https://github.com/dahlbyk/posh-git/pull/286)
+- Rebecca Turner (@9999years)
+  * Add new settings for prompt FileAddedText, FileModifiedText, FileRemovedText and FileConflictText [PR #277](https://github.com/dahlbyk/posh-git/pull/277/files)
+- Jack (@Jackbennett)
+  * Export command Write-VcsStatus to improve module auto-loading [PR #284](https://github.com/dahlbyk/posh-git/pull/284)
+- Brendan Forster (@shiftkey)
+  * Improvements to README.md [PR #273](https://github.com/dahlbyk/posh-git/pull/273), [PR #274](https://github.com/dahlbyk/posh-git/pull/274)
+- Paul Marston (@paulmarsy)
+  * Update README.md to reflect recent changes to the Git prompt [PR #221](https://github.com/dahlbyk/posh-git/pull/221)
