@@ -37,6 +37,11 @@ $script:someCommands = @('add','am','annotate','archive','bisect','blame','branc
                          'format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv',
                          'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm',
                          'shortlog','show','stash','status','submodule','svn','tag','whatchanged', 'worktree')
+
+$script:gitCommandsWithParams = $params.Keys -join '|'
+$script:gitCommandsWithShortParams = $shortparams.Keys -join '|'
+$script:gitCommandsWithParamValues = $paramvalues.Keys -join '|'
+
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
         $script:someCommands += 'flow'
@@ -353,17 +358,17 @@ function GitTabExpansionInternal($lastBlock) {
         }
 
         # Handles git <cmd> --<param>=<value>
-        "^(?<cmd>$($someCommands -join '|')).* --(?<param>[^=]+)=(?<value>\S*)$" {
+        "^(?<cmd>$($gitCommandsWithParamValues)).* --(?<param>[^=]+)=(?<value>\S*)$" {
             expandParamValues $matches['cmd'] $matches['param'] $matches['value']
         }
 
         # Handles git <cmd> --<param>
-        "^(?<cmd>$($someCommands -join '|')).* --(?<param>\S*)$" {
+        "^(?<cmd>$($gitCommandsWithParams)).* --(?<param>\S*)$" {
             expandParams $matches['cmd'] $matches['param']
         }
 
         # Handles git <cmd> -<shortparam>
-        "^(?<cmd>$($someCommands -join '|')).* -(?<shortparam>\S*)$" {
+        "^(?<cmd>$($gitCommandsWithShortParams)).* -(?<shortparam>\S*)$" {
             expandShortParams $matches['cmd'] $matches['shortparam']
         }
     }
