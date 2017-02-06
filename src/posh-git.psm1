@@ -16,6 +16,7 @@ if ($psv.Major -lt 3 -and !$NoVersionWarn) {
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
+. $PSScriptRoot\GitParamTabExpansion.ps1
 . $PSScriptRoot\GitTabExpansion.ps1
 . $PSScriptRoot\TortoiseGit.ps1
 
