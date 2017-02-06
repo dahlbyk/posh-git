@@ -12,6 +12,7 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 - Fix syntax error on setenv calls
 - Fix temp path issue with ~ in 8.3 filenames
 - Fix unable to find type [EnvironmentVariableTarget] in PowerShell on .NET Core
+- Fix branch names using UTF8 characters do not display correctly ([#223](https://github.com/dahlbyk/posh-git/pull/223))
 - Fix incorrect tab expansion for `git push --option <remote>` ([#234](https://github.com/dahlbyk/posh-git/issues/234))
 - Fix support for bare repository ([#291](https://github.com/dahlbyk/posh-git/issues/291))
 - Fix syntax error on setenv calls ([#297](https://github.com/dahlbyk/posh-git/pull/297))
@@ -68,3 +69,5 @@ Thank you to the following folks who contributed their time and scripting skills
   * Improvements to README.md [PR #273](https://github.com/dahlbyk/posh-git/pull/273), [PR #274](https://github.com/dahlbyk/posh-git/pull/274)
 - Paul Marston (@paulmarsy)
   * Update README.md to reflect recent changes to the Git prompt [PR #221](https://github.com/dahlbyk/posh-git/pull/221)
+- INOMATA Kentaro (@matarillo)
+  * Fix branch names using UTF8 characters do not display correctly [PR #223](https://github.com/dahlbyk/posh-git/pull/223)
