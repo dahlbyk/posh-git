@@ -38,9 +38,9 @@ $script:someCommands = @('add','am','annotate','archive','bisect','blame','branc
                          'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm',
                          'shortlog','show','stash','status','submodule','svn','tag','whatchanged', 'worktree')
 
-$script:gitCommandsWithParams = $params.Keys -join '|'
-$script:gitCommandsWithShortParams = $shortparams.Keys -join '|'
-$script:gitCommandsWithParamValues = $paramvalues.Keys -join '|'
+$script:gitCommandsWithLongParams = $longGitParams.Keys -join '|'
+$script:gitCommandsWithShortParams = $shortGitParams.Keys -join '|'
+$script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
@@ -105,7 +105,7 @@ function script:gitTags($filter, $prefix = '') {
 }
 
 function script:gitFeatures($filter, $command){
-	$featurePrefix = git config --local --get "gitflow.prefix.$command"
+    $featurePrefix = git config --local --get "gitflow.prefix.$command"
     $branches = @(git branch --no-color | ForEach-Object { if ($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
         Where-Object { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
@@ -185,22 +185,22 @@ function script:expandGitAlias($cmd, $rest) {
     }
 }
 
-function script:expandParams($cmd, $filter) {
-    $params[$cmd] -split ' ' |
+function script:expandLongParams($cmd, $filter) {
+    $longGitParams[$cmd] -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("--", $_) }
 }
 
 function script:expandShortParams($cmd, $filter) {
-    $shortparams[$cmd] -split ' ' |
+    $shortGitParams[$cmd] -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("-", $_) }
 }
 
 function script:expandParamValues($cmd, $param, $filter) {
-    $paramvalues[$cmd][$param] -split ' ' |
+    $gitParamValues[$cmd][$param] -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("--", $param, "=", $_) }
@@ -212,7 +212,7 @@ function GitTabExpansion($lastBlock) {
 }
 
 function GitTabExpansionInternal($lastBlock) {
-    $gitParams = '(?<params>\s+-(?:[aA-zZ0-9]+|-[aA-zZ0-9][aA-zZ0-9-]*)(?:=\S+)?)*'
+    $ignoreGitParams = '(?<params>\s+-(?:[aA-zZ0-9]+|-[aA-zZ0-9][aA-zZ0-9-]*)(?:=\S+)?)*'
 
     if ($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
@@ -241,9 +241,9 @@ function GitTabExpansionInternal($lastBlock) {
             gitCmdOperations $gitflowsubcommands $matches['cmd'] $matches['op']
         }
 
-		# Handles git flow <command> <op> <name>
+        # Handles git flow <command> <op> <name>
         "^flow (?<command>\S*)\s+(?<op>\S*)\s+(?<name>\S*)$" {
-			gitFeatures $matches['name'] $matches['command']
+            gitFeatures $matches['name'] $matches['command']
         }
 
         # Handles git remote (rename|rm|set-head|set-branches|set-url|show|prune) <stash>
@@ -284,14 +284,14 @@ function GitTabExpansionInternal($lastBlock) {
 
         # Handles git push remote <ref>:<branch>
         # Handles git push remote +<ref>:<branch>
-        "^push${gitParams}\s+(?<remote>[^\s-]\S*).*\s+(?<force>\+?)(?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
+        "^push${ignoreGitParams}\s+(?<remote>[^\s-]\S*).*\s+(?<force>\+?)(?<ref>[^\s\:]*\:)(?<branch>\S*)$" {
             gitRemoteBranches $matches['remote'] $matches['ref'] $matches['branch'] -prefix $matches['force']
         }
 
         # Handles git push remote <ref>
         # Handles git push remote +<ref>
         # Handles git pull remote <ref>
-        "^(?:push|pull)${gitParams}\s+(?<remote>[^\s-]\S*).*\s+(?<force>\+?)(?<ref>[^\s\:]*)$" {
+        "^(?:push|pull)${ignoreGitParams}\s+(?<remote>[^\s-]\S*).*\s+(?<force>\+?)(?<ref>[^\s\:]*)$" {
             gitBranches $matches['ref'] -prefix $matches['force']
             gitTags $matches['ref'] -prefix $matches['force']
         }
@@ -299,7 +299,7 @@ function GitTabExpansionInternal($lastBlock) {
         # Handles git pull <remote>
         # Handles git push <remote>
         # Handles git fetch <remote>
-        "^(?:push|pull|fetch)${gitParams}\s+(?<remote>\S*)$" {
+        "^(?:push|pull|fetch)${ignoreGitParams}\s+(?<remote>\S*)$" {
             gitRemotes $matches['remote']
         }
 
@@ -358,17 +358,17 @@ function GitTabExpansionInternal($lastBlock) {
         }
 
         # Handles git <cmd> --<param>=<value>
-        "^(?<cmd>$($gitCommandsWithParamValues)).* --(?<param>[^=]+)=(?<value>\S*)$" {
+        "^(?<cmd>$gitCommandsWithParamValues).* --(?<param>[^=]+)=(?<value>\S*)$" {
             expandParamValues $matches['cmd'] $matches['param'] $matches['value']
         }
 
         # Handles git <cmd> --<param>
-        "^(?<cmd>$($gitCommandsWithParams)).* --(?<param>\S*)$" {
-            expandParams $matches['cmd'] $matches['param']
+        "^(?<cmd>$gitCommandsWithLongParams).* --(?<param>\S*)$" {
+            expandLongParams $matches['cmd'] $matches['param']
         }
 
         # Handles git <cmd> -<shortparam>
-        "^(?<cmd>$($gitCommandsWithShortParams)).* -(?<shortparam>\S*)$" {
+        "^(?<cmd>$gitCommandsWithShortParams).* -(?<shortparam>\S*)$" {
             expandShortParams $matches['cmd'] $matches['shortparam']
         }
     }

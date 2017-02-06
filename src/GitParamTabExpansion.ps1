@@ -1,4 +1,6 @@
-$shortparams = @{
+# Variable is used in GitTabExpansion.ps1
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+$shortGitParams = @{
     add = 'n v f i p e u A N'
     bisect = ''
     blame = 'b L l t S p M C h c f n s e w'
@@ -37,7 +39,9 @@ $shortparams = @{
     whatchanged = 'p'
 }
 
-$params = @{
+# Variable is used in GitTabExpansion.ps1
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+$longGitParams = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
     bisect = 'no-checkout term-old term-new'
     blame = 'root show-stats reverse porcelain line-porcelain incremental encoding= contents date score-debug show-name show-number show-email abbrev'
@@ -49,7 +53,7 @@ $params = @{
     commit = 'all patch reuse-message reedit-message fixup squash reset-author short branch porcelain long null file author date message template signoff no-verify allow-empty allow-empty-message cleanup= edit no-edit ammend no-post-rewrite include only untracked-files verbose quiet dry-run status no-status gpg-sign no-gpg-sign'
     config = 'replace-all add get get-all get-regexp get-urlmatch global system local file blob remove-section rename-section unset unset-all list bool int bool-or-int path null get-colorbool get-color edit includes no-includes'
     describe = 'dirty all tags contains abbrev candidates= exact-match debug long match always first-parent'
-    diff = 'patch no-patch unified= raw patch-with-raw minimal patience histogram diff-algorithm= stat numstat shortstat dirstat summary patch-with-stat name-only name-status submodule color no-color word-diff word-diff-regex color-words no-renames check full-index binary apprev break-rewrites find-renames find-copies find-copies-harder irreversible-delete diff-filter= pickaxe-all pickaxe-regex relative text ignore-space-at-eol ignore-space-change ignore-all-space ignore-blank-lines inter-hunk-context= function-context exit-code quiet ext-diff no-ext-diff textconv no-textconv ignore-submodules src-prefix dst-prefix no-prefix'
+    diff = 'cached patch no-patch unified= raw patch-with-raw minimal patience histogram diff-algorithm= stat numstat shortstat dirstat summary patch-with-stat name-only name-status submodule color no-color word-diff word-diff-regex color-words no-renames check full-index binary apprev break-rewrites find-renames find-copies find-copies-harder irreversible-delete diff-filter= pickaxe-all pickaxe-regex relative text ignore-space-at-eol ignore-space-change ignore-all-space ignore-blank-lines inter-hunk-context= function-context exit-code quiet ext-diff no-ext-diff textconv no-textconv ignore-submodules src-prefix dst-prefix no-prefix'
     difftool = 'dir-diff no-prompt prompt tool= tool-help no-symlinks symlinks extcmd= gui'
     fetch = 'all append depth= unshallow update-shallow dry-run force keep multiple prune no-tags tags recurse-submodules= no-recurse-submodules submodule-prefix= recurse-submodules-default= update-head-ok upload-pack quiet verbose progress'
     gc = 'aggressive auto prune= no-prune quiet force'
@@ -79,7 +83,9 @@ $params = @{
     whatchanged = 'since'
 }
 
-$paramvalues = @{
+# Variable is used in GitTabExpansion.ps1
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+$gitParamValues = @{
     blame = @{
         encoding = 'utf-8 none'
     }
@@ -159,4 +165,3 @@ $paramvalues = @{
         'ignore-submodules' = 'none untracked dirty all'
     }
 }
-
