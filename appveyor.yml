@@ -5,6 +5,9 @@ branches:
   only:
     - master
 
+init:
+  - git config --global core.autocrlf true
+
 install:
   - ps: |
       Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
