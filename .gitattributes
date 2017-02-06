@@ -1,3 +1,2 @@
-# Disable LF normalization for all files
-* -text
-*.yml text=auto
+# Enable LF normalization for all files
+* text=auto
