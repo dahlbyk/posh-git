@@ -117,4 +117,32 @@ Describe 'TabExpansion Tests' {
             }
         }
     }
+    Context 'Add/Reset/Checkout TabExpansion Tests' {
+        BeforeEach {
+            $origPath = Get-Location
+            $temp = [System.IO.Path]::GetTempPath()
+            $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
+
+            git init $repoPath
+            Set-Location $repoPath
+        }
+        AfterEach {
+            Set-Location $origPath
+            if (Test-Path $repoPath) {
+                Remove-Item $repoPath -Recurse -Force
+            }
+        }
+        It 'Tab completes non-ASCII file name' {
+            git config core.quotepath true # Problematic (default) config
+
+            $fileName = "posh$([char]8226)git.txt"
+            New-Item $fileName
+
+            $GitStatus = & $module Get-GitStatus
+
+            $result = & $module GitTabExpansionInternal 'git add ' $GitStatus
+
+            $result | Should BeExactly $fileName
+        }
+    }
 }
