@@ -136,19 +136,19 @@ function script:gitFiles($filter, $files) {
         ForEach-Object { if ($_ -like '* *') { "'$_'" } else { $_ } }
 }
 
-function script:gitIndex($filter) {
+function script:gitIndex($GitStatus, $filter) {
     gitFiles $filter $GitStatus.Index
 }
 
-function script:gitAddFiles($filter) {
+function script:gitAddFiles($GitStatus, $filter) {
     gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Added))
 }
 
-function script:gitCheckoutFiles($filter) {
+function script:gitCheckoutFiles($GitStatus, $filter) {
     gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
-function script:gitDiffFiles($filter, $staged) {
+function script:gitDiffFiles($GitStatus, $filter, $staged) {
     if ($staged) {
         gitFiles $filter $GitStatus.Index.Modified
     }
@@ -157,11 +157,11 @@ function script:gitDiffFiles($filter, $staged) {
     }
 }
 
-function script:gitMergeFiles($filter) {
+function script:gitMergeFiles($GitStatus, $filter) {
     gitFiles $filter $GitStatus.Working.Unmerged
 }
 
-function script:gitDeleted($filter) {
+function script:gitDeleted($GitStatus, $filter) {
     gitFiles $filter $GitStatus.Working.Deleted
 }
 
@@ -207,11 +207,11 @@ function script:expandParamValues($cmd, $param, $filter) {
 }
 
 function GitTabExpansion($lastBlock) {
-    $res = Invoke-Utf8ConsoleCommand { GitTabExpansionInternal $lastBlock }
+    $res = Invoke-Utf8ConsoleCommand { GitTabExpansionInternal $lastBlock $Global:GitStatus }
     $res
 }
 
-function GitTabExpansionInternal($lastBlock) {
+function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     $ignoreGitParams = '(?<params>\s+-(?:[aA-zZ0-9]+|-[aA-zZ0-9][aA-zZ0-9-]*)(?:=\S+)?)*'
 
     if ($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
@@ -306,7 +306,7 @@ function GitTabExpansionInternal($lastBlock) {
         # Handles git reset HEAD <path>
         # Handles git reset HEAD -- <path>
         "^reset.* HEAD(?:\s+--)? (?<path>\S*)$" {
-            gitIndex $matches['path']
+            gitIndex $GitStatus $matches['path']
         }
 
         # Handles git <cmd> <ref>
@@ -316,27 +316,27 @@ function GitTabExpansionInternal($lastBlock) {
 
         # Handles git add <path>
         "^add.* (?<files>\S*)$" {
-            gitAddFiles $matches['files']
+            gitAddFiles $GitStatus $matches['files']
         }
 
         # Handles git checkout -- <path>
         "^checkout.* -- (?<files>\S*)$" {
-            gitCheckoutFiles $matches['files']
+            gitCheckoutFiles $GitStatus $matches['files']
         }
 
         # Handles git rm <path>
         "^rm.* (?<index>\S*)$" {
-            gitDeleted $matches['index']
+            gitDeleted $GitStatus $matches['index']
         }
 
         # Handles git diff/difftool <path>
         "^(?:diff|difftool)(?:.* (?<staged>(?:--cached|--staged))|.*) (?<files>\S*)$" {
-            gitDiffFiles $matches['files'] $matches['staged']
+            gitDiffFiles $GitStatus $matches['files'] $matches['staged']
         }
 
         # Handles git merge/mergetool <path>
         "^(?:merge|mergetool).* (?<files>\S*)$" {
-            gitMergeFiles $matches['files']
+            gitMergeFiles $GitStatus $matches['files']
         }
 
         # Handles git checkout <ref>
