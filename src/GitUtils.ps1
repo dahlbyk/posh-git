@@ -31,6 +31,14 @@ function Get-GitDirectory {
                 return $gitDirPath
             }
 
+            # Handle the worktree case where .git is a file
+            if (Test-Path -LiteralPath $gitDirPath -PathType Leaf) {
+                $gitDirPath = Invoke-Utf8ConsoleCommand { git rev-parse --git-dir 2>$null }
+                if ($gitDirPath) {
+                    return $gitDirPath
+                }
+            }
+
             $headPath = Join-Path $currentDir.FullName HEAD
             if (Test-Path -LiteralPath $headPath -PathType Leaf) {
                 $refsPath = Join-Path $currentDir.FullName refs
