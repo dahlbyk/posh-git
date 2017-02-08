@@ -87,7 +87,7 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         Write-VcsStatus
 
         # If stopped in the debugger, the prompt needs to indicate that in some fashion
-        $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-member -Name InBreakPoint -MemberType property
+        $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-Member -Name InBreakPoint -MemberType property
         $debugMode = (Test-Path Variable:/PSDebugContext) -or ($hasInBreakPoint -and [runspace]::DefaultRunspace.Debugger.InBreakpoint)
         $promptSuffix = if ($debugMode) { $GitPromptSettings.DefaultPromptDebugSuffix } else { $GitPromptSettings.DefaultPromptSuffix }
 
