@@ -119,6 +119,7 @@ Describe 'TabExpansion Tests' {
     }
     Context 'Add/Reset/Checkout TabExpansion Tests' {
         BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $origPath = Get-Location
             $temp = [System.IO.Path]::GetTempPath()
             $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
