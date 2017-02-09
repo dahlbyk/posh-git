@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 0.7.0 - February 7, 2017
+## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that
 modifies the user's PowerShell profile script to import the posh-git module whenever PowerShell starts.
 When posh-git is imported, it will automatically install a posh-git prompt that displays Git status summary information.
@@ -71,3 +71,7 @@ Thank you to the following folks who contributed their time and scripting skills
   * Update README.md to reflect recent changes to the Git prompt [PR #221](https://github.com/dahlbyk/posh-git/pull/221)
 - INOMATA Kentaro (@matarillo)
   * Fix branch names using UTF8 characters do not display correctly [PR #223](https://github.com/dahlbyk/posh-git/pull/223)
+- Luis Vita (@Ivita)
+  * Fix typo in git commit parameter -amend in tabexansion [PR #405](https://github.com/dahlbyk/posh-git/pull/405)
+- Skeept (@skeept)
+  * Fix debug prompt breaking posh-git prompt on PowerShell v4 [PR #406](https://github.com/dahlbyk/posh-git/pull/406)
