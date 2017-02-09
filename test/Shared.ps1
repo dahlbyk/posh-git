@@ -15,10 +15,15 @@ function global:git {
     }
 }
 
-# Force the posh-git prompt to be installed. Could be runnng on dev system where
-# user has customized the prompt.
-$module = Import-Module $moduleManifestPath -ArgumentList $true,$true -Force -PassThru
-
 function MakeNativePath([string]$Path) {
     $Path -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
 }
+
+function MakeGitPath([string]$Path) {
+    $Path -replace '\\', '/'
+}
+
+# Force the posh-git prompt to be installed. Could be runnng on dev system where
+# user has customized the prompt.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+$module = Import-Module $moduleManifestPath -ArgumentList $true,$true -Force -PassThru
