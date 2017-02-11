@@ -49,7 +49,7 @@ Describe 'Get-GitDiretory Tests' {
                 Remove-Item $worktreePath -Recurse -Force
             }
             New-Item $worktreePath -ItemType Directory > $null
-            git worktree add -b test-worktree $worktreePath master
+            git worktree add -b test-worktree $worktreePath master 2>$null
         }
         AfterEach {
             Set-Location $origPath
