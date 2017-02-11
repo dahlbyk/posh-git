@@ -37,6 +37,11 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 ## Thank You:
 Thank you to the following folks who contributed their time and scripting skills to make posh-git better:
 
+- Keith Hill (@rkeithhill)
+  * [Pester test infrastructure](https://github.com/dahlbyk/posh-git/commits/master/test?author=rkeithhill)
+  * Triage of open issues and PRs
+  * Many README and help improvements
+  * Many of the fixes enumerated above
 - Marcus Reid (@cmarcusreid)
   * Use GitStatusCache when it's installed [PR #208](https://github.com/dahlbyk/posh-git/pull/208)
   * Report UpstreamGone from GitStatusCache response [PR #372](https://github.com/dahlbyk/posh-git/pull/372)
