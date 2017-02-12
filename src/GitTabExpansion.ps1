@@ -51,6 +51,15 @@ catch {
     Write-Debug "Search for 'flow' in 'git help' output failed with error: $_"
 }
 
+filter quoteStringWithSpecialChars {
+    if ($_ -and ($_ -match '\s+|#|@|\$|;|\{|\}|\(|\)')) {
+        "'" + $_ + "'"
+    }
+    else {
+        $_
+    }
+}
+
 function script:gitCommands($filter, $includeAliases) {
     $cmdList = @()
     if (-not $global:GitTabSettings.AllCommands) {
@@ -86,7 +95,8 @@ function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
 
     $branches |
         Where-Object { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
-        ForEach-Object { $prefix + $_ }
+        ForEach-Object { $prefix + $_ } |
+        quoteStringWithSpecialChars
 }
 
 function script:gitRemoteUniqueBranches($filter) {
@@ -95,13 +105,15 @@ function script:gitRemoteUniqueBranches($filter) {
         Group-Object -NoElement |
         Where-Object { $_.Count -eq 1 } |
         Select-Object -ExpandProperty Name |
-        Where-Object { $_ -like "$filter*" }
+        Where-Object { $_ -like "$filter*" } |
+        quoteStringWithSpecialChars
 }
 
 function script:gitTags($filter, $prefix = '') {
     git tag |
         Where-Object { $_ -like "$filter*" } |
-        ForEach-Object { $prefix + $_ }
+        ForEach-Object { $prefix + $_ } |
+        quoteStringWithSpecialChars
 }
 
 function script:gitFeatures($filter, $command){
@@ -109,13 +121,15 @@ function script:gitFeatures($filter, $command){
     $branches = @(git branch --no-color | ForEach-Object { if ($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
         Where-Object { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
-        ForEach-Object { $prefix + $_ }
+        ForEach-Object { $prefix + $_ } |
+        quoteStringWithSpecialChars
 }
 
 function script:gitRemoteBranches($remote, $ref, $filter, $prefix = '') {
     git branch --no-color -r |
         Where-Object { $_ -like "  $remote/$filter*" } |
-        ForEach-Object { $prefix + $ref + ($_ -replace "  $remote/","") }
+        ForEach-Object { $prefix + $ref + ($_ -replace "  $remote/","") } |
+        quoteStringWithSpecialChars
 }
 
 function script:gitStashes($filter) {
@@ -133,7 +147,7 @@ function script:gitTfsShelvesets($filter) {
 function script:gitFiles($filter, $files) {
     $files | Sort-Object |
         Where-Object { $_ -like "$filter*" } |
-        ForEach-Object { if ($_ -like '* *') { "'$_'" } else { $_ } }
+        quoteStringWithSpecialChars
 }
 
 function script:gitIndex($GitStatus, $filter) {
