@@ -135,13 +135,13 @@ function script:gitRemoteBranches($remote, $ref, $filter, $prefix = '') {
 function script:gitStashes($filter) {
     (git stash list) -replace ':.*','' |
         Where-Object { $_ -like "$filter*" } |
-        ForEach-Object { "'$_'" }
+        quoteStringWithSpecialChars
 }
 
 function script:gitTfsShelvesets($filter) {
     (git tfs shelve-list) |
         Where-Object { $_ -like "$filter*" } |
-        ForEach-Object { "'$_'" }
+        quoteStringWithSpecialChars
 }
 
 function script:gitFiles($filter, $files) {
