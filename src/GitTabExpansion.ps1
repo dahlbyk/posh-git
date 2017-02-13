@@ -52,8 +52,9 @@ catch {
 }
 
 filter quoteStringWithSpecialChars {
-    if ($_ -and ($_ -match '\s+|#|@|\$|;|\{|\}|\(|\)')) {
-        "'" + $_ + "'"
+    if ($_ -and ($_ -match '\s+|#|@|\$|;|,|''|\{|\}|\(|\)')) {
+        $str = $_ -replace "'", "''"
+        "'$str'"
     }
     else {
         $_

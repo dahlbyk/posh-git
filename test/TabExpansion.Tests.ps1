@@ -120,21 +120,14 @@ Describe 'TabExpansion Tests' {
             }
         }
     }
+
     Context 'Add/Reset/Checkout TabExpansion Tests' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $origPath = Get-Location
-            $temp = [System.IO.Path]::GetTempPath()
-            $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
-
-            git.exe init $repoPath
-            Set-Location $repoPath
+            $repoPath = NewGitTempRepo
         }
         AfterEach {
-            Set-Location $origPath
-            if (Test-Path $repoPath) {
-                Remove-Item $repoPath -Recurse -Force
-            }
+            RemoveGitTempRepo $repoPath
         }
         It 'Tab completes non-ASCII file name' {
             git.exe config core.quotepath true # Problematic (default) config
@@ -152,27 +145,17 @@ Describe 'TabExpansion Tests' {
     Context 'PowerShell Special Chars Tests' {
         BeforeAll {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $origPath = Get-Location
-            $temp = [System.IO.Path]::GetTempPath()
-            $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
-
-            git.exe init $repoPath
-            Set-Location $repoPath
+            $repoPath = NewGitTempRepo
 
             'readme' | Out-File .\README.md -Encoding ascii
             git.exe add .\README.md
             git.exe commit -m "initial commit."
         }
         AfterAll {
-            Set-Location $origPath
-            if (Test-Path $repoPath) {
-                Remove-Item $repoPath -Recurse -Force
-            }
+            RemoveGitTempRepo $repoPath
         }
         AfterEach {
-            Set-Location $repoPath
-            git.exe reset HEAD --hard
-            git.exe checkout master 2>$null
+            ResetGitTempRepoWorkingDir $repoPath
         }
         It 'Tab completes branch name with special char as quoted' {
             git.exe branch '#develop' 2>$null
@@ -192,6 +175,12 @@ Describe 'TabExpansion Tests' {
 
             $result = & $module GitTabExpansionInternal 'git show v1'
             $result | Should BeExactly "'$tag'"
+        }
+        It 'Tab completes a tag name with single quote correctly' {
+            git.exe tag "v2.0.0'"
+
+            $result = & $module GitTabExpansionInternal 'git show v2'
+            $result | Should BeExactly "'v2.0.0'''"
         }
         It 'Tab completes add file in working dir with special char as quoted' {
             $filename = 'foo{bar} (x86).txt';
