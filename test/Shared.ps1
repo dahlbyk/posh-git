@@ -41,8 +41,8 @@ function RemoveGitTempRepo($RepoPath) {
 
 function ResetGitTempRepoWorkingDir($RepoPath, $Branch = 'master') {
     Set-Location $repoPath
-    git.exe reset HEAD --hard
-    git.exe checkout $Branch 2>$null
+    git.exe checkout -fq $Branch 2>$null
+    git.exe clean -xdfq 2>$null
 }
 
 # Force the posh-git prompt to be installed. Could be runnng on dev system where
