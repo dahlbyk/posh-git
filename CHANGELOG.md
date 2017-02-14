@@ -27,6 +27,10 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
   ([#298](https://github.com/dahlbyk/posh-git/issues/298))
 - Fix problem on open source PowerShell, missing `WindowsPrincipal`/`WindowsIdentity`
   ([#301](https://github.com/dahlbyk/posh-git/issues/301))
+- Fix Chocolatey install and add uninstall
+  ([#358](https://github.com/dahlbyk/posh-git/issues/358))
+- Remove invalid branch from tab expansion when `HEAD` is detached
+  ([#367](https://github.com/dahlbyk/posh-git/issues/367))
 - Fix PowerShell Core error on `EnvironmentVariableTarget`
   ([#369](https://github.com/dahlbyk/posh-git/issues/369))
 - Fix Git prompts not display correctly in codepage using DBCS
@@ -39,19 +43,25 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
   ([PR #284](https://github.com/dahlbyk/posh-git/pull/284))
 - Update module import so that it sets the prompt function *iff* the user does not have a customized prompt function
   ([#217](https://github.com/dahlbyk/posh-git/issues/217))
+  ([PR #349](https://github.com/dahlbyk/posh-git/pull/349))
 - Add tab completion for AVH git-flow commands
   ([PR #231](https://github.com/dahlbyk/posh-git/pull/231))
 - Update profile.example.ps1 to remove prompt function and tweak how module is imported
-- Add new commmand Add-PoshGitToProfile
   ([PR #349](https://github.com/dahlbyk/posh-git/pull/349))
+- Add new commmand Add-PoshGitToProfile
+  ([PR #361](https://github.com/dahlbyk/posh-git/pull/361))
 - Add about_posh-git help topic
   ([PR #298](https://github.com/dahlbyk/posh-git/pull/287))
 - Add new settings for default posh-git prompt:
-  `DefaultPromptPrefix`,
-  `DefaultPromptSuffix` (default includes nested prompt level, [PR #363](https://github.com/dahlbyk/posh-git/pull/363)),
+  `DefaultPromptPrefix`
+    [PR #393](https://github.com/dahlbyk/posh-git/pull/393),
+  `DefaultPromptSuffix` (default includes nested prompt level,
+    [PR #363](https://github.com/dahlbyk/posh-git/pull/363)),
   `DefaultPromptDebugSuffix`,
-  `DefaultPromptEnableTiming` [PR #371](https://github.com/dahlbyk/posh-git/pull/371) and
+  `DefaultPromptEnableTiming`
+    [PR #371](https://github.com/dahlbyk/posh-git/pull/371) and
   `DefaultPromptAbbreviateHomeDirectory`
+    [#386](https://github.com/dahlbyk/posh-git/issues/386)
 - Add ahead/behind count to prompt
   ([PR #256](https://github.com/dahlbyk/posh-git/pull/256))
   * Add `BranchBehindAndAheadDisplay` setting to control count display (Full (default), Compact, Minimal)
@@ -95,7 +105,7 @@ Thank you to the following folks who contributed their time and scripting skills
   * Speed up `Get-GitStatus`
     [PR #319](https://github.com/dahlbyk/posh-git/pull/319)
   * Use `PSCustomObject` case for sorted output of `$GitPromptSettings`
-    [PR #383](https://github.com/dahlbyk/posh-git/pull/382)
+    [PR #382](https://github.com/dahlbyk/posh-git/pull/382)
 - Ralf Müller (@seamlessintegrations)
   * Add support for tab-completion of Git parameters
     [PR #395](https://github.com/dahlbyk/posh-git/pull/395)
@@ -137,7 +147,7 @@ Thank you to the following folks who contributed their time and scripting skills
   * Fix branch names using UTF8 characters do not display correctly
     [PR #223](https://github.com/dahlbyk/posh-git/pull/223)
 - Luis Vita (@Ivita)
-  * Fix typo in git commit parameter -amend in tabexansion
+  * Fix typo in git commit parameter --amend in tab exansion
     [PR #405](https://github.com/dahlbyk/posh-git/pull/405)
 - Skeept (@skeept)
   * Fix debug prompt breaking posh-git prompt on PowerShell v4
