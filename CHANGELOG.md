@@ -12,6 +12,7 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 - Fix file names with non-ASCII characters not tab completing correctly ([#64](https://github.com/dahlbyk/posh-git/issues/64)) ([#403](https://github.com/dahlbyk/posh-git/pull/403))
 - Fix incorrect tab expansion for `git push --option <remote>` ([#234](https://github.com/dahlbyk/posh-git/issues/234))
 - Fix support for bare repository ([#291](https://github.com/dahlbyk/posh-git/issues/291))
+- Fix tab expansion starting with '#' needs to be escaped ([#293](https://github.com/dahlbyk/posh-git/issues/293))
 - Fix syntax error on setenv calls ([#297](https://github.com/dahlbyk/posh-git/pull/297))
 - Fix temp path issue with ~ in 8.3 filenames ([#298](https://github.com/dahlbyk/posh-git/issues/298))
 - Fix problem on open source PowerShell, missing `WindowsPrincipal`/`WindowsIdentity` ([#301](https://github.com/dahlbyk/posh-git/issues/301))
