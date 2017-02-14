@@ -1,5 +1,4 @@
 # Variable is used in GitTabExpansion.ps1
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 $shortGitParams = @{
     add = 'n v f i p e u A N'
     bisect = ''
@@ -40,7 +39,6 @@ $shortGitParams = @{
 }
 
 # Variable is used in GitTabExpansion.ps1
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 $longGitParams = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
     bisect = 'no-checkout term-old term-new'
@@ -84,7 +82,6 @@ $longGitParams = @{
 }
 
 # Variable is used in GitTabExpansion.ps1
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 $gitParamValues = @{
     blame = @{
         encoding = 'utf-8 none'
