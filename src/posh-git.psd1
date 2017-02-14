@@ -58,17 +58,19 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('git', 'tab-completion', 'tab-expansion')
+        Tags = @('git', 'prompt', 'tab', 'tab-completion', 'tab-expansion', 'tabexpansion')
 
         # A URL to the license for this module.
-        LicenseUri = 'https://github.com/dahlbyk/posh-git/blob/master/LICENSE.txt'
+        LicenseUri = 'https://github.com/dahlbyk/posh-git/blob/v0.7.0/LICENSE.txt'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/dahlbyk/posh-git'
+
+        # ReleaseNotes of this module
+        ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md'
 
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
 
 }
-
