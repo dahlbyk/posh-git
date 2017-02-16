@@ -142,14 +142,40 @@ Describe 'TabExpansion Tests' {
         }
     }
 
+    Context 'Alias TabExpansion Tests' {
+        BeforeAll {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo -MakeInitialCommit
+        }
+        AfterAll {
+            RemoveGitTempRepo $repoPath
+        }
+        It 'Tab completes when there are multiple aliases of the same name' {
+            $addedAlias = $false
+            if (!(git config --global --get alias.co)) {
+                git.exe config --global alias.co checkout
+                $addedAlias = $true
+            }
+
+            try {
+                git.exe config alias.co checkout
+                (git.exe config --get-regexp alias\.).Count | Should Be 2
+
+                $result = & $module GitTabExpansionInternal 'git co ma'
+                $result | Should BeExactly 'master'
+            }
+            finally {
+                if ($addedAlias) {
+                    git config --global --unset alias.co
+                }
+            }
+        }
+    }
+
     Context 'PowerShell Special Chars Tests' {
         BeforeAll {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $repoPath = NewGitTempRepo
-
-            'readme' | Out-File .\README.md -Encoding ascii
-            git.exe add .\README.md
-            git.exe commit -m "initial commit."
+            $repoPath = NewGitTempRepo -MakeInitialCommit
         }
         AfterAll {
             RemoveGitTempRepo $repoPath

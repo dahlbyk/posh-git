@@ -23,12 +23,19 @@ function MakeGitPath([string]$Path) {
     $Path -replace '\\', '/'
 }
 
-function NewGitTempRepo {
+function NewGitTempRepo([switch]$MakeInitialCommit) {
     Push-Location
     $temp = [System.IO.Path]::GetTempPath()
     $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
     git.exe init $repoPath *>$null
     Set-Location $repoPath
+
+    if ($MakeInitialCommit) {
+        'readme' | Out-File .\README.md -Encoding ascii
+        git.exe add .\README.md *>$null
+        git.exe commit -m "initial commit." *>$null
+    }
+
     $repoPath
 }
 
