@@ -159,7 +159,7 @@ Describe 'TabExpansion Tests' {
 
             try {
                 git.exe config alias.co checkout
-                (git.exe config --get-all alias.co).Count | Should Be 2
+                (git.exe config --get-all alias.co).Count | Should BeGreaterThan 1
 
                 $result = & $module GitTabExpansionInternal 'git co ma'
                 $result | Should BeExactly 'master'
