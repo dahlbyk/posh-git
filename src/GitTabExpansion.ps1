@@ -192,9 +192,9 @@ function script:gitAliases($filter) {
 }
 
 function script:expandGitAlias($cmd, $rest) {
-    $gitAliases = @(git config --get-regexp "^alias\.$cmd`$")
-    if ($gitAliases[0] -match "^alias\.$cmd (?<cmd>[^!].*)`$") {
-        return "git $($Matches['cmd'])$rest"
+    $alias = git config "alias.$cmd"
+    if ($alias) {
+        return "git $alias$rest"
     }
     else {
         return "git $cmd$rest"
