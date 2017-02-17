@@ -143,32 +143,32 @@ Describe 'TabExpansion Tests' {
     }
 
     Context 'Alias TabExpansion Tests' {
+        $addedAliases = @()
+        function Add-GlobalTestAlias($Name, $Value) {
+            if (!(git config --global "alias.$Name")) {
+                git.exe config --global "alias.$Name" $Value
+                $addedAliases += $Name
+            }
+        }
         BeforeAll {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $repoPath = NewGitTempRepo -MakeInitialCommit
         }
         AfterAll {
+            $addedAliases | Where-Object { $_ } | ForEach-Object {
+                git.exe config --global --unset "alias.$_" 2>$null
+            }
+
             RemoveGitTempRepo $repoPath
         }
         It 'Tab completes when there are multiple aliases of the same name' {
-            $addedAlias = $false
-            if (!(git config --global --get alias.co)) {
-                git.exe config --global alias.co checkout
-                $addedAlias = $true
-            }
+            Add-GlobalTestAlias co checkout
 
-            try {
-                git.exe config alias.co checkout
-                (git.exe config --get-all alias.co).Count | Should BeGreaterThan 1
+            git.exe config alias.co checkout
+            (git.exe config --get-all alias.co).Count | Should BeGreaterThan 1
 
-                $result = & $module GitTabExpansionInternal 'git co ma'
-                $result | Should BeExactly 'master'
-            }
-            finally {
-                if ($addedAlias) {
-                    git config --global --unset alias.co
-                }
-            }
+            $result = & $module GitTabExpansionInternal 'git co ma'
+            $result | Should BeExactly 'master'
         }
     }
 
