@@ -188,7 +188,7 @@ function script:gitAliases($filter) {
                 $alias
             }
         }
-    } | Sort-Object
+    } | Get-Unique | Sort-Object
 }
 
 function script:expandGitAlias($cmd, $rest) {

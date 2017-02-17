@@ -161,6 +161,17 @@ Describe 'TabExpansion Tests' {
 
             RemoveGitTempRepo $repoPath
         }
+        It 'Command completion includes unique list of aliases' {
+            $alias = "test-$(New-Guid)"
+
+            Add-GlobalTestAlias $alias config
+            git.exe config alias.$alias help
+            (git.exe config --get-all alias.$alias).Count | Should Be 2
+
+            $result = @(& $module GitTabExpansionInternal "git $alias")
+            $result.Count | Should Be 1
+            $result[0] | Should BeExactly $alias
+        }
         It 'Tab completes when there is one alias of a given name' {
             $alias = "test-$(New-Guid)"
 
