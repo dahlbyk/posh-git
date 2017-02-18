@@ -23,7 +23,7 @@ Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus 
 ### Prerequisites
 Before installing posh-git make sure the following prerequisites have been met.
 
-1. PowerShell 2.0 or higher. Check your PowerShell version by executing `$PSVersionTable.PSVersion`.
+1. PowerShell 3.0 or higher. Check your PowerShell version by executing `$PSVersionTable.PSVersion`.
 
 2. Script execution policy must be set to either `RemoteSigned` or `Unrestricted`.
    Check the script execution policy setting by executing `Get-ExecutionPolicy`.
@@ -58,7 +58,7 @@ Update-Module posh-git
 ```
 
 ### Installing posh-git via Chocolatey
-If you have PowerShell version 2 or are having issues using Install-Module with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
+If you are having issues using Install-Module with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
 If you don't have Chocolatey, you can install it from the [Chocolately Install page](https://chocolatey.org/install).
 With Chocolatey installed, execute the following command to install posh-git:
 ```

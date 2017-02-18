@@ -1,5 +1,14 @@
 # posh-git Release History
 
+## 1.0.0 - TBD
+This release introduces breaking changes with 0.x to both drop support for PowerShell 2.0 and support writing prompt strings using ANSI sequences.
+The ANSI sequence support will help with cross-platform PowerShell support which is another goal of this release.
+
+- Drop support for PowerShell 2.0
+- Remove Invoke-NullCoalescing command
+  ([#93](https://github.com/dahlbyk/posh-git/issues/93))
+  ([PR #426](https://github.com/dahlbyk/posh-git/pull/426))
+
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that
 modifies the user's PowerShell profile script to import the posh-git module whenever PowerShell starts.

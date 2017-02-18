@@ -4,9 +4,11 @@
 Describe 'Utils Function Tests' {
     Context 'Add-PoshGitToProfile Tests' {
         BeforeAll {
-           $newLine = [System.Environment]::NewLine
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $newLine = [System.Environment]::NewLine
         }
         BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $profilePath = [System.IO.Path]::GetTempFileName()
         }
         AfterEach {
@@ -84,6 +86,7 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
 
     Context 'Test-PoshGitImportedInScript Tests' {
         BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $profilePath = [System.IO.Path]::GetTempFileName()
         }
         AfterEach {

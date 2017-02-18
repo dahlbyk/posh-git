@@ -3,7 +3,7 @@ os:
 
 branches:
   only:
-    - master
+    - develop
 
 init:
   - git config --global core.autocrlf true
