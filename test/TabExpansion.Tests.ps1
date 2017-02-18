@@ -142,14 +142,60 @@ Describe 'TabExpansion Tests' {
         }
     }
 
+    Context 'Alias TabExpansion Tests' {
+        $addedAliases = @()
+        function Add-GlobalTestAlias($Name, $Value) {
+            if (!(git config --global "alias.$Name")) {
+                git.exe config --global "alias.$Name" $Value
+                $addedAliases += $Name
+            }
+        }
+        BeforeAll {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo -MakeInitialCommit
+        }
+        AfterAll {
+            $addedAliases | Where-Object { $_ } | ForEach-Object {
+                git.exe config --global --unset "alias.$_" 2>$null
+            }
+
+            RemoveGitTempRepo $repoPath
+        }
+        It 'Command completion includes unique list of aliases' {
+            $alias = "test-$(New-Guid)"
+
+            Add-GlobalTestAlias $alias config
+            git.exe config alias.$alias help
+            (git.exe config --get-all alias.$alias).Count | Should Be 2
+
+            $result = @(& $module GitTabExpansionInternal "git $alias")
+            $result.Count | Should Be 1
+            $result[0] | Should BeExactly $alias
+        }
+        It 'Tab completes when there is one alias of a given name' {
+            $alias = "test-$(New-Guid)"
+
+            git.exe config alias.$alias checkout
+            (git.exe config --get-all alias.$alias).Count | Should Be 1
+
+            $result = & $module GitTabExpansionInternal "git $alias ma"
+            $result | Should BeExactly 'master'
+        }
+        It 'Tab completes when there are multiple aliases of the same name' {
+            Add-GlobalTestAlias co checkout
+
+            git.exe config alias.co checkout
+            (git.exe config --get-all alias.co).Count | Should BeGreaterThan 1
+
+            $result = & $module GitTabExpansionInternal 'git co ma'
+            $result | Should BeExactly 'master'
+        }
+    }
+
     Context 'PowerShell Special Chars Tests' {
         BeforeAll {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $repoPath = NewGitTempRepo
-
-            'readme' | Out-File .\README.md -Encoding ascii
-            git.exe add .\README.md
-            git.exe commit -m "initial commit."
+            $repoPath = NewGitTempRepo -MakeInitialCommit
         }
         AfterAll {
             RemoveGitTempRepo $repoPath
