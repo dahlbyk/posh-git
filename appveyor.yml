@@ -4,6 +4,7 @@ os:
 branches:
   only:
     - develop
+    - master
 
 init:
   - git config --global core.autocrlf true
