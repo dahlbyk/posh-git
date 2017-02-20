@@ -82,18 +82,32 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
 .OUTPUTS
     None.
 #>
-function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf) {
+function Add-PoshGitToProfile {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter()]
+        [switch]
+        $AllHosts,
+
+        [Parameter()]
+        [switch]
+        $Force,
+
+        [Parameter(ValueFromRemainingArguments)]
+        [psobject[]]
+        $TestParams
+    )
+
     $underTest = $false
 
     $profilePath = if ($AllHosts) { $PROFILE.CurrentUserAllHosts } else { $PROFILE.CurrentUserCurrentHost }
 
     # Under test, we override some variables using $args as a backdoor.
-    # TODO: Can we just turn these into optional parameters with well-defined behavior?
-    if (($args.Count -gt 0) -and ($args[0] -is [string])) {
-        $profilePath = [string]$args[0]
+    if (($TestParams.Count -gt 0) -and ($TestParams[0] -is [string])) {
+        $profilePath = [string]$TestParams[0]
         $underTest = $true
-        if ($args.Count -gt 1) {
-            $ModuleBasePath = [string]$args[1]
+        if ($TestParams.Count -gt 1) {
+            $ModuleBasePath = [string]$TestParams[1]
         }
     }
 
@@ -128,7 +142,7 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
     }
 
     if (!$profilePath) {
-        Write-Warning "Skipping add of posh-git import; no profile found."
+        Write-Warning "Skipping add of posh-git import to profile; no profile found."
         Write-Verbose "`$profilePath          = '$profilePath'"
         Write-Verbose "`$PROFILE              = '$PROFILE'"
         Write-Verbose "CurrentUserCurrentHost = '$($PROFILE.CurrentUserCurrentHost)'"
@@ -136,6 +150,16 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
         Write-Verbose "AllUsersCurrentHost    = '$($PROFILE.AllUsersCurrentHost)'"
         Write-Verbose "AllUsersAllHosts       = '$($PROFILE.AllUsersAllHosts)'"
         return
+    }
+
+    # If the profile script exists and is signed, then we should not modify it
+    if (Test-Path -LiteralPath $profilePath) {
+        $sig = Get-AuthenticodeSignature $profilePath
+        if ($sig.SignatureType -eq [System.Management.Automation.SignatureType]::Authenticode) {
+            Write-Warning "Skipping add of posh-git import to profile; '$profilePath' appears to be signed."
+            Write-Warning "Add the command 'Import-Module posh-git' to your profile and resign it."
+            return
+        }
     }
 
     # Check if the location of this module file is in the PSModulePath
@@ -146,7 +170,9 @@ function Add-PoshGitToProfile([switch]$AllHosts, [switch]$Force, [switch]$WhatIf
         $profileContent = "`nImport-Module '$ModuleBasePath\posh-git.psd1'"
     }
 
-    Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8 -WhatIf:$WhatIf
+    if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module posh-git' to profile")) {
+        Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
+    }
 }
 
 <#
