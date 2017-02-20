@@ -14,7 +14,7 @@ If not, PLEASE fill in the following details so that we can help you!
 To retrieve the system details, paste the following line into PowerShell, press Enter
 and then copy/paste the resulting output above.
 
-"- posh-git version/path: $($m = Get-Module posh-git; '{0} {1} {2}' -f $m.Version,$m.PrivateData.PSData.PreReleaseVersion,$m.ModuleBase)`n- PowerShell version: $($PSVersionTable.PSVersion)`n- $(
+"- posh-git version/path: $($m = Get-Module posh-git; '{0} {1} {2}' -f $m.Version,$m.PrivateData.PSData.PreReleaseVersion,$m.ModuleBase.Replace($HOME,'~'))`n- PowerShell version: $($PSVersionTable.PSVersion)`n- $(
 git --version)`n- OS: $([System.Environment]::OSVersion)"
 -->
 
