@@ -13,6 +13,18 @@ For example, with posh-git, PowerShell can tab complete git commands like `check
 That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will cycle through other command matches such as `cherry` and `cherry-pick`.
 You can also tab complete remote names and branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
 
+## Versions
+- `master` avoids breaking changes, maintaining v0.x.
+  ( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
+- `develop` includes breaking changes, toward [v1.0](https://github.com/dahlbyk/posh-git/issues/328).
+  ( [README](https://github.com/dahlbyk/posh-git/blob/develop/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md) )
+- Previous releases:
+  - v0.7.0
+    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
+    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
+
 ## Notes
 Posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
 For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git#step-3-optional-customize-your-powershell-prompt) section below.
