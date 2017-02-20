@@ -5,6 +5,10 @@ Describe 'TabExpansion Tests' {
         $module.ExportedFunctions.Keys -contains 'TabExpansion' | Should Be $true
     }
     Context 'Fetch/Push/Pull TabExpansion Tests' {
+        BeforeEach {
+            # Ensure master branch exists
+            git branch -q master origin/master 2>$null
+        }
         It 'Tab completes all remotes' {
             $result = & $module GitTabExpansionInternal 'git push '
             $result | Should BeExactly (git remote)
