@@ -7,7 +7,7 @@ The ANSI sequence support will help with cross-platform PowerShell support, whic
 - Drop support for PowerShell 2.0
   ([#163](https://github.com/dahlbyk/posh-git/issues/163))
   ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
-- Remove `Invoke-NullCoalescing` command
+- Remove public `Enable-GitColors`, `Get-AliasPattern` and `Get-GitBranch`; plus `Invoke-NullCoalescing` and its `??` alias
   ([#93](https://github.com/dahlbyk/posh-git/issues/93))
   ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
 
