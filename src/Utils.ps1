@@ -142,7 +142,7 @@ function Add-PoshGitToProfile {
     }
 
     if (!$profilePath) {
-        Write-Warning "Skipping add of posh-git import; no profile found."
+        Write-Warning "Skipping add of posh-git import to profile; no profile found."
         Write-Verbose "`$profilePath          = '$profilePath'"
         Write-Verbose "`$PROFILE              = '$PROFILE'"
         Write-Verbose "CurrentUserCurrentHost = '$($PROFILE.CurrentUserCurrentHost)'"
@@ -155,8 +155,8 @@ function Add-PoshGitToProfile {
     # If the profile script exists and is signed, then we should not modify it
     if (Test-Path -LiteralPath $profilePath) {
         $sig = Get-AuthenticodeSignature $profilePath
-        if ($sig.Status -eq [System.Management.Automation.SignatureStatus]::Valid) {
-            Write-Warning "The profile script '$profilePath' is signed and cannot be updated."
+        if ($sig.SignatureType -eq [System.Management.Automation.SignatureType]::Authenticode) {
+            Write-Warning "Skipping add of posh-git import to profile; '$profilePath' appears to be signed."
             Write-Warning "Add the command 'Import-Module posh-git' to your profile and resign it."
             return
         }
