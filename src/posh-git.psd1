@@ -4,7 +4,7 @@
 RootModule = 'posh-git.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = '74c9fd30-734b-4c89-a8ae-7727ad21d1d5'
@@ -24,9 +24,6 @@ PowerShellVersion = '3.0'
 # Functions to export from this module
 FunctionsToExport = @(
     'Add-PoshGitToProfile',
-    'Enable-GitColors',
-    'Get-AliasPattern',
-    'Get-GitBranch',
     'Get-GitStatus',
     'Get-GitDirectory',
     'Update-AllBranches',
