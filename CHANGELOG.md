@@ -2,12 +2,14 @@
 
 ## 1.0.0 - TBD
 This release introduces breaking changes with 0.x to both drop support for PowerShell 2.0 and support writing prompt strings using ANSI sequences.
-The ANSI sequence support will help with cross-platform PowerShell support which is another goal of this release.
+The ANSI sequence support will help with cross-platform PowerShell support, which is another goal of this release.
 
 - Drop support for PowerShell 2.0
-- Remove Invoke-NullCoalescing command
+  ([#163](https://github.com/dahlbyk/posh-git/issues/163))
+  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
+- Remove `Invoke-NullCoalescing` command
   ([#93](https://github.com/dahlbyk/posh-git/issues/93))
-  ([PR #426](https://github.com/dahlbyk/posh-git/pull/426))
+  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
 
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that
