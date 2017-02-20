@@ -3,6 +3,7 @@ os:
 
 branches:
   only:
+    - develop
     - master
 
 init:
