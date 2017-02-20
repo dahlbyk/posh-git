@@ -1,6 +1,7 @@
 # posh-git
 
-[![Build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80?svg=true)](https://ci.appveyor.com/project/dahlbyk/posh-git)
+[![master build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git)
+[![develop build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/develop)
 [![Join the chat at https://gitter.im/dahlbyk/posh-git](https://badges.gitter.im/dahlbyk/posh-git.svg)](https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
@@ -11,6 +12,18 @@ posh-git also provides tab completion support for common git commands, branch na
 For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing the <kbd>tab</kbd> key.
 That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will cycle through other command matches such as `cherry` and `cherry-pick`.
 You can also tab complete remote names and branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
+
+## Versions
+- `master` avoids breaking changes, maintaining v0.x.
+  ( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
+- `develop` includes breaking changes, toward [v1.0](https://github.com/dahlbyk/posh-git/issues/328).
+  ( [README](https://github.com/dahlbyk/posh-git/blob/develop/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md) )
+- Previous releases:
+  - v0.7.0
+    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
+    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
 
 ## Notes
 Posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.

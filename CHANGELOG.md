@@ -1,5 +1,14 @@
 # posh-git Release History
 
+## 0.7.1 - TBD
+
+- Fixed tab completion issues with duplicate aliases
+  ([#164](https://github.com/dahlbyk/posh-git/issues/164))
+  ([#421](https://github.com/dahlbyk/posh-git/issues/421))
+  ([PR #422](https://github.com/dahlbyk/posh-git/pull/422))
+- `Add-PoshGitToProfile` will no longer modify a signed `$PROFILE` script; it also learned `-Confirm`
+  ([PR #428](https://github.com/dahlbyk/posh-git/pull/428))
+
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that
 modifies the user's PowerShell profile script to import the posh-git module whenever PowerShell starts.
