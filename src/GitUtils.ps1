@@ -350,10 +350,6 @@ function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
     $res
 }
 
-function Enable-GitColors {
-    Write-Warning 'Enable-GitColors is Obsolete and will be removed in a future version of posh-git.'
-}
-
 function Get-AliasPattern($exe) {
    $aliases = @($exe) + @(Get-Alias | Where-Object { $_.Definition -eq $exe } | Select-Object -Exp Name)
    "($($aliases -join '|'))"
