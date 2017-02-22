@@ -1,6 +1,5 @@
 ﻿try {
-    $binRoot = Get-BinRoot
-    $poshgitPath = join-path $binRoot 'poshgit'
+    $poshgitPath = join-path (Get-ToolsLocation) 'poshgit'
 
     $currentVersionPath = Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
 

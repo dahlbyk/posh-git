@@ -10,6 +10,8 @@
   ([PR #428](https://github.com/dahlbyk/posh-git/pull/428))
 - Overwrite pre-0.7 posh-git prompt on import
   ([PR #425](https://github.com/dahlbyk/posh-git/pull/425))
+- Fix Chocolatey deprecation warning with dependency on 0.9.10
+  ([PR #426](https://github.com/dahlbyk/posh-git/pull/426))
 
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that

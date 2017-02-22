@@ -30,6 +30,7 @@ Note on performance: displaying file status in the git prompt for a very large r
     <licenseUrl>https://github.com/dahlbyk/posh-git/blob/v0.7.0/LICENSE.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
+      <dependency id="chocolatey" version="0.9.10" />
       <dependency id="git" />
     </dependencies>
   </metadata>
