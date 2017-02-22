@@ -1,6 +1,5 @@
 ﻿try {
-    $binRoot = Get-BinRoot
-    $poshgitPath = join-path $binRoot 'poshgit'
+    $poshgitPath = join-path (Get-ToolsLocation) 'poshgit'
 
     try {
       if (test-path($poshgitPath)) {
