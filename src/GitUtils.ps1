@@ -529,7 +529,9 @@ function Add-SshKey() {
         if ($args.Count -eq 0) {
             $keyPath = Join-Path $Env:HOME .ssh
             $keys = Get-ChildItem $keyPath/*.ppk -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
-            & $pageant $keys
+            if ($keys) {
+                & $pageant $keys
+            }
         }
         else {
             foreach ($value in $args) {
