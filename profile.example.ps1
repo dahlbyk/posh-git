@@ -17,4 +17,6 @@ else {
 
 Start-SshAgent -Quiet
 
-Write-Warning "posh-git's profile.example.ps1 will be removed in a future version. To avoid a change in behavior, copy its contents into your $PROFILE."
+if ($args[0] -ne 'choco') {
+    Write-Warning "posh-git's profile.example.ps1 will be removed in a future version. To avoid a change in behavior, copy its contents into your $PROFILE."
+}
