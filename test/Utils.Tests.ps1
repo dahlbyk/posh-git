@@ -82,6 +82,23 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             $profileContent += "${newLine}${newLine}Import-Module posh-git"
             $content -join $newLine | Should BeExactly $profileContent
         }
+        It 'Adds Start-SshAgent if posh-git is not installed' {
+            Add-PoshGitToProfile $profilePath -StartSshAgent
+
+            Test-Path -LiteralPath $profilePath | Should Be $true
+            $last = Get-Content $profilePath | Select-Object -Last 1
+            $last | Should BeExactly "Start-SshAgent -Quiet"
+        }
+        It 'Does not add Start-SshAgent if posh-git is installed' {
+            $profileContent = 'Import-Module posh-git'
+            Set-Content $profilePath -Value $profileContent
+
+            Add-PoshGitToProfile $profilePath -StartSshAgent
+
+            Test-Path -LiteralPath $profilePath | Should Be $true
+            $content = Get-Content $profilePath
+            $content | Should BeExactly $profileContent
+        }
     }
 
     Context 'Test-PoshGitImportedInScript Tests' {

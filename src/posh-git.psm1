@@ -28,6 +28,14 @@ else {
 $poshGitPromptScriptBlock = $null
 
 $currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
+
+# If prompt matches pre-0.7 posh-git prompt, ignore it
+$collapsedLegacyPrompt = '$realLASTEXITCODE = $LASTEXITCODE;Write-Host($pwd.ProviderPath) -nonewline;Write-VcsStatus;$global:LASTEXITCODE = $realLASTEXITCODE;return "> "'
+if ($currentPromptDef -and (($currentPromptDef.Trim() -replace '[\r\n\t]+\s*',';') -eq $collapsedLegacyPrompt)) {
+    Write-Warning 'Replacing old posh-git prompt. Did you copy profile.example.ps1 into $PROFILE?'
+    $currentPromptDef = $null
+}
+
 if (!$currentPromptDef) {
     # HACK: If prompt is missing, create a global one we can overwrite with Set-Item
     function global:prompt { ' ' }
