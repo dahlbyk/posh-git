@@ -10,8 +10,10 @@ Describe 'TabExpansion Tests' {
             git branch -q master origin/master 2>$null
         }
         It 'Tab completes all remotes' {
+            (git remote) -contains 'origin' | Should Be $true
+
             $result = & $module GitTabExpansionInternal 'git push '
-            $result | Should BeExactly (git remote)
+            $result -contains 'origin' | Should Be $true
         }
         It 'Tab completes all branches' {
             $result = & $module GitTabExpansionInternal 'git push origin '
