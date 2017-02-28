@@ -12,6 +12,11 @@
   ([PR #425](https://github.com/dahlbyk/posh-git/pull/425))
 - Fix Chocolatey deprecation warning with dependency on 0.9.10
   ([PR #426](https://github.com/dahlbyk/posh-git/pull/426))
+- Don't rerun Pageant if there are no keys to add
+  ([PR #441](https://github.com/dahlbyk/posh-git/pull/441))
+- Improve (and hide for Chocolatey) profile.example.ps1 deprecation messaging
+  ([#442](https://github.com/dahlbyk/posh-git/issues/442))
+  ([PR #444](https://github.com/dahlbyk/posh-git/pull/444))
 - Quote tab completion for remote names containing special characters
   ([PR #446](https://github.com/dahlbyk/posh-git/pull/446))
 
