@@ -12,6 +12,8 @@
   ([PR #425](https://github.com/dahlbyk/posh-git/pull/425))
 - Fix Chocolatey deprecation warning with dependency on 0.9.10
   ([PR #426](https://github.com/dahlbyk/posh-git/pull/426))
+- Quote tab completion for remote names containing special characters
+  ([PR #446](https://github.com/dahlbyk/posh-git/pull/446))
 
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that

@@ -207,6 +207,12 @@ Describe 'TabExpansion Tests' {
         AfterEach {
             ResetGitTempRepoWorkingDir $repoPath
         }
+        It 'Tab completes remote name with special char as quoted' {
+            git.exe remote add '#test' https://github.com/dahlbyk/posh-git.git 2> $null
+
+            $result = & $module GitTabExpansionInternal 'git push #'
+            $result | Should BeExactly "'#test'"
+        }
         It 'Tab completes branch name with special char as quoted' {
             git.exe branch '#develop' 2>$null
 
