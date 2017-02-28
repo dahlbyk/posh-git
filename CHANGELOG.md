@@ -107,6 +107,12 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 - Add support for tab-completion of Git parameters, long and short
   ([PR #395](https://github.com/dahlbyk/posh-git/pull/395))
 - Switch `$GitPromptSettings` type from `PSObject` to `PSCustomObject`. On PowerShell v5 and higher, this preserves the definition order of properties in `$GitPromptSettings` making it easier to find properties.
+- Fix prompt status in worktree
+  ([#407](https://github.com/dahlbyk/posh-git/issues/407))
+  ([PR #408](https://github.com/dahlbyk/posh-git/pull/408))
+- Quote tab completion for items containing special characters
+  ([#293](https://github.com/dahlbyk/posh-git/issues/293))
+  ([PR #413](https://github.com/dahlbyk/posh-git/pull/413))
 
 ## Thank You:
 Thank you to the following folks who contributed their time and scripting skills to make posh-git better:
