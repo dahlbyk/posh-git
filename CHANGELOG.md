@@ -12,6 +12,13 @@
   ([PR #425](https://github.com/dahlbyk/posh-git/pull/425))
 - Fix Chocolatey deprecation warning with dependency on 0.9.10
   ([PR #426](https://github.com/dahlbyk/posh-git/pull/426))
+- Don't rerun Pageant if there are no keys to add
+  ([PR #441](https://github.com/dahlbyk/posh-git/pull/441))
+- Improve (and hide for Chocolatey) profile.example.ps1 deprecation messaging
+  ([#442](https://github.com/dahlbyk/posh-git/issues/442))
+  ([PR #444](https://github.com/dahlbyk/posh-git/pull/444))
+- Quote tab completion for remote names containing special characters
+  ([PR #446](https://github.com/dahlbyk/posh-git/pull/446))
 
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that
@@ -105,6 +112,12 @@ Work was begun to eliminate some obvious crashes on PowerShell on .NET Core but 
 - Add support for tab-completion of Git parameters, long and short
   ([PR #395](https://github.com/dahlbyk/posh-git/pull/395))
 - Switch `$GitPromptSettings` type from `PSObject` to `PSCustomObject`. On PowerShell v5 and higher, this preserves the definition order of properties in `$GitPromptSettings` making it easier to find properties.
+- Fix prompt status in worktree
+  ([#407](https://github.com/dahlbyk/posh-git/issues/407))
+  ([PR #408](https://github.com/dahlbyk/posh-git/pull/408))
+- Quote tab completion for items containing special characters
+  ([#293](https://github.com/dahlbyk/posh-git/issues/293))
+  ([PR #413](https://github.com/dahlbyk/posh-git/pull/413))
 
 ## Thank You:
 Thank you to the following folks who contributed their time and scripting skills to make posh-git better:

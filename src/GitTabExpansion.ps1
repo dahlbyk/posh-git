@@ -81,7 +81,9 @@ function script:gitCommands($filter, $includeAliases) {
 }
 
 function script:gitRemotes($filter) {
-    git remote | Where-Object { $_ -like "$filter*" }
+    git remote |
+        Where-Object { $_ -like "$filter*" } |
+        quoteStringWithSpecialChars
 }
 
 function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {

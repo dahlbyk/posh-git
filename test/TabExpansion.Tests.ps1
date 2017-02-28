@@ -10,8 +10,10 @@ Describe 'TabExpansion Tests' {
             git branch -q master origin/master 2>$null
         }
         It 'Tab completes all remotes' {
+            (git remote) -contains 'origin' | Should Be $true
+
             $result = & $module GitTabExpansionInternal 'git push '
-            $result | Should BeExactly (git remote)
+            $result -contains 'origin' | Should Be $true
         }
         It 'Tab completes all branches' {
             $result = & $module GitTabExpansionInternal 'git push origin '
@@ -206,6 +208,12 @@ Describe 'TabExpansion Tests' {
         }
         AfterEach {
             ResetGitTempRepoWorkingDir $repoPath
+        }
+        It 'Tab completes remote name with special char as quoted' {
+            git.exe remote add '#test' https://github.com/dahlbyk/posh-git.git 2> $null
+
+            $result = & $module GitTabExpansionInternal 'git push #'
+            $result | Should BeExactly "'#test'"
         }
         It 'Tab completes branch name with special char as quoted' {
             git.exe branch '#develop' 2>$null
