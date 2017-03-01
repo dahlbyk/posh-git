@@ -1,5 +1,13 @@
 # Hack! https://gist.github.com/lzybkr/f2059cb2ee8d0c13c65ab933b75e998c
 
+if ($IsWindows -eq $false) {
+    function Set-ConsoleMode {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+        param()
+    }
+    return
+}
+
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
@@ -61,27 +69,9 @@ enum ConsoleModeOutputFlags
     ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
 }
 
-function Get-ConsoleMode
-{
-    [CmdletBinding()]
-    param(
-        [switch]
-        $StandardInput
-    )
-
-    $mode = [NativeConsoleMethods]::GetConsoleMode($StandardInput)
-    if ($StandardInput)
-    {
-        [ConsoleModeInputFlags]$mode
-    }
-    else
-    {
-        [ConsoleModeOutputFlags]$mode
-    }
-}
-
 function Set-ConsoleMode
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param(
         [Parameter(ParameterSetName = "ANSI")]
         [switch]
@@ -110,12 +100,4 @@ function Set-ConsoleMode
     {
         [NativeConsoleMethods]::SetConsoleMode($StandardInput, $Mode)
     }
-}
-
-function Reset-Colors
-{
-    $mode = [NativeConsoleMethods]::GetConsoleMode()
-    Set-ConsoleMode -ANSI
-    "$([char]0x1b)[0m"
-    [NativeConsoleMethods]::SetConsoleMode($false, $mode)
 }
