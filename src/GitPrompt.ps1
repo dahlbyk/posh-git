@@ -157,7 +157,7 @@ function Format-BranchName($branchName){
 
 function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
-    $p = ''
+    $p = New-Object System.Collections.ArrayList
     if ($status -and $s) {
         $p += Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
 
@@ -293,7 +293,7 @@ function Write-GitStatus($status) {
             $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($status.Branch)]"
         }
 
-        return $p
+        return ($p -join '')
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
         return ""
