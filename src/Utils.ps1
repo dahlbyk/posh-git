@@ -176,6 +176,14 @@ function Add-PoshGitToProfile {
         $profileContent = "`nImport-Module '$ModuleBasePath\posh-git.psd1'"
     }
 
+    # Make sure the PowerShell profile directory exists
+    $profileDir = Split-Path $profilePath -Parent
+    if (!(Test-Path -LiteralPath $profileDir)) { 
+        if ($PSCmdlet.ShouldProcess($profileDir, "Create current user PowerShell profile directory")) {
+            New-Item $profileDir -ItemType Directory -Verbose:$VerbosePreference > $null
+        }
+    }
+
     if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module posh-git' to profile")) {
         Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
     }
