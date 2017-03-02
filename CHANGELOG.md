@@ -19,6 +19,8 @@
   ([PR #444](https://github.com/dahlbyk/posh-git/pull/444))
 - Quote tab completion for remote names containing special characters
   ([PR #446](https://github.com/dahlbyk/posh-git/pull/446))
+- Install throws an exception due to missing SignatureType on PowerShell v2
+  ([PR #450](https://github.com/dahlbyk/posh-git/pull/450))
 
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that

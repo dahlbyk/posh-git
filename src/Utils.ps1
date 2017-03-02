@@ -161,7 +161,7 @@ function Add-PoshGitToProfile {
     # If the profile script exists and is signed, then we should not modify it
     if (Test-Path -LiteralPath $profilePath) {
         $sig = Get-AuthenticodeSignature $profilePath
-        if ($sig.SignatureType -eq [System.Management.Automation.SignatureType]::Authenticode) {
+        if ($null -ne $sig.SignerCertificate) {
             Write-Warning "Skipping add of posh-git import to profile; '$profilePath' appears to be signed."
             Write-Warning "Add the command 'Import-Module posh-git' to your profile and resign it."
             return
