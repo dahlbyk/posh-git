@@ -48,6 +48,36 @@ Describe 'Utils Function Tests' {
             $content.Count | Should Be 2
             @($content)[1] | Should BeExactly "Import-Module posh-git"
         }
+        It 'Creates profile file if the profile dir does not exist' {
+            $temp = [System.IO.Path]::GetTempPath();
+            $parentDir = Join-Path $temp ([System.Guid]::NewGuid())
+            Mock Get-PSModulePath {
+                return @(
+                    'C:\Users\Keith\Documents\WindowsPowerShell\Modules',
+                    'C:\Program Files\WindowsPowerShell\Modules',
+                    'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\',
+                    "$parentDir")
+            }
+
+            $profPath = Join-Path $parentDir profile.ps1
+            Test-Path -LiteralPath $profPath | Should Be $false
+
+            try {
+                Add-PoshGitToProfile $profPath $parentDir
+
+                Test-Path -LiteralPath $profPath | Should Be $true
+                Get-FileEncoding $profPath | Should Be 'utf8'
+                $content = Get-Content $profPath
+                $content.Count | Should Be 2
+                @($content)[1] | Should BeExactly "Import-Module posh-git"
+            }
+            finally {
+                if (Test-Path -LiteralPath $parentDir) {
+                    Remove-Item $parentDir -Recurse -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+
         It 'Does not modify profile that already refers to posh-git' {
             $profileContent = @'
 Import-Module PSCX
