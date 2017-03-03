@@ -60,7 +60,6 @@ Describe 'Utils Function Tests' {
             Test-Path -LiteralPath $childProfilePath | Should Be $true
             $childProfilePath | Should Contain "^Import-Module .*posh-git"
         }
-
         It 'Does not modify profile that already refers to posh-git' {
             $profileContent = @'
 Import-Module PSCX
