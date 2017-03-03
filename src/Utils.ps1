@@ -178,9 +178,9 @@ function Add-PoshGitToProfile {
 
     # Make sure the PowerShell profile directory exists
     $profileDir = Split-Path $profilePath -Parent
-    if (!(Test-Path -LiteralPath $profileDir)) { 
+    if (!(Test-Path -LiteralPath $profileDir)) {
         if ($PSCmdlet.ShouldProcess($profileDir, "Create current user PowerShell profile directory")) {
-            New-Item $profileDir -ItemType Directory -Verbose:$VerbosePreference > $null
+            New-Item $profileDir -ItemType Directory -Force -Verbose:$VerbosePreference > $null
         }
     }
 

@@ -10,7 +10,7 @@ Describe 'Utils Function Tests' {
             $profilePath = [System.IO.Path]::GetTempFileName()
         }
         AfterEach {
-            Remove-Item $profilePath -ErrorAction SilentlyContinue
+            Remove-Item $profilePath -Recurse -ErrorAction SilentlyContinue
         }
         It 'Creates profile file if it does not exist that imports absolute path' {
             Mock Get-PSModulePath {
@@ -47,6 +47,18 @@ Describe 'Utils Function Tests' {
             $content = Get-Content $profilePath
             $content.Count | Should Be 2
             @($content)[1] | Should BeExactly "Import-Module posh-git"
+        }
+        It 'Creates profile file if the profile dir does not exist' {
+            # Use $profilePath as missing parent directory (auto-cleanup)
+            Remove-Item -LiteralPath $profilePath
+            Test-Path -LiteralPath $profilePath | Should Be $false
+
+            $childProfilePath = Join-Path $profilePath profile.ps1
+
+            Add-PoshGitToProfile $childProfilePath
+
+            Test-Path -LiteralPath $childProfilePath | Should Be $true
+            $childProfilePath | Should Contain "^Import-Module .*posh-git"
         }
         It 'Does not modify profile that already refers to posh-git' {
             $profileContent = @'
