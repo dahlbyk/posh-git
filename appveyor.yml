@@ -1,0 +1,40 @@
+os:
+  - "WMF 5"
+
+branches:
+  only:
+    - master
+
+init:
+  - git config --global core.autocrlf true
+
+install:
+  - ps: |
+      Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+      Install-Module Pester -MinimumVersion 3.4.0 -Scope CurrentUser -Force | Out-Null
+      "Git version: $(git.exe --version)"
+      "PSVersion:   $($PSVersionTable.PSVersion), build: $($PSVersionTable.BuildVersion), clr version: $($PSVersionTable.ClrVersion)"
+      "Host name:   $($Host.Name)"
+
+build: false
+
+test_script:
+  - ps: |
+      $testResultsFile = Join-Path $Env:APPVEYOR_BUILD_FOLDER TestResults.xml
+      $pesterParams = @{
+          Script       = "$Env:APPVEYOR_BUILD_FOLDER\test"
+          OutputFile   = $testResultsFile
+          OutputFormat = "NUnitXml"
+          PassThru     = $true
+          Verbose      = $VerbosePreference
+      }
+      Import-Module Pester
+      $res = Invoke-Pester @pesterParams
+      if (Test-Path $testResultsFile) {
+          (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $testResultsFile)
+      }
+      if ($res.FailedCount -gt 0) {
+          # Terminate the script to fail the build
+          $Error | Format-List * -Force
+          exit 1;
+      }
