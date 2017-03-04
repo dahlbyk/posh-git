@@ -127,12 +127,25 @@ if (Get-Module NuGet) {
     $WindowTitleSupported = $false
 }
 
-function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
-    if ($BackgroundColor -lt 0) {
-        Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor
-    } else {
-        Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
+function Write-Prompt($Object, $ForegroundColor = $null, $BackgroundColor = $null) {
+    if ($BackgroundColor -is [string]) {
+        $BackgroundColor = [ConsoleColor]$BackgroundColor
     }
+    if ($ForegroundColor -is [string]) {
+        $ForegroundColor = [ConsoleColor]$ForegroundColor
+    }
+
+    $writeHostParams = @{
+        Object = $Object;
+        NoNewLine = $true;
+    }
+    if (($BackgroundColor -ge 0) -and ($BackgroundColor -le 15)) {
+        $writeHostParams.BackgroundColor = $BackgroundColor
+    }
+    if (($ForegroundColor -ge 0) -and ($ForegroundColor -le 15)) {
+        $writeHostParams.ForegroundColor = $ForegroundColor
+    }
+    Write-Host @writeHostParams
 }
 
 function Format-BranchName($branchName){
