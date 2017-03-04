@@ -32,7 +32,12 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
         return "${AnsiEscape}$(38 + $offset);5;${color}m"
     }
     if ($ColorTranslatorType -and ($color -is [String])) {
-        $color = $ColorTranslatorType::FromHtml($color)
+        try {
+            $color = $ColorTranslatorType::FromHtml($color)
+        }
+        catch {
+            Write-Debug $_
+        }
     }
     if ($ColorType -and ($color -is $ColorType)) {
         return "${AnsiEscape}$(38 + $offset);2;$($color.R);$($color.G);$($color.B)m"
