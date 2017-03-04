@@ -128,6 +128,11 @@ if (Get-Module NuGet) {
 }
 
 function Write-Prompt($Object, $ForegroundColor = $null, $BackgroundColor = $null) {
+    $s = $global:GitPromptSettings
+    if ($s -and !$ForegroundColor) {
+        $ForegroundColor = $s.DefaultForegroundColor
+    }
+
     if ($BackgroundColor -is [string]) {
         $BackgroundColor = [ConsoleColor]$BackgroundColor
     }
