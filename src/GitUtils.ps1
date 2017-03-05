@@ -295,16 +295,16 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $indexPaths = @(GetUniquePaths $indexAdded,$indexModified,$indexDeleted,$indexUnmerged)
         $workingPaths = @(GetUniquePaths $filesAdded,$filesModified,$filesDeleted,$filesUnmerged)
         $index = (,$indexPaths) |
-            Add-Member -PassThru NoteProperty Added    $indexAdded.ToArray() |
-            Add-Member -PassThru NoteProperty Modified $indexModified.ToArray() |
-            Add-Member -PassThru NoteProperty Deleted  $indexDeleted.ToArray() |
-            Add-Member -PassThru NoteProperty Unmerged $indexUnmerged.ToArray()
+            Add-Member -PassThru -Force NoteProperty Added    $indexAdded.ToArray() |
+            Add-Member -PassThru -Force NoteProperty Modified $indexModified.ToArray() |
+            Add-Member -PassThru -Force NoteProperty Deleted  $indexDeleted.ToArray() |
+            Add-Member -PassThru -Force NoteProperty Unmerged $indexUnmerged.ToArray()
 
         $working = (,$workingPaths) |
-            Add-Member -PassThru NoteProperty Added    $filesAdded |
-            Add-Member -PassThru NoteProperty Modified $filesModified.ToArray() |
-            Add-Member -PassThru NoteProperty Deleted  $filesDeleted.ToArray() |
-            Add-Member -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
+            Add-Member -PassThru -Force NoteProperty Added    $filesAdded |
+            Add-Member -PassThru -Force NoteProperty Modified $filesModified.ToArray() |
+            Add-Member -PassThru -Force NoteProperty Deleted  $filesDeleted.ToArray() |
+            Add-Member -PassThru -Force NoteProperty Unmerged $filesUnmerged.ToArray()
 
         $result = New-Object PSObject -Property @{
             GitDir          = $gitDir
