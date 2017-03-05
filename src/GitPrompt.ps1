@@ -125,6 +125,7 @@ if (Get-Module NuGet) {
     $WindowTitleSupported = $false
 }
 
+# TODO: Real tempted to rename this to Write-AnsiHost
 function Write-Prompt {
     param(
         [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
