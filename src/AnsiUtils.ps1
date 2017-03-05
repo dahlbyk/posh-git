@@ -21,8 +21,8 @@ $AnsiDefaultColor = 39
 $AnsiEscape = [char]27 + "["
 
 [Reflection.Assembly]::LoadWithPartialName('System.Drawing') > $null
-$ColorTranslatorType = ([System.Management.Automation.PSTypeName]'System.Drawing.ColorTranslator').Type
-$ColorType = ([System.Management.Automation.PSTypeName]'System.Drawing.Color').Type
+$ColorTranslatorType = 'System.Drawing.ColorTranslator' -as [Type]
+$ColorType = 'System.Drawing.Color' -as [Type]
 
 function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
     if (($color -is [ConsoleColor]) -and ($color -ge 0) -and ($color -le 15)) {
