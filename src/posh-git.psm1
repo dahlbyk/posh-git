@@ -2,6 +2,9 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 
 & $PSScriptRoot\CheckRequirements.ps1 > $null
 
+Add-Type -Path $PSScriptRoot\Ansi.cs
+
+#. $PSScriptRoot\AnsiUtils.ps1
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
@@ -66,11 +69,11 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
         if ($defaultPromptPrefix) {
             $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-            Write-Host $expandedDefaultPromptPrefix -NoNewline
+            Write-Prompt $expandedDefaultPromptPrefix # TODO: eventually handle this as a TextSpan
         }
 
         # Write the abbreviated current path
-        Write-Host $currentPath -NoNewline
+        Write-Prompt $currentPath
 
         # Write the Git status summary information
         Write-VcsStatus
@@ -91,7 +94,7 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw.Stop()
             $elapsed = $sw.ElapsedMilliseconds
-            Write-Host " ${elapsed}ms" -NoNewline
+            Write-Prompt " ${elapsed}ms"
         }
 
         $global:LASTEXITCODE = $origLastExitCode
