@@ -43,6 +43,8 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         }
         $origLastExitCode = $global:LASTEXITCODE
 
+        $strBld = New-Object System.Text.StringBuilder
+
         # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
         # However for any path with a drive defined, it's better to use the Path property.
         # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
@@ -69,14 +71,14 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
         if ($defaultPromptPrefix) {
             $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-            Write-Prompt $expandedDefaultPromptPrefix # TODO: eventually handle this as a TextSpan
+            Write-Prompt $expandedDefaultPromptPrefix -StringBuilder $strBld
         }
 
         # Write the abbreviated current path
-        Write-Prompt $currentPath
+        Write-Prompt $currentPath -StringBuilder $strBld
 
         # Write the Git status summary information
-        Write-VcsStatus
+        Write-VcsStatus -StringBuilder $strBld
 
         # If stopped in the debugger, the prompt needs to indicate that in some fashion
         $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-Member -Name InBreakpoint -MemberType property
@@ -94,11 +96,13 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw.Stop()
             $elapsed = $sw.ElapsedMilliseconds
-            Write-Prompt " ${elapsed}ms"
+            Write-Prompt " ${elapsed}ms" -StringBuilder $strBld
         }
 
+        Write-Prompt $expandedPromptSuffix -StringBuilder $strBld
+
         $global:LASTEXITCODE = $origLastExitCode
-        $expandedPromptSuffix
+        if ($strBld.Length -gt 0) { $strBld.ToString() } else { " " }
     }
 
     # Set the posh-git prompt as the default prompt

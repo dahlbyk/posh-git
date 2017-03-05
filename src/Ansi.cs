@@ -147,6 +147,20 @@ namespace PoshGit {
             _value = (int)consoleColor;
         }
 
+        public Color(string consoleColorName)
+        {
+            ConsoleColor consoleColor;
+            if (Enum.TryParse<ConsoleColor>(consoleColorName, true, out consoleColor))
+            {
+                _mode = ColorMode.ConsoleColor;
+                _value = (int)consoleColor;
+            }
+            else
+            {
+                throw new ArgumentException("Unrecognized ConsoleColor name " + consoleColorName);
+            }
+        }
+
         public Color(byte xterm256Index)
         {
             _mode = ColorMode.XTerm256;
@@ -231,6 +245,24 @@ namespace PoshGit {
             }
         }
 
+        public override string ToString() {
+            switch (_mode) {
+                case ColorMode.ConsoleColor:
+                    return Enum.GetName(typeof(ConsoleColor), _value);
+
+                case ColorMode.XTerm256:
+                    return "XTerm256: " + _value.ToString();
+
+                case ColorMode.Rgb:
+                    return String.Format("RGB: 0x{0:X8}", _value);
+
+                case ColorMode.DefaultColor:
+                    return "<DefaultColor>";
+            }
+
+            return base.ToString();
+        }
+
         private void VerifyColorModeRgb()
         {
             if (_mode != ColorMode.Rgb)
@@ -246,11 +278,18 @@ namespace PoshGit {
         private Color _foregroundColor;
         private string _customAnsiSeq;
 
-        public TextSpan(string text) : this(text, new Color(), new Color())
+        public TextSpan(string text)
+        : this(text, new Color(), new Color())
         {
         }
 
-        public TextSpan(string text, Color foregroundColor) : this(text, foregroundColor, new Color())
+        public TextSpan(string text, Color foregroundColor)
+        : this(text, foregroundColor, new Color())
+        {
+        }
+
+        public TextSpan(string text, string foregroundConsoleColorName, Color backgroundColor)
+        : this(text, new Color(foregroundConsoleColorName), backgroundColor)
         {
         }
 
@@ -271,21 +310,37 @@ namespace PoshGit {
         public string Text
         {
             get { return _text; }
+            set { _text = value ?? string.Empty; }
         }
 
         public Color ForegroundColor
         {
             get { return _foregroundColor; }
+            set { _foregroundColor = value ?? new Color(); }
         }
 
         public Color BackgroundColor
         {
             get { return _backgroundColor; }
+            set { _backgroundColor = value ?? new Color(); }
         }
 
         public string CustomAnsiSeq
         {
             get { return _customAnsiSeq; }
+            set { _customAnsiSeq = value ?? string.Empty; }
+        }
+
+        public override string ToString()
+        {
+            if (String.IsNullOrWhiteSpace(_customAnsiSeq))
+            {
+                return String.Format("'{0}', fg:{1}, bg:{2}", _text, _foregroundColor, _backgroundColor);
+            }
+            else
+            {
+                return String.Format("'{0}', ansi:{1}", _text, _customAnsiSeq);
+            }
         }
     }
 
@@ -312,15 +367,7 @@ namespace PoshGit {
             if (inputData is string)
             {
                 var consoleColorName = (string)inputData;
-                ConsoleColor consoleColor;
-                if (Enum.TryParse<ConsoleColor>(consoleColorName, true, out consoleColor))
-                {
-                    return new Color(consoleColor);
-                }
-                else
-                {
-                    throw new PSArgumentException("Unrecognized ConsoleColor name " + consoleColorName);
-                }
+                return new Color(consoleColorName);
             }
 
             if (inputData is byte)
