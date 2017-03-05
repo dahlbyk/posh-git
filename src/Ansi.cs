@@ -109,6 +109,11 @@ namespace PoshGit {
 
         public static string GetAnsiSequence(TextSpan textSpan)
         {
+            if (!String.IsNullOrWhiteSpace(textSpan.CustomAnsiSeq)) {
+                // TODO: what if someone wants custom ansi after the text?
+                return String.Format("{0}{1}{2}m", textSpan.CustomAnsiSeq, textSpan.Text, (int)AnsiTextOption.Default);
+            }
+
             return GetAnsiSequence(textSpan.Text, textSpan.ForegroundColor, textSpan.BackgroundColor);
         }
 
