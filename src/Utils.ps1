@@ -161,7 +161,7 @@ function Add-PoshGitToProfile {
     # If the profile script exists and is signed, then we should not modify it
     if (Test-Path -LiteralPath $profilePath) {
         $sig = Get-AuthenticodeSignature $profilePath
-        if ($sig.SignatureType -eq [System.Management.Automation.SignatureType]::Authenticode) {
+        if ($null -ne $sig.SignerCertificate) {
             Write-Warning "Skipping add of posh-git import to profile; '$profilePath' appears to be signed."
             Write-Warning "Add the command 'Import-Module posh-git' to your profile and resign it."
             return
@@ -174,6 +174,14 @@ function Add-PoshGitToProfile {
     }
     else {
         $profileContent = "`nImport-Module '$ModuleBasePath\posh-git.psd1'"
+    }
+
+    # Make sure the PowerShell profile directory exists
+    $profileDir = Split-Path $profilePath -Parent
+    if (!(Test-Path -LiteralPath $profileDir)) {
+        if ($PSCmdlet.ShouldProcess($profileDir, "Create current user PowerShell profile directory")) {
+            New-Item $profileDir -ItemType Directory -Force -Verbose:$VerbosePreference > $null
+        }
     }
 
     if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module posh-git' to profile")) {
