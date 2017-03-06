@@ -241,7 +241,7 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
         Write-Prompt $branchNameTextSpan -StringBuilder $strBld
 
         if ($branchStatusTextSpan.Text) {
-            Write-Prompt $branchStatusTextSpan.Text -StringBuilder $strBld
+            Write-Prompt " $($branchStatusTextSpan.Text)" -StringBuilder $strBld
         }
 
         if ($s.EnableFileStatus -and $status.HasIndex) {
