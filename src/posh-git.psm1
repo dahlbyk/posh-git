@@ -4,8 +4,8 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 
 if ($PSVersionTable.PSEdition -eq 'Core') {
     Add-Type -Path $PSScriptRoot\Ansi.cs -ReferencedAssemblies @(
-        "$PSHome\System.Console.dll",
-        "$PSHome\System.Management.Automation.dll")
+        "$PSHome/System.Console.dll",
+        "$PSHome/System.Management.Automation.dll")
 }
 else {
     Add-Type -Path $PSScriptRoot\Ansi.cs, $PSScriptRoot\ConsoleMode.cs
