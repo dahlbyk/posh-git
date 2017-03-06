@@ -233,15 +233,15 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
         }
         else {
             # This condition should not be possible but defaulting the variables to be safe
-            $branchStatusTextSpan.Text     = "?"
+            $branchStatusTextSpan.Text = "?"
         }
 
         $branchNameTextSpan = New-Object PoshGit.TextSpan -ArgumentList $branchStatusTextSpan
-        $branchNameTextSpan.Text = Format-BranchName($status.Branch)
+        $branchNameTextSpan.Text = "$(Format-BranchName($status.Branch)) "
         Write-Prompt $branchNameTextSpan -StringBuilder $strBld
 
         if ($branchStatusTextSpan.Text) {
-            Write-Prompt " $($branchStatusTextSpan.Text)" -StringBuilder $strBld
+            Write-Prompt $branchStatusTextSpan -StringBuilder $strBld
         }
 
         if ($s.EnableFileStatus -and $status.HasIndex) {

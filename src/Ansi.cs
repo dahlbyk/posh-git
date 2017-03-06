@@ -77,7 +77,7 @@ namespace PoshGit {
 
         public static string GetAnsiSequence(Color color, bool isForeground)
         {
-            var extended = isForeground ? AnsiTextOption.FgExtended : AnsiTextOption.BgExtended;
+            var extended = (int)(isForeground ? AnsiTextOption.FgExtended : AnsiTextOption.BgExtended);
             var sgrSubSeq256 = "5";
             var sgrSubSeqRgb = "2";
 
@@ -119,12 +119,29 @@ namespace PoshGit {
 
         public static string GetAnsiSequence(string text, Color foregroundColor, Color backgroundColor)
         {
+            string ansiSeq;
             string fgSeq = GetAnsiSequence(foregroundColor, true);
             string bgSeq = GetAnsiSequence(backgroundColor, false);
 
-            var ansiSeq = String.Format("\x1b[{0};{1}m{2}\x1b[{3}m", fgSeq, bgSeq, text, (int)AnsiTextOption.Default);
-            return ansiSeq;
+            if ((foregroundColor.ColorMode == ColorMode.DefaultColor) &&
+                (backgroundColor.ColorMode == ColorMode.DefaultColor))
+            {
+                ansiSeq = text;
+            }
+            else if (foregroundColor.ColorMode == ColorMode.DefaultColor)
+            {
+                ansiSeq = String.Format("\x1b[{0}m{1}\x1b[{2}m", bgSeq, text, (int)AnsiTextOption.Default);
+            }
+            else if (backgroundColor.ColorMode == ColorMode.DefaultColor)
+            {
+                ansiSeq = String.Format("\x1b[{0}m{1}\x1b[{2}m", fgSeq, text, (int)AnsiTextOption.Default);
+            }
+            else
+            {
+                ansiSeq = String.Format("\x1b[{0}m\x1b[{1}m{2}\x1b[{3}m", fgSeq, bgSeq, text, (int)AnsiTextOption.Default);
+            }
 
+            return ansiSeq;
         }
     }
 
