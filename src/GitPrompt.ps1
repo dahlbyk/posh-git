@@ -1,4 +1,4 @@
-﻿# Inspired by Mark Embling
+# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $defColor = New-Object PoshGit.Color
@@ -366,6 +366,8 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
 }
 
 function Global:Write-VcsStatus([System.Text.StringBuilder]$StringBuilder) {
+    # Is this the right place for this call?  If someone uses Write-GitStatus (Get-GitStatus) they lose.
+    Set-ConsoleMode -ANSI
     $Global:VcsPromptStatuses | ForEach-Object { & $_ $StringBuilder }
 }
 

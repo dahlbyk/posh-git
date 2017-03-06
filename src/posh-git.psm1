@@ -8,10 +8,11 @@ if ($PSVersionTable.PSEdition -eq 'Core') {
         "$PSHome\System.Management.Automation.dll")
 }
 else {
-    Add-Type -Path $PSScriptRoot\Ansi.cs
+    Add-Type -Path $PSScriptRoot\Ansi.cs, $PSScriptRoot\ConsoleMode.cs
 }
 
 #. $PSScriptRoot\AnsiUtils.ps1
+. $PSScriptRoot\ConsoleMode.ps1
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
