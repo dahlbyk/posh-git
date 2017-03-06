@@ -15,19 +15,9 @@ $global:GitPromptSettings = [pscustomobject]@{
     FileRemovedText                             = '-'
     FileConflictedText                          = '!'
 
-    LocalDefaultStatusSymbol                    = $null
-    LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
-    LocalDefaultStatusForegroundBrightColor     = [ConsoleColor]::Green
-    LocalDefaultStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
-
-    LocalWorkingStatusSymbol                    = '!'
-    LocalWorkingStatusForegroundColor           = [ConsoleColor]::DarkRed
-    LocalWorkingStatusForegroundBrightColor     = [ConsoleColor]::Red
-    LocalWorkingStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
-
-    LocalStagedStatusSymbol                     = '~'
-    LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
-    LocalStagedStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
+    LocalDefaultStatusSymbol                    = New-Object PoshGit.TextSpan -Arg '',  DarkGreen, Green, $defColor
+    LocalWorkingStatusSymbol                    = New-Object PoshGit.TextSpan -Arg '!', DarkRed, Red, $defColor
+    LocalStagedStatusSymbol                     = New-Object PoshGit.TextSpan -Arg '~', Cyan, $defColor
 
     BranchUntrackedSymbol                       = $null
     BranchForegroundColor                       = [ConsoleColor]::Cyan
@@ -298,23 +288,19 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
 
         if ($status.HasWorking) {
             # We have un-staged files in the working tree
-            $localStatusSymbol          = $s.LocalWorkingStatusSymbol
-            $localStatusBackgroundColor = $s.LocalWorkingStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalWorkingStatusForegroundColor
-        } elseif ($status.HasIndex) {
+            $localStatusSymbol = $s.LocalWorkingStatusSymbol
+        }
+        elseif ($status.HasIndex) {
             # We have staged but uncommited files
-            $localStatusSymbol          = $s.LocalStagedStatusSymbol
-            $localStatusBackgroundColor = $s.LocalStagedStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalStagedStatusForegroundColor
-        } else {
+            $localStatusSymbol = $s.LocalStagedStatusSymbol
+        }
+        else {
             # No uncommited changes
-            $localStatusSymbol          = $s.LocalDefaultStatusSymbol
-            $localStatusBackgroundColor = $s.LocalDefaultStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalDefaultStatusForegroundColor
+            $localStatusSymbol = $s.LocalDefaultStatusSymbol
         }
 
         if ($localStatusSymbol) {
-            Write-Prompt (" {0}" -f $localStatusSymbol) -BackgroundColor $localStatusBackgroundColor -ForegroundColor $localStatusForegroundColor -StringBuilder $strBld
+            Write-Prompt $localStatusSymbol -StringBuilder $strBld
         }
 
         if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
@@ -354,8 +340,8 @@ $s = $global:GitPromptSettings
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
 if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
-    $s.LocalDefaultStatusForegroundColor    = $s.LocalDefaultStatusForegroundBrightColor
-    $s.LocalWorkingStatusForegroundColor    = $s.LocalWorkingStatusForegroundBrightColor
+    $s.LocalDefaultStatusSymbol.ForegroundColor = $s.LocalDefaultStatusSymbol.ForegroundBrightColor
+    $s.LocalWorkingStatusSymbol.ForegroundColor = $s.LocalWorkingStatusSymbol.ForegroundBrightColor
 
     $s.BeforeIndexForegroundColor           = $s.BeforeIndexForegroundBrightColor
     $s.IndexForegroundColor                 = $s.IndexForegroundBrightColor
