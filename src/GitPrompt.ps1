@@ -1,4 +1,4 @@
-# Inspired by Mark Embling
+﻿# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $defColor = New-Object PoshGit.Color
@@ -61,14 +61,9 @@ $global:GitPromptSettings = [pscustomobject]@{
     WorkingBackgroundColor                      = $Host.UI.RawUI.BackgroundColor
 
     EnableStashStatus                           = $false
-    BeforeStashText                             = ' ('
-    BeforeStashBackgroundColor                  = $Host.UI.RawUI.BackgroundColor
-    BeforeStashForegroundColor                  = [ConsoleColor]::Red
-    AfterStashText                              = ')'
-    AfterStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
-    AfterStashForegroundColor                   = [ConsoleColor]::Red
-    StashBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
-    StashForegroundColor                        = [ConsoleColor]::Red
+    BeforeStashText                             = New-Object PoshGit.TextSpan -Arg ' (', Red, $defColor
+    AfterStashText                              = New-Object PoshGit.TextSpan -Arg ')',  Red, $defColor
+    StashTextColor                              = New-Object PoshGit.TextSpan -Arg '',   Red, $defColor
 
     ShowStatusWhenZero                          = $true
 
@@ -323,9 +318,12 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
         }
 
         if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
-             Write-Prompt $s.BeforeStashText -BackgroundColor $s.BeforeStashBackgroundColor -ForegroundColor $s.BeforeStashForegroundColor -StringBuilder $strBld
-             Write-Prompt $status.StashCount -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor -StringBuilder $strBld
-             Write-Prompt $s.AfterStashText -BackgroundColor $s.AfterStashBackgroundColor -ForegroundColor $s.AfterStashForegroundColor -StringBuilder $strBld
+             $stashTextSpan = New-Object PoshGit.TextSpan $s.StashTextColor
+             $stashTextSpan.Text = "$($status.StashCount)"
+
+             Write-Prompt $s.BeforeStashText -StringBuilder $strBld
+             Write-Prompt $stashTextSpan -StringBuilder $strBld
+             Write-Prompt $s.AfterStashText -StringBuilder $strBld
         }
 
         Write-Prompt $s.AfterText -StringBuilder $strBld
@@ -349,7 +347,7 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
     }
 }
 
-if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
+if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
 }
 $s = $global:GitPromptSettings

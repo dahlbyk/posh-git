@@ -283,6 +283,11 @@ namespace PoshGit {
         private Color _foregroundColor;
         private string _customAnsiSeq;
 
+        public TextSpan(TextSpan textSpan)
+        : this(textSpan.Text, textSpan.ForegroundColor, textSpan.BackgroundColor)
+        {
+        }
+
         public TextSpan(string text)
         : this(text, new Color(), new Color())
         {
