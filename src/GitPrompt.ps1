@@ -237,10 +237,11 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
         }
 
         $branchNameTextSpan = New-Object PoshGit.TextSpan -ArgumentList $branchStatusTextSpan
-        $branchNameTextSpan.Text = "$(Format-BranchName($status.Branch)) "
+        $branchNameTextSpan.Text = Format-BranchName($status.Branch)
         Write-Prompt $branchNameTextSpan -StringBuilder $strBld
 
         if ($branchStatusTextSpan.Text) {
+            $branchStatusTextSpan.Text = " " + $branchStatusTextSpan.Text
             Write-Prompt $branchStatusTextSpan -StringBuilder $strBld
         }
 
