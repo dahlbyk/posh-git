@@ -15,27 +15,27 @@ $global:GitPromptSettings = [pscustomobject]@{
     FileRemovedText                        = '-'
     FileConflictedText                     = '!'
 
-    LocalDefaultStatusSymbol               = New-Object PoshGit.TextSpan -Arg '',  DarkGreen, Green, $defColor
-    LocalWorkingStatusSymbol               = New-Object PoshGit.TextSpan -Arg '!', DarkRed, Red, $defColor
-    LocalStagedStatusSymbol                = New-Object PoshGit.TextSpan -Arg '~', Cyan, $defColor
+    LocalDefaultStatusSymbol               = New-Object PoshGit.TextSpan -Arg '',  DarkGreen, $defColor
+    LocalWorkingStatusSymbol               = New-Object PoshGit.TextSpan -Arg '!', DarkRed,   $defColor
+    LocalStagedStatusSymbol                = New-Object PoshGit.TextSpan -Arg '~', Cyan,      $defColor
 
-    BranchColor                            = New-Object PoshGit.TextSpan -Arg '', Cyan, $defColor
-    BranchUntrackedSymbol                  = New-Object PoshGit.TextSpan -Arg '', $defColor, $defColor
+    BranchColor                            = New-Object PoshGit.TextSpan -Arg '',  Cyan,      $defColor
+    BranchUntrackedSymbol                  = New-Object PoshGit.TextSpan -Arg '',  $defColor, $defColor
 
     # × Multiplication sign
     BranchGoneStatusSymbol                 = New-Object PoshGit.TextSpan -Arg ([char]0x00D7), DarkCyan, $defColor
     # ≡ Three horizontal lines
-    BranchIdenticalStatusSymbol            = New-Object PoshGit.TextSpan -Arg ([char]0x2261), Cyan, $defColor
+    BranchIdenticalStatusSymbol            = New-Object PoshGit.TextSpan -Arg ([char]0x2261), Cyan,     $defColor
     # ↑ Up arrow
-    BranchAheadStatusSymbol                = New-Object PoshGit.TextSpan -Arg ([char]0x2191), Green, $defColor
+    BranchAheadStatusSymbol                = New-Object PoshGit.TextSpan -Arg ([char]0x2191), Green,    $defColor
     # ↓ Down arrow
-    BranchBehindStatusSymbol               = New-Object PoshGit.TextSpan -Arg ([char]0x2193), Red, $defColor
+    BranchBehindStatusSymbol               = New-Object PoshGit.TextSpan -Arg ([char]0x2193), Red,      $defColor
     # ↕ Up & Down arrow
-    BranchBehindAndAheadStatusSymbol       = New-Object PoshGit.TextSpan -Arg ([char]0x2195), Yellow, $defColor
+    BranchBehindAndAheadStatusSymbol       = New-Object PoshGit.TextSpan -Arg ([char]0x2195), Yellow,   $defColor
 
-    BeforeIndexText                        = New-Object PoshGit.TextSpan -Arg '', DarkGreen, Green, $defColor
-    IndexColor                             = New-Object PoshGit.TextSpan -Arg '', DarkGreen, Green, $defColor
-    WorkingColor                           = New-Object PoshGit.TextSpan -Arg '', DarkRed, Red, $defColor
+    BeforeIndexText                        = New-Object PoshGit.TextSpan -Arg '', DarkGreen, $defColor
+    IndexColor                             = New-Object PoshGit.TextSpan -Arg '', DarkGreen, $defColor
+    WorkingColor                           = New-Object PoshGit.TextSpan -Arg '', DarkRed,   $defColor
 
     EnableStashStatus                      = $false
     BeforeStashText                        = New-Object PoshGit.TextSpan -Arg ' (', Red, $defColor
@@ -67,6 +67,16 @@ $global:GitPromptSettings = [pscustomobject]@{
 
     BranchNameLimit                        = 0
     TruncatedBranchSuffix                  = '...'
+}
+
+# Override some of the normal colors if the background color is set to the default DarkMagenta.
+$s = $global:GitPromptSettings
+if ($true -or $Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
+    $s.LocalDefaultStatusSymbol.ForegroundColor = New-Object PoshGit.Color -ArgumentList Green
+    $s.LocalWorkingStatusSymbol.ForegroundColor = New-Object PoshGit.Color -ArgumentList Red
+    $s.BeforeIndexText.ForegroundColor          = New-Object PoshGit.Color -ArgumentList Green
+    $s.IndexColor.ForegroundColor               = New-Object PoshGit.Color -ArgumentList Green
+    $s.WorkingColor.ForegroundColor             = New-Object PoshGit.Color -ArgumentList Red
 }
 
 # Make this a function for mocking and user may not want to use ANSI even on a system that supports ANSI.
@@ -160,9 +170,9 @@ function Write-Prompt {
 function Format-BranchName($branchName){
     $s = $global:GitPromptSettings
 
-    if($s.BranchNameLimit -gt 0 -and $branchName.Length -gt $s.BranchNameLimit)
+    if ($s.BranchNameLimit -gt 0 -and $branchName.Length -gt $s.BranchNameLimit)
     {
-        $branchName = "{0}{1}" -f $branchName.Substring(0,$s.BranchNameLimit), $s.TruncatedBranchSuffix
+        $branchName = "{0}{1}" -f $branchName.Substring(0, $s.BranchNameLimit), $s.TruncatedBranchSuffix
     }
 
     return $branchName
@@ -344,16 +354,6 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
 
 if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
     $Global:VcsPromptStatuses = @()
-}
-$s = $global:GitPromptSettings
-
-# Override some of the normal colors if the background color is set to the default DarkMagenta.
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
-    $s.LocalDefaultStatusSymbol.ForegroundColor = $s.LocalDefaultStatusSymbol.ForegroundBrightColor
-    $s.LocalWorkingStatusSymbol.ForegroundColor = $s.LocalWorkingStatusSymbol.ForegroundBrightColor
-    $s.BeforeIndexText.ForegroundColor          = $s.BeforeIndexText.ForegroundBrightColor
-    $s.IndexColor.ForegroundColor               = $s.IndexColor.ForegroundBrightColor
-    $s.WorkingColor.ForegroundColor             = $s.WorkingColor.ForegroundBrightColor
 }
 
 function Global:Write-VcsStatus([System.Text.StringBuilder]$StringBuilder) {

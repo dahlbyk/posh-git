@@ -328,10 +328,9 @@ namespace PoshGit {
         private string _customAnsiSeq;
         private Color _backgroundColor;
         private Color _foregroundColor;
-        private Color _foregroundBrightColor;
 
         public TextSpan(TextSpan textSpan)
-        : this(textSpan.Text, textSpan.ForegroundColor, textSpan.ForegroundBrightColor, textSpan.BackgroundColor)
+        : this(textSpan.Text, textSpan.ForegroundColor, textSpan.BackgroundColor)
         {
         }
 
@@ -350,21 +349,10 @@ namespace PoshGit {
         {
         }
 
-        public TextSpan(string text, string foregroundConsoleColorName, string foregroundBrightConsoleColorName, Color backgroundColor)
-        : this(text, new Color(foregroundConsoleColorName), new Color(foregroundBrightConsoleColorName), backgroundColor)
-        {
-        }
-
-        public TextSpan(string text, Color foregroundColor, Color backgroundColor)
-        : this(text, foregroundColor, new Color(), backgroundColor)
-        {
-        }
-
-        public TextSpan(string text, Color foregroundColor, Color foregroundBrigthColor, Color backgroundColor)
+        public TextSpan(string text, Color foregroundColor,Color backgroundColor)
         {
             _text = text;
             _foregroundColor = foregroundColor;
-            _foregroundBrightColor = foregroundBrigthColor;
             _backgroundColor = backgroundColor;
             _customAnsiSeq = string.Empty;
         }
@@ -399,22 +387,11 @@ namespace PoshGit {
             set { _foregroundColor = value ?? new Color(); }
         }
 
-        public Color ForegroundBrightColor
-        {
-            get { return _foregroundBrightColor; }
-            set { _foregroundBrightColor = value ?? new Color(); }
-        }
-
         public override string ToString()
         {
             if (String.IsNullOrWhiteSpace(_customAnsiSeq))
             {
-                if (_foregroundBrightColor.ColorMode == ColorMode.DefaultColor)
-                {
-                    return String.Format("'{0}', fg:{1}, bg:{2}", _text, _foregroundColor, _backgroundColor);
-                }
-
-                return String.Format("'{0}', fg:{1}, fgB:{2}, bg:{3}", _text, _foregroundColor, _foregroundBrightColor, _backgroundColor);
+                return String.Format("'{0}', fg:{1}, bg:{2}", _text, _foregroundColor, _backgroundColor);
             }
             else
             {
