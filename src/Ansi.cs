@@ -145,7 +145,9 @@ namespace PoshGit {
         }
     }
 
-    public class Color
+    // Thinking about renaming this to AnsiColor to prevent collisions with System.Drawing.Color, as I would
+    // like to add a ctor that takes a System.Drawing.Color.AntiqueWhite, etc.
+    public class Color : IEquatable<Color>
     {
         private ColorMode _mode;
         private int _value;
@@ -166,7 +168,7 @@ namespace PoshGit {
         public Color(ConsoleColor consoleColor)
         {
             _mode = ColorMode.ConsoleColor;
-            _value = (int)consoleColor;
+            _value = (int)consoleColor << 24;
         }
 
         public Color(string consoleColorName)
@@ -175,7 +177,7 @@ namespace PoshGit {
             if (Enum.TryParse<ConsoleColor>(consoleColorName, true, out consoleColor))
             {
                 _mode = ColorMode.ConsoleColor;
-                _value = (int)consoleColor;
+                _value = (int)consoleColor << 24;
             }
             else
             {
@@ -186,7 +188,7 @@ namespace PoshGit {
         public Color(byte xterm256Index)
         {
             _mode = ColorMode.XTerm256;
-            _value = xterm256Index;
+            _value = xterm256Index << 24;
         }
 
         public Color(byte red, byte green, byte blue)
@@ -209,12 +211,8 @@ namespace PoshGit {
         {
             get
             {
-                if (_mode != ColorMode.ConsoleColor)
-                {
-                    throw new InvalidOperationException("ConsoleColor is only valid when ColorMode is set to ConsoleColor.");
-                }
-
-                return (ConsoleColor)_value;
+                VerifyColorMode(ColorMode.ConsoleColor, "ConsoleColor");
+                return (ConsoleColor)(_value >> 24);
             }
         }
 
@@ -222,12 +220,8 @@ namespace PoshGit {
         {
             get
             {
-                if (_mode != ColorMode.XTerm256)
-                {
-                    throw new InvalidOperationException("XTerm256Index is only valid when ColorMode is set to XTerm256.");
-                }
-
-                return (byte)_value;
+                VerifyColorMode(ColorMode.XTerm256, "XTerm256Index");
+                return (byte)(_value >> 24);
             }
         }
 
@@ -235,7 +229,7 @@ namespace PoshGit {
         {
             get
             {
-                VerifyColorModeRgb();
+                VerifyColorMode(ColorMode.Rgb, "Rgb");
                 return _value;
             }
         }
@@ -244,7 +238,7 @@ namespace PoshGit {
         {
             get
             {
-                VerifyColorModeRgb();
+                VerifyColorMode(ColorMode.Rgb, "Red");
                 return (byte)((_value & 0x00FF0000) >> 16);
             }
         }
@@ -253,7 +247,7 @@ namespace PoshGit {
         {
             get
             {
-                VerifyColorModeRgb();
+                VerifyColorMode(ColorMode.Rgb, "Green");
                 return (byte)((_value & 0x0000FF00) >> 8);
             }
         }
@@ -262,7 +256,7 @@ namespace PoshGit {
         {
             get
             {
-                VerifyColorModeRgb();
+                VerifyColorMode(ColorMode.Rgb, "Blue");
                 return (byte)(_value & 0x000000FF);
             }
         }
@@ -270,10 +264,10 @@ namespace PoshGit {
         public override string ToString() {
             switch (_mode) {
                 case ColorMode.ConsoleColor:
-                    return Enum.GetName(typeof(ConsoleColor), _value);
+                    return Enum.GetName(typeof(ConsoleColor), this.ConsoleColor);
 
                 case ColorMode.XTerm256:
-                    return "XTerm256: " + _value.ToString();
+                    return "XTerm256: " + this.XTerm256Index.ToString();
 
                 case ColorMode.Rgb:
                     return String.Format("RGB: 0x{0:X8}", _value);
@@ -285,11 +279,46 @@ namespace PoshGit {
             return base.ToString();
         }
 
-        private void VerifyColorModeRgb()
+        public static bool operator ==(Color left, Color right)
         {
-            if (_mode != ColorMode.Rgb)
+            return (left._value == right._value) && (left._mode == right._mode);
+        }
+
+        public static bool operator !=(Color left, Color right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Color) && Equals((Color)obj);
+        }
+
+        public bool Equals(Color other)
+        {
+            return this == other;
+        }
+
+        public override int GetHashCode()
+        {
+            // For RGB and DefaultColor (-1 / 0xFFFFFFFF) _value is unique
+            if (_mode == ColorMode.Rgb || _mode == ColorMode.DefaultColor)
             {
-                throw new InvalidOperationException("Rgb is only valid when ColorMode is set to Rgb.");
+                return _value;
+            }
+
+            // For ConsoleColor / XTerm256, where value is pushed up to 0xFF000000, we just combine
+            // the value with the mode in the lower nibble 0xFF0000FF to get a unique number.
+            return (int)(_value & 0xFF000000) | (int)_mode;
+        }
+
+        private void VerifyColorMode(ColorMode colorMode, string methodName)
+        {
+            if (_mode != colorMode)
+            {
+                string colorModeName = Enum.GetName(typeof(ColorMode), colorMode);
+                var msg = String.Format("{0} is on valid when the ColorMode is {1}.", methodName, colorModeName);
+                throw new InvalidOperationException(msg);
             }
         }
     }
