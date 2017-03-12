@@ -2,19 +2,19 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $global:GitPromptSettings = [pscustomobject]@{
-    DefaultForegroundColor                      = $Host.UI.RawUI.ForegroundColor
+    DefaultForegroundColor                      = $null
 
     BeforeText                                  = ' ['
     BeforeForegroundColor                       = [ConsoleColor]::Yellow
-    BeforeBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
+    BeforeBackgroundColor                       = $null
 
     DelimText                                   = ' |'
     DelimForegroundColor                        = [ConsoleColor]::Yellow
-    DelimBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
+    DelimBackgroundColor                        = $null
 
     AfterText                                   = ']'
     AfterForegroundColor                        = [ConsoleColor]::Yellow
-    AfterBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
+    AfterBackgroundColor                        = $null
 
     FileAddedText                               = '+'
     FileModifiedText                            = '~'
@@ -24,66 +24,66 @@ $global:GitPromptSettings = [pscustomobject]@{
     LocalDefaultStatusSymbol                    = $null
     LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
     LocalDefaultStatusForegroundBrightColor     = [ConsoleColor]::Green
-    LocalDefaultStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
+    LocalDefaultStatusBackgroundColor           = $null
 
     LocalWorkingStatusSymbol                    = '!'
     LocalWorkingStatusForegroundColor           = [ConsoleColor]::DarkRed
     LocalWorkingStatusForegroundBrightColor     = [ConsoleColor]::Red
-    LocalWorkingStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
+    LocalWorkingStatusBackgroundColor           = $null
 
     LocalStagedStatusSymbol                     = '~'
     LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
-    LocalStagedStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
+    LocalStagedStatusBackgroundColor            = $null
 
     BranchUntrackedSymbol                       = $null
     BranchForegroundColor                       = [ConsoleColor]::Cyan
-    BranchBackgroundColor                       = $Host.UI.RawUI.BackgroundColor
+    BranchBackgroundColor                       = $null
 
     BranchGoneStatusSymbol                      = [char]0x00D7 # × Multiplication sign
     BranchGoneStatusForegroundColor             = [ConsoleColor]::DarkCyan
-    BranchGoneStatusBackgroundColor             = $Host.UI.RawUI.BackgroundColor
+    BranchGoneStatusBackgroundColor             = $null
 
     BranchIdenticalStatusToSymbol               = [char]0x2261 # ≡ Three horizontal lines
     BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
-    BranchIdenticalStatusToBackgroundColor      = $Host.UI.RawUI.BackgroundColor
+    BranchIdenticalStatusToBackgroundColor      = $null
 
     BranchAheadStatusSymbol                     = [char]0x2191 # ↑ Up arrow
     BranchAheadStatusForegroundColor            = [ConsoleColor]::Green
-    BranchAheadStatusBackgroundColor            = $Host.UI.RawUI.BackgroundColor
+    BranchAheadStatusBackgroundColor            = $null
 
     BranchBehindStatusSymbol                    = [char]0x2193 # ↓ Down arrow
     BranchBehindStatusForegroundColor           = [ConsoleColor]::Red
-    BranchBehindStatusBackgroundColor           = $Host.UI.RawUI.BackgroundColor
+    BranchBehindStatusBackgroundColor           = $null
 
     BranchBehindAndAheadStatusSymbol            = [char]0x2195 # ↕ Up & Down arrow
     BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
-    BranchBehindAndAheadStatusBackgroundColor   = $Host.UI.RawUI.BackgroundColor
+    BranchBehindAndAheadStatusBackgroundColor   = $null
 
     BeforeIndexText                             = ""
     BeforeIndexForegroundColor                  = [ConsoleColor]::DarkGreen
     BeforeIndexForegroundBrightColor            = [ConsoleColor]::Green
-    BeforeIndexBackgroundColor                  = $Host.UI.RawUI.BackgroundColor
+    BeforeIndexBackgroundColor                  = $null
 
     IndexForegroundColor                        = [ConsoleColor]::DarkGreen
     IndexForegroundBrightColor                  = [ConsoleColor]::Green
-    IndexBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
+    IndexBackgroundColor                        = $null
 
     WorkingForegroundColor                      = [ConsoleColor]::DarkRed
     WorkingForegroundBrightColor                = [ConsoleColor]::Red
-    WorkingBackgroundColor                      = $Host.UI.RawUI.BackgroundColor
+    WorkingBackgroundColor                      = $null
 
     EnableStashStatus                           = $false
     BeforeStashText                             = ' ('
-    BeforeStashBackgroundColor                  = $Host.UI.RawUI.BackgroundColor
+    BeforeStashBackgroundColor                  = $null
     BeforeStashForegroundColor                  = [ConsoleColor]::Red
     AfterStashText                              = ')'
-    AfterStashBackgroundColor                   = $Host.UI.RawUI.BackgroundColor
+    AfterStashBackgroundColor                   = $null
     AfterStashForegroundColor                   = [ConsoleColor]::Red
-    StashBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
+    StashBackgroundColor                        = $null
     StashForegroundColor                        = [ConsoleColor]::Red
 
     ErrorForegroundColor                        = [ConsoleColor]::Red
-    ErrorBackgroundColor                        = $Host.UI.RawUI.BackgroundColor
+    ErrorBackgroundColor                        = $null
 
     ShowStatusWhenZero                          = $true
 
@@ -130,12 +130,30 @@ if (Get-Module NuGet) {
     $WindowTitleSupported = $false
 }
 
-function Write-Prompt($Object, $ForegroundColor, $BackgroundColor = -1) {
-    if ($BackgroundColor -lt 0) {
-        Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor
-    } else {
-        Write-Host $Object -NoNewLine -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
+function Write-Prompt($Object, $ForegroundColor = $null, $BackgroundColor = $null) {
+    $s = $global:GitPromptSettings
+    if ($s -and !$ForegroundColor) {
+        $ForegroundColor = $s.DefaultForegroundColor
     }
+
+    if ($BackgroundColor -is [string]) {
+        $BackgroundColor = [ConsoleColor]$BackgroundColor
+    }
+    if ($ForegroundColor -is [string]) {
+        $ForegroundColor = [ConsoleColor]$ForegroundColor
+    }
+
+    $writeHostParams = @{
+        Object = $Object;
+        NoNewLine = $true;
+    }
+    if (($BackgroundColor -ge 0) -and ($BackgroundColor -le 15)) {
+        $writeHostParams.BackgroundColor = $BackgroundColor
+    }
+    if (($ForegroundColor -ge 0) -and ($ForegroundColor -le 15)) {
+        $writeHostParams.ForegroundColor = $ForegroundColor
+    }
+    Write-Host @writeHostParams
 }
 
 function Format-BranchName($branchName){
