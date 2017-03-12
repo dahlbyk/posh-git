@@ -82,6 +82,9 @@ $global:GitPromptSettings = [pscustomobject]@{
     StashBackgroundColor                        = $null
     StashForegroundColor                        = [ConsoleColor]::Red
 
+    ErrorForegroundColor                        = [ConsoleColor]::Red
+    ErrorBackgroundColor                        = $null
+
     ShowStatusWhenZero                          = $true
 
     AutoRefreshIndex                            = $true
@@ -327,8 +330,18 @@ function Global:Write-VcsStatus {
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
-    $Global:GitStatus = Get-GitStatus
-    Write-GitStatus $GitStatus
+    try {
+        $Global:GitStatus = Get-GitStatus
+        Write-GitStatus $GitStatus
+    }
+    catch {
+        $s = $Global:GitPromptSettings
+        if ($s) {
+            Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
+            Write-Prompt "Error: $_" -BackgroundColor $s.ErrorBackgroundColor -ForegroundColor $s.ErrorForegroundColor
+            Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
+        }
+    }
 }
 
 $Global:VcsPromptStatuses += $PoshGitVcsPrompt
