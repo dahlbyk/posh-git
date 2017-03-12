@@ -61,16 +61,16 @@ PrivateData = @{
         Tags = @('git', 'prompt', 'tab', 'tab-completion', 'tab-expansion', 'tabexpansion')
 
         # A URL to the license for this module.
-        LicenseUri = 'https://github.com/dahlbyk/posh-git/blob/master/LICENSE.txt'
+        LicenseUri = 'https://github.com/dahlbyk/posh-git/blob/v0.7.1-pre1/LICENSE.txt'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/dahlbyk/posh-git'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md'
+        ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/v0.7.1-pre1/CHANGELOG.md'
 
         # TODO: REMOVE BEFOE RELEASE
-        PreReleaseVersion = 'pre0'
+        PreReleaseVersion = 'pre1'
     }
 
 }
