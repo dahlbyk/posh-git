@@ -251,7 +251,7 @@ function Write-GitStatus($status, [System.Text.StringBuilder]$StringBuilder) {
         Write-Prompt $branchNameTextSpan -StringBuilder $strBld
 
         if ($branchStatusTextSpan.Text) {
-            $branchStatusTextSpan.Text = " " + $branchStatusTextSpan.Text
+            Write-Prompt ' ' -StringBuilder $strBld
             Write-Prompt $branchStatusTextSpan -StringBuilder $strBld
         }
 
