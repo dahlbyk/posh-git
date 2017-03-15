@@ -3,7 +3,7 @@
   <metadata>
     <id>poshgit</id>
     <title>posh-git</title>
-    <version>0.7.1-pre1</version>
+    <version>0.7.1</version>
     <authors>Keith Dahlby, Mark Embling, Jeremy Skinner, Keith Hill</authors>
     <owners>Keith Dahlby</owners>
     <description>### posh-git
@@ -27,7 +27,7 @@ Note on performance: displaying file status in the git prompt for a very large r
     <summary>Provides prompt with Git status summary information and tab completion for Git commands, parameters, remotes and branch names.</summary>
     <tags>poshgit posh-git powershell git</tags>
     <projectUrl>https://github.com/dahlbyk/posh-git</projectUrl>
-    <licenseUrl>https://github.com/dahlbyk/posh-git/blob/v0.7.1-pre1/LICENSE.txt</licenseUrl>
+    <licenseUrl>https://github.com/dahlbyk/posh-git/blob/v0.7.1/LICENSE.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <dependency id="chocolatey" version="0.9.10" />
