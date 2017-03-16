@@ -78,11 +78,11 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
         if ($defaultPromptPrefix) {
             $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-            $res += Write-Prompt $expandedDefaultPromptPrefix -ForegroundColor $GitPromptSettings.DefaultForegroundColor
+            $res += Write-Prompt $expandedDefaultPromptPrefix
         }
 
         # Write the abbreviated current path
-        $res += Write-Prompt $currentPath -ForegroundColor $GitPromptSettings.DefaultForegroundColor
+        $res += Write-Prompt $currentPath
 
         # Write the Git status summary information
         $res += Write-VcsStatus
@@ -103,7 +103,7 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw.Stop()
             $elapsed = $sw.ElapsedMilliseconds
-            $res += Write-Prompt " ${elapsed}ms" -ForegroundColor $GitPromptSettings.DefaultForegroundColor
+            $res += Write-Prompt " ${elapsed}ms"
         }
 
         $global:LASTEXITCODE = $origLastExitCode

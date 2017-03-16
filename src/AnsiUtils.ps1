@@ -20,7 +20,30 @@ $ConsoleColorToAnsi = @(
 $AnsiDefaultColor = 39
 $AnsiEscape = [char]27 + "["
 
+[Reflection.Assembly]::LoadWithPartialName('System.Drawing') > $null
+$ColorTranslatorType = 'System.Drawing.ColorTranslator' -as [Type]
+$ColorType = 'System.Drawing.Color' -as [Type]
+
 function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
+    if ($color -is [byte]) {
+        return "${AnsiEscape}$(38 + $offset);5;${color}m"
+    }
+    if ($color -is [String]) {
+        try {
+            if ($ColorTranslatorType) {
+                $color = $ColorTranslatorType::FromHtml($color)
+            }
+            else {
+                $color = [ConsoleColor]$color
+            }
+        }
+        catch {
+            Write-Debug $_
+        }
+    }
+    if ($ColorType -and ($color -is $ColorType)) {
+        return "${AnsiEscape}$(38 + $offset);2;$($color.R);$($color.G);$($color.B)m"
+    }
     if (($color -is [ConsoleColor]) -and ($color -ge 0) -and ($color -le 15)) {
         return "${AnsiEscape}$($ConsoleColorToAnsi[$color] + $offset)m"
     }
