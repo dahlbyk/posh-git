@@ -3,7 +3,7 @@ os:
 
 environment:
   CA_KEY:
-    secure: +TWGUsZ77a5RAsuMNII7mBsVHon89hIXkI2X/ZDkSO4KWNo+Ozo8lPLST4Y5eAwE
+    secure: JQtUaB+zduPID8bzI5nfHRc2V6xYJiJp4mTHkE4W6broH8rznT1ypvn5orQ6YcGn
 
 branches:
   only:
