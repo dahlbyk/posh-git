@@ -7,6 +7,7 @@
 [![develop build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop)](https://coveralls.io/github/dahlbyk/posh-git?branch=develop)
 
 [![Join the chat at https://gitter.im/dahlbyk/posh-git](https://badges.gitter.im/dahlbyk/posh-git.svg)](https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![posh-git on Chocolatey](https://img.shields.io/chocolatey/dt/poshgit.svg)](https://chocolatey.org/packages/poshgit/)
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
 ```
