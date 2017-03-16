@@ -49,8 +49,8 @@ test_script:
       }
       $ErrorActionPreference = 'Stop'
       if (!(Test-Path Env:CA_KEY)) {
-          Write-Error 'CA_KEY not set!'
-          exit 1;
+          Write-Host 'CA_KEY not set! (Expected on PR builds.)'
+          return;
       }
       $coverageResult = Format-Coverage -Include (gci ..\src\* -include *.ps1,*.psm1) -CoverallsApiToken $ENV:CA_KEY -RootFolder ../ -BranchName $ENV:APPVEYOR_REPO_BRANCH
       Publish-Coverage -Coverage $coverageResult
