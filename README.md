@@ -1,8 +1,13 @@
 # posh-git
 
 [![master build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master)
+[![master build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master)](https://coveralls.io/github/dahlbyk/posh-git?branch=master)
+
 [![develop build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/develop)
+[![develop build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop)](https://coveralls.io/github/dahlbyk/posh-git?branch=develop)
+
 [![Join the chat at https://gitter.im/dahlbyk/posh-git](https://badges.gitter.im/dahlbyk/posh-git.svg)](https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![posh-git on Chocolatey](https://img.shields.io/chocolatey/dt/poshgit.svg)](https://chocolatey.org/packages/poshgit/)
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
 ```
