@@ -21,6 +21,9 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
   ( [README](https://github.com/dahlbyk/posh-git/blob/develop/README.md)
   • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md) )
 - Previous releases:
+  - v0.7.1
+    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.1/README.md)
+    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.1/CHANGELOG.md) )
   - v0.7.0
     ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
     • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )

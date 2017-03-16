@@ -11,7 +11,7 @@ The ANSI sequence support will help with cross-platform PowerShell support, whic
   ([#93](https://github.com/dahlbyk/posh-git/issues/93))
   ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
 
-## 0.7.1 - TBD
+## 0.7.1 - March 14, 2017
 
 - Fixed tab completion issues with duplicate aliases
   ([#164](https://github.com/dahlbyk/posh-git/issues/164))
@@ -30,6 +30,20 @@ The ANSI sequence support will help with cross-platform PowerShell support, whic
   ([PR #444](https://github.com/dahlbyk/posh-git/pull/444))
 - Quote tab completion for remote names containing special characters
   ([PR #446](https://github.com/dahlbyk/posh-git/pull/446))
+- Fix signed $PROFILE detection for PowerShell v2
+  ([#448](https://github.com/dahlbyk/posh-git/issues/448))
+  ([PR #450](https://github.com/dahlbyk/posh-git/pull/450))
+- Create $PROFILE parent directory if missing
+  ([PR #449](https://github.com/dahlbyk/posh-git/pull/449))
+  ([PR #452](https://github.com/dahlbyk/posh-git/pull/452))
+- Add -verbose parameter to install.ps1
+  ([PR #451](https://github.com/dahlbyk/posh-git/pull/451))
+- Write-Prompt now correctly handles $null color parameters;
+  the prompt now also uses DefaultForegroundColor when appropriate
+  ([PR #454](https://github.com/dahlbyk/posh-git/pull/454))
+- Add error handling to Write-GitStatus
+  ([PR #170](https://github.com/dahlbyk/posh-git/pull/170))
+  ([PR #453](https://github.com/dahlbyk/posh-git/pull/453))
 
 ## 0.7.0 - February 14, 2017
 This release has focused on improving the "getting started" experience by adding an `Add-PoshGitToProfile` command that
@@ -185,6 +199,8 @@ Thank you to the following folks who contributed their time and scripting skills
 - Paul Marston (@paulmarsy)
   * Update README.md to reflect recent changes to the Git prompt
     ([PR #221](https://github.com/dahlbyk/posh-git/pull/221))
+  * Add error handling to Write-VcsStatus
+    ([PR #170](https://github.com/dahlbyk/posh-git/pull/170))
 - INOMATA Kentaro (@matarillo)
   * Fix branch names using UTF8 characters do not display correctly
     ([PR #223](https://github.com/dahlbyk/posh-git/pull/223))
@@ -212,3 +228,11 @@ Thank you to the following folks who contributed their time and scripting skills
 - Mark Hillebrand (@mah)
   * Add tab completion of unique remote branch names for `git checkout <tab>`
     ([PR #251](https://github.com/dahlbyk/posh-git/pull/251))
+- Jeff Yates (@somewhatabstract)
+  * Don't rerun Pageant if there are no keys to add
+    ([PR #441](https://github.com/dahlbyk/posh-git/pull/441))
+- Tolga Balci (@tolgabalci)
+  * Create $PROFILE parent directory if missing
+    ([PR #449](https://github.com/dahlbyk/posh-git/pull/449))
+  * Add -verbose parameter to install.ps1
+    ([PR #451](https://github.com/dahlbyk/posh-git/pull/451))
