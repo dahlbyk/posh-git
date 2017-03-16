@@ -1,6 +1,10 @@
 os:
   - "WMF 5"
 
+environment:
+  CA_KEY:
+    secure: JQtUaB+zduPID8bzI5nfHRc2V6xYJiJp4mTHkE4W6broH8rznT1ypvn5orQ6YcGn
+
 branches:
   only:
     - develop
@@ -18,6 +22,11 @@ install:
       "Host name:   $($Host.Name)"
 
 build: false
+
+before_test:
+  - ps: Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+  - ps: Install-Module Coveralls -MinimumVersion 1.0.5 -Scope CurrentUser
+  - ps: Import-Module Coveralls
 
 test_script:
   - ps: |
@@ -39,3 +48,10 @@ test_script:
           $Error | Format-List * -Force
           exit 1;
       }
+      $ErrorActionPreference = 'Stop'
+      if (!(Test-Path Env:CA_KEY)) {
+          Write-Host 'CA_KEY not set! (Expected on PR builds.)'
+          return;
+      }
+      $coverageResult = Format-Coverage -Include (gci ..\src\* -include *.ps1,*.psm1) -CoverallsApiToken $ENV:CA_KEY -RootFolder ../ -BranchName $ENV:APPVEYOR_REPO_BRANCH
+      Publish-Coverage -Coverage $coverageResult
