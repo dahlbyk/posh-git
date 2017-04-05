@@ -281,7 +281,12 @@ namespace PoshGit {
 
         public static bool operator ==(Color left, Color right)
         {
-            return (left._value == right._value) && (left._mode == right._mode);
+            if (object.ReferenceEquals(left, null))
+            {
+                return object.ReferenceEquals(right, null);
+            }
+
+            return left.Equals(right);
         }
 
         public static bool operator !=(Color left, Color right)
@@ -291,12 +296,14 @@ namespace PoshGit {
 
         public override bool Equals(object obj)
         {
-            return (obj is Color) && Equals((Color)obj);
+            return Equals(obj as Color);
         }
 
-        public bool Equals(Color other)
+        public bool Equals(Color obj)
         {
-            return this == other;
+            return object.ReferenceEquals(obj, this) ||
+                   ((!object.ReferenceEquals(obj, null) &&
+                     _value == obj._value && _mode == obj._mode));
         }
 
         public override int GetHashCode()
