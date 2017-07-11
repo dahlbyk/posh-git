@@ -430,7 +430,7 @@ function Find-Pageant() {
 # Attempt to guess $program's location. For ssh-agent/ssh-add.
 function Find-Ssh($program = 'ssh-agent') {
     Write-Verbose "$program not in path. Trying to guess location."
-    $gitItem = Get-Command git.exe -Erroraction SilentlyContinue | Get-Item
+    $gitItem = Get-Command git -CommandType Application -Erroraction SilentlyContinue | Get-Item
     if ($null -eq $gitItem) {
         Write-Warning 'git not in path'
         return
