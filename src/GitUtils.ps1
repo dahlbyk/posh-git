@@ -522,7 +522,9 @@ function Add-SshKey() {
         $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select-Object -First 1 -ExpandProperty Name
         $pageant = if ($pageant) { $pageant } else { Find-Pageant }
         if (!$pageant) {
-            Write-Warning 'Could not find Pageant'
+            if (!$Quiet) {
+                Write-Warning 'Could not find Pageant'
+            }
             return
         }
 
@@ -543,7 +545,9 @@ function Add-SshKey() {
         $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
         $sshAdd = if ($sshAdd) { $sshAdd } else { Find-Ssh('ssh-add') }
         if (!$sshAdd) {
-            Write-Warning 'Could not find ssh-add'
+            if (!$Quiet) {
+                Write-Warning 'Could not find ssh-add'
+            }
             return
         }
 
