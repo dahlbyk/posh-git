@@ -469,7 +469,9 @@ function Start-SshAgent([switch]$Quiet) {
         $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
         $pageant = if ($pageant) { $pageant } else { Find-Pageant }
         if (!$pageant) {
-            Write-Warning "Could not find Pageant."
+            if (!$Quiet) {
+                Write-Warning 'Could not find Pageant'
+            }
             return
         }
 
@@ -479,7 +481,9 @@ function Start-SshAgent([switch]$Quiet) {
         $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
         $sshAgent = if ($sshAgent) { $sshAgent } else { Find-Ssh('ssh-agent') }
         if (!$sshAgent) {
-            Write-Warning 'Could not find ssh-agent'
+            if (!$Quiet) {
+                Write-Warning 'Could not find ssh-add'
+            }
             return
         }
 
@@ -490,7 +494,7 @@ function Start-SshAgent([switch]$Quiet) {
         }
     }
 
-    Add-SshKey
+    Add-SshKey -Quiet:$Quiet
 }
 
 function Get-SshPath($File = 'id_rsa') {
@@ -517,7 +521,7 @@ function Get-SshPath($File = 'id_rsa') {
     None.
     You cannot pipe input to this cmdlet.
 #>
-function Add-SshKey() {
+function Add-SshKey([switch]$Quiet) {
     if ($env:GIT_SSH -imatch 'plink') {
         $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select-Object -First 1 -ExpandProperty Name
         $pageant = if ($pageant) { $pageant } else { Find-Pageant }
