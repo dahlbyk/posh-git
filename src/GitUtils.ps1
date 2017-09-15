@@ -482,7 +482,7 @@ function Start-SshAgent([switch]$Quiet) {
         $sshAgent = if ($sshAgent) { $sshAgent } else { Find-Ssh('ssh-agent') }
         if (!$sshAgent) {
             if (!$Quiet) {
-                Write-Warning 'Could not find ssh-add'
+                Write-Warning 'Could not find ssh-agent'
             }
             return
         }
