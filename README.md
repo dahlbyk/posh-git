@@ -34,7 +34,7 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
     • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
 
 ## Notes
-Posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
+posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
 For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git#step-3-optional-customize-your-powershell-prompt) section below.
 
 Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
@@ -66,12 +66,12 @@ You may be asked if you trust packages coming from the PowerShell Gallery. Answe
 
 If you are on PowerShell version 3 or 4, you will need to install the [Package Management Preview for PowerShell 3 & 4](https://www.microsoft.com/en-us/download/details.aspx?id=51451) in order to run the command above.
 
-Note: If you get an error message from Install-Module about NuGet being required to interact with NuGet-based repositories, execute the following commands to bootstrap the NuGet provider:
+Note: If you get an error message from `Install-Module` about NuGet being required to interact with NuGet-based repositories, execute the following commands to bootstrap the NuGet provider:
 ```powershell
 Install-PackageProvider NuGet -Force
 Import-PackageProvider NuGet -Force
 ```
-Then retry the Install-Module command above.
+Then retry the `Install-Module` command above.
 
 After you have successfully installed the posh-git module from the PowerShell Gallery, you will be able to update to a newer version by executing the command:
 ```powershell
@@ -79,7 +79,7 @@ Update-Module posh-git
 ```
 
 ### Installing posh-git via Chocolatey
-If you have PowerShell version 2 or are having issues using Install-Module with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
+If you have PowerShell version 2 or are having issues using `Install-Module` with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
 If you don't have Chocolatey, you can install it from the [Chocolately Install page](https://chocolatey.org/install).
 With Chocolatey installed, execute the following command to install posh-git:
 ```powershell
