@@ -1,11 +1,16 @@
 # posh-git
 
 [![master build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master)
+[![master build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master)](https://coveralls.io/github/dahlbyk/posh-git?branch=master)
+
 [![develop build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/develop)
+[![develop build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop)](https://coveralls.io/github/dahlbyk/posh-git?branch=develop)
+
 [![Join the chat at https://gitter.im/dahlbyk/posh-git](https://badges.gitter.im/dahlbyk/posh-git.svg)](https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![posh-git on Chocolatey](https://img.shields.io/chocolatey/dt/poshgit.svg)](https://chocolatey.org/packages/poshgit/)
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
-```
+```powershell
 C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 posh-git also provides tab completion support for common git commands, branch names, paths and more.
@@ -29,7 +34,7 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
     • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
 
 ## Notes
-Posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
+posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
 For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git#step-3-optional-customize-your-powershell-prompt) section below.
 
 Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
@@ -54,7 +59,7 @@ Before installing posh-git make sure the following prerequisites have been met.
 ### Installing posh-git via PowerShellGet
 If you are on PowerShell version 5 or higher, execute the command below to install from the [PowerShell Gallery](https://www.powershellgallery.com/):
 
-```
+```powershell
 PowerShellGet\Install-Module posh-git -Scope CurrentUser
 ```
 You may be asked if you trust packages coming from the PowerShell Gallery. Answer yes to allow installation of this module to proceed.
@@ -62,14 +67,14 @@ You may be asked if you trust packages coming from the PowerShell Gallery. Answe
 If you are on PowerShell version 3 or 4, you will need to install the [Package Management Preview for PowerShell 3 & 4](https://www.microsoft.com/en-us/download/details.aspx?id=51451) in order to run the command above.
 
 Note: If you get an error message from `Install-Module` about NuGet being required to interact with NuGet-based repositories, execute the following commands to bootstrap the NuGet provider:
-```
+```powershell
 Install-PackageProvider NuGet -Force
 Import-PackageProvider NuGet -Force
 ```
 Then retry the `Install-Module` command above.
 
 After you have successfully installed the posh-git module from the PowerShell Gallery, you will be able to update to a newer version by executing the command:
-```
+```powershell
 Update-Module posh-git
 ```
 
@@ -77,7 +82,7 @@ Update-Module posh-git
 If you are having issues using `Install-Module` with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
 If you don't have Chocolatey, you can install it from the [Chocolately Install page](https://chocolatey.org/install).
 With Chocolatey installed, execute the following command to install posh-git:
-```
+```powershell
 choco install poshgit
 ```
 
@@ -101,7 +106,7 @@ This will add the same command but to the file `$profile.CurrentUserCurrentHost`
 If you'd prefer, you can manually edit the desired PowerShell profile script.
 Open (or create) your profile script with the command `notepad $profile.CurrentUserAllHosts`.
 In the profile script, add the following line:
-```
+```powershell
 Import-Module posh-git
 ```
 Save the profile script, then close PowerShell and open a new PowerShell session.
@@ -112,33 +117,33 @@ By default, posh-git will update your PowerShell prompt function to display Git 
 posh-git will not update your PowerShell prompt function if you have your own, customized prompt function that has been defined before importing posh-git.
 
 The posh-git prompt is a single line prompt that looks like this:
-```
+```powershell
 C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 You can customize the posh-git prompt or define your own custom prompt function.
 The most common customization for the posh-git provided prompt is to make it span two lines which can be done with the following command:
-```
+```powershell
 $GitPromptSettings.DefaultPromptSuffix = '`n$(''>'' * ($nestedPromptLevel + 1)) '
 ```
 This will change the prompt to:
-```
+```powershell
 C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]
 >
 ```
 You can also customize the default prompt prefix text e.g.:
-```
+```powershell
 $GitPromptSettings.DefaultPromptPrefix = '[$(hostname)] '
 ```
 This will change the prompt to:
-```
+```powershell
 [KEITH1] C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 And if you would prefer to have any path under your home directory abbreviated with ~, you can change this setting:
-```
+```powershell
 $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
 ```
 This will change the prompt to the one shown below:
-```
+```powershell
 ~\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 
@@ -160,10 +165,10 @@ By default, the status summary has the following format:
  * Yellow means the branch is both ahead of and behind its remote
 * S represents the branch status in relation to remote (tracked origin) branch. Note: This information reflects the state of the remote tracked branch after the last `git fetch/pull` of the remote.
   * ≡ = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
-  * ↑`<num>` = The local branch is ahead of the remote branch by the specified number of commits; a 'git push' is required to update the remote branch (`BranchAheadStatus`)
-  * ↓`<num>` = The local branch is behind the remote branch by the specified number of commits; a 'git pull' is required to update the local branch (`BranchBehindStatus`)
-  * `<a>`↕`<b>` = The local branch is both ahead of the remote branch by the specified number of commits (a) and behind by the specified number of commits (b); a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`).  NOTE: this status is only available if $GitPromptSettings.BranchBehindAndAheadDisplay is set to 'Compact'.
-  * × = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus')
+  * ↑`<num>` = The local branch is ahead of the remote branch by the specified number of commits; a `git push` is required to update the remote branch (`BranchAheadStatus`)
+  * ↓`<num>` = The local branch is behind the remote branch by the specified number of commits; a `git pull` is required to update the local branch (`BranchBehindStatus`)
+  * `<a>`↕`<b>` = The local branch is both ahead of the remote branch by the specified number of commits (a) and behind by the specified number of commits (b); a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`).  NOTE: this status is only available if `$GitPromptSettings.BranchBehindAndAheadDisplay` is set to `Compact`.
+  * × = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus`)
 * ABCD represent the index; ` | ` (`DelimText`); EFGH represent the working directory
  * `+` = Added files
  * `~` = Modified files
@@ -181,25 +186,29 @@ The symbols and surrounding text can be customized by the corresponding properti
 
 For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
 
-    # On branch master
-    #
-    # Changes to be committed:
-    #   (use "git reset HEAD <file>..." to unstage)
-    #
-    #        modified:   this-changed.txt
-    #        modified:   this-too.txt
-    #        deleted:    gone.ps1
-    #
-    # Changed but not updated:
-    #   (use "git add <file>..." to update what will be committed)
-    #   (use "git checkout -- <file>..." to discard changes in working directory)
-    #
-    #        modified:   not-staged.ps1
-    #
-    # Untracked files:
-    #   (use "git add <file>..." to include in what will be committed)
-    #
-    #        new.file
+
+
+```powershell
+# On branch master
+#
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#        modified:   this-changed.txt
+#        modified:   this-too.txt
+#        deleted:    gone.ps1
+#
+# Changed but not updated:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#        modified:   not-staged.ps1
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#        new.file
+```
 
 ## Based on work by:
 

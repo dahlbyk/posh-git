@@ -144,7 +144,7 @@ function Write-Prompt {
         [Text.StringBuilder]
         $Builder)
     $s = $global:GitPromptSettings
-    if ($s -and !$ForegroundColor) {
+    if ($s -and ($null -eq $ForegroundColor)) {
         $ForegroundColor = $s.DefaultForegroundColor
     }
 
