@@ -350,10 +350,6 @@ function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
     $res
 }
 
-function Enable-GitColors {
-    Write-Warning 'Enable-GitColors is Obsolete and will be removed in a future version of posh-git.'
-}
-
 function Get-AliasPattern($exe) {
    $aliases = @($exe) + @(Get-Alias | Where-Object { $_.Definition -eq $exe } | Select-Object -Exp Name)
    "($($aliases -join '|'))"
@@ -434,7 +430,7 @@ function Find-Pageant() {
 # Attempt to guess $program's location. For ssh-agent/ssh-add.
 function Find-Ssh($program = 'ssh-agent') {
     Write-Verbose "$program not in path. Trying to guess location."
-    $gitItem = Get-Command git -Erroraction SilentlyContinue | Get-Item
+    $gitItem = Get-Command git -CommandType Application -Erroraction SilentlyContinue | Get-Item
     if ($null -eq $gitItem) {
         Write-Warning 'git not in path'
         return
