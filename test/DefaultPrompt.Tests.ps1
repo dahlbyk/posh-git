@@ -2,7 +2,6 @@
 
 Describe 'Default Prompt Tests' {
     BeforeAll {
-        $GitPromptSettings.AnsiConsole = $false
         $prompt = Get-Item Function:\prompt
         $OFS = ''
     }

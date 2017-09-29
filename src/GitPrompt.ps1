@@ -100,8 +100,6 @@ $global:GitPromptSettings = [pscustomobject]@{
 
     EnableWindowTitle                           = 'posh~git ~ '
 
-    AnsiConsole                                 = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
-
     DefaultPromptPrefix                         = ''
     DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
     DefaultPromptDebugSuffix                    = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
@@ -132,31 +130,19 @@ if (Get-Module NuGet) {
     $WindowTitleSupported = $false
 }
 
-function Write-Prompt {
-    param(
-        [parameter(Mandatory = $true)]
-        $Object,
-        [parameter()]
-        $ForegroundColor = $null,
-        [parameter()]
-        $BackgroundColor = $null,
-        [parameter(ValueFromPipeline = $true)]
-        [Text.StringBuilder]
-        $Builder)
+function Write-Prompt($Object, $ForegroundColor = $null, $BackgroundColor = $null) {
     $s = $global:GitPromptSettings
     if ($s -and ($null -eq $ForegroundColor)) {
         $ForegroundColor = $s.DefaultForegroundColor
     }
 
-    if ($GitPromptSettings.AnsiConsole) {
-        $e = [char]27 + "["
-        $f = Get-ForegroundVirtualTerminalSequence $ForegroundColor
-        $b = Get-BackgroundVirtualTerminalSequence $BackgroundColor
-        if ($Builder) {
-            return $Builder.Append($f).Append($b).Append($Object).Append($e).Append("0m")
-        }
-        return "${f}${b}${Object}${e}0m"
+    if ($BackgroundColor -is [string]) {
+        $BackgroundColor = [ConsoleColor]$BackgroundColor
     }
+    if ($ForegroundColor -is [string]) {
+        $ForegroundColor = [ConsoleColor]$ForegroundColor
+    }
+
     $writeHostParams = @{
         Object = $Object;
         NoNewLine = $true;
@@ -168,10 +154,6 @@ function Write-Prompt {
         $writeHostParams.ForegroundColor = $ForegroundColor
     }
     Write-Host @writeHostParams
-    if ($Builder) {
-        return $Builder
-    }
-    return ""
 }
 
 function Format-BranchName($branchName){
@@ -187,9 +169,8 @@ function Format-BranchName($branchName){
 
 function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
-    $sb = New-Object System.Text.StringBuilder
     if ($status -and $s) {
-        $sb | Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor | Out-Null
+        Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
 
         $branchStatusText            = $null
         $branchStatusBackgroundColor = $s.BranchBackgroundColor
@@ -241,47 +222,47 @@ function Write-GitStatus($status) {
             $branchStatusText            = "?"
         }
 
-        $sb | Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor | Out-Null
+        Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
 
         if ($branchStatusText) {
-            $sb | Write-Prompt  (" {0}" -f $branchStatusText) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor | Out-Null
+            Write-Prompt  (" {0}" -f $branchStatusText) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
         }
 
         if($s.EnableFileStatus -and $status.HasIndex) {
-            $sb | Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor | Out-Null
+            Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
 
             if($s.ShowStatusWhenZero -or $status.Index.Added) {
-                $sb | Write-Prompt (" $($s.FileAddedText)$($status.Index.Added.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileAddedText)$($status.Index.Added.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Modified) {
-                $sb | Write-Prompt (" $($s.FileModifiedText)$($status.Index.Modified.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileModifiedText)$($status.Index.Modified.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
-                $sb | Write-Prompt (" $($s.FileRemovedText)$($status.Index.Deleted.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileRemovedText)$($status.Index.Deleted.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if ($status.Index.Unmerged) {
-                $sb | Write-Prompt (" $($s.FileConflictedText)$($status.Index.Unmerged.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileConflictedText)$($status.Index.Unmerged.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
             }
 
             if($status.HasWorking) {
-                $sb | Write-Prompt $s.DelimText -BackgroundColor $s.DelimBackgroundColor -ForegroundColor $s.DelimForegroundColor | Out-Null
+                Write-Prompt $s.DelimText -BackgroundColor $s.DelimBackgroundColor -ForegroundColor $s.DelimForegroundColor
             }
         }
 
         if($s.EnableFileStatus -and $status.HasWorking) {
             if($s.ShowStatusWhenZero -or $status.Working.Added) {
-                $sb | Write-Prompt (" $($s.FileAddedText)$($status.Working.Added.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileAddedText)$($status.Working.Added.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Modified) {
-                $sb | Write-Prompt (" $($s.FileModifiedText)$($status.Working.Modified.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileModifiedText)$($status.Working.Modified.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
             if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
-                $sb | Write-Prompt (" $($s.FileRemovedText)$($status.Working.Deleted.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileRemovedText)$($status.Working.Deleted.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
 
             if ($status.Working.Unmerged) {
-                $sb | Write-Prompt (" $($s.FileConflictedText)$($status.Working.Unmerged.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+                Write-Prompt (" $($s.FileConflictedText)$($status.Working.Unmerged.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
             }
         }
 
@@ -303,16 +284,16 @@ function Write-GitStatus($status) {
         }
 
         if ($localStatusSymbol) {
-            $sb | Write-Prompt (" {0}" -f $localStatusSymbol) -BackgroundColor $localStatusBackgroundColor -ForegroundColor $localStatusForegroundColor | Out-Null
+            Write-Prompt (" {0}" -f $localStatusSymbol) -BackgroundColor $localStatusBackgroundColor -ForegroundColor $localStatusForegroundColor
         }
 
         if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
-             $sb | Write-Prompt $s.BeforeStashText -BackgroundColor $s.BeforeStashBackgroundColor -ForegroundColor $s.BeforeStashForegroundColor | Out-Null
-             $sb | Write-Prompt $status.StashCount -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor | Out-Null
-             $sb | Write-Prompt $s.AfterStashText -BackgroundColor $s.AfterStashBackgroundColor -ForegroundColor $s.AfterStashForegroundColor | Out-Null
+             Write-Prompt $s.BeforeStashText -BackgroundColor $s.BeforeStashBackgroundColor -ForegroundColor $s.BeforeStashForegroundColor
+             Write-Prompt $status.StashCount -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor
+             Write-Prompt $s.AfterStashText -BackgroundColor $s.AfterStashBackgroundColor -ForegroundColor $s.AfterStashForegroundColor
         }
 
-        $sb | Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor | Out-Null
+        Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
 
         if ($WindowTitleSupported -and $s.EnableWindowTitle) {
             if( -not $Global:PreviousWindowTitle ) {
@@ -322,11 +303,8 @@ function Write-GitStatus($status) {
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
             $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($status.Branch)]"
         }
-
-        return $sb.ToString()
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
-        return ""
     }
 }
 
@@ -347,7 +325,6 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
 }
 
 function Global:Write-VcsStatus {
-    Set-ConsoleMode -ANSI
     $Global:VcsPromptStatuses | ForEach-Object { & $_ }
 }
 

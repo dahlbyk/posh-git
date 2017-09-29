@@ -1,10 +1,19 @@
-param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
+param([switch]$NoVersionWarn,[switch]$ForcePoshGitPrompt)
 
-& $PSScriptRoot\CheckRequirements.ps1 > $null
+if (Get-Module posh-git) { return }
 
-. $PSScriptRoot\ConsoleMode.ps1
+$psv = $PSVersionTable.PSVersion
+
+if ($psv.Major -lt 3 -and !$NoVersionWarn) {
+    Write-Warning ("posh-git support for PowerShell 2.0 is deprecated; you have version $($psv).`n" +
+    "To download version 5.0, please visit https://www.microsoft.com/en-us/download/details.aspx?id=50395`n" +
+    "For more information and to discuss this, please visit https://github.com/dahlbyk/posh-git/issues/163`n" +
+    "To suppress this warning, change your profile to include 'Import-Module posh-git -Args `$true'.")
+}
+
+& $PSScriptRoot\CheckVersion.ps1 > $null
+
 . $PSScriptRoot\Utils.ps1
-. $PSScriptRoot\AnsiUtils.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
 . $PSScriptRoot\GitParamTabExpansion.ps1
@@ -18,12 +27,11 @@ Get-TempEnv 'SSH_AGENT_PID'
 Get-TempEnv 'SSH_AUTH_SOCK'
 
 # Get the default prompt definition.
-$initialSessionState = [Runspace]::DefaultRunspace.InitialSessionState
-if (!$initialSessionState.Commands -or !$initialSessionState.Commands['prompt']) {
+if (($psv.Major -eq 2) -or ![Runspace]::DefaultRunspace.InitialSessionState.Commands) {
     $defaultPromptDef = "`$(if (test-path variable:/PSDebugContext) { '[DBG]: ' } else { '' }) + 'PS ' + `$(Get-Location) + `$(if (`$nestedpromptlevel -ge 1) { '>>' }) + '> '"
 }
 else {
-    $defaultPromptDef = $initialSessionState.Commands['prompt'].Definition
+    $defaultPromptDef = [Runspace]::DefaultRunspace.InitialSessionState.Commands['prompt'].Definition
 }
 
 # If there is no prompt function or the prompt function is the default, replace the current prompt function definition
@@ -44,7 +52,8 @@ if (!$currentPromptDef) {
 }
 
 if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defaultPromptDef)) {
-    $poshGitPromptScriptBlock = {
+    # Have to use [scriptblock]::Create() to get debugger detection to work in PS v2
+    $poshGitPromptScriptBlock = [scriptblock]::Create(@'
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
         }
@@ -72,20 +81,18 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
             $currentPath = "~" + $currentPath.SubString($Home.Length)
         }
 
-        $res = ''
-
         # Display default prompt prefix if not empty.
         $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
         if ($defaultPromptPrefix) {
             $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-            $res += Write-Prompt $expandedDefaultPromptPrefix
+            Write-Prompt $expandedDefaultPromptPrefix
         }
 
         # Write the abbreviated current path
-        $res += Write-Prompt $currentPath
+        Write-Prompt $currentPath
 
         # Write the Git status summary information
-        $res += Write-VcsStatus
+        Write-VcsStatus
 
         # If stopped in the debugger, the prompt needs to indicate that in some fashion
         $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-Member -Name InBreakpoint -MemberType property
@@ -103,12 +110,12 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw.Stop()
             $elapsed = $sw.ElapsedMilliseconds
-            $res += Write-Prompt " ${elapsed}ms"
+            Write-Prompt " ${elapsed}ms"
         }
 
         $global:LASTEXITCODE = $origLastExitCode
-        $res + $expandedPromptSuffix
-    }
+        $expandedPromptSuffix
+'@)
 
     # Set the posh-git prompt as the default prompt
     Set-Item Function:\prompt -Value $poshGitPromptScriptBlock
@@ -129,20 +136,25 @@ $ExecutionContext.SessionState.Module.OnRemove = {
 }
 
 $exportModuleMemberParams = @{
+    Alias = @('??') # TODO: Remove in 1.0.0
     Function = @(
+        'Invoke-NullCoalescing',
         'Add-PoshGitToProfile',
-        'Get-GitDirectory',
-        'Get-GitStatus',
-        'Update-AllBranches',
         'Write-GitStatus',
         'Write-Prompt',
         'Write-VcsStatus',
+        'Get-GitBranch',
+        'Get-GitStatus',
+        'Enable-GitColors',
+        'Get-GitDirectory',
+        'TabExpansion',
+        'Get-AliasPattern',
         'Get-SshAgent',
         'Start-SshAgent',
         'Stop-SshAgent',
         'Add-SshKey',
         'Get-SshPath',
-        'TabExpansion',
+        'Update-AllBranches',
         'tgit'
     )
 }

@@ -7,7 +7,6 @@ environment:
 
 branches:
   only:
-    - develop
     - master
 
 init:

@@ -1,16 +1,5 @@
 # posh-git Release History
 
-## 1.0.0 - TBD
-This release introduces breaking changes with 0.x to both drop support for PowerShell 2.0 and support writing prompt strings using ANSI sequences.
-The ANSI sequence support will help with cross-platform PowerShell support, which is another goal of this release.
-
-- Drop support for PowerShell 2.0
-  ([#163](https://github.com/dahlbyk/posh-git/issues/163))
-  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
-- Remove public `Enable-GitColors`, `Get-AliasPattern` and `Get-GitBranch`; plus `Invoke-NullCoalescing` and its `??` alias
-  ([#93](https://github.com/dahlbyk/posh-git/issues/93))
-  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
-
 ## 0.7.1 - March 14, 2017
 
 - Fixed tab completion issues with duplicate aliases
