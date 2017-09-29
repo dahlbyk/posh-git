@@ -60,7 +60,7 @@ Describe 'Utils Function Tests' {
             Add-PoshGitToProfile $childProfilePath
 
             Test-Path -LiteralPath $childProfilePath | Should Be $true
-            $childProfilePath | Should Contain "^Import-Module .*posh-git"
+            $childProfilePath | Should FileContentMatch "^Import-Module .*posh-git"
         }
         It 'Does not modify profile that already refers to posh-git' {
             $profileContent = @'
