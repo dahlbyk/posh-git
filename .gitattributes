@@ -1,2 +1,2 @@
-# Disable LF normalization for all files
-* -text
+# Enable LF normalization for all files
+* text=auto

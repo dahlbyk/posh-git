@@ -1,0 +1,12 @@
+# To use this file you must have EditorConfig installed for your editor.
+# For Visual Studio Code, install the extension: "EditorConfig for VS Code"
+# https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+[*.{ps1,psd1,psm1}]
+trim_trailing_whitespace = true

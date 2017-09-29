@@ -1,0 +1,56 @@
+os:
+  - "WMF 5"
+
+environment:
+  CA_KEY:
+    secure: JQtUaB+zduPID8bzI5nfHRc2V6xYJiJp4mTHkE4W6broH8rznT1ypvn5orQ6YcGn
+
+branches:
+  only:
+    - master
+
+init:
+  - git config --global core.autocrlf true
+
+install:
+  - ps: |
+      Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+      Install-Module Pester -MinimumVersion 4.0.8 -MaximumVersion 4.99.99 -Scope CurrentUser -Force | Out-Null
+      "Git version: $(git.exe --version)"
+      "PSVersion:   $($PSVersionTable.PSVersion), build: $($PSVersionTable.BuildVersion), clr version: $($PSVersionTable.ClrVersion)"
+      "Host name:   $($Host.Name)"
+
+build: false
+
+before_test:
+  - ps: Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+  - ps: Install-Module Coveralls -MinimumVersion 1.0.5 -Scope CurrentUser
+  - ps: Import-Module Coveralls
+
+test_script:
+  - ps: |
+      $testResultsFile = Join-Path $Env:APPVEYOR_BUILD_FOLDER TestResults.xml
+      $pesterParams = @{
+          Script       = "$Env:APPVEYOR_BUILD_FOLDER\test"
+          OutputFile   = $testResultsFile
+          OutputFormat = "NUnitXml"
+          PassThru     = $true
+          Verbose      = $VerbosePreference
+      }
+      Import-Module Pester
+      $res = Invoke-Pester @pesterParams
+      if (Test-Path $testResultsFile) {
+          (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $testResultsFile)
+      }
+      if ($res.FailedCount -gt 0) {
+          # Terminate the script to fail the build
+          $Error | Format-List * -Force
+          exit 1;
+      }
+      $ErrorActionPreference = 'Stop'
+      if (!(Test-Path Env:CA_KEY)) {
+          Write-Host 'CA_KEY not set! (Expected on PR builds.)'
+          return;
+      }
+      $coverageResult = Format-Coverage -Include (gci ..\src\* -include *.ps1,*.psm1) -CoverallsApiToken $ENV:CA_KEY -RootFolder ../ -BranchName $ENV:APPVEYOR_REPO_BRANCH
+      Publish-Coverage -Coverage $coverageResult
