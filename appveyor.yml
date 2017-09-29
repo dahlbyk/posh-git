@@ -15,7 +15,7 @@ init:
 install:
   - ps: |
       Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
-      Install-Module Pester -MinimumVersion 3.4.0 -MaximumVersion 3.99.99 -Scope CurrentUser -Force | Out-Null
+      Install-Module Pester -MinimumVersion 4.0.8 -MaximumVersion 4.99.99 -Scope CurrentUser -Force | Out-Null
       "Git version: $(git.exe --version)"
       "PSVersion:   $($PSVersionTable.PSVersion), build: $($PSVersionTable.BuildVersion), clr version: $($PSVersionTable.ClrVersion)"
       "Host name:   $($Host.Name)"
