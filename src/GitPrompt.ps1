@@ -30,14 +30,14 @@ class PoshGitCellColor {
         }
         elseif (Test-VirtualTerminalSequece $color) {
             $txt = EscapseAnsiString $color
-            $str = "${color} # ${ansiTerm} $txt"
+            $str = "${color} #${ansiTerm} $txt"
         }
         else {
             $str = ""
 
             if ($global:GitPromptSettings.AnsiConsole) {
                 $bg = Get-BackgroundVirtualTerminalSequence $color
-                $str += "${bg}   ${ansiTerm} "
+                $str += "${bg}  ${ansiTerm} "
             }
 
             $str += $color.ToString()
@@ -113,7 +113,7 @@ class PoshGitTextSpan {
         }
 
         $fg = $this.ForegroundColor
-        if (!(Test-VirtualTerminalSequece $fg)) {
+        if ($fg -and !(Test-VirtualTerminalSequece $fg)) {
             $fg = Get-ForegroundVirtualTerminalSequence $fg
         }
 
@@ -360,8 +360,9 @@ function Write-GitStatus($status) {
         $sb | Write-Prompt $branchNameTextSpan > $null
 
         if ($branchStatusTextSpan.Text) {
-            $branchStatusTextSpan.Text = " " + $branchStatusTextSpan.Text
-            $sb | Write-Prompt $branchStatusTextSpan > $null
+            $textSpan = [PoshGitTextSpan]::new($branchStatusTextSpan)
+            $textSpan.Text = " " + $branchStatusTextSpan.Text
+            $sb | Write-Prompt $textSpan > $null
         }
 
         if ($s.EnableFileStatus -and $status.HasIndex) {
@@ -431,8 +432,9 @@ function Write-GitStatus($status) {
         }
 
         if ($localStatusSymbol.Text) {
-            $localStatusSymbol.Text = " " + $localStatusSymbol.Text
-            $sb | Write-Prompt $localStatusSymbol > $null
+            $textSpan = [PoshGitTextSpan]::new($localStatusSymbol)
+            $textSpan.Text = " " + $localStatusSymbol.Text
+            $sb | Write-Prompt $textSpan > $null
         }
 
         if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
