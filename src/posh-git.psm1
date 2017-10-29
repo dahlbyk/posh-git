@@ -135,6 +135,7 @@ $exportModuleMemberParams = @{
         'Get-GitStatus',
         'Update-AllBranches',
         'Write-GitStatus',
+        'Write-BranchStatus',
         'Write-Prompt',
         'Write-VcsStatus',
         'Get-SshAgent',

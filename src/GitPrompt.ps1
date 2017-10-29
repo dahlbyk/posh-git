@@ -66,36 +66,42 @@ class PoshGitTextSpan {
         $this.Text = ""
         $this.ForegroundColor = $null
         $this.BackgroundColor = $null
+        $this.CustomAnsi = $null
     }
 
     PoshGitTextSpan([string]$Text) {
         $this.Text = $Text
         $this.ForegroundColor = $null
         $this.BackgroundColor = $null
+        $this.CustomAnsi = $null
     }
 
     PoshGitTextSpan([string]$Text, [psobject]$ForegroundColor) {
         $this.Text = $Text
         $this.ForegroundColor = $ForegroundColor
         $this.BackgroundColor = $null
+        $this.CustomAnsi = $null
     }
 
     PoshGitTextSpan([string]$Text, [psobject]$ForegroundColor, [psobject]$BackgroundColor) {
         $this.Text = $Text
         $this.ForegroundColor = $ForegroundColor
         $this.BackgroundColor = $BackgroundColor
+        $this.CustomAnsi = $null
     }
 
     PoshGitTextSpan([PoshGitTextSpan]$PoshGitTextSpan) {
         $this.Text = $PoshGitTextSpan.Text
         $this.ForegroundColor = $PoshGitTextSpan.ForegroundColor
         $this.BackgroundColor = $PoshGitTextSpan.BackgroundColor
+        $this.CustomAnsi = $PoshGitTextSpan.CustomAnsi
     }
 
     PoshGitTextSpan([PoshGitCellColor]$PoshGitCellColor) {
         $this.Text = ''
         $this.ForegroundColor = $PoshGitCellColor.ForegroundColor
         $this.BackgroundColor = $PoshGitCellColor.BackgroundColor
+        $this.CustomAnsi = $null
     }
 
     [string] ToString() {
@@ -249,7 +255,7 @@ function Write-Prompt {
         $BackgroundColor = $null,
 
         [Parameter(ValueFromPipeline = $true)]
-        [Text.StringBuilder]
+        [System.Text.StringBuilder]
         $Builder
     )
 
@@ -262,24 +268,24 @@ function Write-Prompt {
         if ($null -eq $BackgroundColor) {
             $BackgroundColor = $s.DefaultColor.BackgroundColor
         }
-    }
 
-    if ($GitPromptSettings.AnsiConsole) {
-        if ($Object -is [PoshGitTextSpan]) {
-            $str = $Object.RenderAnsi()
-        }
-        else {
-            $e = [char]27 + "["
-            $f = Get-ForegroundVirtualTerminalSequence $ForegroundColor
-            $b = Get-BackgroundVirtualTerminalSequence $BackgroundColor
-            $str = "${f}${b}${Object}${e}0m"
-        }
+        if ($s.AnsiConsole) {
+            if ($Object -is [PoshGitTextSpan]) {
+                $str = $Object.RenderAnsi()
+            }
+            else {
+                $e = [char]27 + "["
+                $f = Get-ForegroundVirtualTerminalSequence $ForegroundColor
+                $b = Get-BackgroundVirtualTerminalSequence $BackgroundColor
+                $str = "${f}${b}${Object}${e}0m"
+            }
 
-        if ($Builder) {
-            return $Builder.Append($str)
-        }
+            if ($Builder) {
+                return $Builder.Append($str)
+            }
 
-        return $str
+            return $str
+        }
     }
 
     if ($Object -is [PoshGitTextSpan]) {
@@ -293,11 +299,11 @@ function Write-Prompt {
         NoNewLine = $true;
     }
 
-    if (($BackgroundColor -ge 0) -and ($BackgroundColor -le 15)) {
+    if ($BackgroundColor -and ($BackgroundColor -ge 0) -and ($BackgroundColor -le 15)) {
         $writeHostParams.BackgroundColor = $BackgroundColor
     }
 
-    if (($ForegroundColor -ge 0) -and ($ForegroundColor -le 15)) {
+    if ($ForegroundColor -and ($ForegroundColor -ge 0) -and ($ForegroundColor -le 15)) {
         $writeHostParams.ForegroundColor = $ForegroundColor
     }
 
@@ -319,6 +325,107 @@ function Format-BranchName($branchName){
     return $branchName
 }
 
+<#
+.SYNOPSIS
+    Writes the branch status text given the current Git status.
+.DESCRIPTION
+    Writes the branch status text given the current Git status which can retrieved
+    via the Get-GitStatus command. Branch status includes information about the
+    upstream branch, how far behind and/or ahead the local branch is from the remote.
+.EXAMPLE
+An example
+
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-BranchStatus {
+    [CmdletBinding(DefaultParameterSetName="Default")]
+    param(
+        # The Git status, retrieved from Get-GitStatus, from which to write the branch status.
+        # If no other parameters are specified, that branch status is written to the host.
+        [Parameter(ParameterSetName = "Default")]
+        [Parameter(ParameterSetName = "PoshGitTextSpan")]
+        [Parameter(ParameterSetName = "StringBuilder")]
+        [Parameter(Mandatory, Position = 0)]
+        [ValidateNotNull()]
+        $status,
+
+        # If specified the branch status is written into the provided BranchStatusTextSpan object.
+        [Parameter(ParameterSetName="PoshGitTextSpan")]
+        [PoshGitTextSpan]
+        $BranchStatusTextSpan,
+
+        # If specified the branch status is written into the provided StringBuilder object.
+        [Parameter(ParameterSetName = "StringBuilder", ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$s) {
+        Write-Warning "$($MyInvocation.MyCommand.Name): `$global:GitPromptSettings variable not found. No BranchStatus generated."
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    if (!$BranchStatusTextSpan) {
+        $BranchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchColor)
+    }
+
+    if (!$status.Upstream) {
+        $branchStatusTextSpan.Text = $s.BranchUntrackedText
+    }
+    elseif ($status.UpstreamGone -eq $true) {
+        # Upstream branch is gone
+        $branchStatusTextSpan = $s.BranchGoneStatusSymbol
+    }
+    elseif (($status.BehindBy -eq 0) -and ($status.AheadBy -eq 0)) {
+        # We are aligned with remote
+        $branchStatusTextSpan = $s.BranchIdenticalStatusSymbol
+    }
+    elseif (($status.BehindBy -ge 1) -and ($status.AheadBy -ge 1)) {
+        # We are both behind and ahead of remote
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchBehindAndAheadStatusSymbol)
+        if ($s.BranchBehindAndAheadDisplay -eq "Full") {
+            $branchStatusTextSpan.Text = ("{0}{1} {2}{3}" -f $s.BranchBehindStatusSymbol.Text, $status.BehindBy, $s.BranchAheadStatusSymbol.Text, $status.AheadBy)
+        }
+        elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
+            $branchStatusTextSpan.Text = ("{0}{1}{2}" -f $status.BehindBy, $s.BranchBehindAndAheadStatusSymbol.Text, $status.AheadBy)
+        }
+    }
+    elseif ($status.BehindBy -ge 1) {
+        # We are behind remote
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchBehindStatusSymbol)
+        if (($s.BranchBehindAndAheadDisplay -eq "Full") -Or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
+            $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchBehindStatusSymbol.Text, $status.BehindBy)
+        }
+    }
+    elseif ($status.AheadBy -ge 1) {
+        # We are ahead of remote
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchAheadStatusSymbol)
+        if (($s.BranchBehindAndAheadDisplay -eq "Full") -or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
+            $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchAheadStatusSymbol.Text, $status.AheadBy)
+        }
+    }
+    else {
+        # This condition should not be possible but defaulting the variables to be safe
+        $branchStatusTextSpan.Text = "?"
+    }
+
+    $str = ""
+    if ($branchStatusTextSpan.Text) {
+        if ($StringBuilder) {
+            $StringBuilder | Write-Prompt $branchStatusTextSpan > $null
+        }
+        elseif ($PSCmdlet.ParameterSetName -ne "PoshGitTextSpan") {
+            $str = Write-Prompt $branchStatusTextSpan > $null
+        }
+    }
+
+    return $(if ($Builder) { $Builder } else { $str })
+}
+
 function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
     $sb = [System.Text.StringBuilder]::new(150)
@@ -328,64 +435,15 @@ function Write-GitStatus($status) {
 
         $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchColor)
 
-        if (!$status.Upstream) {
-            $branchStatusTextSpan.Text = $s.BranchUntrackedText
-        }
-        elseif ($status.UpstreamGone -eq $true) {
-            # Upstream branch is gone
-            $branchStatusTextSpan = $s.BranchGoneStatusSymbol
-        }
-        elseif (($status.BehindBy -eq 0) -and ($status.AheadBy -eq 0)) {
-            # We are aligned with remote
-            $branchStatusTextSpan = $s.BranchIdenticalStatusSymbol
-        }
-        elseif (($status.BehindBy -ge 1) -and ($status.AheadBy -ge 1)) {
-            $branchStatusTextSpan.ForegroundColor = $s.BranchBehindAndAheadStatusSymbol.ForegroundColor
-            $branchStatusTextSpan.BackgroundColor = $s.BranchBehindAndAheadStatusSymbol.BackgroundColor
+        # This only populates $branchStatusTextSpan passed in.
+        Write-BranchStatus $status -BranchStatusTextSpan $branchStatusTextSpan
 
-            # We are both behind and ahead of remote
-            if ($s.BranchBehindAndAheadDisplay -eq "Full") {
-                $branchStatusTextSpan.Text = ("{0}{1} {2}{3}" -f $s.BranchBehindStatusSymbol.Text, $status.BehindBy, $s.BranchAheadStatusSymbol.Text, $status.AheadBy)
-            }
-            elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
-                $branchStatusTextSpan.Text = ("{0}{1}{2}" -f $status.BehindBy, $s.BranchBehindAndAheadStatusSymbol.Text, $status.AheadBy)
-            }
-            else {
-                $branchStatusTextSpan.Text = $s.BranchBehindAndAheadStatusSymbol.Text
-            }
-        }
-        elseif ($status.BehindBy -ge 1) {
-            $branchStatusTextSpan.ForegroundColor = $s.BranchBehindStatusSymbol.ForegroundColor
-            $branchStatusTextSpan.BackgroundColor = $s.BranchBehindStatusSymbol.BackgroundColor
-
-            # We are behind remote
-            if (($s.BranchBehindAndAheadDisplay -eq "Full") -Or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
-                $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchBehindStatusSymbol.Text, $status.BehindBy)
-            }
-            else {
-                $branchStatusTextSpan.Text = $s.BranchBehindStatusSymbol.Text
-            }
-        }
-        elseif ($status.AheadBy -ge 1) {
-            $branchStatusTextSpan.ForegroundColor = $s.BranchAheadStatusSymbol.ForegroundColor
-            $branchStatusTextSpan.BackgroundColor = $s.BranchAheadStatusSymbol.BackgroundColor
-
-            # We are ahead of remote
-            if (($s.BranchBehindAndAheadDisplay -eq "Full") -or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
-                $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchAheadStatusSymbol.Text, $status.AheadBy)
-            } else {
-                $branchStatusTextSpan.Text = $s.BranchAheadStatusSymbol.Text
-            }
-        }
-        else {
-            # This condition should not be possible but defaulting the variables to be safe
-            $branchStatusTextSpan.Text = "?"
-        }
-
+        # Use the branch status colors (or CustomAnsi) to display the branch name
         $branchNameTextSpan = [PoshGitTextSpan]::new($branchStatusTextSpan)
         $branchNameTextSpan.Text = Format-BranchName $status.Branch
         $sb | Write-Prompt $branchNameTextSpan > $null
 
+        # After we've written the branch name, now let's write the branch status
         if ($branchStatusTextSpan.Text) {
             $textSpan = [PoshGitTextSpan]::new($branchStatusTextSpan)
             $textSpan.Text = " " + $branchStatusTextSpan.Text

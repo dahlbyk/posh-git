@@ -29,7 +29,7 @@ function EscapseAnsiString([string]$AnsiString) {
         $res = $AnsiString -replace "$([char]0x1B)", '`e'
     }
     else {
-        $res = $AnsiString -replace "$([char]0x1B)", '$([char]0x1B)'
+        $res = $AnsiString -replace "$([char]0x1B)", '$([char]27)'
     }
 
     $res
