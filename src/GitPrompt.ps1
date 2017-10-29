@@ -37,7 +37,7 @@ class PoshGitCellColor {
 
             if ($global:GitPromptSettings.AnsiConsole) {
                 $bg = Get-BackgroundVirtualTerminalSequence $color
-                $str += "${bg} ${ansiTerm} "
+                $str += "${bg}   ${ansiTerm} "
             }
 
             $str += $color.ToString()
@@ -122,64 +122,63 @@ class PoshGitTextSpan {
 }
 
 $global:GitPromptSettings = [pscustomobject]@{
-    FileAddedText                               = '+'
-    FileModifiedText                            = '~'
-    FileRemovedText                             = '-'
-    FileConflictedText                          = '!'
+    DefaultColor                           = [PoshGitCellColor]::new()
+    BranchColor                            = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
+    IndexColor                             = [PoshGitCellColor]::new([ConsoleColor]::DarkGreen)
+    WorkingColor                           = [PoshGitCellColor]::new([ConsoleColor]::DarkRed)
+    StashColor                             = [PoshGitCellColor]::new([ConsoleColor]::Red)
+    ErrorColor                             = [PoshGitCellColor]::new([ConsoleColor]::Red)
 
-    DefaultColor                                = [PoshGitCellColor]::new()
-    BranchColor                                 = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
-    IndexColor                                  = [PoshGitCellColor]::new([ConsoleColor]::DarkGreen)
-    WorkingColor                                = [PoshGitCellColor]::new([ConsoleColor]::DarkRed)
-    StashColor                                  = [PoshGitCellColor]::new([ConsoleColor]::Red)
-    ErrorColor                                  = [PoshGitCellColor]::new([ConsoleColor]::Red)
+    BeforeText                             = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
+    DelimText                              = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
+    AfterText                              = [PoshGitTextSpan]::new(']',  [ConsoleColor]::Yellow)
 
-    BeforeText                                  = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
-    DelimText                                   = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
-    AfterText                                   = [PoshGitTextSpan]::new(']',  [ConsoleColor]::Yellow)
+    LocalDefaultStatusSymbol               = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
+    LocalWorkingStatusSymbol               = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
+    LocalStagedStatusSymbol                = [PoshGitTextSpan]::new('~', [ConsoleColor]::DarkCyan)
 
-    LocalDefaultStatusSymbol                    = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
-    LocalWorkingStatusSymbol                    = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
-    LocalStagedStatusSymbol                     = [PoshGitTextSpan]::new('~', [ConsoleColor]::DarkCyan)
+    BranchGoneStatusSymbol                 = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
+    BranchIdenticalStatusSymbol            = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
+    BranchAheadStatusSymbol                = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
+    BranchBehindStatusSymbol               = [PoshGitTextSpan]::new([char]0x2193, [ConsoleColor]::Red)      # ↓ Down arrow
+    BranchBehindAndAheadStatusSymbol       = [PoshGitTextSpan]::new([char]0x2195, [ConsoleColor]::Yellow)   # ↕ Up & Down arrow
 
-    BranchUntrackedSymbol                       = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkCyan)
+    BeforeIndexText                        = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
+    BeforeStashText                        = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
+    AfterStashText                         = [PoshGitTextSpan]::new(')',  [ConsoleColor]::Red)
 
-    BranchGoneStatusSymbol                      = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
-    BranchIdenticalStatusSymbol                 = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
-    BranchAheadStatusSymbol                     = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
-    BranchBehindStatusSymbol                    = [PoshGitTextSpan]::new([char]0x2193, [ConsoleColor]::Red)      # ↓ Down arrow
-    BranchBehindAndAheadStatusSymbol            = [PoshGitTextSpan]::new([char]0x2195, [ConsoleColor]::Yellow)   # ↕ Up & Down arrow
-    BranchBehindAndAheadDisplay                 = [BranchBehindAndAheadDisplayOptions]"Full"
+    FileAddedText                          = '+'
+    FileModifiedText                       = '~'
+    FileRemovedText                        = '-'
+    FileConflictedText                     = '!'
+    BranchUntrackedText                    = ''
 
-    BeforeIndexText                             = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
+    BranchBehindAndAheadDisplay            = [BranchBehindAndAheadDisplayOptions]"Full"
 
-    BeforeStashText                             = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
-    AfterStashText                              = [PoshGitTextSpan]::new(')',  [ConsoleColor]::Red)
+    EnableStashStatus                      = $false
+    ShowStatusWhenZero                     = $true
+    AutoRefreshIndex                       = $true
 
-    EnableStashStatus                           = $false
-    ShowStatusWhenZero                          = $true
-    AutoRefreshIndex                            = $true
+    EnablePromptStatus                     = !$global:GitMissing
+    EnableFileStatus                       = $true
+    EnableFileStatusFromCache              = $null
+    RepositoriesInWhichToDisableFileStatus = @() # Array of repository paths
+    DescribeStyle                          = ''
 
-    EnablePromptStatus                          = !$Global:GitMissing
-    EnableFileStatus                            = $true
-    EnableFileStatusFromCache                   = $null
-    RepositoriesInWhichToDisableFileStatus      = @() # Array of repository paths
-    DescribeStyle                               = ''
+    EnableWindowTitle                      = 'posh~git ~ '
 
-    EnableWindowTitle                           = 'posh~git ~ '
+    AnsiConsole                            = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
 
-    AnsiConsole                                 = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
+    DefaultPromptPrefix                    = ''
+    DefaultPromptSuffix                    = '$(''>'' * ($nestedPromptLevel + 1)) '
+    DefaultPromptDebugSuffix               = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+    DefaultPromptEnableTiming              = $false
+    DefaultPromptAbbreviateHomeDirectory   = $false
 
-    DefaultPromptPrefix                         = ''
-    DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptDebugSuffix                    = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptEnableTiming                   = $false
-    DefaultPromptAbbreviateHomeDirectory        = $false
+    Debug                                  = $false
 
-    Debug                                       = $false
-
-    BranchNameLimit                             = 0
-    TruncatedBranchSuffix                       = '...'
+    BranchNameLimit                        = 0
+    TruncatedBranchSuffix                  = '...'
 }
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
@@ -213,13 +212,16 @@ if (Get-Module NuGet) {
 
 function Write-Prompt {
     param(
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         $Object,
-        [parameter()]
+
+        [Parameter()]
         $ForegroundColor = $null,
-        [parameter()]
+
+        [Parameter()]
         $BackgroundColor = $null,
-        [parameter(ValueFromPipeline = $true)]
+
+        [Parameter(ValueFromPipeline = $true)]
         [Text.StringBuilder]
         $Builder
     )
@@ -233,10 +235,6 @@ function Write-Prompt {
         if ($null -eq $BackgroundColor) {
             $BackgroundColor = $s.DefaultColor.BackgroundColor
         }
-    }
-
-    if ($Object -is [PoshGitCellColor]) {
-        Write-Warning "Unexpected PoshGitCellColor passed to Write-Prompt"
     }
 
     if ($GitPromptSettings.AnsiConsole) {
@@ -298,17 +296,13 @@ function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
     $sb = [System.Text.StringBuilder]::new(150)
 
-    if (!$s) {
-        Write-Warning "`$global:GitPromptSettings is not defined. Posh-git prompt information will be limited."
-    }
-
     if ($status -and $s) {
         $sb | Write-Prompt $s.BeforeText > $null
 
         $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchColor)
 
         if (!$status.Upstream) {
-            $branchStatusTextSpan = $s.BranchUntrackedSymbol
+            $branchStatusTextSpan.Text = $s.BranchUntrackedText
         }
         elseif ($status.UpstreamGone -eq $true) {
             # Upstream branch is gone
@@ -366,7 +360,7 @@ function Write-GitStatus($status) {
         $sb | Write-Prompt $branchNameTextSpan > $null
 
         if ($branchStatusTextSpan.Text) {
-            $sb.Append(' ') > $null
+            $branchStatusTextSpan.Text = " " + $branchStatusTextSpan.Text
             $sb | Write-Prompt $branchStatusTextSpan > $null
         }
 
@@ -436,13 +430,14 @@ function Write-GitStatus($status) {
             $localStatusSymbol = $s.LocalDefaultStatusSymbol
         }
 
-        if ($localStatusSymbol) {
-            $sb.Append(' ') > $null
+        if ($localStatusSymbol.Text) {
+            $localStatusSymbol.Text = " " + $localStatusSymbol.Text
             $sb | Write-Prompt $localStatusSymbol > $null
         }
 
         if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
-            $stashTextSpan = [PoshGitTextSpan]::new("$($status.StashCount)", $s.StashColor)
+            $stashTextSpan = [PoshGitTextSpan]::new($s.StashColor)
+            $stashTextSpan.Text = "$($status.StashCount)"
 
             $sb | Write-Prompt $s.BeforeStashText > $null
             $sb | Write-Prompt $stashTextSpan > $null
@@ -452,8 +447,8 @@ function Write-GitStatus($status) {
         $sb | Write-Prompt $s.AfterText > $null
 
         if ($WindowTitleSupported -and $s.EnableWindowTitle) {
-            if (!$Global:PreviousWindowTitle) {
-                $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
+            if (!$global:PreviousWindowTitle) {
+                $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
             }
 
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
@@ -463,29 +458,29 @@ function Write-GitStatus($status) {
 
         return $sb.ToString()
     }
-    elseif ($Global:PreviousWindowTitle) {
-        $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
+    elseif ($global:PreviousWindowTitle) {
+        $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
         return ""
     }
 }
 
 if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
-    $Global:VcsPromptStatuses = @()
+    $global:VcsPromptStatuses = @()
 }
 
 function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
-    $Global:VcsPromptStatuses | ForEach-Object { & $_ }
+    $global:VcsPromptStatuses | ForEach-Object { & $_ }
 }
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
     try {
-        $Global:GitStatus = Get-GitStatus
+        $global:GitStatus = Get-GitStatus
         Write-GitStatus $GitStatus
     }
     catch {
-        $s = $Global:GitPromptSettings
+        $s = $global:GitPromptSettings
         if ($s) {
             Write-Prompt $s.BeforeText
             Write-Prompt "Error: $_" -BackgroundColor $s.ErrorColor.BackgroundColor -ForegroundColor $s.ErrorColor.ForegroundColor
@@ -494,4 +489,4 @@ $PoshGitVcsPrompt = {
     }
 }
 
-$Global:VcsPromptStatuses += $PoshGitVcsPrompt
+$global:VcsPromptStatuses += $PoshGitVcsPrompt
