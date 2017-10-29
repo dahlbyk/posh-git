@@ -24,20 +24,21 @@ class PoshGitCellColor {
 
     hidden [string] ToString($color) {
         $ansiTerm = "$([char]0x1b)[0m"
+        $colorSwatch = "  "
 
         if (!$color) {
             $str = "<default>"
         }
         elseif (Test-VirtualTerminalSequece $color) {
             $txt = EscapseAnsiString $color
-            $str = "${color} #${ansiTerm} $txt"
+            $str = "${color}${colorSwatch}${ansiTerm} $txt"
         }
         else {
             $str = ""
 
             if ($global:GitPromptSettings.AnsiConsole) {
                 $bg = Get-BackgroundVirtualTerminalSequence $color
-                $str += "${bg}  ${ansiTerm} "
+                $str += "${bg}${colorSwatch}${ansiTerm} "
             }
 
             $str += $color.ToString()
@@ -59,6 +60,7 @@ class PoshGitTextSpan {
     [string]$Text
     [psobject]$BackgroundColor
     [psobject]$ForegroundColor
+    [string]$CustomAnsi
 
     PoshGitTextSpan() {
         $this.Text = ""
@@ -97,9 +99,26 @@ class PoshGitTextSpan {
     }
 
     [string] ToString() {
-        $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
-        $txt = $this.RenderAnsi()
-        $str = "Text: '$txt',`t $($color.ToString())"
+        if ($global:GitPromptSettings.AnsiConsole) {
+            if ($this.CustomAnsi) {
+                $e = [char]27 + "["
+                $ansi = $this.CustomAnsi
+                $escAnsi = EscapseAnsiString $this.CustomAnsi
+                $txt = $this.RenderAnsi()
+                $str = "Text: '$txt',`t CustomAnsi: '${ansi}${escAnsi}${e}0m'"
+            }
+            else {
+                $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
+                $txt = $this.RenderAnsi()
+                $str = "Text: '$txt',`t $($color.ToString())"
+            }
+        }
+        else {
+            $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
+            $txt = $this.Text
+            $str = "Text: '$txt',`t $($color.ToString())"
+        }
+
         return $str
     }
 
@@ -107,17 +126,25 @@ class PoshGitTextSpan {
         $e = [char]27 + "["
         $txt = $this.Text
 
-        $bg = $this.BackgroundColor
-        if ($bg -and !(Test-VirtualTerminalSequece $bg)) {
-            $bg = Get-BackgroundVirtualTerminalSequence $bg
+        if ($this.CustomAnsi) {
+            $ansi = $this.CustomAnsi
+            $str = "${ansi}${txt}${e}0m"
+        }
+        else {
+            $bg = $this.BackgroundColor
+            if ($bg -and !(Test-VirtualTerminalSequece $bg)) {
+                $bg = Get-BackgroundVirtualTerminalSequence $bg
+            }
+
+            $fg = $this.ForegroundColor
+            if ($fg -and !(Test-VirtualTerminalSequece $fg)) {
+                $fg = Get-ForegroundVirtualTerminalSequence $fg
+            }
+
+            $str = "${fg}${bg}${txt}${e}0m"
         }
 
-        $fg = $this.ForegroundColor
-        if ($fg -and !(Test-VirtualTerminalSequece $fg)) {
-            $fg = Get-ForegroundVirtualTerminalSequence $fg
-        }
-
-        return "${fg}${bg}${txt}${e}0m"
+        return $str
     }
 }
 
