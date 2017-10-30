@@ -367,16 +367,16 @@ function Write-GitStatus {
     $sb | Write-Prompt $s.BeforeText > $null
 
     # Use the branch status colors (or CustomAnsi) to display the branch name
-    $branchNameTextSpan = Get-BranchStatusColor $Status
-    $branchNameTextSpan.Text = Format-BranchName $Status.Branch
+    $branchNameTextSpan = Get-GitBranchStatusColor $Status
+    $branchNameTextSpan.Text = Format-GitBranchName $Status.Branch
     $sb | Write-Prompt $branchNameTextSpan > $null
 
-    $sb | Write-BranchStatus $Status > $null
+    $sb | Write-GitBranchStatus $Status > $null
 
     if ($s.EnableFileStatus -and $Status.HasIndex) {
         $sb | Write-Prompt $s.BeforeIndexText > $null
 
-        $sb | Write-IndexStatus $Status > $null
+        $sb | Write-GitIndexStatus $Status > $null
 
         if ($Status.HasWorking) {
             $sb | Write-Prompt $s.DelimText > $null
@@ -384,13 +384,13 @@ function Write-GitStatus {
     }
 
     if ($s.EnableFileStatus -and $Status.HasWorking) {
-        $sb | Write-WorkingDirectoryStatus $Status > $null
+        $sb | Write-GitWorkingDirectoryStatus $Status > $null
     }
 
-    $sb | Write-WorkingDirectoryLocalStatus $Status > $null
+    $sb | Write-GitWorkingDirectoryLocalStatus $Status > $null
 
     if ($s.EnableStashStatus -and ($Status.StashCount -gt 0)) {
-        $sb | Write-StashCount $Status > $null
+        $sb | Write-GitStashCount $Status > $null
     }
 
     $sb | Write-Prompt $s.AfterText > $null
@@ -415,7 +415,7 @@ function Write-GitStatus {
     Formats the branch name text according the $GitPromptSettings:
     BranchNameLimit and TruncatedBranchSuffix.
 .EXAMPLE
-    PS C:\> $branchName = Format-BranchName (Get-GitStatus).Branch
+    PS C:\> $branchName = Format-GitBranchName (Get-GitStatus).Branch
 
     Gets the branch name formatted as specified by the user's $GitPromptSettings.
 .INPUTS
@@ -425,7 +425,7 @@ function Write-GitStatus {
     System.String
         This command returns a System.String object.
 #>
-function Format-BranchName {
+function Format-GitBranchName {
     param(
         # The branch name to format according to the GitPromptSettings:
         # BranchNameLimit and TruncatedBranchSuffix.
@@ -454,7 +454,7 @@ function Format-BranchName {
     other $GitPromptSettings: BranchBehindAndAheadStatusSymbol,
     BranchBehindStatusSymbol or BranchAheadStatusSymbol.
 .EXAMPLE
-    PS C:\> $branchStatusColor = Get-BranchStatusColor (Get-GitStatus)
+    PS C:\> $branchStatusColor = Get-GitBranchStatusColor (Get-GitStatus)
 
     Returns a PoshGitTextSpan with the foreground and background colors
     for the branch status.
@@ -466,7 +466,7 @@ function Format-BranchName {
         A PoshGitTextSpan with colors reflecting those to be used by
         branch status symbols.
 #>
-function Get-BranchStatusColor {
+function Get-GitBranchStatusColor {
     param(
         # The Git status, retrieved from Get-GitStatus.
         [Parameter(Position = 0)]
@@ -505,7 +505,7 @@ function Get-BranchStatusColor {
     via the Get-GitStatus command. Branch status includes information about the
     upstream branch, how far behind and/or ahead the local branch is from the remote.
 .EXAMPLE
-    PS C:\> Write-BranchStatus (Get-GitStatus)
+    PS C:\> Write-GitBranchStatus (Get-GitStatus)
 
     Writes the status of the current branch to the host.
 .INPUTS
@@ -516,7 +516,7 @@ function Get-BranchStatusColor {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-BranchStatus {
+function Write-GitBranchStatus {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the branch status.
         # If no other parameters are specified, that branch status is written to the host.
@@ -534,7 +534,7 @@ function Write-BranchStatus {
         return $(if ($StringBuilder) { $StringBuilder } else { "" })
     }
 
-    $branchStatusTextSpan = Get-BranchStatusColor $Status
+    $branchStatusTextSpan = Get-GitBranchStatusColor $Status
 
     if (!$Status.Upstream) {
         $branchStatusTextSpan.Text = $s.BranchUntrackedText
@@ -595,7 +595,7 @@ function Write-BranchStatus {
 .DESCRIPTION
     Writes the index status text given the current Git status.
 .EXAMPLE
-    PS C:\> Write-IndexStatus (Get-GitStatus)
+    PS C:\> Write-GitIndexStatus (Get-GitStatus)
 
     Writes the Git index status to the host.
 .INPUTS
@@ -606,7 +606,7 @@ function Write-BranchStatus {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-IndexStatus {
+function Write-GitIndexStatus {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the index status.
         # If no other parameters are specified, that index status is written to the host.
@@ -679,7 +679,7 @@ function Write-IndexStatus {
 .DESCRIPTION
     Writes the working directory status text given the current Git status.
 .EXAMPLE
-    PS C:\> Write-WorkingDirectoryStatus (Get-GitStatus)
+    PS C:\> Write-GitWorkingDirectoryStatus (Get-GitStatus)
 
     Writes the Git working directory status to the host.
 .INPUTS
@@ -690,7 +690,7 @@ function Write-IndexStatus {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-WorkingDirectoryStatus {
+function Write-GitWorkingDirectoryStatus {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the working dir status.
         # If no other parameters are specified, that working dir status is written to the host.
@@ -763,7 +763,7 @@ function Write-WorkingDirectoryStatus {
 .DESCRIPTION
     Writes the working directory local status text given the current Git status.
 .EXAMPLE
-    PS C:\> Write-WorkingDirectoryLocalStatus (Get-GitStatus)
+    PS C:\> Write-GitWorkingDirectoryLocalStatus (Get-GitStatus)
 
     Writes the Git working directory local status to the host.
 .INPUTS
@@ -774,7 +774,7 @@ function Write-WorkingDirectoryStatus {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-WorkingDirectoryLocalStatus {
+function Write-GitWorkingDirectoryLocalStatus {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the working dir local status.
         # If no other parameters are specified, that working dir local status is written to the host.
@@ -826,7 +826,7 @@ function Write-WorkingDirectoryLocalStatus {
 .DESCRIPTION
     Writes the stash count given the current Git status.
 .EXAMPLE
-    PS C:\> Write-StashCount (Get-GitStatus)
+    PS C:\> Write-GitStashCount (Get-GitStatus)
 
     Writes the Git stash count to the host.
 .INPUTS
@@ -837,7 +837,7 @@ function Write-WorkingDirectoryLocalStatus {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-StashCount {
+function Write-GitStashCount {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the stash count.
         # If no other parameters are specified, the stash count is written to the host.
