@@ -197,8 +197,8 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $stashCount = 0
 
         if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $gitDir) -and !$(InDisabledRepository)) {
-            if ($settings.EnableFileStatusFromCache -eq $null) {
-                $settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
+            if ($null -eq $settings.EnableFileStatusFromCache) {
+                $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
 
             if ($settings.EnableFileStatusFromCache) {
@@ -370,7 +370,7 @@ function Get-TempEnv($key) {
 
 function Set-TempEnv($key, $value) {
     $path = Get-TempEnvPath($key)
-    if ($value -eq $null) {
+    if ($null -eq $value) {
         if (Test-Path $path) {
             Remove-Item $path
         }
@@ -591,5 +591,6 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
             Write-Warning "Rebase failed for $branch"
         }
     }
+
     git checkout -q $head
 }

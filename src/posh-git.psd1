@@ -24,11 +24,17 @@ PowerShellVersion = '3.0'
 # Functions to export from this module
 FunctionsToExport = @(
     'Add-PoshGitToProfile',
+    'Format-BranchName',
+    'Get-BranchStatusColor',
     'Get-GitStatus',
     'Get-GitDirectory',
     'Update-AllBranches',
     'Write-GitStatus',
     'Write-BranchStatus',
+    'Write-IndexStatus',
+    'Write-StashCount',
+    'Write-WorkingDirectoryStatus',
+    'Write-WorkingDirectoryLocalStatus',
     'Write-Prompt',
     'Write-VcsStatus',
     'Get-SshAgent',
