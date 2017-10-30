@@ -384,10 +384,10 @@ function Write-GitStatus {
     }
 
     if ($s.EnableFileStatus -and $Status.HasWorking) {
-        $sb | Write-GitWorkingDirectoryStatus $Status > $null
+        $sb | Write-GitWorkingDirStatus $Status > $null
     }
 
-    $sb | Write-GitWorkingDirectoryLocalStatus $Status > $null
+    $sb | Write-GitWorkingDirLocalStatus $Status > $null
 
     if ($s.EnableStashStatus -and ($Status.StashCount -gt 0)) {
         $sb | Write-GitStashCount $Status > $null
@@ -679,7 +679,7 @@ function Write-GitIndexStatus {
 .DESCRIPTION
     Writes the working directory status text given the current Git status.
 .EXAMPLE
-    PS C:\> Write-GitWorkingDirectoryStatus (Get-GitStatus)
+    PS C:\> Write-GitWorkingDirStatus (Get-GitStatus)
 
     Writes the Git working directory status to the host.
 .INPUTS
@@ -690,7 +690,7 @@ function Write-GitIndexStatus {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-GitWorkingDirectoryStatus {
+function Write-GitWorkingDirStatus {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the working dir status.
         # If no other parameters are specified, that working dir status is written to the host.
@@ -763,7 +763,7 @@ function Write-GitWorkingDirectoryStatus {
 .DESCRIPTION
     Writes the working directory local status text given the current Git status.
 .EXAMPLE
-    PS C:\> Write-GitWorkingDirectoryLocalStatus (Get-GitStatus)
+    PS C:\> Write-GitWorkingDirLocalStatus (Get-GitStatus)
 
     Writes the Git working directory local status to the host.
 .INPUTS
@@ -774,7 +774,7 @@ function Write-GitWorkingDirectoryStatus {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-GitWorkingDirectoryLocalStatus {
+function Write-GitWorkingDirLocalStatus {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the working dir local status.
         # If no other parameters are specified, that working dir local status is written to the host.
