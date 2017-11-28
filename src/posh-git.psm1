@@ -72,20 +72,20 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
             $currentPath = "~" + $currentPath.SubString($Home.Length)
         }
 
-        $res = ''
+        $prompt = ''
 
         # Display default prompt prefix if not empty.
         $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
         if ($defaultPromptPrefix) {
             $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-            $res += Write-Prompt $expandedDefaultPromptPrefix
+            $prompt += Write-Prompt $expandedDefaultPromptPrefix
         }
 
         # Write the abbreviated current path
-        $res += Write-Prompt $currentPath
+        $prompt += Write-Prompt $currentPath
 
         # Write the Git status summary information
-        $res += Write-VcsStatus
+        $prompt += Write-VcsStatus
 
         # If stopped in the debugger, the prompt needs to indicate that in some fashion
         $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-Member -Name InBreakpoint -MemberType property
@@ -103,11 +103,12 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
         if ($GitPromptSettings.DefaultPromptEnableTiming) {
             $sw.Stop()
             $elapsed = $sw.ElapsedMilliseconds
-            $res += Write-Prompt " ${elapsed}ms"
+            $prompt += Write-Prompt " ${elapsed}ms"
         }
 
         $global:LASTEXITCODE = $origLastExitCode
-        $res + $expandedPromptSuffix
+        $prompt += $expandedPromptSuffix
+        $prompt
     }
 
     # Set the posh-git prompt as the default prompt
