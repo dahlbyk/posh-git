@@ -26,10 +26,10 @@ $ColorType = 'System.Drawing.Color' -as [Type]
 
 function EscapseAnsiString([string]$AnsiString) {
     if ($PSVersionTable.PSVersion.Major -ge 6) {
-        $res = $AnsiString -replace "$([char]0x1B)", '`e'
+        $res = $AnsiString -replace "$([char]27)", '`e'
     }
     else {
-        $res = $AnsiString -replace "$([char]0x1B)", '$([char]27)'
+        $res = $AnsiString -replace "$([char]27)", '$([char]27)'
     }
 
     $res
@@ -49,13 +49,20 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
         return "${AnsiEscape}$(38 + $offset);5;${color}m"
     }
 
+    if ($color -is [int]) {
+        $r = ($color -shr 16) -band 0xff
+        $g = ($color -shr 8) -band 0xff
+        $b = $color -band 0xff
+        return "${AnsiEscape}$(38 + $offset);2;${r};${g};${b}m"
+    }
+
     if ($color -is [String]) {
         try {
-            if ($ColorTranslatorType) {
-                $color = $ColorTranslatorType::FromHtml($color)
+            if ($color -as [ConsoleColor]) {
+                $color = [System.ConsoleColor]$color
             }
-            else {
-                $color = [ConsoleColor]$color
+            elseif ($ColorTranslatorType) {
+                $color = $ColorTranslatorType::FromHtml($color)
             }
         }
         catch {
