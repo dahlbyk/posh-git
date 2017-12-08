@@ -65,7 +65,12 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
 .PARAMETER AllHosts
     By default, this command modifies the CurrentUserCurrentHost profile
     script.  By specifying the AllHosts switch, the command updates the
-    CurrentUserAllHosts profile.
+    CurrentUserAllHosts profile (or AllUsersAllHosts, given -AllUsers).
+.PARAMETER AllUsers
+    By default, this command modifies the CurrentUserCurrentHost profile
+    script.  By specifying the AllUsers switch, the command updates the
+    AllUsersCurrentHost profile (or AllUsersAllHosts, given -AllHosts).
+    Requires elevated permissions.
 .PARAMETER Force
     Do not check if the specified profile script is already importing
     posh-git. Just add Import-Module posh-git command.
@@ -76,7 +81,7 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
     Updates your profile script for the current PowerShell host to import the
     posh-git module when the current PowerShell host starts.
 .EXAMPLE
-    PS C:\> Add-PoshGitToProfile -AllHost
+    PS C:\> Add-PoshGitToProfile -AllHosts
     Updates your profile script for all PowerShell hosts to import the posh-git
     module whenever any PowerShell host starts.
 .INPUTS
@@ -93,6 +98,10 @@ function Add-PoshGitToProfile {
 
         [Parameter()]
         [switch]
+        $AllUsers,
+
+        [Parameter()]
+        [switch]
         $Force,
 
         [Parameter()]
@@ -106,7 +115,12 @@ function Add-PoshGitToProfile {
 
     $underTest = $false
 
-    $profilePath = if ($AllHosts) { $PROFILE.CurrentUserAllHosts } else { $PROFILE.CurrentUserCurrentHost }
+    $profileName = $(if ($AllUsers) { 'AllUsers' } else { 'CurrentUser' }) `
+                 + $(if ($AllHosts) { 'AllHosts' } else { 'CurrentHost' })
+    Write-Verbose "`$profileName = '$profileName'"
+
+    $profilePath = $PROFILE.$profileName
+    Write-Verbose "`$profilePath = '$profilePath'"
 
     # Under test, we override some variables using $args as a backdoor.
     if (($TestParams.Count -gt 0) -and ($TestParams[0] -is [string])) {
@@ -149,7 +163,6 @@ function Add-PoshGitToProfile {
 
     if (!$profilePath) {
         Write-Warning "Skipping add of posh-git import to profile; no profile found."
-        Write-Verbose "`$profilePath          = '$profilePath'"
         Write-Verbose "`$PROFILE              = '$PROFILE'"
         Write-Verbose "CurrentUserCurrentHost = '$($PROFILE.CurrentUserCurrentHost)'"
         Write-Verbose "CurrentUserAllHosts    = '$($PROFILE.CurrentUserAllHosts)'"
