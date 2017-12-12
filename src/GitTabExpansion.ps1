@@ -363,7 +363,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             $script:gitRemoteUniqueBranches = @(gitRemoteUniqueBranches $matches['ref'])
             $script:gitTags = @(gitTags $matches['ref'])
             # return only unique branches (to eliminate duplicates where the branch exists locally and on the remote)
-            $script:gitBranches + $script:gitRemoteUniqueBranches + $script:gitTags | Sort-Object -Unique
+            $script:gitBranches + $script:gitRemoteUniqueBranches + $script:gitTags | Select-Object -Unique
         }
 
         # Handles git worktree add <path> <ref>
