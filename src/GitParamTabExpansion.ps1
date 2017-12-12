@@ -1,4 +1,4 @@
-# Variable is used in GitTabExpansion.ps1
+﻿# Variable is used in GitTabExpansion.ps1
 $shortGitParams = @{
     add = 'n v f i p e u A N'
     bisect = ''
