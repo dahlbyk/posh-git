@@ -359,9 +359,11 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 
         # Handles git checkout <ref>
         "^(?:checkout).* (?<ref>\S*)$" {
-            gitBranches $matches['ref'] $true
-            gitRemoteUniqueBranches $matches['ref']
-            gitTags $matches['ref']
+            $script:gitBranches = @(gitBranches $matches['ref'] $true)
+            $script:gitRemoteUniqueBranches = @(gitRemoteUniqueBranches $matches['ref'])
+            $script:gitTags = @(gitTags $matches['ref'])
+            # return only unique branches (to eliminate duplicates where the branch exists locally and on the remote)
+            $script:gitBranches + $script:gitRemoteUniqueBranches + $script:gitTags | Sort-Object -Unique
         }
 
         # Handles git worktree add <path> <ref>
