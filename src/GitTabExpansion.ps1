@@ -362,7 +362,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             $script:gitBranches = @(gitBranches $matches['ref'] $true)
             $script:gitRemoteUniqueBranches = @(gitRemoteUniqueBranches $matches['ref'])
             $script:gitTags = @(gitTags $matches['ref'])
-            # return only unique branches (to eliminate duplicates where the branch exists locally and on the remote)
+            # Return only unique branches (to eliminate duplicates where the branch exists locally and on the remote)
             $script:gitBranches + $script:gitRemoteUniqueBranches + $script:gitTags | Select-Object -Unique
         }
 
