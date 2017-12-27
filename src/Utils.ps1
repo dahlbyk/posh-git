@@ -125,6 +125,10 @@ function Add-PoshGitToProfile {
         $TestParams
     )
 
+    if ($AllUsers -and !(Test-Administrator)) {
+        throw 'Installing posh-git for all users requires an elevated host.'
+    }
+
     $underTest = $false
 
     $profileName = $(if ($AllUsers) { 'AllUsers' } else { 'CurrentUser' }) `
