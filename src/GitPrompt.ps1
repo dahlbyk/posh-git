@@ -1,117 +1,221 @@
 ﻿# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
+enum BranchBehindAndAheadDisplayOptions { Full; Compact; Minimal }
+
+class PoshGitCellColor {
+    [psobject]$BackgroundColor
+    [psobject]$ForegroundColor
+
+    PoshGitCellColor() {
+        $this.ForegroundColor = $null
+        $this.BackgroundColor = $null
+    }
+
+    PoshGitCellColor([psobject]$ForegroundColor) {
+        $this.ForegroundColor = $ForegroundColor
+        $this.BackgroundColor = $null
+    }
+
+    PoshGitCellColor([psobject]$ForegroundColor, [psobject]$BackgroundColor) {
+        $this.ForegroundColor = $ForegroundColor
+        $this.BackgroundColor = $BackgroundColor
+    }
+
+    hidden [string] ToString($color) {
+        $ansiTerm = "$([char]0x1b)[0m"
+        $colorSwatch = "  "
+
+        if (!$color) {
+            $str = "<default>"
+        }
+        elseif (Test-VirtualTerminalSequece $color) {
+            $txt = EscapseAnsiString $color
+            $str = "${color}${colorSwatch}${ansiTerm} $txt"
+        }
+        else {
+            $str = ""
+
+            if ($global:GitPromptSettings.AnsiConsole) {
+                $bg = Get-BackgroundVirtualTerminalSequence $color
+                $str += "${bg}${colorSwatch}${ansiTerm} "
+            }
+
+            $str += $color.ToString()
+        }
+
+        return $str
+    }
+
+    [string] ToString() {
+        $str = "ForegroundColor: "
+        $str += $this.ToString($this.ForegroundColor) + ", "
+        $str += "BackgroundColor: "
+        $str += $this.ToString($this.BackgroundColor)
+        return $str
+    }
+}
+
+class PoshGitTextSpan {
+    [string]$Text
+    [psobject]$BackgroundColor
+    [psobject]$ForegroundColor
+    [string]$CustomAnsi
+
+    PoshGitTextSpan() {
+        $this.Text = ""
+        $this.ForegroundColor = $null
+        $this.BackgroundColor = $null
+    }
+
+    PoshGitTextSpan([string]$Text) {
+        $this.Text = $Text
+        $this.ForegroundColor = $null
+        $this.BackgroundColor = $null
+    }
+
+    PoshGitTextSpan([string]$Text, [psobject]$ForegroundColor) {
+        $this.Text = $Text
+        $this.ForegroundColor = $ForegroundColor
+        $this.BackgroundColor = $null
+    }
+
+    PoshGitTextSpan([string]$Text, [psobject]$ForegroundColor, [psobject]$BackgroundColor) {
+        $this.Text = $Text
+        $this.ForegroundColor = $ForegroundColor
+        $this.BackgroundColor = $BackgroundColor
+    }
+
+    PoshGitTextSpan([PoshGitTextSpan]$PoshGitTextSpan) {
+        $this.Text = $PoshGitTextSpan.Text
+        $this.ForegroundColor = $PoshGitTextSpan.ForegroundColor
+        $this.BackgroundColor = $PoshGitTextSpan.BackgroundColor
+    }
+
+    PoshGitTextSpan([PoshGitCellColor]$PoshGitCellColor) {
+        $this.Text = ''
+        $this.ForegroundColor = $PoshGitCellColor.ForegroundColor
+        $this.BackgroundColor = $PoshGitCellColor.BackgroundColor
+    }
+
+    [string] ToString() {
+        if ($global:GitPromptSettings.AnsiConsole) {
+            if ($this.CustomAnsi) {
+                $e = [char]27 + "["
+                $ansi = $this.CustomAnsi
+                $escAnsi = EscapseAnsiString $this.CustomAnsi
+                $txt = $this.RenderAnsi()
+                $str = "Text: '$txt',`t CustomAnsi: '${ansi}${escAnsi}${e}0m'"
+            }
+            else {
+                $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
+                $txt = $this.RenderAnsi()
+                $str = "Text: '$txt',`t $($color.ToString())"
+            }
+        }
+        else {
+            $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
+            $txt = $this.Text
+            $str = "Text: '$txt',`t $($color.ToString())"
+        }
+
+        return $str
+    }
+
+    [string] RenderAnsi() {
+        $e = [char]27 + "["
+        $txt = $this.Text
+
+        if ($this.CustomAnsi) {
+            $ansi = $this.CustomAnsi
+            $str = "${ansi}${txt}${e}0m"
+        }
+        else {
+            $bg = $this.BackgroundColor
+            if ($bg -and !(Test-VirtualTerminalSequece $bg)) {
+                $bg = Get-BackgroundVirtualTerminalSequence $bg
+            }
+
+            $fg = $this.ForegroundColor
+            if ($fg -and !(Test-VirtualTerminalSequece $fg)) {
+                $fg = Get-ForegroundVirtualTerminalSequence $fg
+            }
+
+            $str = "${fg}${bg}${txt}${e}0m"
+        }
+
+        return $str
+    }
+}
+
 $global:GitPromptSettings = [pscustomobject]@{
-    DefaultForegroundColor                      = $null
+    DefaultColor                           = [PoshGitCellColor]::new()
+    BranchColor                            = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
+    IndexColor                             = [PoshGitCellColor]::new([ConsoleColor]::DarkGreen)
+    WorkingColor                           = [PoshGitCellColor]::new([ConsoleColor]::DarkRed)
+    StashColor                             = [PoshGitCellColor]::new([ConsoleColor]::Red)
+    ErrorColor                             = [PoshGitCellColor]::new([ConsoleColor]::Red)
 
-    BeforeText                                  = ' ['
-    BeforeForegroundColor                       = [ConsoleColor]::Yellow
-    BeforeBackgroundColor                       = $null
+    BeforeText                             = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
+    DelimText                              = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
+    AfterText                              = [PoshGitTextSpan]::new(']',  [ConsoleColor]::Yellow)
 
-    DelimText                                   = ' |'
-    DelimForegroundColor                        = [ConsoleColor]::Yellow
-    DelimBackgroundColor                        = $null
+    LocalDefaultStatusSymbol               = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
+    LocalWorkingStatusSymbol               = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
+    LocalStagedStatusSymbol                = [PoshGitTextSpan]::new('~', [ConsoleColor]::DarkCyan)
 
-    AfterText                                   = ']'
-    AfterForegroundColor                        = [ConsoleColor]::Yellow
-    AfterBackgroundColor                        = $null
+    BranchGoneStatusSymbol                 = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
+    BranchIdenticalStatusSymbol            = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
+    BranchAheadStatusSymbol                = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
+    BranchBehindStatusSymbol               = [PoshGitTextSpan]::new([char]0x2193, [ConsoleColor]::Red)      # ↓ Down arrow
+    BranchBehindAndAheadStatusSymbol       = [PoshGitTextSpan]::new([char]0x2195, [ConsoleColor]::Yellow)   # ↕ Up & Down arrow
 
-    FileAddedText                               = '+'
-    FileModifiedText                            = '~'
-    FileRemovedText                             = '-'
-    FileConflictedText                          = '!'
+    BeforeIndexText                        = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
+    BeforeStashText                        = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
+    AfterStashText                         = [PoshGitTextSpan]::new(')',  [ConsoleColor]::Red)
 
-    LocalDefaultStatusSymbol                    = $null
-    LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
-    LocalDefaultStatusForegroundBrightColor     = [ConsoleColor]::Green
-    LocalDefaultStatusBackgroundColor           = $null
+    FileAddedText                          = '+'
+    FileModifiedText                       = '~'
+    FileRemovedText                        = '-'
+    FileConflictedText                     = '!'
+    BranchUntrackedText                    = ''
 
-    LocalWorkingStatusSymbol                    = '!'
-    LocalWorkingStatusForegroundColor           = [ConsoleColor]::DarkRed
-    LocalWorkingStatusForegroundBrightColor     = [ConsoleColor]::Red
-    LocalWorkingStatusBackgroundColor           = $null
+    BranchBehindAndAheadDisplay            = [BranchBehindAndAheadDisplayOptions]"Full"
 
-    LocalStagedStatusSymbol                     = '~'
-    LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
-    LocalStagedStatusBackgroundColor            = $null
+    EnableStashStatus                      = $false
+    ShowStatusWhenZero                     = $true
+    AutoRefreshIndex                       = $true
 
-    BranchUntrackedSymbol                       = $null
-    BranchForegroundColor                       = [ConsoleColor]::Cyan
-    BranchBackgroundColor                       = $null
+    EnablePromptStatus                     = !$global:GitMissing
+    EnableFileStatus                       = $true
+    EnableFileStatusFromCache              = $null
+    RepositoriesInWhichToDisableFileStatus = @() # Array of repository paths
+    DescribeStyle                          = ''
 
-    BranchGoneStatusSymbol                      = [char]0x00D7 # × Multiplication sign
-    BranchGoneStatusForegroundColor             = [ConsoleColor]::DarkCyan
-    BranchGoneStatusBackgroundColor             = $null
+    EnableWindowTitle                      = 'posh~git ~ '
 
-    BranchIdenticalStatusToSymbol               = [char]0x2261 # ≡ Three horizontal lines
-    BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
-    BranchIdenticalStatusToBackgroundColor      = $null
+    AnsiConsole                            = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
 
-    BranchAheadStatusSymbol                     = [char]0x2191 # ↑ Up arrow
-    BranchAheadStatusForegroundColor            = [ConsoleColor]::Green
-    BranchAheadStatusBackgroundColor            = $null
+    DefaultPromptPrefix                    = ''
+    DefaultPromptSuffix                    = '$(''>'' * ($nestedPromptLevel + 1)) '
+    DefaultPromptDebugSuffix               = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+    DefaultPromptEnableTiming              = $false
+    DefaultPromptAbbreviateHomeDirectory   = $false
 
-    BranchBehindStatusSymbol                    = [char]0x2193 # ↓ Down arrow
-    BranchBehindStatusForegroundColor           = [ConsoleColor]::Red
-    BranchBehindStatusBackgroundColor           = $null
+    Debug                                  = $false
 
-    BranchBehindAndAheadStatusSymbol            = [char]0x2195 # ↕ Up & Down arrow
-    BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
-    BranchBehindAndAheadStatusBackgroundColor   = $null
+    BranchNameLimit                        = 0
+    TruncatedBranchSuffix                  = '...'
+}
 
-    BeforeIndexText                             = ""
-    BeforeIndexForegroundColor                  = [ConsoleColor]::DarkGreen
-    BeforeIndexForegroundBrightColor            = [ConsoleColor]::Green
-    BeforeIndexBackgroundColor                  = $null
-
-    IndexForegroundColor                        = [ConsoleColor]::DarkGreen
-    IndexForegroundBrightColor                  = [ConsoleColor]::Green
-    IndexBackgroundColor                        = $null
-
-    WorkingForegroundColor                      = [ConsoleColor]::DarkRed
-    WorkingForegroundBrightColor                = [ConsoleColor]::Red
-    WorkingBackgroundColor                      = $null
-
-    EnableStashStatus                           = $false
-    BeforeStashText                             = ' ('
-    BeforeStashBackgroundColor                  = $null
-    BeforeStashForegroundColor                  = [ConsoleColor]::Red
-    AfterStashText                              = ')'
-    AfterStashBackgroundColor                   = $null
-    AfterStashForegroundColor                   = [ConsoleColor]::Red
-    StashBackgroundColor                        = $null
-    StashForegroundColor                        = [ConsoleColor]::Red
-
-    ErrorForegroundColor                        = [ConsoleColor]::Red
-    ErrorBackgroundColor                        = $null
-
-    ShowStatusWhenZero                          = $true
-
-    AutoRefreshIndex                            = $true
-
-    # Valid values are "Full", "Compact", and "Minimal"
-    BranchBehindAndAheadDisplay                 = "Full"
-
-    EnablePromptStatus                          = !$Global:GitMissing
-    EnableFileStatus                            = $true
-    EnableFileStatusFromCache                   = $null
-    RepositoriesInWhichToDisableFileStatus      = @( ) # Array of repository paths
-    DescribeStyle                               = ''
-
-    EnableWindowTitle                           = 'posh~git ~ '
-
-    AnsiConsole                                 = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
-
-    DefaultPromptPrefix                         = ''
-    DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptDebugSuffix                    = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptEnableTiming                   = $false
-    DefaultPromptAbbreviateHomeDirectory        = $false
-
-    Debug                                       = $false
-
-    BranchNameLimit                             = 0
-    TruncatedBranchSuffix                       = '...'
+# Override some of the normal colors if the background color is set to the default DarkMagenta.
+$s = $global:GitPromptSettings
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
+    $s.LocalDefaultStatusSymbol.ForegroundColor = 'Green'
+    $s.LocalWorkingStatusSymbol.ForegroundColor = 'Red'
+    $s.BeforeIndexText.ForegroundColor          = 'Green'
+    $s.IndexColor.ForegroundColor               = 'Green'
+    $s.WorkingColor.ForegroundColor             = 'Red'
 }
 
 # PowerShell 5.x only runs on Windows so use .NET types to determine isAdminProcess
@@ -128,56 +232,86 @@ else {
 $adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
 
 $WindowTitleSupported = $true
+# TODO: Hmm, this is a curious way to detemine window title supported
 if (Get-Module NuGet) {
     $WindowTitleSupported = $false
 }
 
 function Write-Prompt {
     param(
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         $Object,
-        [parameter()]
+
+        [Parameter()]
         $ForegroundColor = $null,
-        [parameter()]
+
+        [Parameter()]
         $BackgroundColor = $null,
-        [parameter(ValueFromPipeline = $true)]
+
+        [Parameter(ValueFromPipeline = $true)]
         [Text.StringBuilder]
-        $Builder)
+        $Builder
+    )
+
     $s = $global:GitPromptSettings
-    if ($s -and ($null -eq $ForegroundColor)) {
-        $ForegroundColor = $s.DefaultForegroundColor
+    if ($s) {
+        if ($null -eq $ForegroundColor) {
+            $ForegroundColor = $s.DefaultColor.ForegroundColor
+        }
+
+        if ($null -eq $BackgroundColor) {
+            $BackgroundColor = $s.DefaultColor.BackgroundColor
+        }
     }
 
     if ($GitPromptSettings.AnsiConsole) {
-        $e = [char]27 + "["
-        $f = Get-ForegroundVirtualTerminalSequence $ForegroundColor
-        $b = Get-BackgroundVirtualTerminalSequence $BackgroundColor
-        if ($Builder) {
-            return $Builder.Append($f).Append($b).Append($Object).Append($e).Append("0m")
+        if ($Object -is [PoshGitTextSpan]) {
+            $str = $Object.RenderAnsi()
         }
-        return "${f}${b}${Object}${e}0m"
+        else {
+            $e = [char]27 + "["
+            $f = Get-ForegroundVirtualTerminalSequence $ForegroundColor
+            $b = Get-BackgroundVirtualTerminalSequence $BackgroundColor
+            $str = "${f}${b}${Object}${e}0m"
+        }
+
+        if ($Builder) {
+            return $Builder.Append($str)
+        }
+
+        return $str
     }
+
+    if ($Object -is [PoshGitTextSpan]) {
+        $BackgroundColor = $Object.BackgroundColor
+        $ForegroundColor = $Object.ForegroundColor
+        $Object = $Object.Text
+    }
+
     $writeHostParams = @{
         Object = $Object;
         NoNewLine = $true;
     }
+
     if (($BackgroundColor -ge 0) -and ($BackgroundColor -le 15)) {
         $writeHostParams.BackgroundColor = $BackgroundColor
     }
+
     if (($ForegroundColor -ge 0) -and ($ForegroundColor -le 15)) {
         $writeHostParams.ForegroundColor = $ForegroundColor
     }
+
     Write-Host @writeHostParams
     if ($Builder) {
         return $Builder
     }
+
     return ""
 }
 
 function Format-BranchName($branchName){
     $s = $global:GitPromptSettings
-
-    if($s.BranchNameLimit -gt 0 -and $branchName.Length -gt $s.BranchNameLimit)
+    if (($s.BranchNameLimit -gt 0) -and ($branchName.Length -gt $s.BranchNameLimit))
     {
         $branchName = "{0}{1}" -f $branchName.Substring(0,$s.BranchNameLimit), $s.TruncatedBranchSuffix
     }
@@ -187,184 +321,201 @@ function Format-BranchName($branchName){
 
 function Write-GitStatus($status) {
     $s = $global:GitPromptSettings
-    $sb = New-Object System.Text.StringBuilder
-    if ($status -and $s) {
-        $sb | Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor | Out-Null
+    $sb = [System.Text.StringBuilder]::new(150)
 
-        $branchStatusText            = $null
-        $branchStatusBackgroundColor = $s.BranchBackgroundColor
-        $branchStatusForegroundColor = $s.BranchForegroundColor
+    if ($status -and $s) {
+        $sb | Write-Prompt $s.BeforeText > $null
+
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchColor)
 
         if (!$status.Upstream) {
-            $branchStatusText            = $s.BranchUntrackedSymbol
-        } elseif ($status.UpstreamGone -eq $true) {
+            $branchStatusTextSpan.Text = $s.BranchUntrackedText
+        }
+        elseif ($status.UpstreamGone -eq $true) {
             # Upstream branch is gone
-            $branchStatusText            = $s.BranchGoneStatusSymbol
-            $branchStatusBackgroundColor = $s.BranchGoneStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchGoneStatusForegroundColor
-        } elseif ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
+            $branchStatusTextSpan = $s.BranchGoneStatusSymbol
+        }
+        elseif (($status.BehindBy -eq 0) -and ($status.AheadBy -eq 0)) {
             # We are aligned with remote
-            $branchStatusText            = $s.BranchIdenticalStatusToSymbol
-            $branchStatusBackgroundColor = $s.BranchIdenticalStatusToBackgroundColor
-            $branchStatusForegroundColor = $s.BranchIdenticalStatusToForegroundColor
-        } elseif ($status.BehindBy -ge 1 -and $status.AheadBy -ge 1) {
+            $branchStatusTextSpan = $s.BranchIdenticalStatusSymbol
+        }
+        elseif (($status.BehindBy -ge 1) -and ($status.AheadBy -ge 1)) {
+            $branchStatusTextSpan.ForegroundColor = $s.BranchBehindAndAheadStatusSymbol.ForegroundColor
+            $branchStatusTextSpan.BackgroundColor = $s.BranchBehindAndAheadStatusSymbol.BackgroundColor
+
             # We are both behind and ahead of remote
             if ($s.BranchBehindAndAheadDisplay -eq "Full") {
-                $branchStatusText        = ("{0}{1} {2}{3}" -f $s.BranchBehindStatusSymbol, $status.BehindBy, $s.BranchAheadStatusSymbol, $status.AheadBy)
-            } elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
-                $branchStatusText        = ("{0}{1}{2}" -f $status.BehindBy, $s.BranchBehindAndAheadStatusSymbol, $status.AheadBy)
-            } else {
-                $branchStatusText        = $s.BranchBehindAndAheadStatusSymbol
+                $branchStatusTextSpan.Text = ("{0}{1} {2}{3}" -f $s.BranchBehindStatusSymbol.Text, $status.BehindBy, $s.BranchAheadStatusSymbol.Text, $status.AheadBy)
             }
-            $branchStatusBackgroundColor = $s.BranchBehindAndAheadStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchBehindAndAheadStatusForegroundColor
-        } elseif ($status.BehindBy -ge 1) {
+            elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
+                $branchStatusTextSpan.Text = ("{0}{1}{2}" -f $status.BehindBy, $s.BranchBehindAndAheadStatusSymbol.Text, $status.AheadBy)
+            }
+            else {
+                $branchStatusTextSpan.Text = $s.BranchBehindAndAheadStatusSymbol.Text
+            }
+        }
+        elseif ($status.BehindBy -ge 1) {
+            $branchStatusTextSpan.ForegroundColor = $s.BranchBehindStatusSymbol.ForegroundColor
+            $branchStatusTextSpan.BackgroundColor = $s.BranchBehindStatusSymbol.BackgroundColor
+
             # We are behind remote
-            if ($s.BranchBehindAndAheadDisplay -eq "Full" -Or $s.BranchBehindAndAheadDisplay -eq "Compact") {
-                $branchStatusText        = ("{0}{1}" -f $s.BranchBehindStatusSymbol, $status.BehindBy)
-            } else {
-                $branchStatusText        = $s.BranchBehindStatusSymbol
+            if (($s.BranchBehindAndAheadDisplay -eq "Full") -Or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
+                $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchBehindStatusSymbol.Text, $status.BehindBy)
             }
-            $branchStatusBackgroundColor = $s.BranchBehindStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchBehindStatusForegroundColor
-        } elseif ($status.AheadBy -ge 1) {
+            else {
+                $branchStatusTextSpan.Text = $s.BranchBehindStatusSymbol.Text
+            }
+        }
+        elseif ($status.AheadBy -ge 1) {
+            $branchStatusTextSpan.ForegroundColor = $s.BranchAheadStatusSymbol.ForegroundColor
+            $branchStatusTextSpan.BackgroundColor = $s.BranchAheadStatusSymbol.BackgroundColor
+
             # We are ahead of remote
-            if ($s.BranchBehindAndAheadDisplay -eq "Full" -Or $s.BranchBehindAndAheadDisplay -eq "Compact") {
-                $branchStatusText        = ("{0}{1}" -f $s.BranchAheadStatusSymbol, $status.AheadBy)
+            if (($s.BranchBehindAndAheadDisplay -eq "Full") -or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
+                $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchAheadStatusSymbol.Text, $status.AheadBy)
             } else {
-                $branchStatusText        = $s.BranchAheadStatusSymbol
+                $branchStatusTextSpan.Text = $s.BranchAheadStatusSymbol.Text
             }
-            $branchStatusBackgroundColor = $s.BranchAheadStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchAheadStatusForegroundColor
-        } else {
+        }
+        else {
             # This condition should not be possible but defaulting the variables to be safe
-            $branchStatusText            = "?"
+            $branchStatusTextSpan.Text = "?"
         }
 
-        $sb | Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor | Out-Null
+        $branchNameTextSpan = [PoshGitTextSpan]::new($branchStatusTextSpan)
+        $branchNameTextSpan.Text = Format-BranchName $status.Branch
+        $sb | Write-Prompt $branchNameTextSpan > $null
 
-        if ($branchStatusText) {
-            $sb | Write-Prompt  (" {0}" -f $branchStatusText) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor | Out-Null
+        if ($branchStatusTextSpan.Text) {
+            $textSpan = [PoshGitTextSpan]::new($branchStatusTextSpan)
+            $textSpan.Text = " " + $branchStatusTextSpan.Text
+            $sb | Write-Prompt $textSpan > $null
         }
 
-        if($s.EnableFileStatus -and $status.HasIndex) {
-            $sb | Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor | Out-Null
+        if ($s.EnableFileStatus -and $status.HasIndex) {
+            $sb | Write-Prompt $s.BeforeIndexText > $null
 
-            if($s.ShowStatusWhenZero -or $status.Index.Added) {
-                $sb | Write-Prompt (" $($s.FileAddedText)$($status.Index.Added.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+            $statusTextSpan = [PoshGitTextSpan]::new($s.IndexColor)
+            if ($s.ShowStatusWhenZero -or $status.Index.Added) {
+                $statusTextSpan.Text = " $($s.FileAddedText)$($status.Index.Added.Count)"
+                $sb | Write-Prompt $statusTextSpan > $null
             }
-            if($s.ShowStatusWhenZero -or $status.Index.Modified) {
-                $sb | Write-Prompt (" $($s.FileModifiedText)$($status.Index.Modified.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+
+            if ($s.ShowStatusWhenZero -or $status.Index.Modified) {
+                $statusTextSpan.Text = " $($s.FileModifiedText)$($status.Index.Modified.Count)"
+                $sb | Write-Prompt $statusTextSpan > $null
             }
-            if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
-                $sb | Write-Prompt (" $($s.FileRemovedText)$($status.Index.Deleted.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+
+            if ($s.ShowStatusWhenZero -or $status.Index.Deleted) {
+                $statusTextSpan.Text = " $($s.FileRemovedText)$($status.Index.Deleted.Count)"
+                $sb | Write-Prompt $statusTextSpan > $null
             }
 
             if ($status.Index.Unmerged) {
-                $sb | Write-Prompt (" $($s.FileConflictedText)$($status.Index.Unmerged.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor | Out-Null
+                $statusTextSpan.Text = " $($s.FileConflictedText)$($status.Index.Unmerged.Count)"
+                $sb | Write-Prompt $statusTextSpan > $null
             }
 
             if($status.HasWorking) {
-                $sb | Write-Prompt $s.DelimText -BackgroundColor $s.DelimBackgroundColor -ForegroundColor $s.DelimForegroundColor | Out-Null
+                $sb | Write-Prompt $s.DelimText > $null
             }
         }
 
-        if($s.EnableFileStatus -and $status.HasWorking) {
-            if($s.ShowStatusWhenZero -or $status.Working.Added) {
-                $sb | Write-Prompt (" $($s.FileAddedText)$($status.Working.Added.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+        if ($s.EnableFileStatus -and $status.HasWorking) {
+            $workingTextSpan = [PoshGitTextSpan]::new($s.WorkingColor)
+
+            if ($s.ShowStatusWhenZero -or $status.Working.Added) {
+                $workingTextSpan.Text = " $($s.FileAddedText)$($status.Working.Added.Count)"
+                $sb | Write-Prompt $workingTextSpan > $null
             }
-            if($s.ShowStatusWhenZero -or $status.Working.Modified) {
-                $sb | Write-Prompt (" $($s.FileModifiedText)$($status.Working.Modified.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+
+            if ($s.ShowStatusWhenZero -or $status.Working.Modified) {
+                $workingTextSpan.Text = " $($s.FileModifiedText)$($status.Working.Modified.Count)"
+                $sb | Write-Prompt $workingTextSpan > $null
             }
-            if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
-                $sb | Write-Prompt (" $($s.FileRemovedText)$($status.Working.Deleted.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+
+            if ($s.ShowStatusWhenZero -or $status.Working.Deleted) {
+                $workingTextSpan.Text = " $($s.FileRemovedText)$($status.Working.Deleted.Count)"
+                $sb | Write-Prompt $workingTextSpan > $null
             }
 
             if ($status.Working.Unmerged) {
-                $sb | Write-Prompt (" $($s.FileConflictedText)$($status.Working.Unmerged.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor | Out-Null
+                $workingTextSpan.Text = " $($s.FileConflictedText)$($status.Working.Unmerged.Count)"
+                $sb | Write-Prompt $workingTextSpan > $null
             }
         }
 
         if ($status.HasWorking) {
             # We have un-staged files in the working tree
-            $localStatusSymbol          = $s.LocalWorkingStatusSymbol
-            $localStatusBackgroundColor = $s.LocalWorkingStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalWorkingStatusForegroundColor
-        } elseif ($status.HasIndex) {
+            $localStatusSymbol = $s.LocalWorkingStatusSymbol
+        }
+        elseif ($status.HasIndex) {
             # We have staged but uncommited files
-            $localStatusSymbol          = $s.LocalStagedStatusSymbol
-            $localStatusBackgroundColor = $s.LocalStagedStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalStagedStatusForegroundColor
-        } else {
+            $localStatusSymbol = $s.LocalStagedStatusSymbol
+        }
+        else {
             # No uncommited changes
-            $localStatusSymbol          = $s.LocalDefaultStatusSymbol
-            $localStatusBackgroundColor = $s.LocalDefaultStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalDefaultStatusForegroundColor
+            $localStatusSymbol = $s.LocalDefaultStatusSymbol
         }
 
-        if ($localStatusSymbol) {
-            $sb | Write-Prompt (" {0}" -f $localStatusSymbol) -BackgroundColor $localStatusBackgroundColor -ForegroundColor $localStatusForegroundColor | Out-Null
+        if ($localStatusSymbol.Text) {
+            $textSpan = [PoshGitTextSpan]::new($localStatusSymbol)
+            $textSpan.Text = " " + $localStatusSymbol.Text
+            $sb | Write-Prompt $textSpan > $null
         }
 
         if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
-             $sb | Write-Prompt $s.BeforeStashText -BackgroundColor $s.BeforeStashBackgroundColor -ForegroundColor $s.BeforeStashForegroundColor | Out-Null
-             $sb | Write-Prompt $status.StashCount -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor | Out-Null
-             $sb | Write-Prompt $s.AfterStashText -BackgroundColor $s.AfterStashBackgroundColor -ForegroundColor $s.AfterStashForegroundColor | Out-Null
+            $stashTextSpan = [PoshGitTextSpan]::new($s.StashColor)
+            $stashTextSpan.Text = "$($status.StashCount)"
+
+            $sb | Write-Prompt $s.BeforeStashText > $null
+            $sb | Write-Prompt $stashTextSpan > $null
+            $sb | Write-Prompt $s.AfterStashText > $null
         }
 
-        $sb | Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor | Out-Null
+        $sb | Write-Prompt $s.AfterText > $null
 
         if ($WindowTitleSupported -and $s.EnableWindowTitle) {
-            if( -not $Global:PreviousWindowTitle ) {
-                $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
+            if (!$global:PreviousWindowTitle) {
+                $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
             }
+
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
             $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($status.Branch)]"
         }
 
         return $sb.ToString()
-    } elseif ( $Global:PreviousWindowTitle ) {
-        $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
+    }
+    elseif ($global:PreviousWindowTitle) {
+        $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
         return ""
     }
 }
 
-if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
-    $Global:VcsPromptStatuses = @()
-}
-$s = $global:GitPromptSettings
-
-# Override some of the normal colors if the background color is set to the default DarkMagenta.
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
-    $s.LocalDefaultStatusForegroundColor    = $s.LocalDefaultStatusForegroundBrightColor
-    $s.LocalWorkingStatusForegroundColor    = $s.LocalWorkingStatusForegroundBrightColor
-
-    $s.BeforeIndexForegroundColor           = $s.BeforeIndexForegroundBrightColor
-    $s.IndexForegroundColor                 = $s.IndexForegroundBrightColor
-
-    $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor
+if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
+    $global:VcsPromptStatuses = @()
 }
 
 function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
-    $Global:VcsPromptStatuses | ForEach-Object { & $_ }
+    $global:VcsPromptStatuses | ForEach-Object { & $_ }
 }
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
     try {
-        $Global:GitStatus = Get-GitStatus
+        $global:GitStatus = Get-GitStatus
         Write-GitStatus $GitStatus
     }
     catch {
-        $s = $Global:GitPromptSettings
+        $s = $global:GitPromptSettings
         if ($s) {
-            Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
-            Write-Prompt "Error: $_" -BackgroundColor $s.ErrorBackgroundColor -ForegroundColor $s.ErrorForegroundColor
-            Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
+            Write-Prompt $s.BeforeText
+            Write-Prompt "Error: $_" -BackgroundColor $s.ErrorColor.BackgroundColor -ForegroundColor $s.ErrorColor.ForegroundColor
+            Write-Prompt $s.AfterText
         }
     }
 }
 
-$Global:VcsPromptStatuses += $PoshGitVcsPrompt
+$global:VcsPromptStatuses += $PoshGitVcsPrompt

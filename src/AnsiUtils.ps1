@@ -24,10 +24,31 @@ $AnsiEscape = [char]27 + "["
 $ColorTranslatorType = 'System.Drawing.ColorTranslator' -as [Type]
 $ColorType = 'System.Drawing.Color' -as [Type]
 
+function EscapseAnsiString([string]$AnsiString) {
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $res = $AnsiString -replace "$([char]0x1B)", '`e'
+    }
+    else {
+        $res = $AnsiString -replace "$([char]0x1B)", '$([char]0x1B)'
+    }
+
+    $res
+}
+
+function Test-VirtualTerminalSequece([psobject]$Object) {
+    if ($global:GitPromptSettings.AnsiConsole -and ($Object -is [string])) {
+        return $Object.Contains($AnsiEscape)
+    }
+    else {
+        return $false
+    }
+}
+
 function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
     if ($color -is [byte]) {
         return "${AnsiEscape}$(38 + $offset);5;${color}m"
     }
+
     if ($color -is [String]) {
         try {
             if ($ColorTranslatorType) {
@@ -41,12 +62,15 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
             Write-Debug $_
         }
     }
+
     if ($ColorType -and ($color -is $ColorType)) {
         return "${AnsiEscape}$(38 + $offset);2;$($color.R);$($color.G);$($color.B)m"
     }
+
     if (($color -is [ConsoleColor]) -and ($color -ge 0) -and ($color -le 15)) {
         return "${AnsiEscape}$($ConsoleColorToAnsi[$color] + $offset)m"
     }
+
     return "${AnsiEscape}$($AnsiDefaultColor + $offset)m"
 }
 
