@@ -154,65 +154,68 @@ class PoshGitTextSpan {
     }
 }
 
-$global:GitPromptSettings = [pscustomobject]@{
-    DefaultColor                           = [PoshGitCellColor]::new()
-    BranchColor                            = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
-    IndexColor                             = [PoshGitCellColor]::new([ConsoleColor]::DarkGreen)
-    WorkingColor                           = [PoshGitCellColor]::new([ConsoleColor]::DarkRed)
-    StashColor                             = [PoshGitCellColor]::new([ConsoleColor]::Red)
-    ErrorColor                             = [PoshGitCellColor]::new([ConsoleColor]::Red)
+class GitPromptSettings {
+    [bool]$AnsiConsole = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
 
-    BeforeText                             = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
-    DelimText                              = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
-    AfterText                              = [PoshGitTextSpan]::new(']',  [ConsoleColor]::Yellow)
+    [PoshGitCellColor]$DefaultColor   = [PoshGitCellColor]::new()
+    [PoshGitCellColor]$BranchColor    = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
 
-    LocalDefaultStatusSymbol               = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
-    LocalWorkingStatusSymbol               = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
-    LocalStagedStatusSymbol                = [PoshGitTextSpan]::new('~', [ConsoleColor]::DarkCyan)
+    [PoshGitCellColor]$IndexColor     = [PoshGitCellColor]::new([ConsoleColor]::DarkGreen)
+    [PoshGitCellColor]$WorkingColor   = [PoshGitCellColor]::new([ConsoleColor]::DarkRed)
+    [PoshGitCellColor]$StashColor     = [PoshGitCellColor]::new([ConsoleColor]::Red)
+    [PoshGitCellColor]$ErrorColor     = [PoshGitCellColor]::new([ConsoleColor]::Red)
 
-    BranchGoneStatusSymbol                 = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
-    BranchIdenticalStatusSymbol            = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
-    BranchAheadStatusSymbol                = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
-    BranchBehindStatusSymbol               = [PoshGitTextSpan]::new([char]0x2193, [ConsoleColor]::Red)      # ↓ Down arrow
-    BranchBehindAndAheadStatusSymbol       = [PoshGitTextSpan]::new([char]0x2195, [ConsoleColor]::Yellow)   # ↕ Up & Down arrow
+    [PoshGitTextSpan]$BeforeText      = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$DelimText       = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$AfterText       = [PoshGitTextSpan]::new(']',  [ConsoleColor]::Yellow)
 
-    BeforeIndexText                        = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
-    BeforeStashText                        = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
-    AfterStashText                         = [PoshGitTextSpan]::new(')',  [ConsoleColor]::Red)
+    [PoshGitTextSpan]$BeforeIndexText = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
+    [PoshGitTextSpan]$BeforeStashText = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
+    [PoshGitTextSpan]$AfterStashText  = [PoshGitTextSpan]::new(')',  [ConsoleColor]::Red)
 
-    FileAddedText                          = '+'
-    FileModifiedText                       = '~'
-    FileRemovedText                        = '-'
-    FileConflictedText                     = '!'
-    BranchUntrackedText                    = ''
+    [PoshGitTextSpan]$LocalDefaultStatusSymbol         = [PoshGitTextSpan]::new('',  [ConsoleColor]::DarkGreen)
+    [PoshGitTextSpan]$LocalWorkingStatusSymbol         = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
+    [PoshGitTextSpan]$LocalStagedStatusSymbol          = [PoshGitTextSpan]::new('~', [ConsoleColor]::DarkCyan)
 
-    BranchBehindAndAheadDisplay            = [BranchBehindAndAheadDisplayOptions]"Full"
+    [PoshGitTextSpan]$BranchGoneStatusSymbol           = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
+    [PoshGitTextSpan]$BranchIdenticalStatusSymbol      = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
+    [PoshGitTextSpan]$BranchAheadStatusSymbol          = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
+    [PoshGitTextSpan]$BranchBehindStatusSymbol         = [PoshGitTextSpan]::new([char]0x2193, [ConsoleColor]::Red)      # ↓ Down arrow
+    [PoshGitTextSpan]$BranchBehindAndAheadStatusSymbol = [PoshGitTextSpan]::new([char]0x2195, [ConsoleColor]::Yellow)   # ↕ Up & Down arrow
 
-    EnableStashStatus                      = $false
-    ShowStatusWhenZero                     = $true
-    AutoRefreshIndex                       = $true
+    [BranchBehindAndAheadDisplayOptions]$BranchBehindAndAheadDisplay = [BranchBehindAndAheadDisplayOptions]::Full
 
-    EnablePromptStatus                     = !$global:GitMissing
-    EnableFileStatus                       = $true
-    EnableFileStatusFromCache              = $null
-    RepositoriesInWhichToDisableFileStatus = @() # Array of repository paths
-    DescribeStyle                          = ''
+    [string]$FileAddedText       = '+'
+    [string]$FileModifiedText    = '~'
+    [string]$FileRemovedText     = '-'
+    [string]$FileConflictedText  = '!'
+    [string]$BranchUntrackedText = ''
 
-    EnableWindowTitle                      = 'posh~git ~ '
+    [bool]$EnableStashStatus  = $false
+    [bool]$ShowStatusWhenZero = $true
+    [bool]$AutoRefreshIndex   = $true
 
-    AnsiConsole                            = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
+    [bool]$EnablePromptStatus                         = !$global:GitMissing
+    [bool]$EnableFileStatus                           = $true
+    [Nullable[bool]]$EnableFileStatusFromCache        = $null
+    [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
-    DefaultPromptPrefix                    = ''
-    DefaultPromptSuffix                    = '$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptDebugSuffix               = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptEnableTiming              = $false
-    DefaultPromptAbbreviateHomeDirectory   = $false
+    [string]$DescribeStyle     = ''
+    [psobject]$EnableWindowTitle = 'posh~git ~ '
 
-    Debug                                  = $false
+    [string]$DefaultPromptPrefix                = ''
+    [string]$DefaultPromptSuffix                = '$(''>'' * ($nestedPromptLevel + 1)) '
+    [string]$DefaultPromptDebugSuffix           = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+    [bool]$DefaultPromptEnableTiming            = $false
+    [bool]$DefaultPromptAbbreviateHomeDirectory = $false
 
-    BranchNameLimit                        = 0
-    TruncatedBranchSuffix                  = '...'
+    [int]$BranchNameLimit          = 0
+    [string]$TruncatedBranchSuffix = '...'
+
+    [bool]$Debug = $false
 }
+
+$global:GitPromptSettings = [GitPromptSettings]::new()
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
 $s = $global:GitPromptSettings
@@ -402,7 +405,7 @@ function Write-GitStatus {
 
         $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
         $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-        $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($Status.Branch)]"
+        $Host.UI.RawUI.WindowTitle = "${script:adminHeader}${prefix}${repoName} [$($Status.Branch)]"
     }
 
     return $sb.ToString()
