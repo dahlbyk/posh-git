@@ -3,7 +3,7 @@ cpack
 
 function Setup-Environment {
     Cleanup
-    $env:poshGit = join-path (Resolve-Path .\Tests ) dahlbyk-posh-git-60be436.zip
+    $env:poshGit = Join-Path (Resolve-Path $PSScriptRoot/tests) dahlbyk-posh-git-60be436.zip
     $profileScript = "function Prompt(){ `$host.ui.RawUI.WindowTitle = `"My Prompt`" }"
     (Set-Content $Profile -value $profileScript -Force)
 }
