@@ -51,7 +51,7 @@ FunctionsToExport = @(
 CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = @()
+VariablesToExport = @('GitPromptScriptBlock')
 
 # Aliases to export from this module
 AliasesToExport = @()
