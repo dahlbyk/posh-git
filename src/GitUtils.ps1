@@ -24,7 +24,7 @@ function Get-GitDirectory {
         $Env:GIT_DIR -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
     }
     else {
-        $currentDir = Get-Item $pathInfo -Force
+        $currentDir = Get-Item -LiteralPath $pathInfo -Force
         while ($currentDir) {
             $gitDirPath = Join-Path $currentDir.FullName .git
             if (Test-Path -LiteralPath $gitDirPath -PathType Container) {
