@@ -511,7 +511,7 @@ function Get-GitBranchStatusColor {
 .EXAMPLE
     PS C:\> Write-GitBranchName (Get-GitStatus)
 
-    Outputs the name of the current branch.
+    Writes the name of the current branch.
 .INPUTS
     System.Management.Automation.PSCustomObject
         This is PSCustomObject returned by Get-GitStatus
