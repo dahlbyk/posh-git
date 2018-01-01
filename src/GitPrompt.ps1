@@ -368,12 +368,7 @@ function Write-GitStatus {
     $sb = [System.Text.StringBuilder]::new(150)
 
     $sb | Write-Prompt $s.BeforeText > $null
-
-    # Use the branch status colors (or CustomAnsi) to display the branch name
-    $branchNameTextSpan = Get-GitBranchStatusColor $Status
-    $branchNameTextSpan.Text = Format-GitBranchName $Status.Branch
-    $sb | Write-Prompt $branchNameTextSpan > $null
-
+    $sb | Write-GitBranchName $Status -NoLeadingSpace > $null
     $sb | Write-GitBranchStatus $Status > $null
 
     if ($s.EnableFileStatus -and $Status.HasIndex) {
@@ -390,7 +385,7 @@ function Write-GitStatus {
         $sb | Write-GitWorkingDirStatus $Status > $null
     }
 
-    $sb | Write-GitWorkingDirLocalStatus $Status > $null
+    $sb | Write-GitWorkingDirStatusSummary $Status > $null
 
     if ($s.EnableStashStatus -and ($Status.StashCount -gt 0)) {
         $sb | Write-GitStashCount $Status > $null
@@ -438,12 +433,17 @@ function Format-GitBranchName {
     )
 
     $s = $global:GitPromptSettings
-    if ($s -and $BranchName -and ($s.BranchNameLimit -gt 0) -and ($branchName.Length -gt $s.BranchNameLimit))
-    {
-        $branchName = "{0}{1}" -f $branchName.Substring(0, $s.BranchNameLimit), $s.TruncatedBranchSuffix
+    if (!$s -or !$BranchName) {
+        return "$BranchName"
     }
 
-    $branchName
+    $res = $BranchName
+    if (($s.BranchNameLimit -gt 0) -and ($BranchName.Length -gt $s.BranchNameLimit))
+    {
+        $res = "{0}{1}" -f $BranchName.Substring(0, $s.BranchNameLimit), $s.TruncatedBranchSuffix
+    }
+
+    $res
 }
 
 <#
@@ -477,8 +477,8 @@ function Get-GitBranchStatusColor {
     )
 
     $s = $global:GitPromptSettings
-    if (!$Status -or !$s) {
-        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    if (!$s) {
+        return [PoshGitTextSpan]::new()
     }
 
     $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchColor)
@@ -498,6 +498,70 @@ function Get-GitBranchStatusColor {
 
     $branchStatusTextSpan.Text = ''
     $branchStatusTextSpan
+}
+
+<#
+.SYNOPSIS
+    Writes the branch name given the current Git status.
+.DESCRIPTION
+    Writes the branch name given the current Git status which can retrieved
+    via the Get-GitStatus command. Branch name can be affected by the
+    $GitPromptSettings: BranchColor, BranchNameLimit, TruncatedBranchSuffix
+    and Branch*StatusSymbol colors.
+.EXAMPLE
+    PS C:\> Write-GitBranchName (Get-GitStatus)
+
+    Outputs the name of the current branch.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitBranchName {
+    param(
+        # The Git status, retrieved from Get-GitStatus, from which to write the branch status.
+        # If no other parameters are specified, that branch status is written to the host.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the branch name is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    # Use the branch status colors (or CustomAnsi) to display the branch name
+    $branchNameTextSpan = Get-GitBranchStatusColor $Status
+    $branchNameTextSpan.Text = Format-GitBranchName $Status.Branch
+
+    $textSpan = [PoshGitTextSpan]::new($branchNameTextSpan)
+    if (!$NoLeadingSpace) {
+        $textSpan.Text = " " + $branchNameTextSpan.Text
+    }
+
+    if ($StringBuilder) {
+        $StringBuilder | Write-Prompt $textSpan > $null
+    }
+    else {
+        $str = Write-Prompt $textSpan
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
 }
 
 <#
@@ -529,7 +593,12 @@ function Write-GitBranchStatus {
         # If specified the branch status is written into the provided StringBuilder object.
         [Parameter(ValueFromPipeline = $true)]
         [System.Text.StringBuilder]
-        $StringBuilder
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
     )
 
     $s = $global:GitPromptSettings
@@ -579,7 +648,9 @@ function Write-GitBranchStatus {
     $str = ""
     if ($branchStatusTextSpan.Text) {
         $textSpan = [PoshGitTextSpan]::new($branchStatusTextSpan)
-        $textSpan.Text = " " + $branchStatusTextSpan.Text
+        if (!$NoLeadingSpace) {
+            $textSpan.Text = " " + $branchStatusTextSpan.Text
+        }
 
         if ($StringBuilder) {
             $StringBuilder | Write-Prompt $textSpan > $null
@@ -619,7 +690,12 @@ function Write-GitIndexStatus {
         # If specified the index status is written into the provided StringBuilder object.
         [Parameter(ValueFromPipeline = $true)]
         [System.Text.StringBuilder]
-        $StringBuilder
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
     )
 
     $s = $global:GitPromptSettings
@@ -633,7 +709,16 @@ function Write-GitIndexStatus {
         $indexStatusTextSpan = [PoshGitTextSpan]::new($s.IndexColor)
 
         if ($s.ShowStatusWhenZero -or $Status.Index.Added) {
-            $indexStatusTextSpan.Text = " $($s.FileAddedText)$($Status.Index.Added.Count)"
+            if ($NoLeadingSpace) {
+                $indexStatusTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $indexStatusTextSpan.Text = " "
+            }
+
+            $indexStatusTextSpan.Text += "$($s.FileAddedText)$($Status.Index.Added.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
             }
@@ -643,7 +728,16 @@ function Write-GitIndexStatus {
         }
 
         if ($s.ShowStatusWhenZero -or $status.Index.Modified) {
-            $indexStatusTextSpan.Text = " $($s.FileModifiedText)$($status.Index.Modified.Count)"
+            if ($NoLeadingSpace) {
+                $indexStatusTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $indexStatusTextSpan.Text = " "
+            }
+
+            $indexStatusTextSpan.Text += "$($s.FileModifiedText)$($status.Index.Modified.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
             }
@@ -653,7 +747,16 @@ function Write-GitIndexStatus {
         }
 
         if ($s.ShowStatusWhenZero -or $Status.Index.Deleted) {
-            $indexStatusTextSpan.Text = " $($s.FileRemovedText)$($Status.Index.Deleted.Count)"
+            if ($NoLeadingSpace) {
+                $indexStatusTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $indexStatusTextSpan.Text = " "
+            }
+
+            $indexStatusTextSpan.Text += "$($s.FileRemovedText)$($Status.Index.Deleted.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
             }
@@ -663,7 +766,16 @@ function Write-GitIndexStatus {
         }
 
         if ($Status.Index.Unmerged) {
-            $indexStatusTextSpan.Text = " $($s.FileConflictedText)$($Status.Index.Unmerged.Count)"
+            if ($NoLeadingSpace) {
+                $indexStatusTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $indexStatusTextSpan.Text = " "
+            }
+
+            $indexStatusTextSpan.Text += "$($s.FileConflictedText)$($Status.Index.Unmerged.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
             }
@@ -703,7 +815,12 @@ function Write-GitWorkingDirStatus {
         # If specified the working dir status is written into the provided StringBuilder object.
         [Parameter(ValueFromPipeline = $true)]
         [System.Text.StringBuilder]
-        $StringBuilder
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
     )
 
     $s = $global:GitPromptSettings
@@ -717,7 +834,16 @@ function Write-GitWorkingDirStatus {
         $workingTextSpan = [PoshGitTextSpan]::new($s.WorkingColor)
 
         if ($s.ShowStatusWhenZero -or $Status.Working.Added) {
-            $workingTextSpan.Text = " $($s.FileAddedText)$($Status.Working.Added.Count)"
+            if ($NoLeadingSpace) {
+                $workingTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $workingTextSpan.Text = " "
+            }
+
+            $workingTextSpan.Text += "$($s.FileAddedText)$($Status.Working.Added.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingTextSpan > $null
             }
@@ -727,7 +853,16 @@ function Write-GitWorkingDirStatus {
         }
 
         if ($s.ShowStatusWhenZero -or $Status.Working.Modified) {
-            $workingTextSpan.Text = " $($s.FileModifiedText)$($Status.Working.Modified.Count)"
+            if ($NoLeadingSpace) {
+                $workingTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $workingTextSpan.Text = " "
+            }
+
+            $workingTextSpan.Text += "$($s.FileModifiedText)$($Status.Working.Modified.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingTextSpan > $null
             }
@@ -737,7 +872,16 @@ function Write-GitWorkingDirStatus {
         }
 
         if ($s.ShowStatusWhenZero -or $Status.Working.Deleted) {
-            $workingTextSpan.Text = " $($s.FileRemovedText)$($Status.Working.Deleted.Count)"
+            if ($NoLeadingSpace) {
+                $workingTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $workingTextSpan.Text = " "
+            }
+
+            $workingTextSpan.Text += "$($s.FileRemovedText)$($Status.Working.Deleted.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingTextSpan > $null
             }
@@ -747,7 +891,16 @@ function Write-GitWorkingDirStatus {
         }
 
         if ($Status.Working.Unmerged) {
-            $workingTextSpan.Text = " $($s.FileConflictedText)$($Status.Working.Unmerged.Count)"
+            if ($NoLeadingSpace) {
+                $workingTextSpan.Text = ""
+                $NoLeadingSpace = $false
+            }
+            else {
+                $workingTextSpan.Text = " "
+            }
+
+            $workingTextSpan.Text += "$($s.FileConflictedText)$($Status.Working.Unmerged.Count)"
+
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingTextSpan > $null
             }
@@ -762,13 +915,17 @@ function Write-GitWorkingDirStatus {
 
 <#
 .SYNOPSIS
-    Writes the working directory local status text given the current Git status.
+    Writes the working directory status summary text given the current Git status.
 .DESCRIPTION
-    Writes the working directory local status text given the current Git status.
+    Writes the working directory status summary text given the current Git status.
+    If there are any unstaged commits, the $GitPromptSettings.LocalWorkingStatusSymbol
+    will be output.  If not, then if are any staged but uncommmited changes, the
+    $GitPromptSettings.LocalStagedStatusSymbol will be output.  If not, then
+    $GitPromptSettings.LocalDefaultStatusSymbol will be output.
 .EXAMPLE
-    PS C:\> Write-GitWorkingDirLocalStatus (Get-GitStatus)
+    PS C:\> Write-GitWorkingDirStatusSummary (Get-GitStatus)
 
-    Writes the Git working directory local status to the host.
+    Outputs the Git working directory status summary text.
 .INPUTS
     System.Management.Automation.PSCustomObject
         This is PSCustomObject returned by Get-GitStatus
@@ -777,7 +934,7 @@ function Write-GitWorkingDirStatus {
         This command returns a System.String object unless the -StringBuilder parameter
         is supplied. In this case, it returns a System.Text.StringBuilder.
 #>
-function Write-GitWorkingDirLocalStatus {
+function Write-GitWorkingDirStatusSummary {
     param(
         # The Git status, retrieved from Get-GitStatus, from which to write the working dir local status.
         # If no other parameters are specified, that working dir local status is written to the host.
@@ -787,7 +944,12 @@ function Write-GitWorkingDirLocalStatus {
         # If specified the working dir local status is written into the provided StringBuilder object.
         [Parameter(ValueFromPipeline = $true)]
         [System.Text.StringBuilder]
-        $StringBuilder
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
     )
 
     $s = $global:GitPromptSettings
@@ -811,7 +973,10 @@ function Write-GitWorkingDirLocalStatus {
 
     if ($localStatusSymbol.Text) {
         $textSpan = [PoshGitTextSpan]::new($localStatusSymbol)
-        $textSpan.Text = " " + $localStatusSymbol.Text
+        if (!$NoLeadingSpace) {
+            $textSpan.Text = " " + $localStatusSymbol.Text
+        }
+
         if ($StringBuilder) {
             $StringBuilder | Write-Prompt $textSpan > $null
         }
