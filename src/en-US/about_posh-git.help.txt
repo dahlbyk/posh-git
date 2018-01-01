@@ -99,10 +99,11 @@ GIT STATUS SUMMARY
         * Index status is dark green and working directory status is dark red
           reflecting the colors used by 'git status'.
 
-      * W represents the status of the working directory
-        * ! = There are untracked changes (LocalStagedStatus)
-        * ~ = There are staged changes waiting to be committed (LocalWorkingStatus)
-        * None = There are no uncommitted or unstaged changes (LocalDefault)
+      * W represents the overall status of the working directory
+        * ! = There are unstaged changes (LocalWorkingStatus)
+        * ~ = There are uncommitted changes i.e. staged changes waiting to be
+              committed (LocalStagedStatus)
+        * None = There are no unstaged or uncommitted changes (LocalDefault)
     * ] (AfterText)
 
     The (symbols) and surrounding text can be customized by the corresponding

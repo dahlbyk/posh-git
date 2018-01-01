@@ -227,17 +227,7 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.WorkingColor.ForegroundColor             = 'Red'
 }
 
-# PowerShell 5.x only runs on Windows so use .NET types to determine isAdminProcess
-# Or if we are on v6 or higher, check the $IsWindows pre-defined variable.
-if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
-    $currentUser = [System.Security.Principal.WindowsPrincipal]([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdminProcess = $currentUser.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
-}
-else {
-    # Must be Linux or OSX, so use the id util. Root has userid of 0.
-    $isAdminProcess = 0 -eq (id -u)
-}
-
+$isAdminProcess = Test-Administrator
 $adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
 
 $WindowTitleSupported = $true

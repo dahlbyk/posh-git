@@ -21,7 +21,7 @@ function RunInstall {
     cinst $packageName -source (Resolve-Path .)
 }
 $binRoot = join-path $env:systemdrive 'tools'
-if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
+if($null -ne $env:chocolatey_bin_root){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
 $poshgitPath = join-path $binRoot 'poshgit'
 if(Test-Path $Profile) { $currentProfileScript = (Get-Content $Profile) }
 
@@ -39,7 +39,7 @@ Describe "Install-Posh-Git" {
             RunInstall
 
             $newProfile = (Get-Content $Profile)
-            $pgitDir = [Array](Dir "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime)[-1]
+            $pgitDir = [Array](Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime)[-1]
             ($newProfile -like ". '$poshgitPath\posh-git\profile.example.ps1'").Count.should.be(0)
             ($newProfile -like ". '$pgitDir\profile.example.ps1'").Count.should.be(1)
         }
@@ -59,7 +59,7 @@ Describe "Install-Posh-Git" {
             RunInstall
 
             $newProfile = (Get-Content $Profile)
-            $pgitDir = [Array](Dir "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime)[-1]
+            $pgitDir = [Array](Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime)[-1]
             ($newProfile -like ". '$pgitDir\profile.example.ps1'").Count.should.be(1)
         }
         catch {
@@ -94,7 +94,7 @@ Describe "Install-Posh-Git" {
         try{
             RunInstall
             mkdir PoshTest
-            Pushd PoshTest
+            Push-Location PoshTest
             git init
             . $Profile
             $global:wh=""
@@ -102,7 +102,7 @@ Describe "Install-Posh-Git" {
 
             Prompt
 
-            Popd
+            Pop-Location
             $wh.should.be("$pwd\PoshTest [master]")
         }
         catch {
@@ -122,7 +122,7 @@ Describe "Install-Posh-Git" {
             Remove-Item $Profile -Force
             RunInstall
             mkdir PoshTest
-            Pushd PoshTest
+            Push-Location PoshTest
             git init
             . $Profile
             $global:wh=""
@@ -130,7 +130,7 @@ Describe "Install-Posh-Git" {
 
             Prompt
 
-            Popd
+            Pop-Location
             $wh.should.be("$pwd\PoshTest [master]")
         }
         catch {
@@ -152,7 +152,7 @@ Describe "Install-Posh-Git" {
             Add-Content $profile -value "function prompt {Write-Host 'Hi'}" -Force
             RunInstall
             mkdir PoshTest
-            Pushd PoshTest
+            Push-Location PoshTest
             git init
             . $Profile
             $global:wh=""
@@ -161,7 +161,7 @@ Describe "Install-Posh-Git" {
             Prompt
 
             Remove-Item function:\global:Write-Host
-            Popd
+            Pop-Location
             $wh.should.be("$pwd\PoshTest [master]")
         }
         catch {
@@ -183,7 +183,7 @@ Describe "Install-Posh-Git" {
             Add-Content $profile -value ". 'C:\tools\poshgit\dahlbyk-posh-git-60be436\profile.example.ps1'" -Force
             RunInstall
             mkdir PoshTest
-            Pushd PoshTest
+            Push-Location PoshTest
             git init
             write-output (Get-Content function:\prompt)
             . $Profile
@@ -193,7 +193,7 @@ Describe "Install-Posh-Git" {
             Prompt
 
             Remove-Item function:\global:Write-Host
-            Popd
+            Pop-Location
             $wh.should.be("$pwd\PoshTest [master]")
         }
         catch {

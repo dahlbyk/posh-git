@@ -24,7 +24,7 @@ function Get-GitDirectory {
         $Env:GIT_DIR -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
     }
     else {
-        $currentDir = Get-Item $pathInfo -Force
+        $currentDir = Get-Item -LiteralPath $pathInfo -Force
         while ($currentDir) {
             $gitDirPath = Join-Path $currentDir.FullName .git
             if (Test-Path -LiteralPath $gitDirPath -PathType Container) {
@@ -295,16 +295,16 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $indexPaths = @(GetUniquePaths $indexAdded,$indexModified,$indexDeleted,$indexUnmerged)
         $workingPaths = @(GetUniquePaths $filesAdded,$filesModified,$filesDeleted,$filesUnmerged)
         $index = (,$indexPaths) |
-            Add-Member -PassThru NoteProperty Added    $indexAdded.ToArray() |
-            Add-Member -PassThru NoteProperty Modified $indexModified.ToArray() |
-            Add-Member -PassThru NoteProperty Deleted  $indexDeleted.ToArray() |
-            Add-Member -PassThru NoteProperty Unmerged $indexUnmerged.ToArray()
+            Add-Member -Force -PassThru NoteProperty Added    $indexAdded.ToArray() |
+            Add-Member -Force -PassThru NoteProperty Modified $indexModified.ToArray() |
+            Add-Member -Force -PassThru NoteProperty Deleted  $indexDeleted.ToArray() |
+            Add-Member -Force -PassThru NoteProperty Unmerged $indexUnmerged.ToArray()
 
         $working = (,$workingPaths) |
-            Add-Member -PassThru NoteProperty Added    $filesAdded |
-            Add-Member -PassThru NoteProperty Modified $filesModified.ToArray() |
-            Add-Member -PassThru NoteProperty Deleted  $filesDeleted.ToArray() |
-            Add-Member -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
+            Add-Member -Force -PassThru NoteProperty Added    $filesAdded |
+            Add-Member -Force -PassThru NoteProperty Modified $filesModified.ToArray() |
+            Add-Member -Force -PassThru NoteProperty Deleted  $filesDeleted.ToArray() |
+            Add-Member -Force -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
 
         $result = New-Object PSObject -Property @{
             GitDir          = $gitDir

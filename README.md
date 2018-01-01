@@ -175,18 +175,16 @@ By default, the status summary has the following format:
  * `-` = Removed files
  * `!` = Conflicted files
  * As in `git status`, index status is dark green and working directory status is dark red
-*
-* W represents the status of the working folder
- * `!` = There are untracked changes in the working tree (`LocalStagedStatus`)
- * `~` = There are staged changes in the working tree waiting to be committed (`LocalWorkingStatus`)
- * None = There are no uncommitted or unstaged changes to the working tree (`LocalDefault`)
+
+* W represents the overall status of the working directory
+ * `!` = There are unstaged changes in the working tree (`LocalWorkingStatus`)
+ * `~` = There are uncommitted changes i.e. staged changes in the working tree waiting to be committed (`LocalStagedStatus`)
+ * None = There are no unstaged or uncommitted changes to the working tree (`LocalDefault`)
 * `]` (`AfterText`)
 
 The symbols and surrounding text can be customized by the corresponding properties on `$GitPromptSettings`.
 
 For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
-
-
 
 ```powershell
 # On branch master
