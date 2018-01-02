@@ -839,19 +839,9 @@ if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
 #>
 function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
+
     $OFS = ""
-    $sb = [System.Text.StringBuilder]::new(200)
-
-    $global:VcsPromptStatuses | ForEach-Object {
-        $str = & $_
-        if ($str) {
-            # $str is quoted in case we get back an array of strings, quoting it will flatten the array
-            # into a single string and $OFS="" will ensure no spaces between each array item.
-            $sb.Append("$str") > $null
-        }
-    }
-
-    $sb.ToString()
+    "$($global:VcsPromptStatuses | ForEach-Object { & $_ })"
 }
 
 # Add scriptblock that will execute for Write-VcsStatus
