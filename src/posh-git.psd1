@@ -55,7 +55,6 @@ AliasesToExport = @('??')
 # Private data to pass to the module specified in RootModule/ModuleToProcess.
 # This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
-
     PSData = @{
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = @('git', 'prompt', 'tab', 'tab-completion', 'tab-expansion', 'tabexpansion')
@@ -69,10 +68,9 @@ PrivateData = @{
         # ReleaseNotes of this module
         ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md'
 
-        # TODO: REMOVE BEFOE RELEASE
-        PreReleaseVersion = 'pre0'
+        # OVERRIDE THIS FIELD FOR PUBLISHED RELEASES - LEAVE AT 'alpha' FOR CLONED/LOCAL REPO USAGE
+        Prerelease  = 'alpha'
     }
-
 }
 
 }

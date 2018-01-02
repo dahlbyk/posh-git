@@ -1,3 +1,7 @@
 VERSION
 *.nupkg
 obj
+
+# Ignore out dirs named after module version
+/?.?.?.?
+/?.?.?
