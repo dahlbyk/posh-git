@@ -340,8 +340,8 @@ function Write-Prompt {
 #>
 function Write-GitStatus {
     param(
-        # The Git status, retrieved from Get-GitStatus, from which to write the stash count.
-        # If no other parameters are specified, the stash count is written to the host.
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status
     )
@@ -461,7 +461,8 @@ function Format-GitBranchName {
 #>
 function Get-GitBranchStatusColor {
     param(
-        # The Git status, retrieved from Get-GitStatus.
+        # The Git status object that provides branch status information.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status
     )
@@ -512,8 +513,8 @@ function Get-GitBranchStatusColor {
 #>
 function Write-GitBranchName {
     param(
-        # The Git status, retrieved from Get-GitStatus, from which to write the branch status.
-        # If no other parameters are specified, that branch status is written to the host.
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status,
 
@@ -575,8 +576,8 @@ function Write-GitBranchName {
 #>
 function Write-GitBranchStatus {
     param(
-        # The Git status, retrieved from Get-GitStatus, from which to write the branch status.
-        # If no other parameters are specified, that branch status is written to the host.
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status,
 
@@ -672,8 +673,8 @@ function Write-GitBranchStatus {
 #>
 function Write-GitIndexStatus {
     param(
-        # The Git status, retrieved from Get-GitStatus, from which to write the index status.
-        # If no other parameters are specified, that index status is written to the host.
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status,
 
@@ -797,8 +798,8 @@ function Write-GitIndexStatus {
 #>
 function Write-GitWorkingDirStatus {
     param(
-        # The Git status, retrieved from Get-GitStatus, from which to write the working dir status.
-        # If no other parameters are specified, that working dir status is written to the host.
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status,
 
@@ -926,8 +927,8 @@ function Write-GitWorkingDirStatus {
 #>
 function Write-GitWorkingDirStatusSummary {
     param(
-        # The Git status, retrieved from Get-GitStatus, from which to write the working dir local status.
-        # If no other parameters are specified, that working dir local status is written to the host.
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status,
 
@@ -997,8 +998,8 @@ function Write-GitWorkingDirStatusSummary {
 #>
 function Write-GitStashCount {
     param(
-        # The Git status, retrieved from Get-GitStatus, from which to write the stash count.
-        # If no other parameters are specified, the stash count is written to the host.
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
         [Parameter(Position = 0)]
         $Status,
 
