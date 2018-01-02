@@ -1052,7 +1052,19 @@ if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
 #>
 function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
-    $global:VcsPromptStatuses | ForEach-Object { & $_ }
+    $OFS = ""
+    $sb = [System.Text.StringBuilder]::new(200)
+
+    $global:VcsPromptStatuses | ForEach-Object {
+        $str = & $_
+        if ($str) {
+            # $str is quoted in case we get back an array of strings, quoting it will flatten the array
+            # into a single string and $OFS="" will ensure no spaces between each array item.
+            $sb.Append("$str") > $null
+        }
+    }
+
+    $sb.ToString()
 }
 
 # Add scriptblock that will execute for Write-VcsStatus
@@ -1064,9 +1076,16 @@ $PoshGitVcsPrompt = {
     catch {
         $s = $global:GitPromptSettings
         if ($s) {
-            Write-Prompt $s.BeforeText
-            Write-Prompt "Error: $_" -BackgroundColor $s.ErrorColor.BackgroundColor -ForegroundColor $s.ErrorColor.ForegroundColor
-            Write-Prompt $s.AfterText
+            $errorTextSpan = [PoshGitTextSpan]::new($s.ErrorColor)
+            $errorTextSpan.Text = "PoshGitVcsPrompt error: $_"
+
+            $sb = [System.Text.StringBuilder]::new()
+
+            $sb | Write-Prompt $s.BeforeText > $null
+            $sb | Write-Prompt $errorTextSpan > $null
+            $sb | Write-Prompt $s.AfterText > $null
+
+            $sb.ToString()
         }
     }
 }
