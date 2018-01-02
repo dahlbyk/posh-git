@@ -155,55 +155,56 @@ class GitPromptSettings {
     [bool]$AnsiConsole = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
 
     [PoshGitCellColor]$DefaultColor = [PoshGitCellColor]::new()
-    [PoshGitCellColor]$BranchColor = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
+    [PoshGitCellColor]$BranchColor  = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
 
-    [PoshGitCellColor]$IndexColor = [PoshGitCellColor]::new([ConsoleColor]::DarkGreen)
+    [PoshGitCellColor]$IndexColor   = [PoshGitCellColor]::new([ConsoleColor]::DarkGreen)
     [PoshGitCellColor]$WorkingColor = [PoshGitCellColor]::new([ConsoleColor]::DarkRed)
-    [PoshGitCellColor]$StashColor = [PoshGitCellColor]::new([ConsoleColor]::Red)
-    [PoshGitCellColor]$ErrorColor = [PoshGitCellColor]::new([ConsoleColor]::Red)
+    [PoshGitCellColor]$StashColor   = [PoshGitCellColor]::new([ConsoleColor]::Red)
+    [PoshGitCellColor]$ErrorColor   = [PoshGitCellColor]::new([ConsoleColor]::Red)
 
-    [PoshGitTextSpan]$BeforeText = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
-    [PoshGitTextSpan]$DelimText = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
-    [PoshGitTextSpan]$AfterText = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$BeforeText               = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$DelimText                = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$AfterText                = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
 
-    [PoshGitTextSpan]$BeforeIndexText = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
-    [PoshGitTextSpan]$BeforeStashText = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
-    [PoshGitTextSpan]$AfterStashText = [PoshGitTextSpan]::new(')', [ConsoleColor]::Red)
+    [PoshGitTextSpan]$BeforeIndexText          = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
+    [PoshGitTextSpan]$BeforeStashText          = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
+    [PoshGitTextSpan]$AfterStashText           = [PoshGitTextSpan]::new(')', [ConsoleColor]::Red)
 
     [PoshGitTextSpan]$LocalDefaultStatusSymbol = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
     [PoshGitTextSpan]$LocalWorkingStatusSymbol = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
-    [PoshGitTextSpan]$LocalStagedStatusSymbol = [PoshGitTextSpan]::new('~', [ConsoleColor]::DarkCyan)
+    [PoshGitTextSpan]$LocalStagedStatusSymbol  = [PoshGitTextSpan]::new('~', [ConsoleColor]::Cyan)
 
-    [PoshGitTextSpan]$BranchGoneStatusSymbol = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
-    [PoshGitTextSpan]$BranchIdenticalStatusSymbol = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
-    [PoshGitTextSpan]$BranchAheadStatusSymbol = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
-    [PoshGitTextSpan]$BranchBehindStatusSymbol = [PoshGitTextSpan]::new([char]0x2193, [ConsoleColor]::Red)      # ↓ Down arrow
+    [PoshGitTextSpan]$BranchGoneStatusSymbol           = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
+    [PoshGitTextSpan]$BranchIdenticalStatusSymbol      = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
+    [PoshGitTextSpan]$BranchAheadStatusSymbol          = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
+    [PoshGitTextSpan]$BranchBehindStatusSymbol         = [PoshGitTextSpan]::new([char]0x2193, [ConsoleColor]::Red)      # ↓ Down arrow
     [PoshGitTextSpan]$BranchBehindAndAheadStatusSymbol = [PoshGitTextSpan]::new([char]0x2195, [ConsoleColor]::Yellow)   # ↕ Up & Down arrow
 
     [BranchBehindAndAheadDisplayOptions]$BranchBehindAndAheadDisplay = [BranchBehindAndAheadDisplayOptions]::Full
 
-    [string]$FileAddedText = '+'
-    [string]$FileModifiedText = '~'
-    [string]$FileRemovedText = '-'
-    [string]$FileConflictedText = '!'
+    [string]$FileAddedText       = '+'
+    [string]$FileModifiedText    = '~'
+    [string]$FileRemovedText     = '-'
+    [string]$FileConflictedText  = '!'
     [string]$BranchUntrackedText = ''
 
-    [bool]$EnableStashStatus = $false
-    [bool]$ShowStatusWhenZero = $true
-    [bool]$AutoRefreshIndex = $true
+    [bool]$EnableStashStatus     = $false
+    [bool]$ShowStatusWhenZero    = $true
+    [bool]$AutoRefreshIndex      = $true
 
-    [bool]$EnablePromptStatus = !$global:GitMissing
-    [bool]$EnableFileStatus = $true
-    [Nullable[bool]]$EnableFileStatusFromCache = $null
+    [bool]$EnablePromptStatus    = !$global:GitMissing
+    [bool]$EnableFileStatus      = $true
+
+    [Nullable[bool]]$EnableFileStatusFromCache        = $null
     [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
-    [string]$DescribeStyle = ''
+    [string]$DescribeStyle       = ''
     [psobject]$EnableWindowTitle = 'posh~git ~ '
 
-    [string]$DefaultPromptPrefix = ''
-    [string]$DefaultPromptSuffix = '$(''>'' * ($nestedPromptLevel + 1)) '
-    [string]$DefaultPromptDebugSuffix = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
-    [bool]$DefaultPromptEnableTiming = $false
+    [string]$DefaultPromptPrefix                = ''
+    [string]$DefaultPromptSuffix                = '$(''>'' * ($nestedPromptLevel + 1)) '
+    [string]$DefaultPromptDebugSuffix           = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+    [bool]$DefaultPromptEnableTiming            = $false
     [bool]$DefaultPromptAbbreviateHomeDirectory = $false
 
     [int]$BranchNameLimit = 0
