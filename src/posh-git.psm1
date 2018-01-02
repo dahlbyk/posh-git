@@ -5,6 +5,7 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 . $PSScriptRoot\ConsoleMode.ps1
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\AnsiUtils.ps1
+. $PSScriptRoot\PoshGitTypes.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
 . $PSScriptRoot\GitParamTabExpansion.ps1
