@@ -72,8 +72,8 @@ PrivateData = @{
         # ReleaseNotes of this module
         ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md'
 
-        # TODO: REMOVE BEFORE FINAL RELEASE
-        Prerelease = '-beta1'
+        # OVERRIDE THIS FIELD FOR PUBLISHED RELEASES - LEAVE AT 'alpha' FOR CLONED/LOCAL REPO USAGE
+        Prerelease = 'alpha'
     }
 }
 
