@@ -58,7 +58,7 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
 
     if ($color -is [String]) {
         try {
-            if ($color -as [ConsoleColor]) {
+            if ($null -ne ($color -as [System.ConsoleColor])) {
                 $color = [System.ConsoleColor]$color
             }
             elseif ($ColorTranslatorType) {
@@ -74,7 +74,7 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
         return "${AnsiEscape}$(38 + $offset);2;$($color.R);$($color.G);$($color.B)m"
     }
 
-    if (($color -is [ConsoleColor]) -and ($color -ge 0) -and ($color -le 15)) {
+    if (($color -is [System.ConsoleColor]) -and ($color -ge 0) -and ($color -le 15)) {
         return "${AnsiEscape}$($ConsoleColorToAnsi[$color] + $offset)m"
     }
 
