@@ -24,30 +24,79 @@ if (Get-Module NuGet) {
     $WindowTitleSupported = $false
 }
 
+<#
+.SYNOPSIS
+    Writes the object to the display or renders it as a string using ANSI/VT sequences.
+.DESCRIPTION
+    Writes the specified object to the display unless $GitPromptSettings.AnsiConsole
+    is enabled.  In this case, the Object is rendered, along with the specified
+    colors, as a string with the appropriate ANSI/VT sequences for colors embedded
+    in the string.  If a StringBuilder is provided, the string is appended to the
+    StringBuilder.
+.EXAMPLE
+    PS C:\> Write-Prompt "PS > " -ForegroundColor Cyan -BackgroundColor Black
+    On a system where $GitPromptSettings.AnsiConsole is set to $false, this
+    will write the above to the display using the Write-Host command.
+    If AnsiConsole is set to $true, this will return a string of the form:
+    "`e[96m`e[40mPS > `e[0m".
+.EXAMPLE
+    PS C:\> $sb = [System.Text.StringBuilder]::new()
+    PS C:\> $sb | Write-Prompt "PS > " -ForegroundColor Cyan -BackgroundColor Black
+    On a system where $GitPromptSettings.AnsiConsole is set to $false, this
+    will write the above to the display using the Write-Host command.
+    If AnsiConsole is set to $true, this will append the following string to the
+    StringBuilder object piped into the command:
+    "`e[96m`e[40mPS > `e[0m".
+#>
 function Write-Prompt {
+    [CmdletBinding(DefaultParameterSetName="Default")]
     param(
-        [Parameter(Mandatory)]
+        # Specifies objects to display in the console or render as a string if
+        # $GitPromptSettings.AnsiConsole is enabled. If the Object is of type
+        # [PoshGitTextSpan] the other color parameters are ignored since a
+        # [PoshGitTextSpan] provides the colors.
+        [Parameter(Mandatory, Position=0)]
         $Object,
 
-        [Parameter()]
+        # Specifies the foreground color.
+        [Parameter(ParameterSetName="Default")]
         $ForegroundColor = $null,
 
-        [Parameter()]
+        # Specifies the background color.
+        [Parameter(ParameterSetName="Default")]
         $BackgroundColor = $null,
 
+        # Specifies both the background and foreground colors via [PoshGitCellColor] object.
+        [Parameter(ParameterSetName="CellColor")]
+        [ValidateNotNull()]
+        [PoshGitCellColor]
+        $Color,
+
+        # When specified and $GitPromptSettings.AnsiConsole is enabled, the Object parameter
+        # is written to the StringBuilder along with the appropriate ANSI/VT sequences for
+        # the specified foreground and background colors.
         [Parameter(ValueFromPipeline = $true)]
         [System.Text.StringBuilder]
-        $Builder
+        $StringBuilder
     )
+
+    if ($PSCmdlet.ParameterSetName -eq "CellColor") {
+        $bgColor = $Color.BackgroundColor
+        $fgColor = $Color.ForegroundColor
+    }
+    else {
+        $bgColor = $BackgroundColor
+        $fgColor = $ForegroundColor
+    }
 
     $s = $global:GitPromptSettings
     if ($s) {
-        if ($null -eq $ForegroundColor) {
-            $ForegroundColor = $s.DefaultColor.ForegroundColor
+        if ($null -eq $fgColor) {
+            $fgColor = $s.DefaultColor.ForegroundColor
         }
 
-        if ($null -eq $BackgroundColor) {
-            $BackgroundColor = $s.DefaultColor.BackgroundColor
+        if ($null -eq $bgColor) {
+            $bgColor = $s.DefaultColor.BackgroundColor
         }
 
         if ($s.AnsiConsole) {
@@ -56,13 +105,13 @@ function Write-Prompt {
             }
             else {
                 $e = [char]27 + "["
-                $f = Get-ForegroundVirtualTerminalSequence $ForegroundColor
-                $b = Get-BackgroundVirtualTerminalSequence $BackgroundColor
-                $str = "${f}${b}${Object}${e}0m"
+                $fg = Get-ForegroundVirtualTerminalSequence $fgColor
+                $bg = Get-BackgroundVirtualTerminalSequence $bgColor
+                $str = "${fg}${bg}${Object}${e}0m"
             }
 
-            if ($Builder) {
-                return $Builder.Append($str)
+            if ($StringBuilder) {
+                return $StringBuilder.Append($str)
             }
 
             return $str
@@ -70,8 +119,8 @@ function Write-Prompt {
     }
 
     if ($Object -is [PoshGitTextSpan]) {
-        $BackgroundColor = $Object.BackgroundColor
-        $ForegroundColor = $Object.ForegroundColor
+        $bgColor = $Object.BackgroundColor
+        $fgColor = $Object.ForegroundColor
         $Object = $Object.Text
     }
 
@@ -80,17 +129,17 @@ function Write-Prompt {
         NoNewLine = $true;
     }
 
-    if ($BackgroundColor -and ($BackgroundColor -ge 0) -and ($BackgroundColor -le 15)) {
-        $writeHostParams.BackgroundColor = $BackgroundColor
+    if ($bgColor -and ($bgColor -ge 0) -and ($bgColor -le 15)) {
+        $writeHostParams.BackgroundColor = $bgColor
     }
 
-    if ($ForegroundColor -and ($ForegroundColor -ge 0) -and ($ForegroundColor -le 15)) {
-        $writeHostParams.ForegroundColor = $ForegroundColor
+    if ($fgColor -and ($fgColor -ge 0) -and ($fgColor -le 15)) {
+        $writeHostParams.ForegroundColor = $fgColor
     }
 
     Write-Host @writeHostParams
-    if ($Builder) {
-        return $Builder
+    if ($StringBuilder) {
+        return $StringBuilder
     }
 
     return ""
@@ -325,17 +374,15 @@ function Write-GitBranchName {
     # Use the branch status colors (or CustomAnsi) to display the branch name
     $branchNameTextSpan = Get-GitBranchStatusColor $Status
     $branchNameTextSpan.Text = Format-GitBranchName $Status.Branch
-
-    $textSpan = [PoshGitTextSpan]::new($branchNameTextSpan)
     if (!$NoLeadingSpace) {
-        $textSpan.Text = " " + $branchNameTextSpan.Text
+        $branchNameTextSpan.Text = " " + $branchNameTextSpan.Text
     }
 
     if ($StringBuilder) {
-        $StringBuilder | Write-Prompt $textSpan > $null
+        $StringBuilder | Write-Prompt $branchNameTextSpan > $null
     }
     else {
-        $str = Write-Prompt $textSpan
+        $str = Write-Prompt $branchNameTextSpan
     }
 
     return $(if ($StringBuilder) { $StringBuilder } else { $str })
@@ -483,81 +530,71 @@ function Write-GitIndexStatus {
     $str = ""
 
     if ($Status.HasIndex) {
-        $indexStatusTextSpan = [PoshGitTextSpan]::new($s.IndexColor)
-
         if ($s.ShowStatusWhenZero -or $Status.Index.Added) {
+            $indexStatusText = " "
             if ($NoLeadingSpace) {
-                $indexStatusTextSpan.Text = ""
+                $indexStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $indexStatusTextSpan.Text = " "
-            }
 
-            $indexStatusTextSpan.Text += "$($s.FileAddedText)$($Status.Index.Added.Count)"
+            $indexStatusText += "$($s.FileAddedText)$($Status.Index.Added.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
             }
             else {
-                $str += Write-Prompt $indexStatusTextSpan
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
             }
         }
 
         if ($s.ShowStatusWhenZero -or $status.Index.Modified) {
+            $indexStatusText = " "
             if ($NoLeadingSpace) {
-                $indexStatusTextSpan.Text = ""
+                $indexStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $indexStatusTextSpan.Text = " "
-            }
 
-            $indexStatusTextSpan.Text += "$($s.FileModifiedText)$($status.Index.Modified.Count)"
+            $indexStatusText += "$($s.FileModifiedText)$($status.Index.Modified.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
             }
             else {
-                $str += Write-Prompt $indexStatusTextSpan
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
             }
         }
 
         if ($s.ShowStatusWhenZero -or $Status.Index.Deleted) {
+            $indexStatusText = " "
             if ($NoLeadingSpace) {
-                $indexStatusTextSpan.Text = ""
+                $indexStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $indexStatusTextSpan.Text = " "
-            }
 
-            $indexStatusTextSpan.Text += "$($s.FileRemovedText)$($Status.Index.Deleted.Count)"
+            $indexStatusText += "$($s.FileRemovedText)$($Status.Index.Deleted.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
             }
             else {
-                $str += Write-Prompt $indexStatusTextSpan
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
             }
         }
 
         if ($Status.Index.Unmerged) {
+            $indexStatusText = " "
             if ($NoLeadingSpace) {
-                $indexStatusTextSpan.Text = ""
+                $indexStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $indexStatusTextSpan.Text = " "
-            }
 
-            $indexStatusTextSpan.Text += "$($s.FileConflictedText)$($Status.Index.Unmerged.Count)"
+            $indexStatusText += "$($s.FileConflictedText)$($Status.Index.Unmerged.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $indexStatusTextSpan > $null
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
             }
             else {
-                $str += Write-Prompt $indexStatusTextSpan
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
             }
         }
     }
@@ -608,81 +645,71 @@ function Write-GitWorkingDirStatus {
     $str = ""
 
     if ($Status.HasWorking) {
-        $workingTextSpan = [PoshGitTextSpan]::new($s.WorkingColor)
-
         if ($s.ShowStatusWhenZero -or $Status.Working.Added) {
+            $workingStatusText = " "
             if ($NoLeadingSpace) {
-                $workingTextSpan.Text = ""
+                $workingStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $workingTextSpan.Text = " "
-            }
 
-            $workingTextSpan.Text += "$($s.FileAddedText)$($Status.Working.Added.Count)"
+            $workingStatusText += "$($s.FileAddedText)$($Status.Working.Added.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $workingTextSpan > $null
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
             }
             else {
-                $str += Write-Prompt $workingTextSpan
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
             }
         }
 
         if ($s.ShowStatusWhenZero -or $Status.Working.Modified) {
+            $workingStatusText = " "
             if ($NoLeadingSpace) {
-                $workingTextSpan.Text = ""
+                $workingStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $workingTextSpan.Text = " "
-            }
 
-            $workingTextSpan.Text += "$($s.FileModifiedText)$($Status.Working.Modified.Count)"
+            $workingStatusText += "$($s.FileModifiedText)$($Status.Working.Modified.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $workingTextSpan > $null
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
             }
             else {
-                $str += Write-Prompt $workingTextSpan
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
             }
         }
 
         if ($s.ShowStatusWhenZero -or $Status.Working.Deleted) {
+            $workingStatusText = " "
             if ($NoLeadingSpace) {
-                $workingTextSpan.Text = ""
+                $workingStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $workingTextSpan.Text = " "
-            }
 
-            $workingTextSpan.Text += "$($s.FileRemovedText)$($Status.Working.Deleted.Count)"
+            $workingStatusText += "$($s.FileRemovedText)$($Status.Working.Deleted.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $workingTextSpan > $null
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
             }
             else {
-                $str += Write-Prompt $workingTextSpan
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
             }
         }
 
         if ($Status.Working.Unmerged) {
+            $workingStatusText = " "
             if ($NoLeadingSpace) {
-                $workingTextSpan.Text = ""
+                $workingStatusText = ""
                 $NoLeadingSpace = $false
             }
-            else {
-                $workingTextSpan.Text = " "
-            }
 
-            $workingTextSpan.Text += "$($s.FileConflictedText)$($Status.Working.Unmerged.Count)"
+            $workingStatusText += "$($s.FileConflictedText)$($Status.Working.Unmerged.Count)"
 
             if ($StringBuilder) {
-                $StringBuilder | Write-Prompt $workingTextSpan > $null
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
             }
             else {
-                $str += Write-Prompt $workingTextSpan
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
             }
         }
     }
@@ -803,18 +830,17 @@ function Write-GitStashCount {
     $str = ""
 
     if ($Status.StashCount -gt 0) {
-        $stashTextSpan = [PoshGitTextSpan]::new($s.StashColor)
-        $stashTextSpan.Text = "$($Status.StashCount)"
+        $stashText = "$($Status.StashCount)"
 
         if ($StringBuilder) {
             $StringBuilder | Write-Prompt $s.BeforeStashText > $null
-            $StringBuilder | Write-Prompt $stashTextSpan > $null
+            $StringBuilder | Write-Prompt $stashText -Color $s.StashColor > $null
             $StringBuilder | Write-Prompt $s.AfterStashText > $null
         }
         else {
-            $str += Write-Prompt $s.BeforeStashText > $null
-            $str += Write-Prompt $stashTextSpan > $null
-            $str += Write-Prompt $s.AfterStashText > $null
+            $str += Write-Prompt $s.BeforeStashText
+            $str += Write-Prompt $stashText -Color $s.StashColor
+            $str += Write-Prompt $s.AfterStashText
         }
     }
 
@@ -853,13 +879,11 @@ $PoshGitVcsPrompt = {
     catch {
         $s = $global:GitPromptSettings
         if ($s) {
-            $errorTextSpan = [PoshGitTextSpan]::new($s.ErrorColor)
-            $errorTextSpan.Text = "PoshGitVcsPrompt error: $_"
-
+            $errorText = "PoshGitVcsPrompt error: $_"
             $sb = [System.Text.StringBuilder]::new()
 
             $sb | Write-Prompt $s.BeforeText > $null
-            $sb | Write-Prompt $errorTextSpan > $null
+            $sb | Write-Prompt $errorText -Color $s.ErrorColor > $null
             $sb | Write-Prompt $s.AfterText > $null
 
             $sb.ToString()
