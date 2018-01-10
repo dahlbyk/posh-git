@@ -206,6 +206,9 @@ class GitPromptSettings {
     [PoshGitTextSpan]$DefaultPromptDebugSuffix  = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
 
     [bool]$DefaultPromptEnableTiming            = $false
+    [PoshGitCellColor]$DefaultPromptTimingColor = [PoshGitCellColor]::new()
+
+    [PoshGitCellColor]$DefaultPromptPathColor   = [PoshGitCellColor]::new()
     [bool]$DefaultPromptAbbreviateHomeDirectory = $false
 
     [int]$BranchNameLimit = 0

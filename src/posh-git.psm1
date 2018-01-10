@@ -72,7 +72,7 @@ $GitPromptScriptBlock = {
     }
 
     # Write the abbreviated current path
-    $prompt += Write-Prompt $currentPath
+    $prompt += Write-Prompt $currentPath -Color $settings.DefaultPromptPathColor
 
     # Write the Git status summary information
     $prompt += Write-VcsStatus
@@ -95,7 +95,7 @@ $GitPromptScriptBlock = {
     if ($settings.DefaultPromptEnableTiming) {
         $sw.Stop()
         $elapsed = $sw.ElapsedMilliseconds
-        $prompt += Write-Prompt " ${elapsed}ms"
+        $prompt += Write-Prompt " ${elapsed}ms" -Color $settings.DefaultPromptTimingColor
     }
 
     $global:LASTEXITCODE = $origLastExitCode
