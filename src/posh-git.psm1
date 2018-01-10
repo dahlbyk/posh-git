@@ -41,28 +41,6 @@ $GitPromptScriptBlock = {
     }
     $origLastExitCode = $global:LASTEXITCODE
 
-    # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
-    # However for any path with a drive defined, it's better to use the Path property.
-    # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
-    # The latter is more desirable.
-    $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
-    $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-
-    # File system paths are case-sensitive on Linux and case-insensitive on Windows and macOS
-    if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsLinux) {
-        $stringComparison = [System.StringComparison]::Ordinal
-    }
-    else {
-        $stringComparison = [System.StringComparison]::OrdinalIgnoreCase
-    }
-
-    # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
-    $abbrevHomeDir = $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory
-    if ($abbrevHomeDir -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison))
-    {
-        $currentPath = "~" + $currentPath.SubString($Home.Length)
-    }
-
     # Display default prompt prefix if not empty.
     $defaultPromptPrefix = [string]$GitPromptSettings.DefaultPromptPrefix
     if ($defaultPromptPrefix) {
@@ -71,6 +49,7 @@ $GitPromptScriptBlock = {
     }
 
     # Write the abbreviated current path
+    $currentPath = $ExecutionContext.SessionState.InvokeCommand.ExpandString($GitPromptSettings.DefaultPromptPath)
     Write-Prompt $currentPath
 
     # Write the Git status summary information
@@ -138,6 +117,7 @@ $exportModuleMemberParams = @{
     Function = @(
         'Invoke-NullCoalescing',
         'Add-PoshGitToProfile',
+        'Get-PromptPath',
         'Write-GitStatus',
         'Write-Prompt',
         'Write-VcsStatus',
