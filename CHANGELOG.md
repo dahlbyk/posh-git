@@ -5,11 +5,66 @@ This release introduces breaking changes with 0.x to both drop support for Power
 The ANSI sequence support will help with cross-platform PowerShell support, which is another goal of this release.
 
 - Drop support for PowerShell 2.0
-  ([#163](https://github.com/dahlbyk/posh-git/issues/163))
-  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
+  ([#163](https://github.com/dahlbyk/posh-git/issues/163))
+  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
 - Remove public `Enable-GitColors`, `Get-AliasPattern` and `Get-GitBranch`; plus `Invoke-NullCoalescing` and its `??` alias
   ([#93](https://github.com/dahlbyk/posh-git/issues/93))
-  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
+  ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
+
+## 0.7.2 - January 10, 2018
+
+- posh-git now exports the variable `$GitPromptScriptBlock` which contains the code for the default prompt.
+  ([#501](https://github.com/dahlbyk/posh-git/issues/501))
+  ([PR #513](https://github.com/dahlbyk/posh-git/pull/513))
+
+  If you need to execute your own logic in your own prompt function but still want to display the default posh-git
+  prompt, you can execute this scriptblock from your prompt function e.g.:
+
+  ```powershell
+  # profile.ps1
+  function prompt {
+    Set-NodeVersion
+    &$GitPromptScriptBlock
+  }
+  Import-Module posh-git
+  ```
+
+- Added `Add-PoshGitToProfile -AllUsers` support
+  ([PR #504](https://github.com/dahlbyk/posh-git/pull/504))
+- Fixed 'Write-Prompt' to be able use Black as foreground color.
+  ([#470](https://github.com/dahlbyk/posh-git/pull/470))
+  ([PR #468](https://github.com/dahlbyk/posh-git/pull/468))
+  Thanks Vladimir Poleh (@vladimir-poleh)
+- Pass "git.exe" instead of "git" to Get-Command.
+  ([PR #478](https://github.com/dahlbyk/posh-git/pull/478))
+  ([PR #479](https://github.com/dahlbyk/posh-git/pull/479))
+  Thanks Mike Sigsworth (@mikesigs)
+- Squash ssh agent warnings if `-Quiet`.
+  ([PR #484](https://github.com/dahlbyk/posh-git/pull/484))
+  Thanks Refael Ackermann (@refack)
+- Fixed directory names that contain [brackets] cause GitPrompt to fail.
+  ([PR #502](https://github.com/dahlbyk/posh-git/pull/502))
+  Thanks Duncan Smart (@duncansmart)
+- Fixed duplicated branch completion for git checkout
+  ([#505](https://github.com/dahlbyk/posh-git/issues/505))
+  ([PR #506](https://github.com/dahlbyk/posh-git/pull/506))
+  ([PR #512](https://github.com/dahlbyk/posh-git/pull/512))
+  Thanks Christoph Bergmeister (@bergmeister)
+- Fixed PSScriptAnalyzer warnings in the source
+  ([PR #509](https://github.com/dahlbyk/posh-git/pull/509))
+  Thanks Christoph Bergmeister (@bergmeister)
+- Fixed errors added to $Error collection by `Get-GitStatus` command
+  ([#500](https://github.com/dahlbyk/posh-git/issues/500))
+  ([PR #514](https://github.com/dahlbyk/posh-git/pull/514))
+- Add custom path rendering in prompt
+  ([#469](https://github.com/dahlbyk/posh-git/issues/469))
+  ([PR #520](https://github.com/dahlbyk/posh-git/pull/520))
+- Clean up wording for work dir local status in help file
+  ([PR #516](https://github.com/dahlbyk/posh-git/pull/516))
+- Add code coverage to Coveralls.io
+  ([#416](https://github.com/dahlbyk/posh-git/pull/416))
+  ([PR #461](https://github.com/dahlbyk/posh-git/pull/461))
+  Thanks Jan De Dobbeleer (@JanJoris)
 
 ## 0.7.1 - March 14, 2017
 
