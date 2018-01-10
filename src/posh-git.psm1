@@ -40,38 +40,20 @@ $GitPromptScriptBlock = {
 
     $origLastExitCode = $global:LASTEXITCODE
 
-    # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
-    # However for any path with a drive defined, it's better to use the Path property.
-    # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
-    # The latter is more desirable.
-    $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
-    $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-
-    # File system paths are case-sensitive on Linux and case-insensitive on Windows and macOS
-    if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsLinux) {
-        $stringComparison = [System.StringComparison]::Ordinal
-    }
-    else {
-        $stringComparison = [System.StringComparison]::OrdinalIgnoreCase
-    }
-
-    # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
-    $abbrevHomeDir = $settings.DefaultPromptAbbreviateHomeDirectory
-    if ($abbrevHomeDir -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison)) {
-        $currentPath = "~" + $currentPath.SubString($Home.Length)
-    }
-
     $prompt = ''
 
     # Display default prompt prefix if not empty.
-    $defaultPromptPrefix = [string]$settings.DefaultPromptPrefix
-    if ($defaultPromptPrefix) {
-        $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-        $prompt += Write-Prompt $expandedDefaultPromptPrefix
+    $defaultPromptPrefix = $settings.DefaultPromptPrefix
+    if ($defaultPromptPrefix.Text) {
+        $promptPrefix = [PoshGitTextSpan]::new($settings.DefaultPromptPrefix)
+        $promptPrefix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix.Text)
+        $prompt += Write-Prompt $promptPrefix
     }
 
     # Write the abbreviated current path
-    $prompt += Write-Prompt $currentPath
+    $promptPath = [PoshGitTextSpan]::new($settings.DefaultPromptPath)
+    $promptPath.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptPath.Text)
+    $prompt += Write-Prompt $promptPath
 
     # Write the Git status summary information
     $prompt += Write-VcsStatus
@@ -79,24 +61,26 @@ $GitPromptScriptBlock = {
     # If stopped in the debugger, the prompt needs to indicate that in some fashion
     $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-Member -Name InBreakpoint -MemberType property
     $debugMode = (Test-Path Variable:/PSDebugContext) -or ($hasInBreakpoint -and [runspace]::DefaultRunspace.Debugger.InBreakpoint)
-    $promptSuffix = if ($debugMode) { $settings.DefaultPromptDebugSuffix } else { $settings.DefaultPromptSuffix }
+    $defaultPromptSuffix = if ($debugMode) { $settings.DefaultPromptDebugSuffix } else { $settings.DefaultPromptSuffix }
 
-    # If user specifies $null or empty string, set to ' ' to avoid "PS>" unexpectedly being displayed
-    if (!$promptSuffix) {
-        $promptSuffix = ' '
+    $promptSuffix = [PoshGitTextSpan]::new($defaultPromptSuffix)
+    if ($defaultPromptSuffix.Text) {
+        $promptSuffix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptSuffix.Text)
     }
-
-    $expandedPromptSuffix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptSuffix)
+    # If user specifies $null or empty string, set to ' ' to avoid "PS>" unexpectedly being displayed
+    else {
+        $promptSuffix.Text = ' '
+    }
 
     # If prompt timing enabled, display elapsed milliseconds
     if ($settings.DefaultPromptEnableTiming) {
         $sw.Stop()
         $elapsed = $sw.ElapsedMilliseconds
-        $prompt += Write-Prompt " ${elapsed}ms"
+        $prompt += Write-Prompt " ${elapsed}ms" -Color $settings.DefaultPromptTimingColor
     }
 
     $global:LASTEXITCODE = $origLastExitCode
-    $prompt += $expandedPromptSuffix
+    $prompt += Write-Prompt $promptSuffix
     $prompt
 }
 
@@ -141,6 +125,7 @@ $exportModuleMemberParams = @{
         'Get-GitBranchStatusColor',
         'Get-GitDirectory',
         'Get-GitStatus',
+        'Get-PromptPath',
         'Update-AllBranches',
         'Write-GitStatus',
         'Write-GitBranchName',
