@@ -1,15 +1,75 @@
 # posh-git Release History
 
-## 1.0.0 - TBD
-This release introduces breaking changes with 0.x to both drop support for PowerShell 2.0 and support writing prompt strings using ANSI sequences.
-The ANSI sequence support will help with cross-platform PowerShell support, which is another goal of this release.
+## 1.0.0-beta1 - January 10, 2018
+
+The 1.0.0 release is targeted specifically at Windows PowerShell 5.x and (cross-platform) PowerShell Core 6.x, both of
+which support writing prompt strings using [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code).
+On Windows, support for [Console Virtual Terminal Sequences](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences)
+was added in Windows 10 version 1511.
+Consequently this release introduces BREAKING changes with 0.7.x by:
+
+- Dropping support for Windows PowerShell versions 2.0, 3.0 and 4.0.
+- Changing the $GitPromptSettings hashtable to a more structured and stongly typed object.
+  Here is one example of the changed settings structure:
+  ```powershell
+  $GitPromptSettings.LocalWorkingStatusSymbol = '#'
+  $GitPromptSettings.LocalWorkingStatusForegroundColor = [ConsoleColor]::DarkRed
+  ```
+  Changes to:
+  ```powershell
+  $GitPromptSettings.LocalWorkingStatusSymbol.Text = '#'
+  $GitPromptSettings.LocalWorkingStatusSymbol.ForegroundColor = [ConsoleColor]::DarkRed
+  ```
+- Changing `Write-VcsStatus`, `Write-GitStatus` and `Write-Prompt` to return a string rather than write to host when
+  the host supports ANSI escape sequences.
+
+If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use the 0.7.x version of posh-git.
+
+### Removed
 
 - Drop support for PowerShell 2.0
   ([#163](https://github.com/dahlbyk/posh-git/issues/163))
   ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
-- Remove public `Enable-GitColors`, `Get-AliasPattern` and `Get-GitBranch`; plus `Invoke-NullCoalescing` and its `??` alias
+- Drop support for PowerShell 3.0 and 4.0
+  ([#328](https://github.com/dahlbyk/posh-git/issues/328))
+  ([PR #513](https://github.com/dahlbyk/posh-git/pull/513))
+- Remove public `Enable-GitColors`, `Get-AliasPattern`, `Get-GitBranch` and `Invoke-NullCoalescing` and its `??` alias
   ([#93](https://github.com/dahlbyk/posh-git/issues/93))
   ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
+
+### Added
+
+- Implement support for ANSI escape sequences for colored output - support System.ConsoleColor, System.Drawing.HtmlColor
+  (if available on the platform) and 24-bit color.  NOTE: this is a breaking change since `Write-VcsStatus`,
+  `Write-GitStatus` and `Write-Prompt` will now return a string rather than write to the host when the host supports
+  ANSI escape sequences.
+  ([#304](https://github.com/dahlbyk/posh-git/pull/304))
+  ([#447](https://github.com/dahlbyk/posh-git/pull/447))
+  ([#455](https://github.com/dahlbyk/posh-git/pull/455))
+- $GitPromptSettings is now a strongly typed object using PS classes
+  ([#344](https://github.com/dahlbyk/posh-git/issues/344))
+  ([PR #513](https://github.com/dahlbyk/posh-git/pull/513))
+- Provide more granular commands than just `Write-GitStatus`.
+  ([#345](https://github.com/dahlbyk/posh-git/issues/345))
+  ([PR #513](https://github.com/dahlbyk/posh-git/pull/513))
+  We now export the commands that `Write-GitStatus` uses internally which are:
+  * Write-GitBranchName
+  * Write-GitBranchStatus
+  * Write-GitIndexStatus
+  * Write-GitStashCount
+  * Write-GitWorkingDirStatus
+  * Write-GitWorkingDirStatusSummary
+
+### Fixed
+
+- Fixed Get-AuthenticodeSignature not on PS Core.
+  ([PR #487](https://github.com/dahlbyk/posh-git/pull/487))
+- Provide DefaultPromptPrefixColor and DefaultPromptSuffixColor options
+  ([#474](https://github.com/dahlbyk/posh-git/issues/474))
+  ([PR #520](https://github.com/dahlbyk/posh-git/pull/520))
+- Fixed posh-git prompt makes PowerShell transcripts less readable
+  ([#282](https://github.com/dahlbyk/posh-git/issues/282))
+  ([PR #447](https://github.com/dahlbyk/posh-git/pull/447))
 
 ## 0.7.2 - January 10, 2018
 
