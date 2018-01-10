@@ -40,27 +40,6 @@ $GitPromptScriptBlock = {
 
     $origLastExitCode = $global:LASTEXITCODE
 
-    # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
-    # However for any path with a drive defined, it's better to use the Path property.
-    # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
-    # The latter is more desirable.
-    $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
-    $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-
-    # File system paths are case-sensitive on Linux and case-insensitive on Windows and macOS
-    if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsLinux) {
-        $stringComparison = [System.StringComparison]::Ordinal
-    }
-    else {
-        $stringComparison = [System.StringComparison]::OrdinalIgnoreCase
-    }
-
-    # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
-    $abbrevHomeDir = $settings.DefaultPromptAbbreviateHomeDirectory
-    if ($abbrevHomeDir -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison)) {
-        $currentPath = "~" + $currentPath.SubString($Home.Length)
-    }
-
     $prompt = ''
 
     # Display default prompt prefix if not empty.
@@ -72,7 +51,9 @@ $GitPromptScriptBlock = {
     }
 
     # Write the abbreviated current path
-    $prompt += Write-Prompt $currentPath -Color $settings.DefaultPromptPathColor
+    $promptPath = [PoshGitTextSpan]::new($settings.DefaultPromptPath)
+    $promptPath.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptPath.Text)
+    $prompt += Write-Prompt $promptPath
 
     # Write the Git status summary information
     $prompt += Write-VcsStatus
@@ -144,6 +125,7 @@ $exportModuleMemberParams = @{
         'Get-GitBranchStatusColor',
         'Get-GitDirectory',
         'Get-GitStatus',
+        'Get-PromptPath',
         'Update-AllBranches',
         'Write-GitStatus',
         'Write-GitBranchName',

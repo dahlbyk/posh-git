@@ -208,7 +208,7 @@ class GitPromptSettings {
     [bool]$DefaultPromptEnableTiming            = $false
     [PoshGitCellColor]$DefaultPromptTimingColor = [PoshGitCellColor]::new()
 
-    [PoshGitCellColor]$DefaultPromptPathColor   = [PoshGitCellColor]::new()
+    [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
     [bool]$DefaultPromptAbbreviateHomeDirectory = $false
 
     [int]$BranchNameLimit = 0
