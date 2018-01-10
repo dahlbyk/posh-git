@@ -591,5 +591,6 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
             Write-Warning "Rebase failed for $branch"
         }
     }
+
     git checkout -q $head
 }

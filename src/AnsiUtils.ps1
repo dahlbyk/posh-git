@@ -24,29 +24,60 @@ $AnsiEscape = [char]27 + "["
 $ColorTranslatorType = 'System.Drawing.ColorTranslator' -as [Type]
 $ColorType = 'System.Drawing.Color' -as [Type]
 
+function EscapseAnsiString([string]$AnsiString) {
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $res = $AnsiString -replace "$([char]27)", '`e'
+    }
+    else {
+        $res = $AnsiString -replace "$([char]27)", '$([char]27)'
+    }
+
+    $res
+}
+
+function Test-VirtualTerminalSequece([psobject]$Object) {
+    if ($global:GitPromptSettings.AnsiConsole -and ($Object -is [string])) {
+        return $Object.Contains($AnsiEscape)
+    }
+    else {
+        return $false
+    }
+}
+
 function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
     if ($color -is [byte]) {
         return "${AnsiEscape}$(38 + $offset);5;${color}m"
     }
+
+    if ($color -is [int]) {
+        $r = ($color -shr 16) -band 0xff
+        $g = ($color -shr 8) -band 0xff
+        $b = $color -band 0xff
+        return "${AnsiEscape}$(38 + $offset);2;${r};${g};${b}m"
+    }
+
     if ($color -is [String]) {
         try {
-            if ($ColorTranslatorType) {
-                $color = $ColorTranslatorType::FromHtml($color)
+            if ($null -ne ($color -as [System.ConsoleColor])) {
+                $color = [System.ConsoleColor]$color
             }
-            else {
-                $color = [ConsoleColor]$color
+            elseif ($ColorTranslatorType) {
+                $color = $ColorTranslatorType::FromHtml($color)
             }
         }
         catch {
             Write-Debug $_
         }
     }
+
     if ($ColorType -and ($color -is $ColorType)) {
         return "${AnsiEscape}$(38 + $offset);2;$($color.R);$($color.G);$($color.B)m"
     }
-    if (($color -is [ConsoleColor]) -and ($color -ge 0) -and ($color -le 15)) {
+
+    if (($color -is [System.ConsoleColor]) -and ($color -ge 0) -and ($color -le 15)) {
         return "${AnsiEscape}$($ConsoleColorToAnsi[$color] + $offset)m"
     }
+
     return "${AnsiEscape}$($AnsiDefaultColor + $offset)m"
 }
 

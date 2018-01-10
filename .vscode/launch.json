@@ -4,6 +4,12 @@
         {
             "type": "PowerShell",
             "request": "launch",
+            "name": "PowerShell Interactive Session",
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
             "name": "PowerShell Pester Tests",
             "script": "Invoke-Pester",
             "args": [],

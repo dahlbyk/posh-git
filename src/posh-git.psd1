@@ -4,7 +4,7 @@
 RootModule = 'posh-git.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0.0'
+ModuleVersion = '1.0.0'
 
 # ID used to uniquely identify this module
 GUID = '74c9fd30-734b-4c89-a8ae-7727ad21d1d5'
@@ -13,21 +13,29 @@ GUID = '74c9fd30-734b-4c89-a8ae-7727ad21d1d5'
 Author = 'Keith Dahlby and contributors'
 
 # Copyright statement for this module
-Copyright = '(c) 2010-2017 Keith Dahlby and contributors'
+Copyright = '(c) 2010-2018 Keith Dahlby and contributors'
 
 # Description of the functionality provided by this module
 Description = 'Provides prompt with Git status summary information and tab completion for Git commands, parameters, remotes and branch names.'
 
 # Minimum version of the Windows PowerShell engine required by this module
-PowerShellVersion = '3.0'
+PowerShellVersion = '5.0'
 
 # Functions to export from this module
 FunctionsToExport = @(
     'Add-PoshGitToProfile',
+    'Format-GitBranchName',
+    'Get-GitBranchStatusColor',
     'Get-GitStatus',
     'Get-GitDirectory',
     'Update-AllBranches',
     'Write-GitStatus',
+    'Write-GitBranchName',
+    'Write-GitBranchStatus',
+    'Write-GitIndexStatus',
+    'Write-GitStashCount',
+    'Write-GitWorkingDirStatus',
+    'Write-GitWorkingDirStatusSummary',
     'Write-Prompt',
     'Write-VcsStatus',
     'Get-SshAgent',
@@ -43,7 +51,7 @@ FunctionsToExport = @(
 CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = @()
+VariablesToExport = @('GitPromptScriptBlock')
 
 # Aliases to export from this module
 AliasesToExport = @()
@@ -51,7 +59,6 @@ AliasesToExport = @()
 # Private data to pass to the module specified in RootModule/ModuleToProcess.
 # This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
-
     PSData = @{
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = @('git', 'prompt', 'tab', 'tab-completion', 'tab-expansion', 'tabexpansion')
@@ -65,10 +72,9 @@ PrivateData = @{
         # ReleaseNotes of this module
         ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md'
 
-        # TODO: REMOVE BEFOE RELEASE
-        PreReleaseVersion = 'pre00'
+        # OVERRIDE THIS FIELD FOR PUBLISHED RELEASES - LEAVE AT 'alpha' FOR CLONED/LOCAL REPO USAGE
+        Prerelease = 'alpha'
     }
-
 }
 
 }
