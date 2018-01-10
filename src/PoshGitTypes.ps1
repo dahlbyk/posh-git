@@ -201,9 +201,10 @@ class GitPromptSettings {
     [string]$DescribeStyle       = ''
     [psobject]$EnableWindowTitle = 'posh~git ~ '
 
-    [string]$DefaultPromptPrefix                = ''
-    [string]$DefaultPromptSuffix                = '$(''>'' * ($nestedPromptLevel + 1)) '
-    [string]$DefaultPromptDebugSuffix           = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+    [PoshGitTextSpan]$DefaultPromptPrefix       = ''
+    [PoshGitTextSpan]$DefaultPromptSuffix       = '$(''>'' * ($nestedPromptLevel + 1)) '
+    [PoshGitTextSpan]$DefaultPromptDebugSuffix  = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+
     [bool]$DefaultPromptEnableTiming            = $false
     [bool]$DefaultPromptAbbreviateHomeDirectory = $false
 

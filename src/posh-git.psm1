@@ -64,10 +64,11 @@ $GitPromptScriptBlock = {
     $prompt = ''
 
     # Display default prompt prefix if not empty.
-    $defaultPromptPrefix = [string]$settings.DefaultPromptPrefix
-    if ($defaultPromptPrefix) {
-        $expandedDefaultPromptPrefix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix)
-        $prompt += Write-Prompt $expandedDefaultPromptPrefix
+    $defaultPromptPrefix = $settings.DefaultPromptPrefix
+    if ($defaultPromptPrefix.Text) {
+        $promptPrefix = [PoshGitTextSpan]::new($settings.DefaultPromptPrefix)
+        $promptPrefix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix.Text)
+        $prompt += Write-Prompt $promptPrefix
     }
 
     # Write the abbreviated current path
@@ -79,14 +80,16 @@ $GitPromptScriptBlock = {
     # If stopped in the debugger, the prompt needs to indicate that in some fashion
     $hasInBreakpoint = [runspace]::DefaultRunspace.Debugger | Get-Member -Name InBreakpoint -MemberType property
     $debugMode = (Test-Path Variable:/PSDebugContext) -or ($hasInBreakpoint -and [runspace]::DefaultRunspace.Debugger.InBreakpoint)
-    $promptSuffix = if ($debugMode) { $settings.DefaultPromptDebugSuffix } else { $settings.DefaultPromptSuffix }
+    $defaultPromptSuffix = if ($debugMode) { $settings.DefaultPromptDebugSuffix } else { $settings.DefaultPromptSuffix }
 
-    # If user specifies $null or empty string, set to ' ' to avoid "PS>" unexpectedly being displayed
-    if (!$promptSuffix) {
-        $promptSuffix = ' '
+    $promptSuffix = [PoshGitTextSpan]::new($defaultPromptSuffix)
+    if ($defaultPromptSuffix.Text) {
+        $promptSuffix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptSuffix.Text)
     }
-
-    $expandedPromptSuffix = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptSuffix)
+    # If user specifies $null or empty string, set to ' ' to avoid "PS>" unexpectedly being displayed
+    else {
+        $promptSuffix.Text = ' '
+    }
 
     # If prompt timing enabled, display elapsed milliseconds
     if ($settings.DefaultPromptEnableTiming) {
@@ -96,7 +99,7 @@ $GitPromptScriptBlock = {
     }
 
     $global:LASTEXITCODE = $origLastExitCode
-    $prompt += $expandedPromptSuffix
+    $prompt += Write-Prompt $promptSuffix
     $prompt
 }
 
