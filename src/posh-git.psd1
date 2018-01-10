@@ -71,7 +71,7 @@ PrivateData = @{
         ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/v0.7.2-pre1/CHANGELOG.md'
 
         # TODO: REMOVE BEFOE RELEASE
-        PreReleaseVersion = 'pre1'
+        Prerelease = 'pre1'
     }
 
 }
