@@ -22,9 +22,12 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
 - `master` avoids breaking changes, maintaining v0.x.
   ( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
   • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
+  - Supports PowerShell 3+
 - `develop` includes breaking changes, toward [v1.0](https://github.com/dahlbyk/posh-git/issues/328).
   ( [README](https://github.com/dahlbyk/posh-git/blob/develop/README.md)
   • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md) )
+  - Supports PowerShell 5 and PowerShell Core 6
+  - Supports [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) for color customization
 - Previous releases:
   - v0.7.1
     ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.1/README.md)
