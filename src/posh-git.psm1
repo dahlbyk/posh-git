@@ -11,6 +11,7 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 . $PSScriptRoot\GitParamTabExpansion.ps1
 . $PSScriptRoot\GitTabExpansion.ps1
 . $PSScriptRoot\TortoiseGit.ps1
+. $PSScriptRoot\SshUtils.ps1
 
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
 if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
