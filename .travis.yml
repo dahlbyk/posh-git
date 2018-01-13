@@ -1,5 +1,9 @@
 language: generic
 
+branches:
+  only:
+  - develop
+
 stages:
 - linux
 - osx
