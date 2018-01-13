@@ -2,6 +2,37 @@
 # SshUtils.ps1
 #
 
+function setenv($key, $value) {
+    [void][Environment]::SetEnvironmentVariable($key, $value)
+    Set-TempEnv $key $value
+}
+
+function Get-TempEnv($key) {
+    $path = Get-TempEnvPath($key)
+    if (Test-Path $path) {
+        $value =  Get-Content $path
+        [void][Environment]::SetEnvironmentVariable($key, $value)
+    }
+}
+
+function Set-TempEnv($key, $value) {
+    $path = Get-TempEnvPath($key)
+    if ($null -eq $value) {
+        if (Test-Path $path) {
+            Remove-Item $path
+        }
+    }
+    else {
+        New-Item $path -Force -ItemType File > $null
+        $value | Out-File -FilePath $path -Encoding ascii -Force
+    }
+}
+
+function Get-TempEnvPath($key){
+    $path = Join-Path ([System.IO.Path]::GetTempPath()) ".ssh\$key.env"
+    return $path
+}
+
 # Retrieve the current SSH agent PID (or zero). Can be used to determine if there
 # is a running agent.
 function Get-SshAgent() {
