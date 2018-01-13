@@ -224,3 +224,6 @@ function Stop-SshAgent() {
         setenv 'SSH_AUTH_SOCK' $null
     }
 }
+
+Get-TempEnv 'SSH_AGENT_PID'
+Get-TempEnv 'SSH_AUTH_SOCK'

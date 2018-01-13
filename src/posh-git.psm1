@@ -16,9 +16,6 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
 if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
-Get-TempEnv 'SSH_AGENT_PID'
-Get-TempEnv 'SSH_AUTH_SOCK'
-
 # Get the default prompt definition.
 $initialSessionState = [Runspace]::DefaultRunspace.InitialSessionState
 if (!$initialSessionState.Commands -or !$initialSessionState.Commands['prompt']) {
