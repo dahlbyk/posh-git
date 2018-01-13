@@ -1,5 +1,3 @@
-. $PSScriptRoot\..\src\Utils.ps1 #for Invoke-NullCoalescing
-
 . $PSScriptRoot\..\src\SshUtils.ps1
 
 Describe 'SSH Function Tests' {
