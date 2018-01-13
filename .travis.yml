@@ -1,8 +1,13 @@
 language: generic
 
-matrix:
+stages:
+- linux
+- osx
+
+jobs:
   include:
-    - os: linux
+    - stage: linux
+      os: linux
       dist: trusty
       sudo: false
       addons:
@@ -15,7 +20,8 @@ matrix:
       before_install:
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
         - pwsh -c 'Install-Module Pester -Scope CurrentUser'
-    - if: branch = develop
+    - stage: osx
+      if: branch = develop
       os: osx
       before_install:
         - brew update
