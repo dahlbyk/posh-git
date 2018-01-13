@@ -15,6 +15,13 @@ matrix:
       before_install:
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
         - pwsh -c 'Install-Module Pester -Scope CurrentUser'
+    - os: osx
+      before_install:
+        - brew update
+        - brew tap caskroom/cask
+        - brew cask install powershell
+        - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
+        - pwsh -c 'Install-Module Pester -Scope CurrentUser'
 
 script:
   - pwsh -c 'Import-Module Pester; Invoke-Pester -EnableExit'
