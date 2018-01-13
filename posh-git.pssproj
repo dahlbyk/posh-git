@@ -1,0 +1,62 @@
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>6CAFC0C6-A428-4d30-A9F9-700E829FEA51</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>posh-git</RootNamespace>
+    <AssemblyName>posh-git</AssemblyName>
+    <Name>posh-git</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include=".editorconfig" />
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
+    <Content Include=".travis.yml" />
+    <Content Include="appveyor.yml" />
+    <Content Include="CHANGELOG.md" />
+    <Content Include="ISSUE_TEMPLATE.md" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="README.md" />
+    <Content Include="src/*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="install.ps1" />
+    <Compile Include="profile.example.ps1" />
+    <Compile Include="PSScriptAnalyzerSettings.psd1" />
+    <Compile Include="src\SshUtils.ps1" />
+    <Compile Include="test/*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="chocolatey/*" />
+    <Compile Include="chocolatey/tests/*" />
+    <Compile Include="chocolatey/tools/*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="chocolatey\" />
+    <Folder Include="chocolatey\tests\" />
+    <Folder Include="chocolatey\tools\" />
+    <Folder Include="src\" />
+    <Folder Include="test\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Target Name="Build" />
+  <Import Project="$(MSBuildExtensionsPath)\PowerShell Tools for Visual Studio\PowerShellTools.targets" Condition="Exists('$(MSBuildExtensionsPath)\PowerShell Tools for Visual Studio\PowerShellTools.targets')" />
+</Project>

@@ -1,3 +1,4 @@
 VERSION
 *.nupkg
 obj
+.vs/
