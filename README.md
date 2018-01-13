@@ -20,7 +20,7 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
 | AppVeyor (Windows) | Travis (Linux) | Travis (macOS) | Code Coverage Status |
 |--------------------|----------------|----------------|----------------------|
 | [![master build status][av-master-img]][av-master-site] | | | [![master build coverage][cc-master-img]][cc-master-site] |
-| [![develop build status][av-develop-img]][av-develop-site] | PLACEHOLDER | PLACEHOLDER | [![develop build coverage][cc-develop-img]][cc-develop-site] |
+| [![develop build status][av-develop-img]][av-develop-site] | [![develop pscore build status][tv-develop-img]][tv-develop-site] | PLACEHOLDER | [![develop build coverage][cc-develop-img]][cc-develop-site] |
 
 ## Supported Versions
 
@@ -290,6 +290,10 @@ For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the f
 [av-develop-img]: https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing
 [av-master-site]: https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master
 [av-master-img]: https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing
+
+[tv-develop-img]: https://travis-ci.org/dahlbyk/posh-git.svg?branch=develop
+[tv-develop-site]: https://travis-ci.org/dahlbyk/posh-git
+
 [cc-develop-img]: https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop
 [cc-develop-site]: https://coveralls.io/github/dahlbyk/posh-git?branch=develop
 [cc-master-img]: https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master
