@@ -15,7 +15,8 @@ matrix:
       before_install:
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
         - pwsh -c 'Install-Module Pester -Scope CurrentUser'
-    - os: osx
+    - if: branch = develop
+      os: osx
       before_install:
         - brew update
         - brew tap caskroom/cask
