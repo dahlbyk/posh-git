@@ -101,7 +101,7 @@ function Write-Prompt {
 
         if ($s.AnsiConsole) {
             if ($Object -is [PoshGitTextSpan]) {
-                $str = $Object.RenderAnsi()
+                $str = $Object.ToAnsiString()
             }
             else {
                 $e = [char]27 + "["
