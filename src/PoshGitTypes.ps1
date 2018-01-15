@@ -131,57 +131,7 @@ class PoshGitTextSpan {
         $this.CustomAnsi = $null
     }
 
-    [string] ToEscapedString() {
-        if ($global:GitPromptSettings.AnsiConsole) {
-            $ansiTerm = EscapseAnsiString ([char]27 + "[0m")
-
-            if ($this.CustomAnsi) {
-                $escAnsi = EscapseAnsiString $this.CustomAnsi
-                $str = "${escAnsi}$($this.Text)$ansiTerm"
-            }
-            else {
-                $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
-                $escAnsi = $color.ToEscapedString()
-                if ($escAnsi) {
-                    $str = "${escAnsi}$($this.Text)$ansiTerm"
-                }
-                else {
-                    $str = $this.Text
-                }
-            }
-        }
-        else {
-            $str = $this.Text
-        }
-
-        return $str
-    }
-
-    [string] ToString() {
-        if ($global:GitPromptSettings.AnsiConsole) {
-            if ($this.CustomAnsi) {
-                $e = [char]27 + "["
-                $ansi = $this.CustomAnsi
-                $escAnsi = EscapseAnsiString $this.CustomAnsi
-                $txt = $this.RenderAnsi()
-                $str = "Text: '$txt',`t CustomAnsi: '${ansi}${escAnsi}${e}0m'"
-            }
-            else {
-                $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
-                $txt = $this.RenderAnsi()
-                $str = "Text: '$txt',`t $($color.ToString())"
-            }
-        }
-        else {
-            $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
-            $txt = $this.Text
-            $str = "Text: '$txt',`t $($color.ToString())"
-        }
-
-        return $str
-    }
-
-    [string] RenderAnsi() {
+    [string] ToAnsiString() {
         $e = [char]27 + "["
         $txt = $this.Text
 
@@ -206,6 +156,41 @@ class PoshGitTextSpan {
             else {
                 $str = $txt
             }
+        }
+
+        return $str
+    }
+
+    [string] ToEscapedString() {
+        if ($global:GitPromptSettings.AnsiConsole) {
+            $str = EscapseAnsiString $this.ToAnsiString()
+        }
+        else {
+            $str = $this.Text
+        }
+
+        return $str
+    }
+
+    [string] ToString() {
+        if ($global:GitPromptSettings.AnsiConsole) {
+            if ($this.CustomAnsi) {
+                $e = [char]27 + "["
+                $ansi = $this.CustomAnsi
+                $escAnsi = EscapseAnsiString $this.CustomAnsi
+                $txt = $this.ToAnsiString()
+                $str = "Text: '$txt',`t CustomAnsi: '${ansi}${escAnsi}${e}0m'"
+            }
+            else {
+                $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
+                $txt = $this.ToAnsiString()
+                $str = "Text: '$txt',`t $($color.ToString())"
+            }
+        }
+        else {
+            $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
+            $txt = $this.Text
+            $str = "Text: '$txt',`t $($color.ToString())"
         }
 
         return $str
