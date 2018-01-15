@@ -1,6 +1,7 @@
 # posh-git
 
 [![Join the chat at https://gitter.im/dahlbyk/posh-git][gitter-img]][gitter]
+[![PowerShell Gallery][psgallery-badge-img]][psgallery-posh-git]
 
 ## Overview
 
@@ -35,12 +36,15 @@ See that version's [README][!!!PATH-TO-0x-README-HERE!!!] for installation instr
 ### posh-git v1.x
 
 Version 1.x of posh-git is targeted specifically at Windows PowerShell 5.x and (cross-platform)
-PowerShell Core 6.x, both of which support writing prompt strings using [ANSI escape sequences][ansi-esc-code].
-On Windows, support for [Console Virtual Terminal Sequences][console-vt-seq] was added in Windows 10 version 1511.
+PowerShell Core 6.x.  It takes advantage of features only available in these versions such as the
+class and enum keywords to better organize the `$GitPromptSettings` object.
 Consequently this version of posh-git introduces BREAKING changes with 0.x which including dropping support
-for Windows PowerShell version 2, 3 and 4 since these versions of PowerShell do not run on platforms that
-have ANSI escape sequence capability.
-There are a few other breaking changes, see the [CHANGELOG][./CHANGELOG.md] for details.
+for Windows PowerShell version 2, 3 and 4. There are a few other breaking changes, see the
+[CHANGELOG](./CHANGELOG.md) for details.
+
+In addition, version 1.x is able to render prompt status strings using [ANSI escape sequences][ansi-esc-code].
+This can be used in hosts that support virtual terminal escape sequences such as PowerShell Core on Linux,
+macOS and Windows.  On Windows, support for [Console Virtual Terminal Sequences][console-vt-seq] was added in Windows 10 version 1511.
 
 The rest of this readme applies only to the posh-git version 1.x.
 
@@ -80,11 +84,11 @@ Before installing posh-git make sure the following prerequisites have been met.
    Get PowerShell Core 6.0 for Windows, Linux or macOS from [here][pscore-install].
    You can check your PowerShell version by executing `$PSVersionTable.PSVersion`.
 
-1. On Windows, script execution policy must be set to either `RemoteSigned` or `Unrestricted`.
+2. On Windows, script execution policy must be set to either `RemoteSigned` or `Unrestricted`.
    Check the script execution policy setting by executing `Get-ExecutionPolicy`.
    If the policy is not set to one of the two required values, run PowerShell as Administrator and execute `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm`.
 
-1. Git must be installed and available via the PATH environment variable.
+3. Git must be installed and available via the PATH environment variable.
    Check that `git` is accessible from PowerShell by executing `git --version` from PowerShell.
    If `git` is not recognized as the name of a command verify that you have Git installed.
    If not, install Git from [https://git-scm.com](https://git-scm.com).
@@ -99,8 +103,8 @@ Start either Windows PowerShell 5.x or PowerShell Core 6.x (`pwsh`) and execute 
 Install-Module posh-git -Scope CurrentUser -Force
 ```
 
-- If you are asked to trust packages coming from the PowerShell Gallery.
-  Answer yes to allow installation of this module.
+- If you are asked to trust packages coming from the PowerShell Gallery,
+  answer yes to allow installation of this module.
 - If you get an error message from `Install-Module` about NuGet being required to interact with
   NuGet-based repositories, execute the following commands to bootstrap the NuGet provider and then retry
   the command above:
@@ -305,3 +309,5 @@ For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the f
 [gitter]: https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 [pscore-install]: https://github.com/PowerShell/PowerShell#get-powershell
 [psgallery]: https://www.powershellgallery.com/packages/posh-git/1.0.0-beta1
+[psgallery-badge-img]: https://img.shields.io/powershellgallery/dt/posh-git.svg
+[psgallery-posh-git]: https://powershellgallery.com/packages/posh-git
