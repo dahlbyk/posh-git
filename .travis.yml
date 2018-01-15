@@ -7,7 +7,7 @@ branches:
 stages:
 - name: linux
 - name: osx
-  if: branch = develop
+  if: type != pull_request
 
 jobs:
   include:
@@ -25,8 +25,7 @@ jobs:
       before_install:
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
         - pwsh -c 'Install-Module Pester -Scope CurrentUser'
-    - if: branch = develop
-      stage: osx
+    - stage: osx
       os: osx
       before_install:
         - brew update
