@@ -7,7 +7,7 @@ branches:
 stages:
 - name: linux
 - name: osx
-  if: type != pull_request
+  if: type != pull_request OR head_branch = rkeithhill/fix-pester-tests
 
 jobs:
   include:
