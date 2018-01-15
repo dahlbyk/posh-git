@@ -1,7 +1,8 @@
 # posh-git
 
 [![Join the chat at https://gitter.im/dahlbyk/posh-git][gitter-img]][gitter]
-[![PowerShell Gallery][psgallery-badge-img]][psgallery-posh-git]
+[![PowerShell Gallery][psgallery-img]][psgallery-site]
+[![posh-git on Chocolatey][choco-img]][choco-site]
 
 ## Overview
 
@@ -18,10 +19,10 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
 
 ### Build status
 
-| AppVeyor (Windows) | Travis (Linux) | Travis (macOS) | Code Coverage Status |
-|--------------------|----------------|----------------|----------------------|
-| [![master build status][av-master-img]][av-master-site] | | | [![master build coverage][cc-master-img]][cc-master-site] |
-| [![develop build status][av-develop-img]][av-develop-site] | [![develop pscore build status][tv-develop-img]][tv-develop-site] | PLACEHOLDER | [![develop build coverage][cc-develop-img]][cc-develop-site] |
+| AppVeyor (Windows) | Travis (Linux) | Code Coverage Status |
+|--------------------|----------------|----------------------|
+| [![master build status][av-master-img]][av-master-site] | | [![master build coverage][cc-master-img]][cc-master-site] |
+| [![develop build status][av-develop-img]][av-develop-site] | [![develop pscore build status][tv-develop-img]][tv-develop-site] | [![develop build coverage][cc-develop-img]][cc-develop-site] |
 
 ## Supported Versions
 
@@ -96,7 +97,7 @@ Before installing posh-git make sure the following prerequisites have been met.
 
 ### Installing posh-git
 
-posh-git is available on the [PowerShell Gallery][psgallery] and can be installed using the PowerShellGet module.
+posh-git is available on the [PowerShell Gallery][psgallery-beta1] and can be installed using the PowerShellGet module.
 Start either Windows PowerShell 5.x or PowerShell Core 6.x (`pwsh`) and execute the following command:
 
 ```powershell
@@ -308,6 +309,9 @@ For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the f
 [gitter-img]: https://badges.gitter.im/dahlbyk/posh-git.svg
 [gitter]: https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 [pscore-install]: https://github.com/PowerShell/PowerShell#get-powershell
-[psgallery]: https://www.powershellgallery.com/packages/posh-git/1.0.0-beta1
-[psgallery-badge-img]: https://img.shields.io/powershellgallery/dt/posh-git.svg
-[psgallery-posh-git]: https://powershellgallery.com/packages/posh-git
+
+[choco-img]: https://img.shields.io/chocolatey/dt/poshgit.svg
+[choco-site]: https://chocolatey.org/packages/poshgit/
+[psgallery-beta1]: https://www.powershellgallery.com/packages/posh-git/1.0.0-beta1
+[psgallery-img]: https://img.shields.io/powershellgallery/dt/posh-git.svg
+[psgallery-site]: https://powershellgallery.com/packages/posh-git
