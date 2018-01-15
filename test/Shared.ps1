@@ -4,11 +4,11 @@ $moduleManifestPath = "$modulePath\posh-git.psd1"
 $csi = [char]0x1b + "["
 if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
     # On Windows, we can access the git binary via git.exe
-    $global:gitbin = Get-Command -Name git -CommandType Application
+    $global:gitbin = Get-Command -Name git -CommandType Application -TotalCount 1
 }
 else {
     # On Linux/macOS, we can access the git binary via its path /usr/bin/git
-    $global:gitbin = (Get-Command -Name git -CommandType Application).Path
+    $global:gitbin = (Get-Command -Name git -CommandType Application -TotalCount 1).Path
 }
 
 # We need this or the Git mocks don't work
