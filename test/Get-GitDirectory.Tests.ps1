@@ -38,18 +38,18 @@ Describe 'Get-GitDiretory Tests' {
             $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
             $worktreePath = Join-Path $temp ([IO.Path]::GetRandomFileName())
 
-            git init $repoPath
+            &$gitbin init $repoPath
             Set-Location $repoPath
             'foo' > ./README.md
-            git add ./README.md
+            &$gitbin add ./README.md
             # Quoting is a hack due to our use of the global:git function and how it converts args for invoke-expression
-            git commit -m "`"initial commit.`""
+            &$gitbin commit -m "`"initial commit.`""
 
             if (Test-Path $worktreePath) {
                 Remove-Item $worktreePath -Recurse -Force
             }
             New-Item $worktreePath -ItemType Directory > $null
-            git worktree add -b test-worktree $worktreePath master 2>$null
+            &$gitbin worktree add -b test-worktree $worktreePath master 2>$null
         }
         AfterEach {
             Set-Location $origPath
@@ -78,7 +78,7 @@ Describe 'Get-GitDiretory Tests' {
             if (Test-Path $bareRepoPath) {
                 Remove-Item $bareRepoPath -Recurse -Force
             }
-            git init --bare $bareRepoPath
+            &$gitbin init --bare $bareRepoPath
         }
         AfterAll {
             Set-Location $origPath

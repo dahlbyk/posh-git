@@ -7,10 +7,10 @@ Describe 'TabExpansion Tests' {
     Context 'Fetch/Push/Pull TabExpansion Tests' {
         BeforeEach {
             # Ensure master branch exists
-            git branch -q master origin/master 2>$null
+            &$gitbin branch -q master origin/master 2>$null
         }
         It 'Tab completes all remotes' {
-            (git remote) -contains 'origin' | Should Be $true
+            (&$gitbin remote) -contains 'origin' | Should Be $true
 
             $result = & $module GitTabExpansionInternal 'git push '
             $result -contains 'origin' | Should Be $true
@@ -109,11 +109,11 @@ Describe 'TabExpansion Tests' {
 
         It 'Tab completes branch names with - and -- in them' {
             $branchName = 'branch--for-Pester-tests'
-            if (git branch --list -q $branchName) {
-                git branch -D $branchName
+            if (&$gitbin branch --list -q $branchName) {
+                &$gitbin branch -D $branchName
             }
 
-            git branch $branchName
+            &$gitbin branch $branchName
             try {
                 $result = & $module GitTabExpansionInternal 'git push origin branch-'
                 $result | Should BeExactly $branchName
@@ -122,7 +122,7 @@ Describe 'TabExpansion Tests' {
                 $result -contains $branchName | Should Be $true
             }
             finally {
-                git branch -D $branchName
+                &$gitbin branch -D $branchName
             }
         }
     }
@@ -136,7 +136,7 @@ Describe 'TabExpansion Tests' {
             RemoveGitTempRepo $repoPath
         }
         It 'Tab completes non-ASCII file name' {
-            git config core.quotepath true # Problematic (default) config
+            &$gitbin config core.quotepath true # Problematic (default) config
 
             $fileName = "posh$([char]8226)git.txt"
             New-Item $fileName -ItemType File
@@ -151,8 +151,8 @@ Describe 'TabExpansion Tests' {
     Context 'Alias TabExpansion Tests' {
         $addedAliases = @()
         function Add-GlobalTestAlias($Name, $Value) {
-            if (!(git config --global "alias.$Name")) {
-                git config --global "alias.$Name" $Value
+            if (!(&$gitbin config --global "alias.$Name")) {
+                &$gitbin config --global "alias.$Name" $Value
                 $addedAliases += $Name
             }
         }
@@ -162,7 +162,7 @@ Describe 'TabExpansion Tests' {
         }
         AfterAll {
             $addedAliases | Where-Object { $_ } | ForEach-Object {
-                git config --global --unset "alias.$_" 2>$null
+                &$gitbin config --global --unset "alias.$_" 2>$null
             }
 
             RemoveGitTempRepo $repoPath
@@ -171,8 +171,8 @@ Describe 'TabExpansion Tests' {
             $alias = "test-$(New-Guid)"
 
             Add-GlobalTestAlias $alias config
-            git config alias.$alias help
-            (git config --get-all alias.$alias).Count | Should Be 2
+            &$gitbin config alias.$alias help
+            (&$gitbin config --get-all alias.$alias).Count | Should Be 2
 
             $result = @(& $module GitTabExpansionInternal "git $alias")
             $result.Count | Should Be 1
@@ -181,8 +181,8 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes when there is one alias of a given name' {
             $alias = "test-$(New-Guid)"
 
-            git config alias.$alias checkout
-            (git config --get-all alias.$alias).Count | Should Be 1
+            &$gitbin config alias.$alias checkout
+            (&$gitbin config --get-all alias.$alias).Count | Should Be 1
 
             $result = & $module GitTabExpansionInternal "git $alias ma"
             $result | Should BeExactly 'master'
@@ -190,8 +190,8 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes when there are multiple aliases of the same name' {
             Add-GlobalTestAlias co checkout
 
-            git config alias.co checkout
-            (git config --get-all alias.co).Count | Should BeGreaterThan 1
+            &$gitbin config alias.co checkout
+            (&$gitbin config --get-all alias.co).Count | Should BeGreaterThan 1
 
             $result = & $module GitTabExpansionInternal 'git co ma'
             $result | Should BeExactly 'master'

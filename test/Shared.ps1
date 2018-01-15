@@ -65,7 +65,7 @@ function NewGitTempRepo([switch]$MakeInitialCommit) {
 
 function RemoveGitTempRepo($RepoPath) {
     Pop-Location
-    if (Test-Path $repoPath) {
+    if ($repoPath -and (Test-Path $repoPath)) {
         Remove-Item $repoPath -Recurse -Force
     }
 }

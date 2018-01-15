@@ -30,6 +30,7 @@ function Clean-Environment {
 }
 
 Describe "Install-Posh-Git" {
+
     It "WillRemvePreviousInstallVersion" {
         Setup-Environment
         try{
