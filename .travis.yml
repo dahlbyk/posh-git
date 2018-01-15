@@ -25,7 +25,8 @@ jobs:
       before_install:
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
         - pwsh -c 'Install-Module Pester -Scope CurrentUser'
-    - stage: osx
+    - if: branch = develop
+      stage: osx
       os: osx
       before_install:
         - brew update
