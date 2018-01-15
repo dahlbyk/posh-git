@@ -77,7 +77,7 @@ function ResetGitTempRepoWorkingDir($RepoPath, $Branch = 'master') {
 }
 
 Remove-Item Function:\prompt
-Remove-Module posh-git -Force 3>$null
+Remove-Module posh-git -Force *>$null
 
 # Force the posh-git prompt to be installed. Could be runnng on dev system where
 # user has customized the prompt.

@@ -1,5 +1,11 @@
 ﻿$packageName = "poshgit"
-cpack
+if (($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows) {
+    cpack
+    $binRoot = join-path $env:systemdrive 'tools'
+    if($null -ne $env:chocolatey_bin_root){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
+    $poshgitPath = join-path $binRoot 'poshgit'
+    if(Test-Path $Profile) { $currentProfileScript = (Get-Content $Profile) }
+}
 
 function Setup-Environment {
     Cleanup
@@ -20,17 +26,17 @@ function Clean-Temp {
 function RunInstall {
     cinst $packageName -source (Resolve-Path .)
 }
-$binRoot = join-path $env:systemdrive 'tools'
-if($null -ne $env:chocolatey_bin_root){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
-$poshgitPath = join-path $binRoot 'poshgit'
-if(Test-Path $Profile) { $currentProfileScript = (Get-Content $Profile) }
 
 function Clean-Environment {
     Set-Content $Profile -value $currentProfileScript -Force
 }
 
 Describe "Install-Posh-Git" {
-
+    BeforeAll {
+        if (($PSVersionTable.PSVersion.Major -ge 6) -and !$IsWindows) {
+            $PSDefaultParameterValues["it:skip"] = $true
+        }
+    }
     It "WillRemvePreviousInstallVersion" {
         Setup-Environment
         try{
