@@ -24,7 +24,7 @@ $AnsiEscape = [char]27 + "["
 $ColorTranslatorType = 'System.Drawing.ColorTranslator' -as [Type]
 $ColorType = 'System.Drawing.Color' -as [Type]
 
-function EscapseAnsiString([string]$AnsiString) {
+function EscapeAnsiString([string]$AnsiString) {
     if ($PSVersionTable.PSVersion.Major -ge 6) {
         $res = $AnsiString -replace "$([char]27)", '`e'
     }

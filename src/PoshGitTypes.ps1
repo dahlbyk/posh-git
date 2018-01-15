@@ -27,7 +27,7 @@ class PoshGitCellColor {
             $str = "<default>"
         }
         elseif (Test-VirtualTerminalSequece $color) {
-            $txt = EscapseAnsiString $color
+            $txt = EscapeAnsiString $color
             $str = "${color}${colorSwatch}${ansiTerm} $txt"
         }
         else {
@@ -53,21 +53,21 @@ class PoshGitCellColor {
 
         if ($this.ForegroundColor) {
             if (Test-VirtualTerminalSequece $this.ForegroundColor) {
-                $str += EscapseAnsiString $this.ForegroundColor
+                $str += EscapeAnsiString $this.ForegroundColor
             }
             else {
                 $seq = Get-ForegroundVirtualTerminalSequence $this.ForegroundColor
-                $str += EscapseAnsiString $seq
+                $str += EscapeAnsiString $seq
             }
         }
 
         if ($this.BackgroundColor) {
             if (Test-VirtualTerminalSequece $this.BackgroundColor) {
-                $str += EscapseAnsiString $this.BackgroundColor
+                $str += EscapeAnsiString $this.BackgroundColor
             }
             else {
                 $seq = Get-BackgroundVirtualTerminalSequence $this.BackgroundColor
-                $str += EscapseAnsiString $seq
+                $str += EscapeAnsiString $seq
             }
         }
 
@@ -163,7 +163,7 @@ class PoshGitTextSpan {
 
     [string] ToEscapedString() {
         if ($global:GitPromptSettings.AnsiConsole) {
-            $str = EscapseAnsiString $this.ToAnsiString()
+            $str = EscapeAnsiString $this.ToAnsiString()
         }
         else {
             $str = $this.Text
@@ -177,7 +177,7 @@ class PoshGitTextSpan {
             if ($this.CustomAnsi) {
                 $e = [char]27 + "["
                 $ansi = $this.CustomAnsi
-                $escAnsi = EscapseAnsiString $this.CustomAnsi
+                $escAnsi = EscapeAnsiString $this.CustomAnsi
                 $txt = $this.ToAnsiString()
                 $str = "Text: '$txt',`t CustomAnsi: '${ansi}${escAnsi}${e}0m'"
             }
