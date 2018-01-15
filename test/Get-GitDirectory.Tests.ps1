@@ -15,7 +15,7 @@ Describe 'Get-GitDiretory Tests' {
             Get-GitDirectory | Should BeNullOrEmpty
         }
         It 'Returns $null for not a filesystem path' {
-            Set-Location Cert:\CurrentUser
+            Set-Location Alias:\
             Get-GitDirectory | Should BeNullOrEmpty
         }
         It 'Returns correct path when in the root of repo' {
@@ -40,8 +40,8 @@ Describe 'Get-GitDiretory Tests' {
 
             git init $repoPath
             Set-Location $repoPath
-            'foo' > .\README.md
-            git add .\README.md
+            'foo' > ./README.md
+            git add ./README.md
             # Quoting is a hack due to our use of the global:git function and how it converts args for invoke-expression
             git commit -m "`"initial commit.`""
 
@@ -102,7 +102,7 @@ Describe 'Get-GitDiretory Tests' {
             Remove-Item Env:\GIT_DIR -ErrorAction SilentlyContinue
         }
         It 'Returns the value in GIT_DIR env var' {
-            $env:GIT_DIR = 'C:\xyzzy\posh-git\.git'
+            $env:GIT_DIR = MakeNativePath '/xyzzy/posh-git/.git'
             Get-GitDirectory | Should BeExactly $env:GIT_DIR
         }
     }
