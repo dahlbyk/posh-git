@@ -1,13 +1,12 @@
 . $PSScriptRoot\Shared.ps1
 
-function GetMacOSAdjustedTempPath($path) {
+function GetMacOSAdjustedTempPath($Path) {
     if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsMacOS) {
         # Mac OS's temp folder has a symlink in its path - /var is linked to /private/var
-        $path = "/private" + $path
+        return "/private${Path}"
     }
-    else {
-        $path
-    }
+
+    $Path
 }
 
 Describe 'Get-GitDiretory Tests' {
