@@ -99,6 +99,7 @@ $global:GitPromptSettings = [pscustomobject]@{
     DescribeStyle                               = ''
 
     EnableWindowTitle                           = 'posh~git ~ '
+    AdminTitlePrefixText                        = 'Administrator: '
 
     DefaultPromptPrefix                         = ''
     DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
@@ -113,8 +114,6 @@ $global:GitPromptSettings = [pscustomobject]@{
 }
 
 $isAdminProcess = Test-Administrator
-
-$adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
 
 $WindowTitleSupported = $true
 if (Get-Module NuGet) {
@@ -292,7 +291,8 @@ function Write-GitStatus($status) {
             }
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-            $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($status.Branch)]"
+            $adminHeader = if ($script:isAdminProcess) { $s.AdminTitlePrefixText } else { '' }
+            $Host.UI.RawUI.WindowTitle = "$adminHeader$prefix$repoName [$($status.Branch)]"
         }
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
