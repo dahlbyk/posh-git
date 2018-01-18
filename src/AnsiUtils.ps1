@@ -61,12 +61,14 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
             if ($ColorTranslatorType) {
                 $color = $ColorTranslatorType::FromHtml($color)
             }
-            elseif ($null -ne ($color -as [System.ConsoleColor])) {
-                $color = [System.ConsoleColor]$color
-            }
         }
         catch {
             Write-Debug $_
+        }
+
+        # Hard to get here but DarkYellow is not an HTML color but is a ConsoleColor
+        if (($color -isnot $ColorType) -and ($null -ne ($consoleColor = $color -as [System.ConsoleColor]))) {
+            $color = $consoleColor
         }
     }
 
