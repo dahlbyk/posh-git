@@ -171,10 +171,42 @@ function GetUniquePaths($pathCollections) {
 
 $castStringSeq = [Linq.Enumerable].GetMethod("Cast").MakeGenericMethod([string])
 
-function Get-GitStatus($gitDir = (Get-GitDirectory)) {
+<#
+.SYNOPSIS
+    Gets a Git status object that is used by Write-GitStatus.
+.DESCRIPTION
+    Gets a Git status object that is used by Write-GitStatus.
+    The status object provides the information to be displayed in the various
+    sections of the posh-git prompt.
+.EXAMPLE
+    PS C:\> $s = Get-GitStatus; Write-GitStatus $s
+    Gets a Git status object. Then passes the object to Write-GitStatus which
+    writes out a posh-git prompt (or returns a string in ANSI mode) with the
+    information contained in the status object.
+.INPUTS
+    None
+.OUTPUTS
+    System.Management.Automation.PSObject
+.LINK
+    Write-GitStatus
+#>
+function Get-GitStatus {
+    param(
+        # The path of a directory within a Git repository that you want to get
+        # the Git status.
+        [Parameter(Position=0)]
+        $GitDir = (Get-GitDirectory),
+
+        # If specified, overrides $GitPromptSettings.EnablePromptStatus when it
+        # is set to $false.
+        [Parameter()]
+        [switch]
+        $Force
+    )
+
     $settings = $Global:GitPromptSettings
-    $enabled = (-not $settings) -or $settings.EnablePromptStatus
-    if ($enabled -and $gitDir) {
+    $enabled = $Force -or !$settings -or $settings.EnablePromptStatus
+    if ($enabled -and $GitDir) {
         if($settings.Debug) {
             $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
         }
@@ -196,7 +228,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $gitDir) -and !$(InDisabledRepository)) {
+        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
             if ($null -eq $settings.EnableFileStatusFromCache) {
                 $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
@@ -285,7 +317,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             }
         }
 
-        if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
+        if(!$branch) { $branch = Get-GitBranch $GitDir $sw }
 
         dbg 'Building status object' $sw
         #
@@ -307,7 +339,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             Add-Member -Force -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
 
         $result = New-Object PSObject -Property @{
-            GitDir          = $gitDir
+            GitDir          = $GitDir
             Branch          = $branch
             AheadBy         = $aheadBy
             BehindBy        = $behindBy
