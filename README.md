@@ -181,34 +181,39 @@ posh-git will not update your PowerShell prompt function if you have your own, c
 
 The posh-git prompt is a single line prompt that looks like this:
 
-```powershell
+```text
 C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 
 You can customize the posh-git prompt or define your own custom prompt function.
-The most common customization for the posh-git provided prompt is to make it span two lines which can be done with the following command:
+If you would like to make your prompt span two lines with the "prompt suffix string" starting
+on a newline, execute the following command:
 
 ```powershell
-$GitPromptSettings.DefaultPromptSuffix = '`n$(''>'' * ($nestedPromptLevel + 1)) '
+$GitPromptSettings.DefaultPromptSuffix.Text = '`n$(''>'' * ($nestedPromptLevel + 1)) '
 ```
 
 This will change the prompt to:
 
-```powershell
+```text
 C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]
 >
 ```
 
+If you'd like to make this change available whenever you start PowerShell,
+put the command above in one of your profile scripts.
+
 You can also customize the default prompt prefix text e.g.:
 
 ```powershell
-$GitPromptSettings.DefaultPromptPrefix = '[$(hostname)] '
+$GitPromptSettings.DefaultPromptPrefix.Text = '[${env:USERNAME}:$(hostname)] '
+$GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::DarkMagenta
 ```
 
 This will change the prompt to:
 
-```powershell
-[KEITH1] C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
+```text
+[Keith:KEITH1] C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 
 And if you would prefer to have any path under your home directory abbreviated with ~, you can change this setting:
@@ -217,14 +222,51 @@ And if you would prefer to have any path under your home directory abbreviated w
 $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
 ```
 
-This will change the prompt to the one shown below:
+You can also change the color of the path e.g.:
 
 ```powershell
+$GitPromptSettings.DefaultPromptPath.ForegroundColor = 'Orange'
+```
+
+This will change the prompt to the one shown below:
+
+```text
 ~\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
 ```
 
-You can also create your own prompt function to show whatever information you want.
-See the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt) wiki page for details.
+Setting the ForegroundColor to a color name other than the standard ConsoleColor names only works on Windows. posh-git uses the `System.Drawing.ColorTranslator.FromHtml()` static method to parse the color name as an HTML color. For a complete list of HTML colors, see this [W3Schools page][w3schools-colors].
+
+If you are on Linux or macOS and desire an Orange path, you can specify the RGB value as an int e.g.:
+
+```powershell
+$GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
+```
+
+If you require more customization than `$GitPromptSettings` provides, you can create your own prompt function to show whatever information you want. See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details. However, if you already have a custom prompt and want to display posh-git's default
+prompt, that can be done with the `$GitPromptScriptBlock` variable e.g.:
+
+```powershell
+# my profile.ps1
+function prompt {
+    # Your non-prompt logic here
+
+    # Have posh-git display its default prompt
+    & $GitPromptScriptBlock
+}
+```
+
+And if you'd like to write prompt text before and/or after the posh-git default prompt:
+
+```powershell
+# my profile.ps1
+function prompt {
+    # Your non-prompt logic here
+    $prompt = Write-Prompt "Text before posh-git prompt" -ForegroundColor Orange
+    $prompt += & $GitPromptScriptBlock
+    $prompt += Write-Prompt "Text after posh-git prompt" -ForegroundColor ([ConsoleColor]::Magenta)
+    if ($prompt) { $prompt } else { " " } # Prevents PowerShell from appending "PS>"
+}
+```
 
 ## Git Status Summary Information
 
@@ -315,3 +357,6 @@ For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the f
 [psgallery-beta1]: https://www.powershellgallery.com/packages/posh-git/1.0.0-beta1
 [psgallery-img]: https://img.shields.io/powershellgallery/dt/posh-git.svg
 [psgallery-site]: https://powershellgallery.com/packages/posh-git
+[w3schools-colors]: https://www.w3schools.com/colors/colors_names.asp
+
+[wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
