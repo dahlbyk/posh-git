@@ -1,7 +1,7 @@
 ﻿# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
-$global:GitPromptSettings = [GitPromptSettings]::new()
+$global:GitPromptSettings = [PoshGitPromptSettings]::new()
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
 $s = $global:GitPromptSettings
@@ -13,15 +13,19 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.WorkingColor.ForegroundColor             = 'Red'
 }
 
-$isAdminProcess = Test-Administrator
-$adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
+$IsAdmin = Test-Administrator
 
-$WindowTitleSupported = $true
-# TODO: Hmm, this is a curious way to detemine window title supported
-# Could do $host.Name -eq "Package Manager Host" but that is kinda specific
-# Could attempt to change it and catch any exception and then set this to $false
-if (Get-Module NuGet) {
-    $WindowTitleSupported = $false
+# Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
+$WindowTitleSupported = $false
+try {
+    $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
+    $newTitle = "$origTitle "
+    $Host.UI.RawUI.WindowTitle = $newTitle
+    $WindowTitleSupported = $Host.UI.RawUI.WindowTitle -eq $newTitle
+    $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+}
+catch {
+    Write-Debug "Probing for WindowTitleSupported errored: $_"
 }
 
 <#
@@ -218,14 +222,28 @@ function Write-GitStatus {
 
     $sb | Write-Prompt $s.AfterText > $null
 
-    if ($WindowTitleSupported -and $s.EnableWindowTitle) {
-        if (!$global:PreviousWindowTitle) {
-            $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
+    if ($WindowTitleSupported) {
+        if (!$s.EnableWindowTitle) {
+            if ($global:PreviousWindowTitle) {
+                $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+            }
         }
+        else {
+            try {
+                if ($s.WindowTitle -is [scriptblock]) {
+                    $windowTitleText = & $s.WindowTitle $Status $IsAdmin
+                }
+                else {
+                    $windowTitleText = $ExecutionContext.SessionState.InvokeCommand.ExpandString("$($s.WindowTitle)")
+                }
 
-        $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
-        $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-        $Host.UI.RawUI.WindowTitle = "${script:adminHeader}${prefix}${repoName} [$($Status.Branch)]"
+                # Put $windowTitleText in a string to ensure results returned by scriptblock are flattened to a string
+                $Host.UI.RawUI.WindowTitle = "$windowTitleText"
+            }
+            catch {
+                Write-Debug "Error occurred during evaluation of `$GitPromptSettings.WindowTitle: $_"
+            }
+        }
     }
 
     return $sb.ToString()

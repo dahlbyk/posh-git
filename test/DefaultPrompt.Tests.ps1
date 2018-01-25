@@ -7,7 +7,7 @@ Describe 'Default Prompt Tests - NO ANSI' {
     }
     BeforeEach {
         # Ensure these settings start out set to the default values
-        $global:GitPromptSettings = & $module.NewBoundScriptBlock({[GitPromptSettings]::new()})
+        $global:GitPromptSettings = & $module.NewBoundScriptBlock({[PoshGitPromptSettings]::new()})
         $GitPromptSettings.AnsiConsole = $false
     }
 
@@ -99,7 +99,7 @@ Describe 'Default Prompt Tests - ANSI' {
     }
     BeforeEach {
         # Ensure these settings start out set to the default values
-        $global:GitPromptSettings = & $module.NewBoundScriptBlock({[GitPromptSettings]::new()})
+        $global:GitPromptSettings = & $module.NewBoundScriptBlock({[PoshGitPromptSettings]::new()})
         $GitPromptSettings.AnsiConsole = $true
     }
 
@@ -191,6 +191,64 @@ A  test/Foo.Tests.ps1
             $res = [string](&$prompt 6>&1)
             Assert-MockCalled git -ModuleName posh-git
             $res | Should BeExactly "$PSScriptRoot${csi}93m [${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}93m |${csi}0m${csi}31m${csi}49m +0${csi}0m${csi}31m${csi}49m ~1${csi}0m${csi}31m${csi}49m -1${csi}0m${csi}31m !${csi}0m${csi}93m]${csi}0m> "
+        }
+    }
+}
+
+Describe 'Default Prompt Window Title Tests' {
+    BeforeEach {
+        # Ensure these settings start out set to the default values
+        $defaultTitle = if ($IsWindows) { "Windows PowerShell" } else { "PowerShell-$($PSVersionTable.PSVersion)" }
+        $Host.UI.RawUI.WindowTitle = $defaultTitle
+        $global:PreviousWindowTitle = $defaultTitle
+        $global:GitPromptSettings = & $module.NewBoundScriptBlock({[PoshGitPromptSettings]::new()})
+    }
+
+    Context 'Default WindowTitle / EnableWindowTitle work ' {
+        It 'Sets the expected Window title text' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+A  test/Foo.Tests.ps1
+ D test/Bar.Tests.ps1
+ M test/Baz.Tests.ps1
+
+'@
+            }
+
+            Set-Location $PSScriptRoot
+            & $GitPromptScriptBlock *>$null
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $title = $Host.UI.RawUI.WindowTitle
+            $title | Should Match '(Admin: )?posh~git ~ posh-git \[master\]'
+        }
+        It 'Does not set Window title when EnableWindowText is $false' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+A  test/Foo.Tests.ps1
+ D test/Bar.Tests.ps1
+ M test/Baz.Tests.ps1
+
+'@
+            }
+
+            Set-Location $PSScriptRoot
+            $GitPromptSettings.EnableWindowTitle = 0
+            & $GitPromptScriptBlock *>$null
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $title = $Host.UI.RawUI.WindowTitle
+            $title | Should Match '^(Windows )?PowerShell'
         }
     }
 }
