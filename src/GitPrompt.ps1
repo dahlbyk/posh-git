@@ -13,21 +13,6 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.WorkingColor.ForegroundColor             = 'Red'
 }
 
-$IsAdmin = Test-Administrator
-
-# Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
-$WindowTitleSupported = $false
-try {
-    $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
-    $newTitle = "$origTitle "
-    $Host.UI.RawUI.WindowTitle = $newTitle
-    $WindowTitleSupported = $Host.UI.RawUI.WindowTitle -eq $newTitle
-    $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
-}
-catch {
-    Write-Debug "Probing for WindowTitleSupported errored: $_"
-}
-
 <#
 .SYNOPSIS
     Writes the object to the display or renders it as a string using ANSI/VT sequences.
@@ -146,7 +131,7 @@ function Write-Prompt {
         return $StringBuilder
     }
 
-    return ""
+    ""
 }
 
 <#
@@ -187,10 +172,6 @@ function Write-GitStatus {
 
     $s = $global:GitPromptSettings
     if (!$Status -or !$s) {
-        if ($global:PreviousWindowTitle) {
-            $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
-        }
-
         return ""
     }
 
@@ -202,7 +183,6 @@ function Write-GitStatus {
 
     if ($s.EnableFileStatus -and $Status.HasIndex) {
         $sb | Write-Prompt $s.BeforeIndexText > $null
-
         $sb | Write-GitIndexStatus $Status > $null
 
         if ($Status.HasWorking) {
@@ -222,31 +202,7 @@ function Write-GitStatus {
 
     $sb | Write-Prompt $s.AfterText > $null
 
-    if ($WindowTitleSupported) {
-        if (!$s.EnableWindowTitle) {
-            if ($global:PreviousWindowTitle) {
-                $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
-            }
-        }
-        else {
-            try {
-                if ($s.WindowTitle -is [scriptblock]) {
-                    $windowTitleText = & $s.WindowTitle $Status $IsAdmin
-                }
-                else {
-                    $windowTitleText = $ExecutionContext.SessionState.InvokeCommand.ExpandString("$($s.WindowTitle)")
-                }
-
-                # Put $windowTitleText in a string to ensure results returned by scriptblock are flattened to a string
-                $Host.UI.RawUI.WindowTitle = "$windowTitleText"
-            }
-            catch {
-                Write-Debug "Error occurred during evaluation of `$GitPromptSettings.WindowTitle: $_"
-            }
-        }
-    }
-
-    return $sb.ToString()
+    $sb.ToString()
 }
 
 <#

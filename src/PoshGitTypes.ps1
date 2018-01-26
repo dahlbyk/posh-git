@@ -245,8 +245,7 @@ class PoshGitPromptSettings {
     [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
     [string]$DescribeStyle   = ''
-    [bool]$EnableWindowTitle = $true
-    [psobject]$WindowTitle   = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Admin: '})posh~git ~ $($GitStatus.RepoName) [$($GitStatus.Branch)]"}
+    [psobject]$WindowTitle   = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Administrator: '})posh~git ~ $($GitStatus.RepoName) [$($GitStatus.Branch)]"}
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = ''
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(''>'' * ($nestedPromptLevel + 1)) '

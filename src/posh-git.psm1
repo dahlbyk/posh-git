@@ -16,6 +16,21 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
 if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
+$IsAdmin = Test-Administrator
+
+# Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
+$WindowTitleSupported = $false
+try {
+    $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
+    $newTitle = "${global:PreviousWindowTitle} "
+    $Host.UI.RawUI.WindowTitle = $newTitle
+    $WindowTitleSupported = ($Host.UI.RawUI.WindowTitle -eq $newTitle)
+    $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+}
+catch {
+    Write-Debug "Probing for WindowTitleSupported errored: $_"
+}
+
 # Get the default prompt definition.
 $initialSessionState = [Runspace]::DefaultRunspace.InitialSessionState
 if (!$initialSessionState.Commands -or !$initialSessionState.Commands['prompt']) {
@@ -29,6 +44,10 @@ else {
 $GitPromptScriptBlock = {
     $settings = $global:GitPromptSettings
     if (!$settings) {
+        if ($WindowTitleSupported -and $global:PreviousWindowTitle) {
+            $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+        }
+
         return "<`$GitPromptSettings not found> "
     }
 
@@ -68,6 +87,36 @@ $GitPromptScriptBlock = {
     # If user specifies $null or empty string, set to ' ' to avoid "PS>" unexpectedly being displayed
     else {
         $promptSuffix.Text = ' '
+    }
+
+    # Update the host's WindowTitle is host supports it and user has not disabled $GitPromptSettings.WindowTitle
+    if ($WindowTitleSupported) {
+        $windowTitle = $settings.WindowTitle
+        if (($null -eq $windowTitle) -or ($null -eq $global:GitStatus)) {
+            if ($global:PreviousWindowTitle) {
+                $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+            }
+        }
+        else {
+            try {
+                if ($windowTitle -is [scriptblock]) {
+                    $windowTitleText = & $windowTitle $global:GitStatus $IsAdmin
+                }
+                else {
+                    $windowTitleText = $ExecutionContext.SessionState.InvokeCommand.ExpandString("$windowTitle")
+                }
+
+                # Put $windowTitleText in a string to ensure results returned by scriptblock are flattened to a string
+                $Host.UI.RawUI.WindowTitle = "$windowTitleText"
+            }
+            catch {
+                if ($global:PreviousWindowTitle) {
+                    $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+                }
+
+                Write-Debug "Error occurred during evaluation of `$GitPromptSettings.WindowTitle: $_"
+            }
+        }
     }
 
     # If prompt timing enabled, display elapsed milliseconds
