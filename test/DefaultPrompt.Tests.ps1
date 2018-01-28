@@ -202,10 +202,10 @@ Describe 'Default Prompt WindowTitle Tests' {
             Write-Warning "Current PowerShell Host does not support changing its WindowTitle."
             $PSDefaultParameterValues["it:skip"] = $true
         }
-        $repoAdminRegex = '^Administrator: posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
-        $repoRegex = '^posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
-        $nonRepoAdminRegex = '^Administrator: PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
-        $nonRepoRegex = '^PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
+        $repoAdminRegex = '^Administrator: posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        $repoRegex = '^posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        $nonRepoAdminRegex = '^Administrator: PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        $nonRepoRegex = '^PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
     }
     AfterAll {
         $global:PSDefaultParameterValues = $originalDefaultParameterValues
