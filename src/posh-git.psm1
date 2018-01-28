@@ -92,7 +92,7 @@ $GitPromptScriptBlock = {
     # Update the host's WindowTitle is host supports it and user has not disabled $GitPromptSettings.WindowTitle
     if ($WindowTitleSupported) {
         $windowTitle = $settings.WindowTitle
-        if (($null -eq $windowTitle) -or ($null -eq $global:GitStatus)) {
+        if ($null -eq $windowTitle) {
             if ($global:PreviousWindowTitle) {
                 $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
             }
@@ -154,6 +154,11 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
 # Install handler for removal/unload of the module
 $ExecutionContext.SessionState.Module.OnRemove = {
     $global:VcsPromptStatuses = $global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
+
+    # Revert original WindowTitle
+    if ($WindowTitleSupported -and $global:PreviousWindowTitle) {
+        $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+    }
 
     # Check if the posh-git prompt function itself has been replaced. If so, do not restore the prompt function
     $promptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }

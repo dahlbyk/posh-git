@@ -202,6 +202,10 @@ Describe 'Default Prompt WindowTitle Tests' {
             Write-Warning "Current PowerShell Host does not support changing its WindowTitle."
             $PSDefaultParameterValues["it:skip"] = $true
         }
+        $repoAdminRegex = '^Administrator: posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
+        $repoRegex = '^posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
+        $nonRepoAdminRegex = '^Administrator: PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
+        $nonRepoRegex = '^PowerShell \d+\.\d+\.\d+\.\d+ \(\d+\)$'
     }
     AfterAll {
         $global:PSDefaultParameterValues = $originalDefaultParameterValues
@@ -237,10 +241,10 @@ M test/Baz.Tests.ps1
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
-                $title | Should Match '^Administrator: posh~git ~ posh-git \[master\]$'
+                $title | Should Match $repoAdminRegex
             }
             else {
-                $title | Should Match '^posh~git ~ posh-git \[master\]$'
+                $title | Should Match $repoRegex
             }
         }
 
@@ -286,11 +290,16 @@ M test/Baz.Tests.ps1
     }
 
     Context 'Not in a Git repo' {
-        It 'Does not set Window title when not in a Git repo' {
+        It 'Does not display posh-git status info in Window title when not in a Git repo' {
             Set-Location $Home
             $res = & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            $title | Should Match '^(Windows )?PowerShell'
+            if (& $module {$IsAdmin}) {
+                $title | Should Match $nonRepoAdminRegex
+            }
+            else {
+                $title | Should Match $nonRepoRegex
+            }
         }
     }
 
@@ -314,23 +323,43 @@ M test/Baz.Tests.ps1
             Set-Location $Home
             $res = & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            $title | Should Match '^(Windows )?PowerShell'
+            if (& $module {$IsAdmin}) {
+                $title | Should Match $nonRepoAdminRegex
+            }
+            else {
+                $title | Should Match $nonRepoRegex
+            }
 
             Set-Location $PSScriptRoot
             $res = & $GitPromptScriptBlock 6>&1
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
-                $title | Should Match '^Administrator: posh~git ~ posh-git \[master\]$'
+                $title | Should Match $repoAdminRegex
             }
             else {
-                $title | Should Match '^posh~git ~ posh-git \[master\]$'
+                $title | Should Match $repoRegex
             }
 
             Set-Location $Home
             $res = & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            $title | Should Match '^(Windows )?PowerShell'
+            if (& $module {$IsAdmin}) {
+                $title | Should Match $nonRepoAdminRegex
+            }
+            else {
+                $title | Should Match $nonRepoRegex
+            }
+        }
+
+        # This test must be the last test in this file
+        Context 'Removing the posh-git module' {
+            It 'Correctly reverts the Window Title back to original state' {
+                Set-Item function:\prompt -Value ([Runspace]::DefaultRunspace.InitialSessionState.Commands['prompt']).Definition
+                Remove-Module posh-git -Force *>$null
+                $title = $Host.UI.RawUI.WindowTitle
+                $title | Should Match '^(Windows )?PowerShell'
+            }
         }
     }
 }
