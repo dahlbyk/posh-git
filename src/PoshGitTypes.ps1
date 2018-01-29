@@ -197,7 +197,7 @@ class PoshGitTextSpan {
     }
 }
 
-class GitPromptSettings {
+class PoshGitPromptSettings {
     [bool]$AnsiConsole = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
 
     [PoshGitCellColor]$DefaultColor = [PoshGitCellColor]::new()
@@ -244,8 +244,8 @@ class GitPromptSettings {
     [Nullable[bool]]$EnableFileStatusFromCache        = $null
     [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
-    [string]$DescribeStyle       = ''
-    [psobject]$EnableWindowTitle = 'posh~git ~ '
+    [string]$DescribeStyle   = ''
+    [psobject]$WindowTitle   = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Administrator: '})$(if ($GitStatus) {"posh~git ~ $($GitStatus.RepoName) [$($GitStatus.Branch)] ~ "})PowerShell $($PSVersionTable.PSVersion) ($PID)"}
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = ''
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(''>'' * ($nestedPromptLevel + 1)) '

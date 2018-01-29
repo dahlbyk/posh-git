@@ -340,6 +340,7 @@ function Get-GitStatus {
 
         $result = New-Object PSObject -Property @{
             GitDir          = $GitDir
+            RepoName        = Split-Path (Split-Path $GitDir -Parent) -Leaf
             Branch          = $branch
             AheadBy         = $aheadBy
             BehindBy        = $behindBy

@@ -1,7 +1,7 @@
 ﻿# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
-$global:GitPromptSettings = [GitPromptSettings]::new()
+$global:GitPromptSettings = [PoshGitPromptSettings]::new()
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
 $s = $global:GitPromptSettings
@@ -11,17 +11,6 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.BeforeIndexText.ForegroundColor          = 'Green'
     $s.IndexColor.ForegroundColor               = 'Green'
     $s.WorkingColor.ForegroundColor             = 'Red'
-}
-
-$isAdminProcess = Test-Administrator
-$adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
-
-$WindowTitleSupported = $true
-# TODO: Hmm, this is a curious way to detemine window title supported
-# Could do $host.Name -eq "Package Manager Host" but that is kinda specific
-# Could attempt to change it and catch any exception and then set this to $false
-if (Get-Module NuGet) {
-    $WindowTitleSupported = $false
 }
 
 <#
@@ -142,7 +131,7 @@ function Write-Prompt {
         return $StringBuilder
     }
 
-    return ""
+    ""
 }
 
 <#
@@ -183,10 +172,6 @@ function Write-GitStatus {
 
     $s = $global:GitPromptSettings
     if (!$Status -or !$s) {
-        if ($global:PreviousWindowTitle) {
-            $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
-        }
-
         return ""
     }
 
@@ -198,7 +183,6 @@ function Write-GitStatus {
 
     if ($s.EnableFileStatus -and $Status.HasIndex) {
         $sb | Write-Prompt $s.BeforeIndexText > $null
-
         $sb | Write-GitIndexStatus $Status > $null
 
         if ($Status.HasWorking) {
@@ -218,17 +202,7 @@ function Write-GitStatus {
 
     $sb | Write-Prompt $s.AfterText > $null
 
-    if ($WindowTitleSupported -and $s.EnableWindowTitle) {
-        if (!$global:PreviousWindowTitle) {
-            $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
-        }
-
-        $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
-        $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-        $Host.UI.RawUI.WindowTitle = "${script:adminHeader}${prefix}${repoName} [$($Status.Branch)]"
-    }
-
-    return $sb.ToString()
+    $sb.ToString()
 }
 
 <#
