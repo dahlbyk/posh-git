@@ -2,6 +2,7 @@
 
 Describe 'Default Prompt Tests - NO ANSI' {
     BeforeAll {
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $prompt = Get-Item Function:\prompt
         $OFS = ''
     }
@@ -94,6 +95,7 @@ A  test/Foo.Tests.ps1
 
 Describe 'Default Prompt Tests - ANSI' {
     BeforeAll {
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $prompt = Get-Item Function:\prompt
         $OFS = ''
     }
@@ -197,14 +199,20 @@ A  test/Foo.Tests.ps1
 
 Describe 'Default Prompt WindowTitle Tests' {
     BeforeAll {
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $originalDefaultParameterValues = $PSDefaultParameterValues.Clone()
         if (!(& $module {$WindowTitleSupported})) {
             Write-Warning "Current PowerShell Host does not support changing its WindowTitle."
             $PSDefaultParameterValues["it:skip"] = $true
         }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $repoAdminRegex = '^Administrator: posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $repoRegex = '^posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $nonRepoAdminRegex = '^Administrator: PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $nonRepoRegex = '^PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
     }
     AfterAll {
@@ -237,7 +245,7 @@ M test/Baz.Tests.ps1
 
         It 'Default GitPromptSettings.WindowTitle sets the expected Window title text' {
             Set-Location $PSScriptRoot
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
@@ -254,7 +262,7 @@ M test/Baz.Tests.ps1
                 param($s, $admin)
                 "$(if ($admin) {'daboss:'} else {'loser:'}) poshgit == $($s.RepoName) / $($s.Branch)"
             }
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
@@ -268,7 +276,7 @@ M test/Baz.Tests.ps1
         It 'Custom GitPromptSettings.WindowTitle single quoted string sets the expected Window title text' {
             Set-Location $PSScriptRoot
             $GitPromptSettings.WindowTitle = '$(if ($IsAdmin) {"daboss:"} else {"loser:"}) poshgit == $($GitStatus.RepoName) / $($GitStatus.Branch)'
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
@@ -282,7 +290,7 @@ M test/Baz.Tests.ps1
         It 'Does not set Window title when GitPromptSettings.WindowText is $null' {
             Set-Location $PSScriptRoot
             $GitPromptSettings.WindowTitle = $null
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $title = $Host.UI.RawUI.WindowTitle
             $title | Should Match '^(Windows )?PowerShell'
@@ -292,7 +300,7 @@ M test/Baz.Tests.ps1
     Context 'Not in a Git repo' {
         It 'Does not display posh-git status info in Window title when not in a Git repo' {
             Set-Location $Home
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
                 $title | Should Match $nonRepoAdminRegex
@@ -321,7 +329,7 @@ M test/Baz.Tests.ps1
 
         It 'Displays the correct Window title as we move in and out of a Git repo' {
             Set-Location $Home
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
                 $title | Should Match $nonRepoAdminRegex
@@ -331,7 +339,7 @@ M test/Baz.Tests.ps1
             }
 
             Set-Location $PSScriptRoot
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
@@ -342,7 +350,7 @@ M test/Baz.Tests.ps1
             }
 
             Set-Location $Home
-            $res = & $GitPromptScriptBlock 6>&1
+            & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
             if (& $module {$IsAdmin}) {
                 $title | Should Match $nonRepoAdminRegex
