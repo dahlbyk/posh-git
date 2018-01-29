@@ -295,6 +295,24 @@ M test/Baz.Tests.ps1
             $title = $Host.UI.RawUI.WindowTitle
             $title | Should Match '^(Windows )?PowerShell'
         }
+
+        It 'Does not set Window title when GitPromptSettings.WindowText is $false' {
+            Set-Location $PSScriptRoot
+            $GitPromptSettings.WindowTitle = $false
+            & $GitPromptScriptBlock 6>&1
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $title = $Host.UI.RawUI.WindowTitle
+            $title | Should Match '^(Windows )?PowerShell'
+        }
+
+        It 'Does not set Window title when GitPromptSettings.WindowText is ""' {
+            Set-Location $PSScriptRoot
+            $GitPromptSettings.WindowTitle = ''
+            & $GitPromptScriptBlock 6>&1
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $title = $Host.UI.RawUI.WindowTitle
+            $title | Should Match '^(Windows )?PowerShell'
+        }
     }
 
     Context 'Not in a Git repo' {
