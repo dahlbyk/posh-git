@@ -92,7 +92,7 @@ $GitPromptScriptBlock = {
     # Update the host's WindowTitle is host supports it and user has not disabled $GitPromptSettings.WindowTitle
     if ($WindowTitleSupported) {
         $windowTitle = $settings.WindowTitle
-        if ($null -eq $windowTitle) {
+        if (!$windowTitle) {
             if ($global:PreviousWindowTitle) {
                 $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
             }
