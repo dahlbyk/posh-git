@@ -4,6 +4,19 @@
 [![posh-git on Chocolatey](https://img.shields.io/chocolatey/dt/poshgit.svg)](https://chocolatey.org/packages/poshgit/)
 [![posh-git on PowerShell Gallery](https://img.shields.io/powershellgallery/dt/posh-git.svg)](https://www.powershellgallery.org/packages/posh-git/)
 
+Table of contents:
+
+- [Overview](#overview)
+- [Versions](#versions)
+- [Installation](#installation)
+- [Using posh-git](#using-posh-git)
+- [Git status summary information](#git-status-summary-information)
+- [Customization variables](#customization-variables)
+- [Customizing the posh-git prompt](#customizing-the-posh-git-prompt)
+- [Based on work by](#based-on-work-by)
+
+## Overview
+
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
 
 ```powershell
@@ -57,14 +70,6 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
 - v0.7.0
   ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
   • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
-
-## Notes
-
-posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
-For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git#step-3-optional-customize-your-powershell-prompt) section below.
-
-Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
-Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus = $false`), you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
 
 ## Installation
 
@@ -130,7 +135,7 @@ After you have installed posh-git, you need to configure your PowerShell session
 The first step is to import the module into your PowerShell session which will enable git tab completion.
 You can do this with the command `Import-Module posh-git`.
 
-### Step 2: Import posh-git from Your PowerShell Profile
+### Step 2: Import posh-git from your PowerShell profile
 
 You do not want to have to manually execute the `Import-Module` command every time you open a new PowerShell prompt.
 Let's have PowerShell import this module for you in each new PowerShell session.
@@ -152,59 +157,7 @@ Import-Module posh-git
 Save the profile script, then close PowerShell and open a new PowerShell session.
 Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to `git fetch`.
 
-### Step 3 (optional): Customize Your PowerShell Prompt
-
-By default, posh-git will update your PowerShell prompt function to display Git status summary information when the current dir is inside a Git repository.
-posh-git will not update your PowerShell prompt function if you have your own, customized prompt function that has been defined before importing posh-git.
-
-The posh-git prompt is a single line prompt that looks like this:
-
-```powershell
-C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
-```
-
-You can customize the posh-git prompt or define your own custom prompt function.
-The most common customization for the posh-git provided prompt is to make it span two lines which can be done with the following command:
-
-```powershell
-$GitPromptSettings.DefaultPromptSuffix = '`n$(''>'' * ($nestedPromptLevel + 1)) '
-```
-
-This will change the prompt to:
-
-```powershell
-C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]
->
-```
-
-You can also customize the default prompt prefix text e.g.:
-
-```powershell
-$GitPromptSettings.DefaultPromptPrefix = '[$(hostname)] '
-```
-
-This will change the prompt to:
-
-```powershell
-[KEITH1] C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
-```
-
-And if you would prefer to have any path under your home directory abbreviated with ~, you can change this setting:
-
-```powershell
-$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
-```
-
-This will change the prompt to the one shown below:
-
-```powershell
-~\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
-```
-
-You can also create your own prompt function to show whatever information you want.
-See the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt) wiki page for details.
-
-## Git Status Summary Information
+## Git status summary information
 
 The Git status summary information provides a wealth of "Git status" information at a glance, all the time in your prompt.
 
@@ -262,6 +215,66 @@ For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the f
 #
 #        new.file
 ```
+
+## Customization variables
+
+posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
+For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git#step-3-optional-customize-your-powershell-prompt) section below.
+
+Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
+Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus = $false`), you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
+
+## Customizing the posh-git prompt
+
+By default, posh-git will update your PowerShell prompt function to display Git status summary information when the current dir is inside a Git repository.
+posh-git will not update your PowerShell prompt function if you have your own, customized prompt function that has been defined before importing posh-git.
+
+The posh-git prompt is a single line prompt that looks like this:
+
+```powershell
+C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
+```
+
+You can customize the posh-git prompt or define your own custom prompt function.
+The most common customization for the posh-git provided prompt is to make it span two lines which can be done with the following command:
+
+```powershell
+$GitPromptSettings.DefaultPromptSuffix = '`n$(''>'' * ($nestedPromptLevel + 1)) '
+```
+
+This will change the prompt to:
+
+```powershell
+C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]
+>
+```
+
+You can also customize the default prompt prefix text e.g.:
+
+```powershell
+$GitPromptSettings.DefaultPromptPrefix = '[$(hostname)] '
+```
+
+This will change the prompt to:
+
+```powershell
+[KEITH1] C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
+```
+
+And if you would prefer to have any path under your home directory abbreviated with ~, you can change this setting:
+
+```powershell
+$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
+```
+
+This will change the prompt to the one shown below:
+
+```powershell
+~\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
+```
+
+You can also create your own prompt function to show whatever information you want.
+See the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt) wiki page for details.
 
 ## Based on work by
 
