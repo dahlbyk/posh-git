@@ -254,18 +254,19 @@ class PoshGitPromptSettings {
     [Nullable[bool]]$EnableFileStatusFromCache        = $null
     [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
-    [string]$DescribeStyle   = ''
-    [psobject]$WindowTitle   = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Administrator: '})$(if ($GitStatus) {"posh~git ~ $($GitStatus.RepoName) [$($GitStatus.Branch)] ~ "})PowerShell $($PSVersionTable.PSVersion) ($PID)"}
+    [string]$DescribeStyle = ''
+    [psobject]$WindowTitle = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Administrator: '})$(if ($GitStatus) {"posh~git ~ $($GitStatus.RepoName) [$($GitStatus.Branch)] ~ "})PowerShell $($PSVersionTable.PSVersion) ($PID)"}
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = ''
-    [PoshGitTextSpan]$DefaultPromptSuffix       = '$(''>'' * ($nestedPromptLevel + 1)) '
-    [PoshGitTextSpan]$DefaultPromptDebugSuffix  = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
+    [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
+    [PoshGitTextSpan]$DefaultPromptDebug        = ' [DBG]:'
+    [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
+
+    [bool]$DefaultPromptWriteStatusFirst        = $false
+    [bool]$DefaultPromptAbbreviateHomeDirectory = $false
 
     [bool]$DefaultPromptEnableTiming            = $false
-    [PoshGitCellColor]$DefaultPromptTimingColor = [PoshGitCellColor]::new()
-
-    [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
-    [bool]$DefaultPromptAbbreviateHomeDirectory = $false
+    [PoshGitTextSpan]$DefaultPromptTimingFormat = ' {0}ms'
 
     [int]$BranchNameLimit = 0
     [string]$TruncatedBranchSuffix = '...'
