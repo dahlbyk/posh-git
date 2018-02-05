@@ -11,7 +11,7 @@ Describe 'TabExpansion Tests' {
             # Ensure an origin remote exists
             &$gitbin remote add origin . 2>$null
             # Ensure origin/master exists
-            &$gitbin update-ref refs/remotes/origin/master master 2>$null
+            &$gitbin update-ref refs/remotes/origin/master $(git rev-parse master) 2>$null
             # Ensure origin/HEAD exists
             &$gitbin symbolic-ref refs/remotes/origin/HEAD master 2>$null
         }
