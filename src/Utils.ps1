@@ -189,11 +189,17 @@ function Add-PoshGitToProfile {
 
     # If the profile script exists and is signed, then we should not modify it
     if (Test-Path -LiteralPath $profilePath) {
-        $sig = Get-AuthenticodeSignature $profilePath
-        if ($null -ne $sig.SignerCertificate) {
-            Write-Warning "Skipping add of posh-git import to profile; '$profilePath' appears to be signed."
-            Write-Warning "Add the command 'Import-Module posh-git' to your profile and resign it."
-            return
+        if (!(Get-Command Get-AuthenticodeSignature -ErrorAction SilentlyContinue))
+        {
+            Write-Verbose "Platform doesn't support script signing, skipping test for signed profile."
+        }
+        else {
+            $sig = Get-AuthenticodeSignature $profilePath
+            if ($null -ne $sig.SignerCertificate) {
+                Write-Warning "Skipping add of posh-git import to profile; '$profilePath' appears to be signed."
+                Write-Warning "Add the command 'Import-Module posh-git' to your profile and resign it."
+                return
+            }
         }
     }
 
@@ -202,7 +208,8 @@ function Add-PoshGitToProfile {
         $profileContent = "`nImport-Module posh-git"
     }
     else {
-        $profileContent = "`nImport-Module '$ModuleBasePath\posh-git.psd1'"
+        $modulePath = Join-Path $ModuleBasePath posh-git.psd1
+        $profileContent = "`nImport-Module '$modulePath'"
     }
 
     # Make sure the PowerShell profile directory exists
@@ -239,7 +246,12 @@ function Add-PoshGitToProfile {
     Adapted from http://www.west-wind.com/Weblog/posts/197245.aspx
 #>
 function Get-FileEncoding($Path) {
-    $bytes = [byte[]](Get-Content $Path -Encoding byte -ReadCount 4 -TotalCount 4)
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $bytes = [byte[]](Get-Content $Path -AsByteStream -ReadCount 4 -TotalCount 4)
+    }
+    else {
+        $bytes = [byte[]](Get-Content $Path -Encoding byte -ReadCount 4 -TotalCount 4)
+    }
 
     if (!$bytes) { return 'utf8' }
 
@@ -273,6 +285,27 @@ function Get-PathStringComparison {
     else {
         [System.StringComparison]::OrdinalIgnoreCase
     }
+}
+
+function Get-PromptPath {
+    $settings = $global:GitPromptSettings
+    $abbrevHomeDir = $settings -and $settings.DefaultPromptAbbreviateHomeDirectory
+
+    # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
+    # However for any path with a drive defined, it's better to use the Path property.
+    # In this case, ProviderPath is "\LocalMachine\My"" whereas Path is "Cert:\LocalMachine\My".
+    # The latter is more desirable.
+    $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
+    $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
+
+    $stringComparison = Get-PathStringComparison
+
+    # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
+    if ($abbrevHomeDir -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison)) {
+        $currentPath = "~" + $currentPath.SubString($Home.Length)
+    }
+
+    return $currentPath
 }
 
 function Get-PSModulePath {

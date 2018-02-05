@@ -7,12 +7,14 @@ if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
 }
 
 $requiredVersion = [Version]'1.7.2'
-if ([String](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)') {
+if ([string](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)') {
     $version = [Version]$Matches['ver']
 }
+
 if ($version -lt $requiredVersion) {
     Write-Warning "posh-git requires Git $requiredVersion or better. You have $version."
     $false
-} else {
+}
+else {
     $true
 }

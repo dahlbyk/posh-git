@@ -4,10 +4,16 @@
         {
             "type": "PowerShell",
             "request": "launch",
-            "name": "PowerShell Launch Pester Tests",
-            "script": "${workspaceRoot}/test/testDebugHarness.ps1",
+            "name": "PowerShell Interactive Session",
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "PowerShell Pester Tests",
+            "script": "Invoke-Pester",
             "args": [],
-            "cwd": "${file}"
+            "cwd": "${workspaceRoot}/test"
         },
         {
             "type": "PowerShell",

@@ -8,15 +8,16 @@ Describe 'Get-GitStatus Tests' {
         }
 
         It 'Returns the correct branch name' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding @'
 ## rkeithill/more-status-tests
 '@
-             } -ModuleName posh-git
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -25,17 +26,18 @@ Describe 'Get-GitStatus Tests' {
 
 
         It 'Returns the correct number of added untracked working files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 ?? test/Foo.Tests.ps1
 ?? test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -50,17 +52,18 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Added[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of added working files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
  A test/Foo.Tests.ps1
  A test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -75,17 +78,18 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Added[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of deleted working files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
  D test/Foo.Tests.ps1
  D test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -100,17 +104,18 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Deleted[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of modified working files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
  M test/Foo.Tests.ps1
  M test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -125,17 +130,18 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Modified[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of unmerged working files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
  U test/Foo.Tests.ps1
  U test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -150,20 +156,21 @@ Describe 'Get-GitStatus Tests' {
             $status.Working.Unmerged[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of mixed working files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
  ? test/Untracked.Tests.ps1
  A test/Added.Tests.ps1
  D test/Deleted.Tests.ps1
  M test/Modified.Tests.ps1
  U test/Unmerged.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -182,17 +189,18 @@ Describe 'Get-GitStatus Tests' {
         }
 
         It 'Returns the correct number of added index files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 A  test/Foo.Tests.ps1
 A  test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -207,17 +215,18 @@ A  test/Bar.Tests.ps1
             $status.Index.Added[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of deleted index files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 D  test/Foo.Tests.ps1
 D  test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -232,17 +241,18 @@ D  test/Bar.Tests.ps1
             $status.Index.Deleted[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of copied index files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 C  test/Foo.Tests.ps1
 C  test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -257,17 +267,18 @@ C  test/Bar.Tests.ps1
             $status.Index.Modified[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of modified index files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 M  test/Foo.Tests.ps1
 M  test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -282,16 +293,17 @@ M  test/Bar.Tests.ps1
             $status.Index.Modified[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of modified index files for a rename' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 R  README.md -> README2.md
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -305,17 +317,18 @@ R  README.md -> README2.md
             $status.Index.Modified[0] | Should Be "README.md"
         }
         It 'Returns the correct number of unmerged index files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 U  test/Foo.Tests.ps1
 U  test/Bar.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -330,12 +343,13 @@ U  test/Bar.Tests.ps1
             $status.Index.Unmerged[1] | Should Be "test/Bar.Tests.ps1"
         }
         It 'Returns the correct number of mixed index files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 A  test/Added.Tests.ps1
 D  test/Deleted.Tests.ps1
@@ -343,8 +357,8 @@ C  test/Copied.Tests.ps1
 R  README.md -> README2.md
 M  test/Modified.Tests.ps1
 U  test/Unmerged.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1
@@ -364,12 +378,13 @@ U  test/Unmerged.Tests.ps1
         }
 
         It 'Returns the correct number of mixed index and working files' {
-            Mock git {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
                 if ($args -contains 'rev-parse') {
-                    $res = Invoke-Expression "git.exe $args"
+                    $res = Invoke-Expression "&$gitbin $args"
                     return $res
                 }
-                return @'
+                Convert-NativeLineEnding -SplitLines @'
 ## master
 A  test/Added.Tests.ps1
 D  test/Deleted.Tests.ps1
@@ -382,8 +397,8 @@ U  test/Unmerged.Tests.ps1
  D test/Deleted.Tests.ps1
  M test/Modified.Tests.ps1
  U test/Unmerged.Tests.ps1
-'@ -split [System.Environment]::NewLine
-             } -ModuleName posh-git
+'@
+            }
 
             $status = Get-GitStatus
             Assert-MockCalled git -ModuleName posh-git #-Exactly 1

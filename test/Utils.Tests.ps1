@@ -1,12 +1,16 @@
 . $PSScriptRoot\Shared.ps1
 . $modulePath\Utils.ps1
 
+$expectedEncoding = if ($PSVersionTable.PSVersion.Major -le 5) { "utf8" } else { "ascii" }
+
 Describe 'Utils Function Tests' {
     Context 'Add-PoshGitToProfile Tests' {
         BeforeAll {
-           $newLine = [System.Environment]::NewLine
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $newLine = [System.Environment]::NewLine
         }
         BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $profilePath = [System.IO.Path]::GetTempFileName()
         }
         AfterEach {
@@ -22,10 +26,11 @@ Describe 'Utils Function Tests' {
             Add-PoshGitToProfile $profilePath
 
             Test-Path -LiteralPath $profilePath | Should Be $true
-            Get-FileEncoding $profilePath | Should Be 'utf8'
+            Get-FileEncoding $profilePath | Should Be $expectedEncoding
             $content = Get-Content $profilePath
             $content.Count | Should Be 2
-            @($content)[1] | Should BeExactly "Import-Module '$modulePath\posh-git.psd1'"
+            $nativePath = MakeNativePath $modulePath\posh-git.psd1
+            @($content)[1] | Should BeExactly "Import-Module '$nativePath'"
         }
         It 'Creates profile file if it does not exist that imports from module path' {
             $parentDir = Split-Path $profilePath -Parent
@@ -43,7 +48,7 @@ Describe 'Utils Function Tests' {
             Add-PoshGitToProfile $profilePath $parentDir
 
             Test-Path -LiteralPath $profilePath | Should Be $true
-            Get-FileEncoding $profilePath | Should Be 'utf8'
+            Get-FileEncoding $profilePath | Should Be $expectedEncoding
             $content = Get-Content $profilePath
             $content.Count | Should Be 2
             @($content)[1] | Should BeExactly "Import-Module posh-git"
@@ -73,7 +78,8 @@ Import-Module posh-git
             Get-FileEncoding $profilePath | Should Be 'ascii'
             $content = Get-Content $profilePath
             $content.Count | Should Be 2
-            $content -join $newLine | Should BeExactly $profileContent
+            $nativeContent = Convert-NativeLineEnding $profileContent
+            $content -join $newline | Should BeExactly $nativeContent
         }
         It 'Adds import from PSModulePath on existing (Unicode) profile file correctly' {
             $profileContent = @'
@@ -89,8 +95,9 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             Get-FileEncoding $profilePath | Should Be 'unicode'
             $content = Get-Content $profilePath
             $content.Count | Should Be 5
-            $profileContent += "${newLine}${newLine}Import-Module posh-git"
-            $content -join $newLine | Should BeExactly $profileContent
+            $nativeContent = Convert-NativeLineEnding $profileContent
+            $nativeContent += "${newLine}${newLine}Import-Module posh-git"
+            $content -join $newLine | Should BeExactly $nativeContent
         }
         It 'Adds Start-SshAgent if posh-git is not installed' {
             Add-PoshGitToProfile $profilePath -StartSshAgent
@@ -113,6 +120,7 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
 
     Context 'Test-PoshGitImportedInScript Tests' {
         BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $profilePath = [System.IO.Path]::GetTempFileName()
         }
         AfterEach {
@@ -149,35 +157,35 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         }
         It 'Returns true for install under single PSModulePath' {
             Mock Get-PSModulePath {
-                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\'
+                return MakeNativePath "$HOME\Documents\WindowsPowerShell\Modules\posh-git\"
             }
-            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
+            $path = MakeNativePath "$HOME\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
             Test-InPSModulePath $path | Should Be $true
             Assert-MockCalled Get-PSModulePath
         }
         It 'Returns true for install under multiple PSModulePaths' {
             Mock Get-PSModulePath {
-                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0\',
-                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330\'
+                return (MakeNativePath "$HOME\Documents\WindowsPowerShell\Modules\posh-git\"),
+                       (MakeNativePath "$HOME\GitHub\dahlbyk\posh-git\0.6.1.20160330\")
             }
-            $path = "C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
+            $path = MakeNativePath "$HOME\Documents\WindowsPowerShell\Modules\posh-git\0.7.0"
             Test-InPSModulePath $path | Should Be $true
             Assert-MockCalled Get-PSModulePath
         }
         It 'Returns false when current posh-git module location is not under PSModulePaths' {
             Mock Get-PSModulePath {
-                return 'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.7.0\',
-                       'C:\Users\Keith\Documents\WindowsPowerShell\Modules\posh-git\0.6.1.20160330\'
+                return (MakeNativePath "$HOME\Documents\WindowsPowerShell\Modules\posh-git\"),
+                       (MakeNativePath "$HOME\GitHub\dahlbyk\posh-git\0.6.1.20160330\")
             }
-            $path = "C:\tools\posh-git\dahlbyk-posh-git-18d600a"
+            $path = MakeNativePath "\tools\posh-git\dahlbyk-posh-git-18d600a"
             Test-InPSModulePath $path | Should Be $false
             Assert-MockCalled Get-PSModulePath
         }
         It 'Returns false when current posh-git module location is under PSModulePath, but in a src directory' {
             Mock Get-PSModulePath {
-                return 'C:\GitHub'
+                return MakeNativePath '\GitHub'
             }
-            $path = "C:\GitHub\posh-git\src"
+            $path = MakeNativePath "\GitHub\posh-git\src"
             Test-InPSModulePath $path | Should Be $false
             Assert-MockCalled Get-PSModulePath
         }
