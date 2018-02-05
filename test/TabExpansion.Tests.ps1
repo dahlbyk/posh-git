@@ -7,7 +7,7 @@ Describe 'TabExpansion Tests' {
     Context 'Fetch/Push/Pull TabExpansion Tests' {
         BeforeEach {
             # Ensure master branch exists
-            &$gitbin branch -q master master 2>$null
+            &$gitbin branch -q master 2>$null
         }
         It 'Tab completes all remotes' {
             (&$gitbin remote) -contains 'origin' | Should Be $true
