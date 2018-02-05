@@ -10,10 +10,10 @@ Describe 'TabExpansion Tests' {
             &$gitbin branch -q master 2>$null
             # Ensure an origin remote exists
             &$gitbin remote add origin . 2>$null
-            # Fetch origin/master
-            &$gitbin fetch origin master 2>$null
+            # Ensure origin/master exists
+            &$gitbin update-ref refs/remotes/origin/master $(git rev-parse master) 2>$null
             # Ensure origin/HEAD exists
-            &$gitbin remote set-head origin --auto 2>$null
+            &$gitbin symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/master 2>$null
         }
         It 'Tab completes all remotes' {
             (&$gitbin remote) -contains 'origin' | Should Be $true
