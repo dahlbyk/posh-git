@@ -248,24 +248,20 @@ posh-git will not update your PowerShell prompt function if you have your own, c
 
 The posh-git prompt is a single line prompt that looks like this:
 
-```text
-C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
-```
+![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-default]
 
 You can customize the posh-git prompt or define your own custom prompt function.
 If you would like to make your prompt span two lines with the "prompt suffix string" starting
 on a newline, execute the following command:
 
 ```powershell
-$GitPromptSettings.DefaultPromptSuffix.Text = '`n$(''>'' * ($nestedPromptLevel + 1)) '
+$GitPromptSettings.AfterText.Text += "`n"
+$GitPromptSettings.DefaultPromptDebug = "[DBG]: "
 ```
 
 This will change the prompt to:
 
-```text
-C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]
->
-```
+![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> ][prompt-two-line]
 
 If you'd like to make this change available whenever you start PowerShell,
 put the command above in one of your profile scripts.
@@ -273,8 +269,8 @@ put the command above in one of your profile scripts.
 You can also customize the default prompt prefix text e.g.:
 
 ```powershell
-$GitPromptSettings.DefaultPromptPrefix.Text = '[${env:USERNAME}:$(hostname)] '
-$GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::DarkMagenta
+$GitPromptSettings.DefaultPromptPrefix.Text = '[$(hostname)] '
+$GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::Magenta
 ```
 
 This will change the prompt to:
@@ -366,5 +362,8 @@ function prompt {
 [psgallery-img]: https://img.shields.io/powershellgallery/dt/posh-git.svg
 [psgallery-site]: https://powershellgallery.com/packages/posh-git
 [w3schools-colors]: https://www.w3schools.com/colors/colors_names.asp
+
+[prompt-default]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
+[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> "
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
