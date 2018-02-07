@@ -7,10 +7,16 @@ Describe 'TabExpansion Tests' {
     Context 'Fetch/Push/Pull TabExpansion Tests' {
         BeforeEach {
             # Ensure master branch exists
-            git branch -q master origin/master 2>$null
+            &$gitbin branch -q master 2>$null
+            # Ensure an origin remote exists
+            &$gitbin remote add origin . 2>$null
+            # Ensure origin/master exists
+            &$gitbin update-ref refs/remotes/origin/master $(git rev-parse master) 2>$null
+            # Ensure origin/HEAD exists
+            &$gitbin symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/master 2>$null
         }
         It 'Tab completes all remotes' {
-            (git remote) -contains 'origin' | Should Be $true
+            (&$gitbin remote) -contains 'origin' | Should Be $true
 
             $result = & $module GitTabExpansionInternal 'git push '
             $result -contains 'origin' | Should Be $true
@@ -109,11 +115,11 @@ Describe 'TabExpansion Tests' {
 
         It 'Tab completes branch names with - and -- in them' {
             $branchName = 'branch--for-Pester-tests'
-            if (git branch --list -q $branchName) {
-                git branch -D $branchName
+            if (&$gitbin branch --list -q $branchName) {
+                &$gitbin branch -D $branchName
             }
 
-            git branch $branchName
+            &$gitbin branch $branchName
             try {
                 $result = & $module GitTabExpansionInternal 'git push origin branch-'
                 $result | Should BeExactly $branchName
@@ -122,7 +128,7 @@ Describe 'TabExpansion Tests' {
                 $result -contains $branchName | Should Be $true
             }
             finally {
-                git branch -D $branchName
+                &$gitbin branch -D $branchName
             }
         }
     }
@@ -136,7 +142,7 @@ Describe 'TabExpansion Tests' {
             RemoveGitTempRepo $repoPath
         }
         It 'Tab completes non-ASCII file name' {
-            git.exe config core.quotepath true # Problematic (default) config
+            &$gitbin config core.quotepath true # Problematic (default) config
 
             $fileName = "posh$([char]8226)git.txt"
             New-Item $fileName -ItemType File
@@ -151,8 +157,8 @@ Describe 'TabExpansion Tests' {
     Context 'Alias TabExpansion Tests' {
         $addedAliases = @()
         function Add-GlobalTestAlias($Name, $Value) {
-            if (!(git config --global "alias.$Name")) {
-                git.exe config --global "alias.$Name" $Value
+            if (!(&$gitbin config --global "alias.$Name")) {
+                &$gitbin config --global "alias.$Name" $Value
                 $addedAliases += $Name
             }
         }
@@ -162,7 +168,7 @@ Describe 'TabExpansion Tests' {
         }
         AfterAll {
             $addedAliases | Where-Object { $_ } | ForEach-Object {
-                git.exe config --global --unset "alias.$_" 2>$null
+                &$gitbin config --global --unset "alias.$_" 2>$null
             }
 
             RemoveGitTempRepo $repoPath
@@ -171,8 +177,8 @@ Describe 'TabExpansion Tests' {
             $alias = "test-$(New-Guid)"
 
             Add-GlobalTestAlias $alias config
-            git.exe config alias.$alias help
-            (git.exe config --get-all alias.$alias).Count | Should Be 2
+            &$gitbin config alias.$alias help
+            (&$gitbin config --get-all alias.$alias).Count | Should Be 2
 
             $result = @(& $module GitTabExpansionInternal "git $alias")
             $result.Count | Should Be 1
@@ -181,8 +187,8 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes when there is one alias of a given name' {
             $alias = "test-$(New-Guid)"
 
-            git.exe config alias.$alias checkout
-            (git.exe config --get-all alias.$alias).Count | Should Be 1
+            &$gitbin config alias.$alias checkout
+            (&$gitbin config --get-all alias.$alias).Count | Should Be 1
 
             $result = & $module GitTabExpansionInternal "git $alias ma"
             $result | Should BeExactly 'master'
@@ -190,8 +196,8 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes when there are multiple aliases of the same name' {
             Add-GlobalTestAlias co checkout
 
-            git.exe config alias.co checkout
-            (git.exe config --get-all alias.co).Count | Should BeGreaterThan 1
+            &$gitbin config alias.co checkout
+            (&$gitbin config --get-all alias.co).Count | Should BeGreaterThan 1
 
             $result = & $module GitTabExpansionInternal 'git co ma'
             $result | Should BeExactly 'master'
@@ -210,32 +216,32 @@ Describe 'TabExpansion Tests' {
             ResetGitTempRepoWorkingDir $repoPath
         }
         It 'Tab completes remote name with special char as quoted' {
-            git.exe remote add '#test' https://github.com/dahlbyk/posh-git.git 2> $null
+            &$gitbin remote add '#test' https://github.com/dahlbyk/posh-git.git 2> $null
 
             $result = & $module GitTabExpansionInternal 'git push #'
             $result | Should BeExactly "'#test'"
         }
         It 'Tab completes branch name with special char as quoted' {
-            git.exe branch '#develop' 2>$null
+            &$gitbin branch '#develop' 2>$null
 
             $result = & $module GitTabExpansionInternal 'git checkout #'
             $result | Should BeExactly "'#develop'"
         }
         It 'Tab completes git feature branch name with special char as quoted' {
-            git.exe branch '#develop' 2>$null
+            &$gitbin branch '#develop' 2>$null
 
             $result = & $module GitTabExpansionInternal 'git flow feature list #'
             $result | Should BeExactly "'#develop'"
         }
         It 'Tab completes a tag name with special char as quoted' {
             $tag = "v1.0.0;abcdef"
-            git.exe tag $tag
+            &$gitbin tag $tag
 
             $result = & $module GitTabExpansionInternal 'git show v1'
             $result | Should BeExactly "'$tag'"
         }
         It 'Tab completes a tag name with single quote correctly' {
-            git.exe tag "v2.0.0'"
+            &$gitbin tag "v2.0.0'"
 
             $result = & $module GitTabExpansionInternal 'git show v2'
             $result | Should BeExactly "'v2.0.0'''"

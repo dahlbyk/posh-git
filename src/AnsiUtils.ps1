@@ -24,7 +24,7 @@ $AnsiEscape = [char]27 + "["
 $ColorTranslatorType = 'System.Drawing.ColorTranslator' -as [Type]
 $ColorType = 'System.Drawing.Color' -as [Type]
 
-function EscapseAnsiString([string]$AnsiString) {
+function EscapeAnsiString([string]$AnsiString) {
     if ($PSVersionTable.PSVersion.Major -ge 6) {
         $res = $AnsiString -replace "$([char]27)", '`e'
     }
@@ -58,15 +58,17 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
 
     if ($color -is [String]) {
         try {
-            if ($null -ne ($color -as [System.ConsoleColor])) {
-                $color = [System.ConsoleColor]$color
-            }
-            elseif ($ColorTranslatorType) {
+            if ($ColorTranslatorType) {
                 $color = $ColorTranslatorType::FromHtml($color)
             }
         }
         catch {
             Write-Debug $_
+        }
+
+        # Hard to get here but DarkYellow is not an HTML color but is a ConsoleColor
+        if (($color -isnot $ColorType) -and ($null -ne ($consoleColor = $color -as [System.ConsoleColor]))) {
+            $color = $consoleColor
         }
     }
 
