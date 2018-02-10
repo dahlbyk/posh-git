@@ -167,6 +167,13 @@ Describe 'TabExpansion Tests' {
         }
     }
 
+    Context 'Vsts' {
+        It 'Tab completes pr options' {
+            $result = & $module GitTabExpansionInternal 'git pr '
+            $result -contains 'abandon' | Should Be $true
+        }
+    }
+
     Context 'Add/Reset/Checkout TabExpansion Tests' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]

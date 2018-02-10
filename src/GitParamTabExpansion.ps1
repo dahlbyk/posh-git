@@ -81,6 +81,30 @@ $longGitParams = @{
     whatchanged = 'since'
 }
 
+$shortVstsGlobal = 'h o'
+$shortVstsParams = @{
+    abandon = "i $shortVstsGlobal"
+    create = "d i p r s t $shortVstsGlobal"
+    complete = "i $shortVstsGlobal"
+    list = "i p r s t $shortVstsGlobal"
+    reactivate = "i $shortVstsGlobal"
+    'set-vote' = "i $shortVstsGlobal"
+    show = "i $shortVstsGlobal"
+    update = "d i $shortVstsGlobal"
+}
+
+$longVstsGlobal = 'debug help output query verbose'
+$longVstsParams = @{
+    abandon = "id detect instance $longVstsGlobal"
+    create = "auto-complete delete-source-branch work-items bypass-policy bypass-policy-reason description detect instance merge-commit-message open project repository reviewers source-branch squash target-branch title $longVstsGlobal"
+    complete = "id detect instance $longVstsGlobal"
+    list = " $longVstsGlobal"
+    reactivate = " $longVstsGlobal"
+    'set-vote' = " $longVstsGlobal"
+    show = " $longVstsGlobal"
+    update = " $longVstsGlobal"
+}
+
 # Variable is used in GitTabExpansion.ps1
 $gitParamValues = @{
     blame = @{

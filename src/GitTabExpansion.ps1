@@ -8,6 +8,7 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
 $subcommands = @{
     bisect = "start bad good skip reset visualize replay log run"
     notes = 'add append copy edit get-ref list merge prune remove show'
+    pr = 'create update show list complete abandon reactivate reviewers work-items set-vote policies'
     reflog = "show delete expire"
     remote = "
         add rename remove set-head set-branches
@@ -56,6 +57,8 @@ $script:someCommands = @('add','am','annotate','archive','bisect','blame','branc
 $script:gitCommandsWithLongParams = $longGitParams.Keys -join '|'
 $script:gitCommandsWithShortParams = $shortGitParams.Keys -join '|'
 $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
+$script:vstsCommandsWithShortParams = $shortVstsParams.Keys -join '|'
+$script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
@@ -218,15 +221,15 @@ function script:expandGitAlias($cmd, $rest) {
     }
 }
 
-function script:expandLongParams($cmd, $filter) {
-    $longGitParams[$cmd] -split ' ' |
+function script:expandLongParams($hash, $cmd, $filter) {
+    $hash[$cmd] -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("--", $_) }
 }
 
-function script:expandShortParams($cmd, $filter) {
-    $shortGitParams[$cmd] -split ' ' |
+function script:expandShortParams($hash, $cmd, $filter) {
+    $hash[$cmd] -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("-", $_) }
@@ -263,6 +266,23 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
+
+        # Handles git pr alias
+        "\!f\(\) \{ exec vsts code pr `"\$\@`"; \}; f\s+(?<op>\S*)$" {
+            gitCmdOperations $subcommands 'pr' $matches['op']
+        }
+
+        # Handles git pr <cmd> --<param>
+        "\!f\(\) \{ exec vsts code pr `"\$\@`"; \}; f\s+(?<cmd>$vstsCommandsWithLongParams).*--(?<param>\S*)$"
+        {
+            expandLongParams $longVstsParams $matches['cmd'] $matches['param']
+        }
+
+        # Handles git pr <cmd> -<shortparam>
+        "\!f\(\) \{ exec vsts code pr `"\$\@`"; \}; f\s+(?<cmd>$vstsCommandsWithShortParams).*-(?<shortparam>\S*)$"
+        {
+            expandShortParams $shortVstsParams $matches['cmd'] $matches['shortparam']
+        }
 
         # Handles git <cmd> <op>
         "^(?<cmd>$($subcommands.Keys -join '|'))\s+(?<op>\S*)$" {
@@ -400,12 +420,12 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 
         # Handles git <cmd> --<param>
         "^(?<cmd>$gitCommandsWithLongParams).* --(?<param>\S*)$" {
-            expandLongParams $matches['cmd'] $matches['param']
+            expandLongParams $longGitParams $matches['cmd'] $matches['param']
         }
 
         # Handles git <cmd> -<shortparam>
         "^(?<cmd>$gitCommandsWithShortParams).* -(?<shortparam>\S*)$" {
-            expandShortParams $matches['cmd'] $matches['shortparam']
+            expandShortParams $shortGitParams $matches['cmd'] $matches['shortparam']
         }
     }
 }
