@@ -382,12 +382,12 @@ function prompt {
 [psgallery-site]:  https://powershellgallery.com/packages/posh-git
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
-[prompt-def-long]: ../posh-git.wiki/images/PromptDefaultLong.png   "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
-[prompt-default]:  ../posh-git.wiki/images/PromptDefault.png       "C:\Users\Keith\GitHub\posh-git [master ≡]> "
-[prompt-prefix]:   ../posh-git.wiki/images/PromptPrefix.png        "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
-[prompt-abbrev]:   ../posh-git.wiki/images/PromptAbbrevHomeDir.png "~\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
-[prompt-path]:     ../posh-git.wiki/images/PromptOrangePath.png    "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
-[prompt-swap]:     ../posh-git.wiki/images/PromptStatusFirst.png   "[master ≡ +0 ~1 -0 !] C:\Users\Keith\GitHub\posh-git> "
-[prompt-two-line]: ../posh-git.wiki/images/PromptTwoLine.png       "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> "
+[prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
+[prompt-default]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png       "C:\Users\Keith\GitHub\posh-git [master ≡]> "
+[prompt-prefix]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptPrefix.png        "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
+[prompt-abbrev]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptAbbrevHomeDir.png "~\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
+[prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
+[prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡ +0 ~1 -0 !] C:\Users\Keith\GitHub\posh-git> "
+[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> "
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
