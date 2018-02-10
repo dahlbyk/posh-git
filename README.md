@@ -25,9 +25,7 @@ Table of contents:
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
 
-```text
-C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
-```
+![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> ][prompt-def-long]
 
 posh-git also provides tab completion support for common git commands, branch names, paths and more.
 For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing the <kbd>tab</kbd> key.
@@ -111,6 +109,20 @@ Version 0.x of posh-git continues to support Windows PowerShell versions 2, 3 an
 And if you don't need ANSI escape sequence support, v0.x can be used on Windows PowerShell v5.x.
 See the v0.x [README][!!!PATH-TO-0x-README-HERE!!!] for installation instructions.
 
+This version is being maintained on the branch:
+
+- `master` avoids breaking changes, maintaining v0.x.
+  ( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
+
+- Previous releases:
+  - v0.7.1
+    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.1/README.md)
+    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.1/CHANGELOG.md) )
+  - v0.7.0
+    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
+    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
+
 ### posh-git v1.x
 
 Version 1.x of posh-git is targeted specifically at Windows PowerShell 5.x and (cross-platform)
@@ -124,25 +136,13 @@ In addition, version 1.x is able to render prompt status strings using [ANSI esc
 This can be used in hosts that support virtual terminal escape sequences such as PowerShell Core on Linux,
 macOS and Windows and Windows PowerShell 5.x on Windows 10. Support for [Console Virtual Terminal Sequences][console-vt-seq] was added in Windows 10 version 1511.
 
-The rest of this readme applies only to version 1.x of posh-git.
+This version is being developed on the branch:
 
-### Active branches
-
-TODO: @dahlbyk Need to update for the new maintenance branch and moving v1 to master (and probably nuke develop, right?).  Maybe we integrate this info into the appropriate v0.x / v1.x sections above?
-
-- `master` avoids breaking changes, maintaining v0.x.
-  ( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
-  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
 - `develop` includes breaking changes, toward [v1.0](https://github.com/dahlbyk/posh-git/issues/328).
-  ( [README](https://github.com/dahlbyk/posh-git/blob/develop/README.md)
-  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md) )
-- Previous releases:
-  - v0.7.1
-    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.1/README.md)
-    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.1/CHANGELOG.md) )
-  - v0.7.0
-    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
-    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
+  ( [README](./README.md)
+  • [CHANGELOG](./CHANGELOG.md) )
+
+The rest of this readme applies only to version 1.x of posh-git.
 
 ## Installation
 
@@ -243,18 +243,62 @@ Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that
 
 ### Step 3 (optional): Customize your PowerShell prompt
 
-By default, posh-git will update your PowerShell prompt function to display Git status summary information when the current dir is inside a Git repository.
-posh-git will not update your PowerShell prompt function if you have your own, customized prompt function that has been defined before importing posh-git.
+When you import the posh-git module, it will replace PowerShell's default prompt function with a new
+prompt function that displays Git status summary information when the current directory is inside a Git repository.
+posh-git will not replace the prompt function if it has detected that you have your own, customized prompt
+function.
 
-The posh-git prompt is a single line prompt that looks like this:
+The prompt function provided by posh-git creates a prompt that looks like this:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-default]
+![C:\Users\Keith\GitHub\posh-git [master ≡]> ][prompt-default]
 
-You can customize the posh-git prompt or define your own custom prompt function.
-If you would like to make your prompt span two lines with the "prompt suffix string" starting
-on a newline, execute the following command:
+You can customize the posh-git prompt function or define your own custom prompt function.
+The rest of this section covers how to customize posh-git's prompt function using the global variale `$GitPromptSettings`.
 
-```powershell
+You can customize the default prompt prefix to display a timestamp with these settings:
+
+```text
+$GitPromptSettings.DefaultPromptPrefix.Text = '$(Get-Date -f "MM/dd-hh:mm:ss") '
+$GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::DarkMagenta
+```
+
+This will change the prompt to:
+
+![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-prefix]
+
+And if you would prefer to have any path under your home directory abbreviated with `~`, use the following setting:
+
+```text
+$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
+```
+
+This will change the prompt to:
+
+![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-abbrev]
+
+If you would like to change the color of the path, you can use the following setting on Windows:
+
+```text
+$GitPromptSettings.DefaultPromptPath.ForegroundColor = 'Orange'
+```
+
+Setting the ForegroundColor to a color name, other than one of the standard ConsoleColor names, only works on Windows.
+On Windows, posh-git uses the `System.Drawing.ColorTranslator.FromHtml()` method to parse a color name as an HTML color.
+For a complete list of HTML colors, see this [W3Schools page][w3c-colors].
+
+If you are on Linux or macOS and desire an Orange path, you can specify the RGB value for Orange e.g.:
+
+```text
+$GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
+```
+
+This will change the prompt to:
+
+![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-path]
+
+If you would like to make your prompt span two lines, with a newline after the Git status summary, use these settings:
+
+```text
 $GitPromptSettings.AfterText.Text += "`n"
 $GitPromptSettings.DefaultPromptDebug = "[DBG]: "
 ```
@@ -263,50 +307,24 @@ This will change the prompt to:
 
 ![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> ][prompt-two-line]
 
-If you'd like to make this change available whenever you start PowerShell,
-put the command above in one of your profile scripts.
+Finally, you can swap the order of the path and the Git status summary with the following settings:
 
-You can also customize the default prompt prefix text e.g.:
-
-```powershell
-$GitPromptSettings.DefaultPromptPrefix.Text = '[$(hostname)] '
-$GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::Magenta
+```text
+$GitPromptSettings.DefaultPromptWriteStatusFirst = $true
+$GitPromptSettings.BeforeText.Text = '['
+$GitPromptSettings.AfterText.Text  = '] '
 ```
 
 This will change the prompt to:
 
-```text
-[Keith:KEITH1] C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
-```
+![[master ≡ +0 ~1 -0 !] C:\Users\Keith\GitHub\posh-git> ][prompt-swap]
 
-And if you would prefer to have any path under your home directory abbreviated with ~, you can change this setting:
+If you'd like to make any of these changes available whenever you start PowerShell,
+put the corresponding setting(s) in one of your profile scripts.
 
-```powershell
-$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
-```
-
-You can also change the color of the path e.g.:
-
-```powershell
-$GitPromptSettings.DefaultPromptPath.ForegroundColor = 'Orange'
-```
-
-This will change the prompt to the one shown below:
-
-```text
-~\GitHub\posh-git [master ≡ +0 ~1 -0 !]>
-```
-
-Setting the ForegroundColor to a color name other than the standard ConsoleColor names only works on Windows. posh-git uses the `System.Drawing.ColorTranslator.FromHtml()` static method to parse the color name as an HTML color. For a complete list of HTML colors, see this [W3Schools page][w3schools-colors].
-
-If you are on Linux or macOS and desire an Orange path, you can specify the RGB value as an int e.g.:
-
-```powershell
-$GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
-```
-
-If you require more customization than `$GitPromptSettings` provides, you can create your own prompt function to show whatever information you want. See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details. However, if you already have a custom prompt and want to display posh-git's default
-prompt, that can be done with the `$GitPromptScriptBlock` variable e.g.:
+If you require more customization than `$GitPromptSettings` provides, you can create your own prompt function to show whatever information you want. See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details.
+However, if you need a custom prompt to perform some non-prompt logic, you can still use posh-git's prompt function to
+write out a prompt string.  This can be done with the `$GitPromptScriptBlock` variable as shown below e.g.:
 
 ```powershell
 # my profile.ps1
@@ -318,52 +336,58 @@ function prompt {
 }
 ```
 
-And if you'd like to write prompt text before and/or after the posh-git default prompt:
+And if you'd like to write prompt text before and/or after the posh-git prompt,
+you can use posh-git's `Write-Prompt` command as shown below:
 
 ```powershell
 # my profile.ps1
 function prompt {
     # Your non-prompt logic here
-    $prompt = Write-Prompt "Text before posh-git prompt" -ForegroundColor Orange
+    $prompt = Write-Prompt "Text before posh-git prompt " -ForegroundColor Orange
     $prompt += & $GitPromptScriptBlock
-    $prompt += Write-Prompt "Text after posh-git prompt" -ForegroundColor ([ConsoleColor]::Magenta)
-    if ($prompt) { $prompt } else { " " } # Prevents PowerShell from appending "PS>"
+    $prompt += Write-Prompt "Text after posh-git prompt " -ForegroundColor ([ConsoleColor]::Magenta)
+    if ($prompt) { $prompt }
 }
 ```
 
 ## Based on work by
 
-- Keith Dahlby, http://solutionizing.net/
-- Mark Embling, http://www.markembling.info/
+- Keith Dahlby,   http://solutionizing.net/
+- Mark Embling,   http://www.markembling.info/
 - Jeremy Skinner, http://www.jeremyskinner.co.uk/
 
 [av-develop-site]: https://ci.appveyor.com/project/dahlbyk/posh-git/branch/develop
-[av-develop-img]: https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing
-[av-master-site]: https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master
-[av-master-img]: https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing
+[av-develop-img]:  https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing
+[av-master-site]:  https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master
+[av-master-img]:   https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing
 
-[tv-develop-img]: https://travis-ci.org/dahlbyk/posh-git.svg?branch=develop
+[tv-develop-img]:  https://travis-ci.org/dahlbyk/posh-git.svg?branch=develop
 [tv-develop-site]: https://travis-ci.org/dahlbyk/posh-git
 
-[cc-develop-img]: https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop
+[cc-develop-img]:  https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop
 [cc-develop-site]: https://coveralls.io/github/dahlbyk/posh-git?branch=develop
-[cc-master-img]: https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master
-[cc-master-site]: https://coveralls.io/github/dahlbyk/posh-git?branch=master
+[cc-master-img]:   https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master
+[cc-master-site]:  https://coveralls.io/github/dahlbyk/posh-git?branch=master
 
-[ansi-esc-code]: https://en.wikipedia.org/wiki/ANSI_escape_code
-[console-vt-seq]: https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
-[gitter-img]: https://badges.gitter.im/dahlbyk/posh-git.svg
-[gitter]: https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[pscore-install]: https://github.com/PowerShell/PowerShell#get-powershell
+[ansi-esc-code]:   https://en.wikipedia.org/wiki/ANSI_escape_code
+[console-vt-seq]:  https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
+[gitter-img]:      https://badges.gitter.im/dahlbyk/posh-git.svg
+[gitter]:          https://gitter.im/dahlbyk/posh-git?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[pscore-install]:  https://github.com/PowerShell/PowerShell#get-powershell
 
-[choco-img]: https://img.shields.io/chocolatey/dt/poshgit.svg
-[choco-site]: https://chocolatey.org/packages/poshgit/
+[choco-img]:       https://img.shields.io/chocolatey/dt/poshgit.svg
+[choco-site]:      https://chocolatey.org/packages/poshgit/
 [psgallery-beta1]: https://www.powershellgallery.com/packages/posh-git/1.0.0-beta1
-[psgallery-img]: https://img.shields.io/powershellgallery/dt/posh-git.svg
-[psgallery-site]: https://powershellgallery.com/packages/posh-git
-[w3schools-colors]: https://www.w3schools.com/colors/colors_names.asp
+[psgallery-img]:   https://img.shields.io/powershellgallery/dt/posh-git.svg
+[psgallery-site]:  https://powershellgallery.com/packages/posh-git
+[w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
-[prompt-default]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
-[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> "
+[prompt-def-long]: ../posh-git.wiki/images/PromptDefaultLong.png   "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
+[prompt-default]:  ../posh-git.wiki/images/PromptDefault.png       "C:\Users\Keith\GitHub\posh-git [master ≡]> "
+[prompt-prefix]:   ../posh-git.wiki/images/PromptPrefix.png        "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
+[prompt-abbrev]:   ../posh-git.wiki/images/PromptAbbrevHomeDir.png "~\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
+[prompt-path]:     ../posh-git.wiki/images/PromptOrangePath.png    "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
+[prompt-swap]:     ../posh-git.wiki/images/PromptStatusFirst.png   "[master ≡ +0 ~1 -0 !] C:\Users\Keith\GitHub\posh-git> "
+[prompt-two-line]: ../posh-git.wiki/images/PromptTwoLine.png       "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> "
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
