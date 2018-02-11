@@ -207,13 +207,13 @@ Describe 'Default Prompt WindowTitle Tests' {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $repoAdminRegex = '^Administrator: posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        $repoAdminRegex = '^Administrator: posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $repoRegex = '^posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        $repoRegex = '^posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $nonRepoAdminRegex = '^Administrator: PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        $nonRepoAdminRegex = '^Administrator: PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $nonRepoRegex = '^PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \(\d+\)$'
+        $nonRepoRegex = '^PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
     }
     AfterAll {
         $global:PSDefaultParameterValues = $originalDefaultParameterValues
