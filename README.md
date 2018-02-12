@@ -258,13 +258,13 @@ The rest of this section covers how to customize posh-git's prompt function usin
 You can customize the default prompt prefix to display a timestamp with these settings:
 
 ```text
-$GitPromptSettings.DefaultPromptPrefix.Text = '$(Get-Date -f "MM/dd-hh:mm:ss") '
+$GitPromptSettings.DefaultPromptPrefix.Text = '$(Get-Date -f "MM-dd HH:mm:ss") '
 $GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::DarkMagenta
 ```
 
 This will change the prompt to:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-prefix]
+![02-11 19:03:31 C:\Users\Keith\GitHub\posh-git [master ≡]> ][prompt-prefix]
 
 And if you would prefer to have any path under your home directory abbreviated with `~`, use the following setting:
 
@@ -274,7 +274,7 @@ $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
 
 This will change the prompt to:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-abbrev]
+![~\GitHub\posh-git [master ≡]> ][prompt-abbrev]
 
 If you would like to change the color of the path, you can use the following setting on Windows:
 
@@ -294,7 +294,7 @@ $GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
 
 This will change the prompt to:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> ][prompt-path]
+![C:\Users\Keith\GitHub\posh-git [master]> ][prompt-path]
 
 If you would like to make your prompt span two lines, with a newline after the Git status summary, use these settings:
 
@@ -305,7 +305,7 @@ $GitPromptSettings.DefaultPromptDebug = "[DBG]: "
 
 This will change the prompt to:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> ][prompt-two-line]
+![C:\Users\Keith\GitHub\posh-git [master ≡]&#10;> ][prompt-two-line]
 
 Finally, you can swap the order of the path and the Git status summary with the following settings:
 
@@ -317,7 +317,7 @@ $GitPromptSettings.AfterText.Text  = '] '
 
 This will change the prompt to:
 
-![[master ≡ +0 ~1 -0 !] C:\Users\Keith\GitHub\posh-git> ][prompt-swap]
+![[master ≡] C:\Users\Keith\GitHub\posh-git> ][prompt-swap]
 
 If you'd like to make any of these changes available whenever you start PowerShell,
 put the corresponding setting(s) in one of your profile scripts.
@@ -384,10 +384,10 @@ function prompt {
 
 [prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
 [prompt-default]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png       "C:\Users\Keith\GitHub\posh-git [master ≡]> "
-[prompt-prefix]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptPrefix.png        "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
-[prompt-abbrev]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptAbbrevHomeDir.png "~\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
-[prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]> "
-[prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡ +0 ~1 -0 !] C:\Users\Keith\GitHub\posh-git> "
-[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 !]&#10;> "
+[prompt-prefix]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptPrefix.png        "02-11 19:03:31 C:\Users\Keith\GitHub\posh-git [master ≡]>"
+[prompt-abbrev]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptAbbrevHomeDir.png "~\GitHub\posh-git [master ≡]> "
+[prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "C:\Users\Keith\GitHub\posh-git [master ≡]> "
+[prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡] C:\Users\Keith\GitHub\posh-git> "
+[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "C:\Users\Keith\GitHub\posh-git [master ≡]&#10;> "
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
