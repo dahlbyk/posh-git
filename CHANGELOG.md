@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 1.0.0-beta1 - January 10, 2018
+## 1.0.0-beta2 - February 14, 2018
 
 The 1.0.0 release is targeted specifically at Windows PowerShell 5.x and (cross-platform) PowerShell Core 6.x, both of
 which support writing prompt strings using [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code).
@@ -11,19 +11,56 @@ Consequently this release introduces BREAKING changes with 0.7.x by:
 - Dropping support for Windows PowerShell versions 2.0, 3.0 and 4.0.
 - Changing the $GitPromptSettings hashtable to a more structured and stongly typed object.
   Here is one example of the changed settings structure:
+
   ```powershell
   $GitPromptSettings.LocalWorkingStatusSymbol = '#'
   $GitPromptSettings.LocalWorkingStatusForegroundColor = [ConsoleColor]::DarkRed
   ```
+
   Changes to:
+
   ```powershell
   $GitPromptSettings.LocalWorkingStatusSymbol.Text = '#'
   $GitPromptSettings.LocalWorkingStatusSymbol.ForegroundColor = [ConsoleColor]::DarkRed
   ```
+
+- Renaming `$GitPromptSettings.EnableWindowTitle` to `$GitPromptSettings.WindowTitle`.
 - Changing `Write-VcsStatus`, `Write-GitStatus` and `Write-Prompt` to return a string rather than write to host when
   the host supports ANSI escape sequences.
 
 If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use the 0.7.x version of posh-git.
+
+### Added
+
+- `RepoName` property has been addded to the `$global:GitStatus` object returned by Get-GitStatus.
+- New command: Get-PromptPath which formats the path displayed in the prompt according to the $GitPromptSettings that
+  affect the path (DefaultPromptAbbreviateHomeDirectory).
+
+### Changed
+
+- `$GitPromptSettigs.EnableWindowTitle` has been renamed to `$GitPromptSettigs.WindowTitle` and now takes either a string or a ScriptBlock.
+  The default value is a ScriptBlock that takes two parameters: `$GitStatus`, `$IsAdmin`.
+  To prevent posh-git from changing the host's WindowTitle text, set `$GitPromptSettigs.WindowTitle` to `$null`.
+- The script that updates the WindowTitle text has been moved from the `Write-GitStatus` command to the built-in prompt function.
+- `$GitPromptSettigs.WindowTitle` is now used to set the WindowTitle text all the time, not just when inside a Git repo.
+- When a color setting is specified by a string (color name), HtmlColors are looked up before ConsoleColors on platforms that support `System.Drawing.ColorTranslator`.
+  ConsoleColors can be forced with `[ConsoleColor]::Cyan`.
+  ([PR #536](https://github.com/dahlbyk/posh-git/pull/536))
+
+### Fixed
+
+- Fixed EnablePromptStatus should not affect `Get-GitStatus` by adding `-Force` parameter.
+  ([#475](https://github.com/dahlbyk/posh-git/issues/475))
+  ([PR #535](https://github.com/dahlbyk/posh-git/pull/535))
+- Fixed PowerShell Core bug where we were using `Get-Content -Encoding Byte` when processing profile scripts during Chocolatey install/uninstall.
+  That encoding doesn't exist in PowerShell Core.
+  Switched to `Get-Content -AsByteStream` on PowerShell Core.
+  ([PR #532](https://github.com/dahlbyk/posh-git/pull/532))
+- Fixed ANSI rendering bug when both Foreground and Background colors are $null (default),
+  we were emitting an unnecessary terminating escape sequence `"$([char]27)[0m"`.
+  ([PR #532](https://github.com/dahlbyk/posh-git/pull/532))
+
+## 1.0.0-beta1 - January 10, 2018
 
 ### Removed
 
