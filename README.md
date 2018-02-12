@@ -266,7 +266,7 @@ This will change the prompt to:
 
 ![02-11 19:03:31 C:\Users\Keith\GitHub\posh-git [master ≡]> ][prompt-prefix]
 
-And if you would prefer to have any path under your home directory abbreviated with `~`, use the following setting:
+If you would prefer to have any path under your home directory abbreviated with `~`, use the following setting:
 
 ```text
 $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
@@ -319,8 +319,8 @@ This will change the prompt to:
 
 ![[master ≡] C:\Users\Keith\GitHub\posh-git> ][prompt-swap]
 
-If you'd like to make any of these changes available whenever you start PowerShell,
-put the corresponding setting(s) in one of your profile scripts.
+If you'd like to make any of these changes available whenever you start PowerShell, put the corresponding
+setting(s) in one of your profile scripts after the line that imports posh-git.
 
 If you require more customization than `$GitPromptSettings` provides, you can create your own prompt function to show whatever information you want. See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details.
 However, if you need a custom prompt to perform some non-prompt logic, you can still use posh-git's prompt function to
