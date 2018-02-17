@@ -39,6 +39,24 @@ function global:Convert-NativeLineEnding([string]$content, [switch]$SplitLines) 
     }
 }
 
+function GetHomePath() {
+    if ($GitPromptSettings.DefaultPromptAbbreviateHomeDirectory) {"~"} else {$HOME}
+}
+
+function GetHomeRelPath([string]$Path) {
+    if (!$Path.StartsWith($Home)) {
+        # Path not under $Home
+        return $Path
+    }
+
+    if ($GitPromptSettings.DefaultPromptAbbreviateHomeDirectory) {
+        "~$($Path.Substring($Home.Length))"
+    }
+    else {
+        $Path
+    }
+}
+
 function MakeNativePath([string]$Path) {
     $Path -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
 }

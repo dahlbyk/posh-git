@@ -259,10 +259,10 @@ class PoshGitPromptSettings {
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = ''
     [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
-    [PoshGitTextSpan]$DefaultPromptDebug        = ' [DBG]:'
+    [PoshGitTextSpan]$DefaultPromptDebug        = [PoshGitTextSpan]::new(' [DBG]:', [ConsoleColor]::Magenta)
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
 
-    [bool]$DefaultPromptAbbreviateHomeDirectory = $false
+    [bool]$DefaultPromptAbbreviateHomeDirectory = $true
     [bool]$DefaultPromptWriteStatusFirst        = $false
     [bool]$DefaultPromptEnableTiming            = $false
     [PoshGitTextSpan]$DefaultPromptTimingFormat = ' {0}ms'
