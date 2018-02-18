@@ -250,7 +250,7 @@ function.
 
 The prompt function provided by posh-git creates a prompt that looks like this:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡]> ][prompt-default]
+![~\GitHub\posh-git [master ≡]> ][prompt-default]
 
 You can customize the posh-git prompt function or define your own custom prompt function.
 The rest of this section covers how to customize posh-git's prompt function using the global variale `$GitPromptSettings`.
@@ -259,22 +259,22 @@ You can customize the default prompt prefix to display a timestamp with these se
 
 ```text
 $GitPromptSettings.DefaultPromptPrefix.Text = '$(Get-Date -f "MM-dd HH:mm:ss") '
-$GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::DarkMagenta
+$GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::Magenta
 ```
 
 This will change the prompt to:
 
-![02-11 19:03:31 C:\Users\Keith\GitHub\posh-git [master ≡]> ][prompt-prefix]
+![02-18 13:45:19 ~\GitHub\posh-git [master ≡]> ][prompt-prefix]
 
-If you would prefer to have any path under your home directory abbreviated with `~`, use the following setting:
+If you would prefer not to have any path under your home directory abbreviated with `~`, use the following setting:
 
 ```text
-$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
+$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $false
 ```
 
 This will change the prompt to:
 
-![~\GitHub\posh-git [master ≡]> ][prompt-abbrev]
+![C:\Users\Keith\GitHub\posh-git [master ≡]> ][prompt-no-abbr]
 
 If you would like to change the color of the path, you can use the following setting on Windows:
 
@@ -294,35 +294,66 @@ $GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
 
 This will change the prompt to:
 
-![C:\Users\Keith\GitHub\posh-git [master]> ][prompt-path]
+![~\GitHub\posh-git [master]> ][prompt-path]
 
 If you would like to make your prompt span two lines, with a newline after the Git status summary, use these settings:
 
 ```text
-$GitPromptSettings.AfterText.Text += "`n"
-$GitPromptSettings.DefaultPromptDebug = "[DBG]: "
+$GitPromptSettings.DefaultPromptMiddle.Text = '`n'
 ```
 
 This will change the prompt to:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡]&#10;> ][prompt-two-line]
+![~\GitHub\posh-git [master ≡]&#10;> ][prompt-two-line]
 
-Finally, you can swap the order of the path and the Git status summary with the following settings:
+You can swap the order of the path and the Git status summary with the following settings:
 
 ```text
 $GitPromptSettings.DefaultPromptWriteStatusFirst = $true
-$GitPromptSettings.BeforeText.Text = '['
-$GitPromptSettings.AfterText.Text  = '] '
 ```
 
 This will change the prompt to:
 
-![[master ≡] C:\Users\Keith\GitHub\posh-git> ][prompt-swap]
+![[master ≡] ~\GitHub\posh-git> ][prompt-swap]
 
-If you'd like to make any of these changes available whenever you start PowerShell, put the corresponding
+Finally, you can combine these settings to customize the posh-git prompt fairly significantly.
+In the `DefaultPromptSuffix` field below, we are prepending the PowerShell history id number before the prompt char `>` e.g.:
+
+```text
+$GitPromptSettings.DefaultPromptWriteStatusFirst = $true
+$GitPromptSettings.DefaultPromptMiddle.Text = '`n$([DateTime]::now.ToString("MM-dd HH:mm:ss"))'
+$GitPromptSettings.DefaultPromptMiddle.ForegroundColor = 0x808080
+$GitPromptSettings.DefaultPromptSuffix = ' $((Get-History -Count 1).id + 1)$(">" * ($nestedPromptLevel + 1)) '
+```
+
+This will change the prompt to:
+
+![[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
+
+If you'd like to make any of these changes permanent i.e. available whenever you start PowerShell, put the corresponding
 setting(s) in one of your profile scripts after the line that imports posh-git.
 
-If you require more customization than `$GitPromptSettings` provides, you can create your own prompt function to show whatever information you want. See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details.
+For reference, the following layouts show the relative position of the various parts of the posh-git prompt.
+Note that `<>` denotes parts of the prompt that may not appear depending on the status of settings and whether or not
+the current dir is in a Git repository.
+To simplify the layout, `DP` is being used as an abbreviation for `DefaultPrompt` settings.
+
+Default prompt layout:
+
+```text
+{DPPrefix}{DPPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPMiddle}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+```
+
+Prompt layout when DefaultPromptWriteStatusFirst is set to $true:
+
+```text
+{DPPrefix}<{BeforeStatus}{Status}{AfterStatus}>{PathStatusSeparator}{DPPath}{DPMiddle}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+```
+
+If you require even more customization than `$GitPromptSettings` provides, you can create your own prompt
+function to show whatever information you want.
+
+See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details.
 However, if you need a custom prompt to perform some non-prompt logic, you can still use posh-git's prompt function to
 write out a prompt string.  This can be done with the `$GitPromptScriptBlock` variable as shown below e.g.:
 
@@ -382,12 +413,13 @@ function prompt {
 [psgallery-site]:  https://powershellgallery.com/packages/posh-git
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
-[prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
-[prompt-default]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png       "C:\Users\Keith\GitHub\posh-git [master ≡]> "
-[prompt-prefix]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptPrefix.png        "02-11 19:03:31 C:\Users\Keith\GitHub\posh-git [master ≡]>"
-[prompt-abbrev]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptAbbrevHomeDir.png "~\GitHub\posh-git [master ≡]> "
-[prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "C:\Users\Keith\GitHub\posh-git [master ≡]> "
-[prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡] C:\Users\Keith\GitHub\posh-git> "
-[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "C:\Users\Keith\GitHub\posh-git [master ≡]&#10;> "
+[prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "~\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
+[prompt-default]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png       "~\GitHub\posh-git [master ≡]> "
+[prompt-prefix]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptPrefix.png        "02-18 13:45:19 ~\GitHub\posh-git [master ≡]>"
+[prompt-no-abbr]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptNoAbbrevHome.png  "C:\Users\Keith\GitHub\posh-git [master ≡]> "
+[prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "~\GitHub\posh-git [master ≡]> "
+[prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡] ~\GitHub\posh-git> "
+[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "~\GitHub\posh-git [master ≡]&#10;> "
+[prompt-custom]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustom.png        "[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> "
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
