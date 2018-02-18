@@ -12,6 +12,7 @@ Table of contents:
 - [Supported version](#supported-versions)
 - [Installation](#installation)
 - [Using posh-git](#using-posh-git)
+- [Customizing the posh-git prompt](#customizing-the-posh-git-prompt)
 - [Based on work by](#based-on-work-by)
 
 ## Build status
@@ -241,12 +242,11 @@ Import-Module posh-git
 Save the profile script, then close PowerShell and open a new PowerShell session.
 Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to `git fetch`.
 
-### Step 3 (optional): Customize your PowerShell prompt
+## Customizing the posh-git prompt
 
-When you import the posh-git module, it will replace PowerShell's default prompt function with a new
-prompt function that displays Git status summary information when the current directory is inside a Git repository.
-posh-git will not replace the prompt function if it has detected that you have your own, customized prompt
-function.
+When you import the posh-git module, it will replace PowerShell's default prompt function with a new prompt function.
+The posh-git prompt function will display Git status summary information when the current directory is inside a Git repository.
+posh-git will not replace the prompt function if it has detected that you have your own, customized prompt function.
 
 The prompt function provided by posh-git creates a prompt that looks like this:
 
@@ -255,7 +255,7 @@ The prompt function provided by posh-git creates a prompt that looks like this:
 You can customize the posh-git prompt function or define your own custom prompt function.
 The rest of this section covers how to customize posh-git's prompt function using the global variale `$GitPromptSettings`.
 
-You can customize the default prompt prefix to display a timestamp with these settings:
+For instance, you can customize the default prompt prefix to display a colored timestamp with these settings:
 
 ```text
 $GitPromptSettings.DefaultPromptPrefix.Text = '$(Get-Date -f "MM-dd HH:mm:ss") '
@@ -282,11 +282,11 @@ If you would like to change the color of the path, you can use the following set
 $GitPromptSettings.DefaultPromptPath.ForegroundColor = 'Orange'
 ```
 
-Setting the ForegroundColor to a color name, other than one of the standard ConsoleColor names, only works on Windows.
+> Note: Setting the ForegroundColor to a color name, other than one of the standard ConsoleColor names, only works on Windows.
 On Windows, posh-git uses the `System.Drawing.ColorTranslator.FromHtml()` method to parse a color name as an HTML color.
 For a complete list of HTML colors, see this [W3Schools page][w3c-colors].
 
-If you are on Linux or macOS and desire an Orange path, you can specify the RGB value for Orange e.g.:
+If you are on Linux or macOS and desire an Orange path, you will need to specify the RGB value for Orange e.g.:
 
 ```text
 $GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
@@ -296,7 +296,7 @@ This will change the prompt to:
 
 ![~\GitHub\posh-git [master]> ][prompt-path]
 
-If you would like to make your prompt span two lines, with a newline after the Git status summary, use these settings:
+If you would like to make your prompt span two lines, with a newline after the Git status summary, use this setting:
 
 ```text
 $GitPromptSettings.DefaultPromptMiddle.Text = '`n'
@@ -306,7 +306,7 @@ This will change the prompt to:
 
 ![~\GitHub\posh-git [master ≡]&#10;> ][prompt-two-line]
 
-You can swap the order of the path and the Git status summary with the following settings:
+You can swap the order of the path and the Git status summary with the following setting:
 
 ```text
 $GitPromptSettings.DefaultPromptWriteStatusFirst = $true
@@ -331,7 +331,7 @@ This will change the prompt to:
 ![[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
 
 If you'd like to make any of these changes permanent i.e. available whenever you start PowerShell, put the corresponding
-setting(s) in one of your profile scripts after the line that imports posh-git.
+setting(s) in one of your profile scripts **after** the line that imports posh-git.
 
 For reference, the following layouts show the relative position of the various parts of the posh-git prompt.
 Note that `<>` denotes parts of the prompt that may not appear depending on the status of settings and whether or not
