@@ -60,11 +60,10 @@ $GitPromptScriptBlock = {
     # Construct/write the prompt text
     $prompt = ''
 
-    # Display default prompt prefix if not empty.
-    $defaultPromptPrefix = $settings.DefaultPromptPrefix
-    if ($defaultPromptPrefix.Text) {
+    # Write default prompt prefix if not empty.
+    if ($settings.DefaultPromptPrefix.Text) {
         $promptPrefix = [PoshGitTextSpan]::new($settings.DefaultPromptPrefix)
-        $promptPrefix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($defaultPromptPrefix.Text)
+        $promptPrefix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptPrefix.Text)
         $prompt += Write-Prompt $promptPrefix
     }
 
@@ -82,18 +81,25 @@ $GitPromptScriptBlock = {
         $prompt += Write-VcsStatus
     }
 
-    # If stopped in the debugger, the prompt needs to indicate that in some fashion
-    $debugMode = (Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint
-    if ($debugMode) {
+    # Write default prompt middle if not empty.
+    if ($settings.DefaultPromptMiddle.Text) {
+        $promptMiddle = [PoshGitTextSpan]::new($settings.DefaultPromptMiddle)
+        $promptMiddle.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptMiddle.Text)
+        $prompt += Write-Prompt $promptMiddle
+    }
+
+    # If stopped in the debugger, the prompt needs to indicate that by writing default propmt debug
+    if ($settings.DefaultPromptDebug.Text -and ((Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint)) {
         $promptDebug = [PoshGitTextSpan]::new($settings.DefaultPromptDebug)
         $promptDebug.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptDebug.Text)
+        $prompt += Write-Prompt $promptDebug
     }
 
     # Get the prompt suffix text
     $promptSuffix = [PoshGitTextSpan]::new($settings.DefaultPromptSuffix)
     $promptSuffix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptSuffix.Text)
 
-    # When using Write-Host, we will append a single space to prevent PowerShell from displaying "PS>"
+    # When using Write-Host, we return a single space from this function to prevent PowerShell from displaying "PS>"
     # So to avoid two spaces at the end of the suffix, remove one here if it exists
     if (!$settings.AnsiConsole -and $promptSuffix.Text.EndsWith(' ')) {
         $promptSuffix.Text = $promptSuffix.Text.Substring(0, $promptSuffix.Text.Length - 1)
@@ -130,15 +136,10 @@ $GitPromptScriptBlock = {
         }
     }
 
-    # Write debug prompt
-    if ($debugMode) {
-        $prompt += Write-Prompt $promptDebug
-    }
-
     # If prompt timing enabled, write elapsed milliseconds
     if ($settings.DefaultPromptEnableTiming) {
-        $sw.Stop()
         $timingInfo = [PoshGitTextSpan]::new($settings.DefaultPromptTimingFormat)
+        $sw.Stop()
         $timingInfo.Text = $timingInfo.Text -f $sw.ElapsedMilliseconds
         $prompt += Write-Prompt $timingInfo
     }
@@ -148,6 +149,11 @@ $GitPromptScriptBlock = {
     # When using Write-Host, return at least a space to avoid "PS>" being unexpectedly displayed
     if (!$settings.AnsiConsole) {
         $prompt += " "
+    }
+    else {
+        # If using ANSI, set this global to help debug ANSI issues
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+        $global:PoshGitLastPrompt = EscapeAnsiString $prompt
     }
 
     $global:LASTEXITCODE = $origLastExitCode

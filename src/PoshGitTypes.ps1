@@ -218,13 +218,14 @@ class PoshGitPromptSettings {
     [PoshGitCellColor]$StashColor   = [PoshGitCellColor]::new([ConsoleColor]::Red)
     [PoshGitCellColor]$ErrorColor   = [PoshGitCellColor]::new([ConsoleColor]::Red)
 
-    [PoshGitTextSpan]$BeforeText               = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
-    [PoshGitTextSpan]$DelimText                = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
-    [PoshGitTextSpan]$AfterText                = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$PathStatusSeparator      = ' '
+    [PoshGitTextSpan]$BeforeStatus             = [PoshGitTextSpan]::new('[', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$DelimStatus              = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$AfterStatus              = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
 
-    [PoshGitTextSpan]$BeforeIndexText          = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
-    [PoshGitTextSpan]$BeforeStashText          = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
-    [PoshGitTextSpan]$AfterStashText           = [PoshGitTextSpan]::new(')', [ConsoleColor]::Red)
+    [PoshGitTextSpan]$BeforeIndex              = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
+    [PoshGitTextSpan]$BeforeStash              = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
+    [PoshGitTextSpan]$AfterStash               = [PoshGitTextSpan]::new(')', [ConsoleColor]::Red)
 
     [PoshGitTextSpan]$LocalDefaultStatusSymbol = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
     [PoshGitTextSpan]$LocalWorkingStatusSymbol = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
@@ -259,6 +260,7 @@ class PoshGitPromptSettings {
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = ''
     [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
+    [PoshGitTextSpan]$DefaultPromptMiddle       = ''
     [PoshGitTextSpan]$DefaultPromptDebug        = [PoshGitTextSpan]::new(' [DBG]:', [ConsoleColor]::Magenta)
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
 

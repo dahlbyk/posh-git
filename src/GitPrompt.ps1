@@ -8,7 +8,7 @@ $s = $global:GitPromptSettings
 if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.LocalDefaultStatusSymbol.ForegroundColor = 'Green'
     $s.LocalWorkingStatusSymbol.ForegroundColor = 'Red'
-    $s.BeforeIndexText.ForegroundColor          = 'Green'
+    $s.BeforeIndex.ForegroundColor              = 'Green'
     $s.IndexColor.ForegroundColor               = 'Green'
     $s.WorkingColor.ForegroundColor             = 'Red'
 }
@@ -177,16 +177,21 @@ function Write-GitStatus {
 
     $sb = [System.Text.StringBuilder]::new(150)
 
-    $sb | Write-Prompt $s.BeforeText > $null
+    # When prompt is first (default), place the separator before the status summary
+    if (!$s.DefaultPromptWriteStatusFirst) {
+        $sb | Write-Prompt $s.PathStatusSeparator > $null
+    }
+
+    $sb | Write-Prompt $s.BeforeStatus > $null
     $sb | Write-GitBranchName $Status -NoLeadingSpace > $null
     $sb | Write-GitBranchStatus $Status > $null
 
     if ($s.EnableFileStatus -and $Status.HasIndex) {
-        $sb | Write-Prompt $s.BeforeIndexText > $null
+        $sb | Write-Prompt $s.BeforeIndex > $null
         $sb | Write-GitIndexStatus $Status > $null
 
         if ($Status.HasWorking) {
-            $sb | Write-Prompt $s.DelimText > $null
+            $sb | Write-Prompt $s.DelimStatus > $null
         }
     }
 
@@ -200,7 +205,12 @@ function Write-GitStatus {
         $sb | Write-GitStashCount $Status > $null
     }
 
-    $sb | Write-Prompt $s.AfterText > $null
+    $sb | Write-Prompt $s.AfterStatus > $null
+
+    # When status is first, place the separator after the status summary
+    if ($s.DefaultPromptWriteStatusFirst) {
+        $sb | Write-Prompt $s.PathStatusSeparator > $null
+    }
 
     $sb.ToString()
 }
@@ -807,14 +817,14 @@ function Write-GitStashCount {
         $stashText = "$($Status.StashCount)"
 
         if ($StringBuilder) {
-            $StringBuilder | Write-Prompt $s.BeforeStashText > $null
+            $StringBuilder | Write-Prompt $s.BeforeStash > $null
             $StringBuilder | Write-Prompt $stashText -Color $s.StashColor > $null
-            $StringBuilder | Write-Prompt $s.AfterStashText > $null
+            $StringBuilder | Write-Prompt $s.AfterStash > $null
         }
         else {
-            $str += Write-Prompt $s.BeforeStashText
+            $str += Write-Prompt $s.BeforeStash
             $str += Write-Prompt $stashText -Color $s.StashColor
-            $str += Write-Prompt $s.AfterStashText
+            $str += Write-Prompt $s.AfterStash
         }
     }
 
@@ -856,9 +866,9 @@ $PoshGitVcsPrompt = {
             $errorText = "PoshGitVcsPrompt error: $_"
             $sb = [System.Text.StringBuilder]::new()
 
-            $sb | Write-Prompt $s.BeforeText > $null
+            $sb | Write-Prompt $s.BeforeStatus > $null
             $sb | Write-Prompt $errorText -Color $s.ErrorColor > $null
-            $sb | Write-Prompt $s.AfterText > $null
+            $sb | Write-Prompt $s.AfterStatus > $null
 
             $sb.ToString()
         }

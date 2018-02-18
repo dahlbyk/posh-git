@@ -200,7 +200,7 @@ A  test/Foo.Tests.ps1
             $res = [string](&$prompt 6>&1)
             Assert-MockCalled git -ModuleName posh-git
             $path = GetHomeRelPath $PSScriptRoot
-            $res | Should BeExactly "$path${csi}93m [${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}93m |${csi}0m${csi}31m${csi}49m +0${csi}0m${csi}31m${csi}49m ~1${csi}0m${csi}31m${csi}49m -1${csi}0m${csi}31m !${csi}0m${csi}93m]${csi}0m> "
+            $res | Should BeExactly "$path ${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}93m |${csi}0m${csi}31m${csi}49m +0${csi}0m${csi}31m${csi}49m ~1${csi}0m${csi}31m${csi}49m -1${csi}0m${csi}31m !${csi}0m${csi}93m]${csi}0m> "
         }
     }
 }
