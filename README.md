@@ -352,8 +352,8 @@ Prompt layout when DefaultPromptWriteStatusFirst is set to $true:
 
 If you require even more customization than `$GitPromptSettings` provides, you can create your own prompt
 function to show whatever information you want.
-
 See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details.
+
 However, if you need a custom prompt to perform some non-prompt logic, you can still use posh-git's prompt function to
 write out a prompt string.  This can be done with the `$GitPromptScriptBlock` variable as shown below e.g.:
 
@@ -374,7 +374,7 @@ you can use posh-git's `Write-Prompt` command as shown below:
 # my profile.ps1
 function prompt {
     # Your non-prompt logic here
-    $prompt = Write-Prompt "Text before posh-git prompt " -ForegroundColor Orange
+    $prompt = Write-Prompt "Text before posh-git prompt " -ForegroundColor ([ConsoleColor]::Green)
     $prompt += & $GitPromptScriptBlock
     $prompt += Write-Prompt "Text after posh-git prompt " -ForegroundColor ([ConsoleColor]::Magenta)
     if ($prompt) { $prompt }
