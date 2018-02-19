@@ -253,7 +253,7 @@ The prompt function provided by posh-git creates a prompt that looks like this:
 ![~\GitHub\posh-git [master ≡]> ][prompt-default]
 
 You can customize the posh-git prompt function or define your own custom prompt function.
-The rest of this section covers how to customize posh-git's prompt function using the global variale `$GitPromptSettings`.
+The rest of this section covers how to customize posh-git's prompt function using the global variable `$GitPromptSettings`.
 
 For instance, you can customize the default prompt prefix to display a colored timestamp with these settings:
 
