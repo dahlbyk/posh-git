@@ -1,6 +1,8 @@
 posh-hg
 ========
 
+**This project is no longer under development and is not maintained. Please feel free to use the code, but no changes will be made and no pull requests will be merged in.** 
+
 Inspired by the Posh-Git project (http://github.com/dahlbyk/posh-git), Posh-Hg provides a set of PowerShell scripts which provide Mercurial/PowerShell integration
 
 ### Prompt for Hg repositories
