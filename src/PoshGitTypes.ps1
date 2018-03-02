@@ -141,12 +141,12 @@ class PoshGitTextSpan {
         }
         else {
             $bg = $this.BackgroundColor
-            if ($bg -and !(Test-VirtualTerminalSequece $bg)) {
+            if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
                 $bg = Get-BackgroundVirtualTerminalSequence $bg
             }
 
             $fg = $this.ForegroundColor
-            if ($fg -and !(Test-VirtualTerminalSequece $fg)) {
+            if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
                 $fg = Get-ForegroundVirtualTerminalSequence $fg
             }
 
