@@ -38,7 +38,12 @@ class PoshGitCellColor {
                 $str += "${bg}${colorSwatch}${ansiTerm} "
             }
 
-            $str += $color.ToString()
+            if ($color -is [int]) {
+                $str += "0x{0:X6}" -f $color
+            }
+            else {
+                $str += $color.ToString()
+            }
         }
 
         return $str
@@ -173,24 +178,29 @@ class PoshGitTextSpan {
     }
 
     [string] ToString() {
+        $sep = " "
+        if ($this.Text.Length -lt 2) {
+            $sep = " " * (3 - $this.Text.Length)
+        }
+
         if ($global:GitPromptSettings.AnsiConsole) {
             if ($this.CustomAnsi) {
                 $e = [char]27 + "["
                 $ansi = $this.CustomAnsi
                 $escAnsi = EscapeAnsiString $this.CustomAnsi
                 $txt = $this.ToAnsiString()
-                $str = "Text: '$txt',`t CustomAnsi: '${ansi}${escAnsi}${e}0m'"
+                $str = "Text: '$txt',${sep}CustomAnsi: '${ansi}${escAnsi}${e}0m'"
             }
             else {
                 $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
                 $txt = $this.ToAnsiString()
-                $str = "Text: '$txt',`t $($color.ToString())"
+                $str = "Text: '$txt',${sep}$($color.ToString())"
             }
         }
         else {
             $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
             $txt = $this.Text
-            $str = "Text: '$txt',`t $($color.ToString())"
+            $str = "Text: '$txt',${sep}$($color.ToString())"
         }
 
         return $str
