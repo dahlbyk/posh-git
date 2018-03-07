@@ -405,3 +405,35 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
 
     git checkout -q $head
 }
+
+<#
+.SYNOPSIS
+    Gets a Git remotes object
+.DESCRIPTION
+    Gets a git remotes object
+    The object contains the name and URL of all remotes
+.EXAMPLE
+    PS C:\> $s = Get-GitRemotes
+    Returns:
+        Name   Url
+        ----   ---
+        origin git@github.com:dahlbyk/posh-git.git
+.INPUTS
+    None
+.OUTPUTS
+    System.Management.Automation.PSObject
+#>
+function Get-GitRemotes {
+    $remoteNames = Invoke-Utf8ConsoleCommand { git remote }
+    $remotes = New-Object System.Collections.ArrayList
+    foreach ($remoteName in $remoteNames) {
+        $remoteUrl = Invoke-Utf8ConsoleCommand { git remote get-url $remoteName }
+
+        $remote = New-Object System.Object
+        $remote | Add-Member -MemberType NoteProperty -Name "Name" -Value $remoteName
+        $remote | Add-Member -MemberType NoteProperty -Name "Url" -Value $remoteUrl
+
+        $remotes.Add($remote) | Out-Null
+    }
+    $remotes
+}

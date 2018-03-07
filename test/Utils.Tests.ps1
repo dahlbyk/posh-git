@@ -190,4 +190,58 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             Assert-MockCalled Get-PSModulePath
         }
     }
+
+    Context 'Get-GitRemotes Tests' {
+        It 'Returns the remote object with correct name and url' {
+            $remotes = Get-GitRemotes
+    
+            $remotes[0].Name | Should Be "origin"
+            $remotes[0].Url | Should BeLike "*github*"
+        }
+    
+        It 'Returns a list of 2 with 2 remotes' {
+            Mock -ModuleName posh-git git {
+                if ($args -contains 'get-url') {
+                    return "git@" + $args[2] + ".url"
+                } 
+                elseif ($args -contains 'remote') {
+                    return @('foo', 'bar')
+                }
+            }
+            $remotes = Get-GitRemotes
+
+            $remotes.Length | Should Be 2
+            $remotes[0].Name | Should Be 'foo'
+            $remotes[0].Url | Should Be 'git@foo.url'
+            $remotes[1].Name | Should Be 'bar'
+            $remotes[1].Url | Should Be 'git@bar.url'
+        }
+
+        It 'Returns valid objects with weird branch names' {
+            Mock -ModuleName posh-git git {
+                if ($args -contains 'get-url') {
+                    return "git@" + $args[2] + ".url"
+                }
+                elseif ($args -contains 'remote') {
+                    return @('foo/w3ird-br@nch')
+                }
+            }
+            $remotes = Get-GitRemotes
+
+            $remotes.Length | Should Be 1
+            $remotes[0].Name | Should Be 'foo/w3ird-br@nch'
+            $remotes[0].Url | Should Be 'git@foo/w3ird-br@nch.url'
+        }
+
+        It 'Returns empty list when no remotes are present' {
+            Mock -ModuleName posh-git git {
+                if ($args -contains 'remote') {
+                    return $null
+                }
+            }
+            $remotes = Get-GitRemotes
+
+            $remotes.Length | Should Be 0
+        }
+    }
 }

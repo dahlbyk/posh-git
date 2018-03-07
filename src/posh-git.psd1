@@ -30,6 +30,7 @@ FunctionsToExport = @(
     'Get-GitDirectory',
     'Get-PromptPath',
     'Update-AllBranches',
+    'Get-GitRemotes',
     'Write-GitStatus',
     'Write-GitBranchName',
     'Write-GitBranchStatus',
