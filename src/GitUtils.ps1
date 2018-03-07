@@ -414,7 +414,7 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
     The object contains the name and URL of all remotes
 .EXAMPLE
     PS C:\> $s = Get-GitRemotes
-    Returns: 
+    Returns:
         Name   Url
         ----   ---
         origin git@github.com:dahlbyk/posh-git.git
@@ -424,10 +424,10 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
     System.Management.Automation.PSMethod
 #>
 function Get-GitRemotes {
-    $remoteNames = git remote
+    $remoteNames = Invoke-Utf8ConsoleCommand { git remote }
     $remotes = New-Object System.Collections.ArrayList
     foreach ($remoteName in $remoteNames) {
-        $remoteUrl = git remote get-url $remoteName
+        $remoteUrl = Invoke-Utf8ConsoleCommand { git remote get-url $remoteName }
 
         $remote = New-Object System.Object
         $remote | Add-Member -MemberType NoteProperty -Name "Name" -Value $remoteName
