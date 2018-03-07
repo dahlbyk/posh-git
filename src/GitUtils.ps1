@@ -421,7 +421,7 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
 .INPUTS
     None
 .OUTPUTS
-    System.Management.Automation.PSMethod
+    System.Management.Automation.PSObject
 #>
 function Get-GitRemotes {
     $remoteNames = Invoke-Utf8ConsoleCommand { git remote }
