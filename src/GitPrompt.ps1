@@ -330,6 +330,10 @@ $PoshGitVcsPrompt = {
         if ($s) {
             Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
             Write-Prompt "Error: $_" -BackgroundColor $s.ErrorBackgroundColor -ForegroundColor $s.ErrorForegroundColor
+            if ($s.Debug) {
+                Write-Host
+                Write-Verbose $_.ScriptStackTrace -Verbose
+            }
             Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
         }
     }
