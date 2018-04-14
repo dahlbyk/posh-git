@@ -332,7 +332,7 @@ $PoshGitVcsPrompt = {
             Write-Prompt "Error: $_" -BackgroundColor $s.ErrorBackgroundColor -ForegroundColor $s.ErrorForegroundColor
             if ($s.Debug) {
                 Write-Host
-                Write-Verbose $_.ScriptStackTrace -Verbose
+                Write-Verbose "PoshGitVcsPrompt error details: $($_ | Format-List * -Force | Out-String)" -Verbose
             }
             Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
         }
