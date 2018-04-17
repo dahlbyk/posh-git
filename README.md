@@ -1,7 +1,7 @@
 # posh-git
 
-[![master build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master)
-[![master build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master)](https://coveralls.io/github/dahlbyk/posh-git?branch=master)
+[![v0 build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/v0?svg=true&pendingText=v0%20%E2%80%A3%20pending&failingText=v0%20%E2%80%A3%20failing&passingText=v0%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/v0)
+[![v0 build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=v0)](https://coveralls.io/github/dahlbyk/posh-git?branch=v0)
 
 [![develop build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/develop)
 [![develop build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop)](https://coveralls.io/github/dahlbyk/posh-git?branch=develop)
@@ -19,16 +19,19 @@ That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>
 You can also tab complete remote names and branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
 
 ## Versions
-- `master` avoids breaking changes, maintaining v0.x.
-  ( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
-  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
+- `v0` avoids breaking changes, maintaining v0.x.
+  ( [README](https://github.com/dahlbyk/posh-git/blob/v0/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0/CHANGELOG.md) )
   - Supports Windows PowerShell 3+
 - `develop` includes breaking changes, toward [v1.0](https://github.com/dahlbyk/posh-git/issues/328).
   ( [README](https://github.com/dahlbyk/posh-git/blob/develop/README.md)
   • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/develop/CHANGELOG.md) )
   - Supports Windows PowerShell 5.x and PowerShell Core 6
   - Supports [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) for color customization
-- Previous releases:
+- Releases:
+  - v0.7.2
+    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.2/README.md)
+    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.2/CHANGELOG.md) )
   - v0.7.1
     ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.1/README.md)
     • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.1/CHANGELOG.md) )
