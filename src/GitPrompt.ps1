@@ -87,6 +87,9 @@ $global:GitPromptSettings = [pscustomobject]@{
 
     ShowStatusWhenZero                          = $true
 
+    # Valid values are "all", "no", and "normal"
+    UntrackedFilesMode                          = $null
+
     AutoRefreshIndex                            = $true
 
     # Valid values are "Full", "Compact", and "Minimal"

@@ -232,7 +232,8 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
             } else {
                 dbg 'Getting status' $sw
-                $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status -uall --short --branch 2>$null }
+                $untrackedFilesOption = if($settings.UntrackedFilesMode) { "-u$($settings.UntrackedFilesMode)" } else { "" }
+                $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
                 if($settings.EnableStashStatus) {
                     dbg 'Getting stash count' $sw
                     $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
