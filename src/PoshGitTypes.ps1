@@ -138,6 +138,10 @@ class PoshGitTextSpan {
     }
 
     [PoshGitTextSpan] Expand() {
+        if (!$this.Text) {
+            return $this
+        }
+
         $execContext = Get-Variable ExecutionContext -ValueOnly
         $expandedText = $execContext.SessionState.InvokeCommand.ExpandString($this.Text)
         $newTextSpan = [PoshGitTextSpan]::new($expandedText, $this.ForegroundColor, $this.BackgroundColor)

@@ -69,6 +69,14 @@ function Write-Prompt {
         $StringBuilder
     )
 
+    if (!$Object -or ($Object -is [PoshGitTextSpan] -and !$Object.Text)) {
+        if ($StringBuilder) {
+            return $StringBuilder
+        }
+
+        return ""
+    }
+
     if ($PSCmdlet.ParameterSetName -eq "CellColor") {
         $bgColor = $Color.BackgroundColor
         $fgColor = $Color.ForegroundColor
