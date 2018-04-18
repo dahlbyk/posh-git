@@ -61,9 +61,7 @@ $GitPromptScriptBlock = {
     $prompt = ''
 
     # Write default prompt prefix if not empty.
-    if ($settings.DefaultPromptPrefix.Text) {
-        $prompt += Write-Prompt $settings.DefaultPromptPrefix.Expand()
-    }
+    $prompt += Write-Prompt $settings.DefaultPromptPrefix.Expand()
 
     # Get the current path - formatted correctly
     $promptPath = $settings.DefaultPromptPath.Expand()
@@ -79,12 +77,10 @@ $GitPromptScriptBlock = {
     }
 
     # Write default prompt middle if not empty.
-    if ($settings.DefaultPromptBeforeSuffix.Text) {
-        $prompt += Write-Prompt $settings.DefaultPromptBeforeSuffix.Expand()
-    }
+    $prompt += Write-Prompt $settings.DefaultPromptBeforeSuffix.Expand()
 
     # If stopped in the debugger, the prompt needs to indicate that by writing default propmt debug
-    if ($settings.DefaultPromptDebug.Text -and ((Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint)) {
+    if ((Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint) {
         $prompt += Write-Prompt $settings.DefaultPromptDebug.Expand()
     }
 
