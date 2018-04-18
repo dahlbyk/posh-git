@@ -62,14 +62,11 @@ $GitPromptScriptBlock = {
 
     # Write default prompt prefix if not empty.
     if ($settings.DefaultPromptPrefix.Text) {
-        $promptPrefix = [PoshGitTextSpan]::new($settings.DefaultPromptPrefix)
-        $promptPrefix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptPrefix.Text)
-        $prompt += Write-Prompt $promptPrefix
+        $prompt += Write-Prompt $settings.DefaultPromptPrefix.Expand()
     }
 
     # Get the current path - formatted correctly
-    $promptPath = [PoshGitTextSpan]::new($settings.DefaultPromptPath)
-    $promptPath.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptPath.Text)
+    $promptPath = $settings.DefaultPromptPath.Expand()
 
     # Write the path and Git status summary information
     if ($settings.DefaultPromptWriteStatusFirst) {
@@ -82,22 +79,17 @@ $GitPromptScriptBlock = {
     }
 
     # Write default prompt middle if not empty.
-    if ($settings.DefaultPromptMiddle.Text) {
-        $promptMiddle = [PoshGitTextSpan]::new($settings.DefaultPromptMiddle)
-        $promptMiddle.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptMiddle.Text)
-        $prompt += Write-Prompt $promptMiddle
+    if ($settings.DefaultPromptBeforeSuffix.Text) {
+        $prompt += Write-Prompt $settings.DefaultPromptBeforeSuffix.Expand()
     }
 
     # If stopped in the debugger, the prompt needs to indicate that by writing default propmt debug
     if ($settings.DefaultPromptDebug.Text -and ((Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint)) {
-        $promptDebug = [PoshGitTextSpan]::new($settings.DefaultPromptDebug)
-        $promptDebug.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptDebug.Text)
-        $prompt += Write-Prompt $promptDebug
+        $prompt += Write-Prompt $settings.DefaultPromptDebug.Expand()
     }
 
     # Get the prompt suffix text
-    $promptSuffix = [PoshGitTextSpan]::new($settings.DefaultPromptSuffix)
-    $promptSuffix.Text = $ExecutionContext.SessionState.InvokeCommand.ExpandString($promptSuffix.Text)
+    $promptSuffix = $settings.DefaultPromptSuffix.Expand()
 
     # When using Write-Host, we return a single space from this function to prevent PowerShell from displaying "PS>"
     # So to avoid two spaces at the end of the suffix, remove one here if it exists

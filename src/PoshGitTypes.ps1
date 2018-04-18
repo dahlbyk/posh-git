@@ -137,6 +137,14 @@ class PoshGitTextSpan {
         $this.CustomAnsi = $null
     }
 
+    [PoshGitTextSpan] Expand() {
+        $execContext = Get-Variable ExecutionContext -ValueOnly
+        $expandedText = $execContext.SessionState.InvokeCommand.ExpandString($this.Text)
+        $newTextSpan = [PoshGitTextSpan]::new($expandedText, $this.ForegroundColor, $this.BackgroundColor)
+        $newTextSpan.CustomAnsi = $this.CustomAnsi
+        return $newTextSpan
+    }
+
     [string] ToAnsiString() {
         $e = [char]27 + "["
         $txt = $this.Text
@@ -263,7 +271,7 @@ class PoshGitPromptSettings {
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = ''
     [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
-    [PoshGitTextSpan]$DefaultPromptMiddle       = ''
+    [PoshGitTextSpan]$DefaultPromptBeforeSuffix = ''
     [PoshGitTextSpan]$DefaultPromptDebug        = [PoshGitTextSpan]::new(' [DBG]:', [ConsoleColor]::Magenta)
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
 
