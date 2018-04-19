@@ -116,7 +116,7 @@ Describe 'Default Prompt Tests - ANSI' {
         It 'Returns the expected prompt string' {
             Set-Location $env:HOME -ErrorAction Stop
             $res = &$prompt
-            "$res" | Should BeExactly "$(GetHomePath)> "
+            $res | Should BeExactly "$(GetHomePath)> "
         }
         It 'Returns the expected prompt string with changed DefaultPromptSuffix' {
             Set-Location $Home -ErrorAction Stop
@@ -124,7 +124,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptSuffix.ForegroundColor = [ConsoleColor]::DarkBlue
             $GitPromptSettings.DefaultPromptSuffix.BackgroundColor = 0xFF6000 # Orange
             $res = &$prompt
-            "$res" | Should BeExactly "$(GetHomePath)${csi}34m${csi}48;2;255;96;0m`n> ${csi}0m"
+            $res | Should BeExactly "$(GetHomePath)${csi}34m${csi}48;2;255;96;0m`n> ${csi}0m"
         }
         It 'Returns the expected prompt string with expanded DefaultPromptSuffix' {
             Set-Location $Home -ErrorAction Stop
@@ -132,21 +132,21 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptSuffix.ForegroundColor = [ConsoleColor]::DarkBlue
             $GitPromptSettings.DefaultPromptSuffix.BackgroundColor = 0xFF6000 # Orange
             $res = &$prompt
-            "$res" | Should BeExactly "$(GetHomePath)${csi}34m${csi}48;2;255;96;0m - 42> ${csi}0m"
+            $res | Should BeExactly "$(GetHomePath)${csi}34m${csi}48;2;255;96;0m - 42> ${csi}0m"
         }
         It 'Returns the expected prompt string with changed DefaultPromptPrefix' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptPrefix.Text = 'PS '
             $GitPromptSettings.DefaultPromptPrefix.BackgroundColor = [ConsoleColor]::White
             $res = &$prompt
-            "$res" | Should BeExactly "${csi}107mPS ${csi}0m$(GetHomePath)> "
+            $res | Should BeExactly "${csi}107mPS ${csi}0m$(GetHomePath)> "
         }
         It 'Returns the expected prompt string with expanded DefaultPromptPrefix' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptPrefix.Text = '[$(hostname)] '
             $GitPromptSettings.DefaultPromptPrefix.BackgroundColor = 0xF5F5F5
             $res = &$prompt
-            "$res" | Should BeExactly "${csi}48;2;245;245;245m[$(hostname)] ${csi}0m$(GetHomePath)> "
+            $res | Should BeExactly "${csi}48;2;245;245;245m[$(hostname)] ${csi}0m$(GetHomePath)> "
         }
         It 'Returns the expected prompt path colors' {
             Set-Location $Home -ErrorAction Stop
@@ -154,7 +154,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptPath.ForegroundColor = [ConsoleColor]::DarkCyan
             $GitPromptSettings.DefaultPromptPath.BackgroundColor = [ConsoleColor]::DarkRed
             $res = &$prompt
-            "$res" | Should BeExactly "${csi}36m${csi}41m~${csi}0m> "
+            $res | Should BeExactly "${csi}36m${csi}41m~${csi}0m> "
         }
         It 'Returns the expected prompt string with prefix, suffix and abbrev home set' {
             Set-Location $Home -ErrorAction Stop
@@ -164,7 +164,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptSuffix.ForegroundColor = [ConsoleColor]::DarkBlue
             $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
             $res = &$prompt
-            "$res" | Should BeExactly "${csi}38;2;245;245;245m[$(hostname)] ${csi}0m~${csi}34m - 42> ${csi}0m"
+            $res | Should BeExactly "${csi}38;2;245;245;245m[$(hostname)] ${csi}0m~${csi}34m - 42> ${csi}0m"
         }
         It 'Returns the expected prompt string with prompt timing enabled' {
             Set-Location $Home -ErrorAction Stop
@@ -173,7 +173,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $res = &$prompt
             $escapedHome = [regex]::Escape((GetHomePath))
             $rexcsi = [regex]::Escape($csi)
-            "$res" | Should Match "$escapedHome${rexcsi}95m \d+ms${rexcsi}0m> "
+            $res | Should Match "$escapedHome${rexcsi}95m \d+ms${rexcsi}0m> "
         }
     }
 
@@ -197,7 +197,7 @@ A  test/Foo.Tests.ps1
 '@
             }
 
-            $res = [string](&$prompt 6>&1)
+            $res = &$prompt
             Assert-MockCalled git -ModuleName posh-git
             $path = GetHomeRelPath $PSScriptRoot
             $res | Should BeExactly "$path ${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}93m |${csi}0m${csi}31m${csi}49m +0${csi}0m${csi}31m${csi}49m ~1${csi}0m${csi}31m${csi}49m -1${csi}0m${csi}31m !${csi}0m${csi}93m]${csi}0m> "

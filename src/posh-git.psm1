@@ -60,7 +60,7 @@ $GitPromptScriptBlock = {
     # Construct/write the prompt text
     $prompt = ''
 
-    # Write default prompt prefix if not empty.
+    # Write default prompt prefix
     $prompt += Write-Prompt $settings.DefaultPromptPrefix.Expand()
 
     # Get the current path - formatted correctly
@@ -76,7 +76,7 @@ $GitPromptScriptBlock = {
         $prompt += Write-VcsStatus
     }
 
-    # Write default prompt middle if not empty.
+    # Write default prompt before suffix text
     $prompt += Write-Prompt $settings.DefaultPromptBeforeSuffix.Expand()
 
     # If stopped in the debugger, the prompt needs to indicate that by writing default propmt debug
