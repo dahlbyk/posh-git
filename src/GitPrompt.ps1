@@ -70,7 +70,7 @@ function Write-Prompt {
     )
 
     if (!$Object -or (($Object -is [PoshGitTextSpan]) -and !$Object.Text)) {
-        return $(if ($StringBuilder) {$StringBuilder} else {""})
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
     }
 
     if ($PSCmdlet.ParameterSetName -eq "CellColor") {
@@ -103,11 +103,7 @@ function Write-Prompt {
                 $str = "${fg}${bg}${Object}${e}0m"
             }
 
-            if ($StringBuilder) {
-                return $StringBuilder.Append($str)
-            }
-
-            return $str
+            return $(if ($StringBuilder) { $StringBuilder.Append($str) } else { $str })
         }
     }
 
@@ -131,11 +127,7 @@ function Write-Prompt {
     }
 
     Write-Host @writeHostParams
-    if ($StringBuilder) {
-        return $StringBuilder
-    }
-
-    ""
+    return $(if ($StringBuilder) { $StringBuilder } else { "" })
 }
 
 <#
