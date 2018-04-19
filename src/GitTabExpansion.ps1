@@ -224,8 +224,8 @@ function script:expandParamValues($cmd, $param, $filter) {
         ForEach-Object { -join ("--", $param, "=", $_) }
 }
 
-function GitTabExpansion($lastBlock) {
-    $res = Invoke-Utf8ConsoleCommand { GitTabExpansionInternal $lastBlock $Global:GitStatus }
+function Expand-GitCommand($Command) {
+    $res = Invoke-Utf8ConsoleCommand { GitTabExpansionInternal $Command $Global:GitStatus }
     $res
 }
 
@@ -403,7 +403,7 @@ if ($PowerTab_RegisterTabExpansion) {
         $line = $Context.Line
         $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
         $TabExpansionHasOutput.Value = $true
-        GitTabExpansion $lastBlock
+        Expand-GitCommand $lastBlock
     }
     return
 }
@@ -417,9 +417,9 @@ function TabExpansion($line, $lastWord) {
 
     switch -regex ($lastBlock) {
         # Execute git tab completion for all git-related commands
-        "^$(Get-AliasPattern git) (.*)" { GitTabExpansion $lastBlock }
-        "^$(Get-AliasPattern tgit) (.*)" { GitTabExpansion $lastBlock }
-        "^$(Get-AliasPattern gitk) (.*)" { GitTabExpansion $lastBlock }
+        "^$(Get-AliasPattern git) (.*)" { Expand-GitCommand $lastBlock }
+        "^$(Get-AliasPattern tgit) (.*)" { Expand-GitCommand $lastBlock }
+        "^$(Get-AliasPattern gitk) (.*)" { Expand-GitCommand $lastBlock }
 
         # Fall back on existing tab expansion
         default {

@@ -190,6 +190,7 @@ $ExecutionContext.SessionState.Module.OnRemove = {
 $exportModuleMemberParams = @{
     Function = @(
         'Add-PoshGitToProfile',
+        'Expand-GitCommand',
         'Format-GitBranchName',
         'Get-GitBranchStatusColor',
         'Get-GitDirectory',

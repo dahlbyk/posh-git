@@ -862,8 +862,17 @@ $PoshGitVcsPrompt = {
             $errorText = "PoshGitVcsPrompt error: $_"
             $sb = [System.Text.StringBuilder]::new()
 
+            # When prompt is first (default), place the separator before the status summary
+            if (!$s.DefaultPromptWriteStatusFirst) {
+                $sb | Write-Prompt $s.PathStatusSeparator > $null
+            }
             $sb | Write-Prompt $s.BeforeStatus > $null
+
             $sb | Write-Prompt $errorText -Color $s.ErrorColor > $null
+            if ($s.Debug) {
+                if (!$s.AnsiConsole) { Write-Host }
+                Write-Verbose "PoshGitVcsPrompt error details: $($_ | Format-List * -Force | Out-String)" -Verbose
+            }
             $sb | Write-Prompt $s.AfterStatus > $null
 
             $sb.ToString()

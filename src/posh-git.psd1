@@ -24,6 +24,7 @@ PowerShellVersion = '5.0'
 # Functions to export from this module
 FunctionsToExport = @(
     'Add-PoshGitToProfile',
+    'Expand-GitCommand',
     'Format-GitBranchName',
     'Get-GitBranchStatusColor',
     'Get-GitStatus',
