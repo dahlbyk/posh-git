@@ -137,6 +137,18 @@ class PoshGitTextSpan {
         $this.CustomAnsi = $null
     }
 
+    [PoshGitTextSpan] Expand() {
+        if (!$this.Text) {
+            return $this
+        }
+
+        $execContext = Get-Variable ExecutionContext -ValueOnly
+        $expandedText = $execContext.SessionState.InvokeCommand.ExpandString($this.Text)
+        $newTextSpan = [PoshGitTextSpan]::new($expandedText, $this.ForegroundColor, $this.BackgroundColor)
+        $newTextSpan.CustomAnsi = $this.CustomAnsi
+        return $newTextSpan
+    }
+
     [string] ToAnsiString() {
         $e = [char]27 + "["
         $txt = $this.Text
@@ -219,13 +231,14 @@ class PoshGitPromptSettings {
     [PoshGitCellColor]$StashColor   = [PoshGitCellColor]::new([ConsoleColor]::Red)
     [PoshGitCellColor]$ErrorColor   = [PoshGitCellColor]::new([ConsoleColor]::Red)
 
-    [PoshGitTextSpan]$BeforeText               = [PoshGitTextSpan]::new(' [', [ConsoleColor]::Yellow)
-    [PoshGitTextSpan]$DelimText                = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
-    [PoshGitTextSpan]$AfterText                = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$PathStatusSeparator      = ' '
+    [PoshGitTextSpan]$BeforeStatus             = [PoshGitTextSpan]::new('[', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$DelimStatus              = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$AfterStatus              = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
 
-    [PoshGitTextSpan]$BeforeIndexText          = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
-    [PoshGitTextSpan]$BeforeStashText          = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
-    [PoshGitTextSpan]$AfterStashText           = [PoshGitTextSpan]::new(')', [ConsoleColor]::Red)
+    [PoshGitTextSpan]$BeforeIndex              = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
+    [PoshGitTextSpan]$BeforeStash              = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
+    [PoshGitTextSpan]$AfterStash               = [PoshGitTextSpan]::new(')', [ConsoleColor]::Red)
 
     [PoshGitTextSpan]$LocalDefaultStatusSymbol = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
     [PoshGitTextSpan]$LocalWorkingStatusSymbol = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
@@ -257,18 +270,19 @@ class PoshGitPromptSettings {
     [Nullable[bool]]$EnableFileStatusFromCache        = $null
     [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
-    [string]$DescribeStyle   = ''
-    [psobject]$WindowTitle   = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Administrator: '})$(if ($GitStatus) {"posh~git ~ $($GitStatus.RepoName) [$($GitStatus.Branch)] ~ "})PowerShell $($PSVersionTable.PSVersion) ($PID)"}
+    [string]$DescribeStyle = ''
+    [psobject]$WindowTitle = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Administrator: '})$(if ($GitStatus) {"posh~git ~ $($GitStatus.RepoName) [$($GitStatus.Branch)] ~ "})PowerShell $($PSVersionTable.PSVersion) $([IntPtr]::Size * 8)-bit ($PID)"}
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = ''
-    [PoshGitTextSpan]$DefaultPromptSuffix       = '$(''>'' * ($nestedPromptLevel + 1)) '
-    [PoshGitTextSpan]$DefaultPromptDebugSuffix  = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
-
-    [bool]$DefaultPromptEnableTiming            = $false
-    [PoshGitCellColor]$DefaultPromptTimingColor = [PoshGitCellColor]::new()
-
     [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
-    [bool]$DefaultPromptAbbreviateHomeDirectory = $false
+    [PoshGitTextSpan]$DefaultPromptBeforeSuffix = ''
+    [PoshGitTextSpan]$DefaultPromptDebug        = [PoshGitTextSpan]::new(' [DBG]:', [ConsoleColor]::Magenta)
+    [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
+
+    [bool]$DefaultPromptAbbreviateHomeDirectory = $true
+    [bool]$DefaultPromptWriteStatusFirst        = $false
+    [bool]$DefaultPromptEnableTiming            = $false
+    [PoshGitTextSpan]$DefaultPromptTimingFormat = ' {0}ms'
 
     [int]$BranchNameLimit = 0
     [string]$TruncatedBranchSuffix = '...'
