@@ -46,7 +46,7 @@ Describe 'Default Prompt Tests - NO ANSI' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "~> "
+            $res | Should BeExactly "$(GetHomePath)> "
         }
         It 'Returns the expected prompt string with DefaultPromptAbbreviateHomeDirectory disabled' {
             Set-Location $Home -ErrorAction Stop
@@ -60,7 +60,7 @@ Describe 'Default Prompt Tests - NO ANSI' {
             $GitPromptSettings.DefaultPromptSuffix.Text = ' - $(6*7)> '
             $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "[$(hostname)] ~ - 42> "
+            $res | Should BeExactly "[$(hostname)] $(GetHomePath) - 42> "
         }
         It 'Returns the expected prompt string with prompt timing enabled' {
             Set-Location $Home -ErrorAction Stop
@@ -154,7 +154,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptPath.ForegroundColor = [ConsoleColor]::DarkCyan
             $GitPromptSettings.DefaultPromptPath.BackgroundColor = [ConsoleColor]::DarkRed
             $res = &$prompt
-            $res | Should BeExactly "${csi}36m${csi}41m~${csi}0m> "
+            $res | Should BeExactly "${csi}36m${csi}41m$(GetHomePath)${csi}0m> "
         }
         It 'Returns the expected prompt string with prefix, suffix and abbrev home set' {
             Set-Location $Home -ErrorAction Stop
@@ -164,7 +164,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptSuffix.ForegroundColor = [ConsoleColor]::DarkBlue
             $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
             $res = &$prompt
-            $res | Should BeExactly "${csi}38;2;245;245;245m[$(hostname)] ${csi}0m~${csi}34m - 42> ${csi}0m"
+            $res | Should BeExactly "${csi}38;2;245;245;245m[$(hostname)] ${csi}0m$(GetHomePath)${csi}34m - 42> ${csi}0m"
         }
         It 'Returns the expected prompt string with prompt timing enabled' {
             Set-Location $Home -ErrorAction Stop
@@ -214,14 +214,16 @@ Describe 'Default Prompt WindowTitle Tests' {
             $PSDefaultParameterValues["it:skip"] = $true
         }
 
+        $homePath = [regex]::Escape((GetHomePath))
+
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $repoAdminRegex = '^Administrator: posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
+        $repoAdminRegex = '^Admin: posh-git \[master\] \~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $repoRegex = '^posh~git ~ posh-git \[master\] ~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
+        $repoRegex = '^posh-git \[master\] \~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $nonRepoAdminRegex = '^Administrator: PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
+        $nonRepoAdminRegex = '^Admin: ' + $homePath + ' \~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $nonRepoRegex = '^PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
+        $nonRepoRegex = '^' + $homePath + ' \~ PowerShell \d+\.\d+\.\d+(\.\d+|-\S+)? \d\d-bit \(\d+\)$'
     }
     AfterAll {
         $global:PSDefaultParameterValues = $originalDefaultParameterValues
