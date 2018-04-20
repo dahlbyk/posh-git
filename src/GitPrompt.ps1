@@ -108,6 +108,8 @@ $global:GitPromptSettings = [pscustomobject]@{
     DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
     DefaultPromptDebugSuffix                    = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
     DefaultPromptEnableTiming                   = $false
+
+    DefaultPromptPath                           = '$(Get-PromptPath)'
     DefaultPromptAbbreviateHomeDirectory        = $false
 
     Debug                                       = $false

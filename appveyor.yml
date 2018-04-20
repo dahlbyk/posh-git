@@ -7,7 +7,7 @@ environment:
 
 branches:
   only:
-    - master
+    - v0
 
 init:
   - git config --global core.autocrlf true

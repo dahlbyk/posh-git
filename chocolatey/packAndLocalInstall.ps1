@@ -1,5 +1,5 @@
 param ($Remote = 'origin', [switch]$Force)
-pushd $PSScriptRoot
+Push-Location $PSScriptRoot
 
 $nuspec = [xml](Get-Content poshgit.nuspec)
 $version = $nuspec.package.metadata.version
@@ -17,4 +17,4 @@ elseif (!$(git ls-remote $Remote $tag)) {
 choco pack poshgit.nuspec
 choco install -f -y poshgit -pre --version=$version -s .
 
-popd
+Pop-Location
