@@ -1,44 +1,23 @@
 # posh-git Release History
 
-## 1.0.0-beta2 - February 14, 2018
+## 1.0.0-beta2 - April 23, 2018
 
 The 1.0.0 release is targeted specifically at Windows PowerShell 5.x and (cross-platform) PowerShell Core 6.x, both of
-which support writing prompt strings using [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code).
-On Windows, support for [Console Virtual Terminal Sequences](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences)
+which support writing prompt strings using [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code)
+and classes which enable the enhanced structure of `$GitPromptSettings`.
+Consequently this release introduces BREAKING changes with 0.x.
+If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use the 0.x version of posh-git.
+
+> On Windows, support for [Console Virtual Terminal Sequences](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences)
 was added in Windows 10 version 1511.
-Consequently this release introduces BREAKING changes with 0.7.x by:
-
-- Dropping support for Windows PowerShell versions 2.0, 3.0 and 4.0.
-- Changing the $GitPromptSettings hashtable to a more structured and stongly typed object.
-  Here is one example of the changed settings structure:
-
-  ```powershell
-  $GitPromptSettings.LocalWorkingStatusSymbol = '#'
-  $GitPromptSettings.LocalWorkingStatusForegroundColor = [ConsoleColor]::DarkRed
-  ```
-
-  Changes to:
-
-  ```powershell
-  $GitPromptSettings.LocalWorkingStatusSymbol.Text = '#'
-  $GitPromptSettings.LocalWorkingStatusSymbol.ForegroundColor = [ConsoleColor]::DarkRed
-  ```
-
-- Renaming `$GitPromptSettings.EnableWindowTitle` to `$GitPromptSettings.WindowTitle`.
-- Changing `Write-VcsStatus`, `Write-GitStatus` and `Write-Prompt` to return a string rather than write to host when
-  the host supports ANSI escape sequences.
-
-If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use the 0.7.x version of posh-git.
-
-### Added
-
-- `RepoName` property has been addded to the `$global:GitStatus` object returned by Get-GitStatus.
-- New command: Get-PromptPath which formats the path displayed in the prompt according to the $GitPromptSettings that
-  affect the path (DefaultPromptAbbreviateHomeDirectory).
 
 ### Changed
 
-- `$GitPromptSettigs.EnableWindowTitle` has been renamed to `$GitPromptSettigs.WindowTitle` and now takes either a string or a ScriptBlock.
+- Renamed `$GitPromptSettings.BeforeText/DelimText/AfterText` to `$GitPromptSettings.BeforeStatus/DelimStatus/AfterStatus`.
+  This results in easier to read script e.g. this `$GitPromptSettings.BeforeStatus.Text = '<['` instead of this
+  `$GitPromptSettings.BeforeText.Text = '<['`.
+- Renamed `$GitPromptSettings.BeforeIndexText/BeforeStashText/AfterStashText` to `$GitPromptSettings.BeforeIndex/BeforeStash/AfterStash`.
+- Renamed `$GitPromptSettigs.EnableWindowTitle` to `$GitPromptSettigs.WindowTitle`.  This setting now takes either a string or a ScriptBlock.
   The default value is a ScriptBlock that takes two parameters: `$GitStatus`, `$IsAdmin`.
   To prevent posh-git from changing the host's WindowTitle text, set `$GitPromptSettigs.WindowTitle` to `$null`.
 - The script that updates the WindowTitle text has been moved from the `Write-GitStatus` command to the built-in prompt function.
@@ -47,18 +26,34 @@ If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use t
   ConsoleColors can be forced with `[ConsoleColor]::Cyan`.
   ([PR #536](https://github.com/dahlbyk/posh-git/pull/536))
 
+### Added
+
+- New `$GitPromptSettings`:
+  - PathStatusSeparator
+  - DefaultPromptPath
+  - DefaultPromptBeforeSuffix
+  - DefaultPromptDebug
+  - DefaultPromptWriteStatusFirst
+  - DefaultPromptTimingFormat
+- `RepoName` property has been addded to the `$global:GitStatus` object returned by `Get-GitStatus`.
+- New command `Get-PromptPath` which formats the path displayed in the prompt. This command is called from the
+  `$GitPromptSettings.DefaultPromptPath` setting.  This command honors the
+  `$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory` setting.
+- New `Expand-GitCommand` to allow posh-gits tab expansion functionality to be used by others in their tabexpansion function.
+
 ### Fixed
 
-- Fixed EnablePromptStatus should not affect `Get-GitStatus` by adding `-Force` parameter.
+- Fixed `$GitPromptSettings.EnablePromptStatus` should not affect `Get-GitStatus` by adding `-Force` parameter.
   ([#475](https://github.com/dahlbyk/posh-git/issues/475))
   ([PR #535](https://github.com/dahlbyk/posh-git/pull/535))
 - Fixed PowerShell Core bug where we were using `Get-Content -Encoding Byte` when processing profile scripts during Chocolatey install/uninstall.
   That encoding doesn't exist in PowerShell Core.
   Switched to `Get-Content -AsByteStream` on PowerShell Core.
   ([PR #532](https://github.com/dahlbyk/posh-git/pull/532))
-- Fixed ANSI rendering bug when both Foreground and Background colors are $null (default),
+- Fixed ANSI rendering bug when both ForegroundColor and BackgroundColor colors are $null (default),
   we were emitting an unnecessary terminating escape sequence `"$([char]27)[0m"`.
   ([PR #532](https://github.com/dahlbyk/posh-git/pull/532))
+- Fixed issue where setting Foreground/BackgroundColor to 0 (Black) resulted in posh-git rendering the default color.
 
 ## 1.0.0-beta1 - January 10, 2018
 
@@ -73,6 +68,26 @@ If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use t
 - Remove public `Enable-GitColors`, `Get-AliasPattern`, `Get-GitBranch` and `Invoke-NullCoalescing` and its `??` alias
   ([#93](https://github.com/dahlbyk/posh-git/issues/93))
   ([PR #427](https://github.com/dahlbyk/posh-git/pull/427))
+
+### Changed
+
+- Changed the `$GitPromptSettings` hashtable to a stongly typed object.
+  Here is one example of the impact of this change:
+
+  ```powershell
+  $GitPromptSettings.LocalWorkingStatusSymbol = '#'
+  $GitPromptSettings.LocalWorkingStatusForegroundColor = [ConsoleColor]::DarkRed
+  ```
+
+  Changes to:
+
+  ```powershell
+  $GitPromptSettings.LocalWorkingStatusSymbol.Text = '#'
+  $GitPromptSettings.LocalWorkingStatusSymbol.ForegroundColor = [ConsoleColor]::DarkRed
+  ```
+
+- Changed `Write-VcsStatus`, `Write-GitStatus` and `Write-Prompt` to return a string rather than write to host when
+  the host supports ANSI escape sequences.
 
 ### Added
 
