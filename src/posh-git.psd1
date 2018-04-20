@@ -13,7 +13,7 @@ GUID = '74c9fd30-734b-4c89-a8ae-7727ad21d1d5'
 Author = 'Keith Dahlby and contributors'
 
 # Copyright statement for this module
-Copyright = '(c) 2010-2017 Keith Dahlby and contributors'
+Copyright = '(c) 2010-2018 Keith Dahlby and contributors'
 
 # Description of the functionality provided by this module
 Description = 'Provides prompt with Git status summary information and tab completion for Git commands, parameters, remotes and branch names.'
