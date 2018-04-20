@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 0.7.2 - April 19, 2018
+## 0.7.3 - April 19, 2018
 
 - posh-git now exports the variable `$GitPromptScriptBlock` which contains the code for the default prompt.
   ([#501](https://github.com/dahlbyk/posh-git/issues/501))
