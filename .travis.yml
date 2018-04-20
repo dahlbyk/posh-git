@@ -2,7 +2,7 @@ language: generic
 
 branches:
   only:
-  - develop
+  - master
 
 stages:
 - name: linux
