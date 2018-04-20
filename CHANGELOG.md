@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 0.7.2 - January 10, 2018
+## 0.7.2 - April 19, 2018
 
 - posh-git now exports the variable `$GitPromptScriptBlock` which contains the code for the default prompt.
   ([#501](https://github.com/dahlbyk/posh-git/issues/501))
@@ -18,8 +18,6 @@
   Import-Module posh-git
   ```
 
-- Added `Add-PoshGitToProfile -AllUsers` support
-  ([PR #504](https://github.com/dahlbyk/posh-git/pull/504))
 - Fixed 'Write-Prompt' to be able use Black as foreground color.
   ([#470](https://github.com/dahlbyk/posh-git/pull/470))
   ([PR #468](https://github.com/dahlbyk/posh-git/pull/468))
@@ -34,6 +32,8 @@
 - Fixed directory names that contain [brackets] cause GitPrompt to fail.
   ([PR #502](https://github.com/dahlbyk/posh-git/pull/502))
   Thanks Duncan Smart (@duncansmart)
+- Added `Add-PoshGitToProfile -AllUsers` support
+  ([PR #504](https://github.com/dahlbyk/posh-git/pull/504))
 - Fixed duplicated branch completion for git checkout
   ([#505](https://github.com/dahlbyk/posh-git/issues/505))
   ([PR #506](https://github.com/dahlbyk/posh-git/pull/506))
@@ -45,11 +45,25 @@
 - Fixed errors added to $Error collection by `Get-GitStatus` command
   ([#500](https://github.com/dahlbyk/posh-git/issues/500))
   ([PR #514](https://github.com/dahlbyk/posh-git/pull/514))
-- Add custom path rendering in prompt
+- Added custom path rendering in prompt
   ([#469](https://github.com/dahlbyk/posh-git/issues/469))
   ([PR #520](https://github.com/dahlbyk/posh-git/pull/520))
 - Clean up wording for work dir local status in help file
   ([PR #516](https://github.com/dahlbyk/posh-git/pull/516))
+- Added `$GitPromptSettings.AdminTitlePrefixText` (default: `'Administrator: '`)
+  ([#537](https://github.com/dahlbyk/posh-git/pull/537))
+  ([PR #538](https://github.com/dahlbyk/posh-git/pull/538))
+  Thanks Eric Jorgensen (@nebosite)
+- Added `$GitPromptSettings.UntrackedFilesMode`;
+  accepted values are `$null` (inherit `status.showUntrackedFiles`), "all", "no", and "normal"
+  ([#556](https://github.com/dahlbyk/posh-git/pull/556))
+  ([PR #557](https://github.com/dahlbyk/posh-git/pull/557))
+  Thanks David Snedecor (@TheSned)
+- `PoshGitVcsPrompt` errors now show details if `$GitPromptSettings.Debug`
+  ([PR #560](https://github.com/dahlbyk/posh-git/pull/560))
+- Exported `Expand-GitCommand` for use with custom tab expansion
+  ([#562](https://github.com/dahlbyk/posh-git/pull/562))
+  ([PR #563](https://github.com/dahlbyk/posh-git/pull/563))
 - Add code coverage to Coveralls.io
   ([#416](https://github.com/dahlbyk/posh-git/pull/416))
   ([PR #461](https://github.com/dahlbyk/posh-git/pull/461))
