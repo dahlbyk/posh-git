@@ -1,0 +1,38 @@
+language: generic
+
+branches:
+  only:
+  - master
+
+stages:
+- name: linux
+- name: osx
+  if: type != pull_request OR head_branch = rkeithhill/fix-pester-tests
+
+jobs:
+  include:
+    - stage: linux
+      os: linux
+      dist: trusty
+      sudo: false
+      addons:
+        apt:
+          sources:
+            - sourceline: deb [arch=amd64] https://packages.microsoft.com/ubuntu/14.04/prod trusty main
+              key_url: https://packages.microsoft.com/keys/microsoft.asc
+          packages:
+            - powershell
+      before_install:
+        - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
+        - pwsh -c 'Install-Module Pester -Scope CurrentUser'
+    - stage: osx
+      os: osx
+      before_install:
+        - brew update
+        - brew tap caskroom/cask
+        - brew cask install powershell
+        - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
+        - pwsh -c 'Install-Module Pester -Scope CurrentUser'
+
+script:
+  - pwsh -c 'Import-Module Pester; Invoke-Pester -Script test -EnableExit'

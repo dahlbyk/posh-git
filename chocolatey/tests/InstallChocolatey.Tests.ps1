@@ -21,7 +21,7 @@ function RunInstall {
     cinst $packageName -source (Resolve-Path .)
 }
 $binRoot = join-path $env:systemdrive 'tools'
-if($env:chocolatey_bin_root -ne $null){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
+if($null -ne $env:chocolatey_bin_root){$binRoot = join-path $env:systemdrive $env:chocolatey_bin_root}
 $poshgitPath = join-path $binRoot 'poshgit'
 if(Test-Path $Profile) { $currentProfileScript = (Get-Content $Profile) }
 

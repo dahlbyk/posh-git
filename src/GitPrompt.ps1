@@ -1,347 +1,883 @@
 ﻿# Inspired by Mark Embling
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
-$global:GitPromptSettings = [pscustomobject]@{
-    DefaultForegroundColor                      = $null
+$global:GitPromptSettings = [PoshGitPromptSettings]::new()
 
-    BeforeText                                  = ' ['
-    BeforeForegroundColor                       = [ConsoleColor]::Yellow
-    BeforeBackgroundColor                       = $null
-
-    DelimText                                   = ' |'
-    DelimForegroundColor                        = [ConsoleColor]::Yellow
-    DelimBackgroundColor                        = $null
-
-    AfterText                                   = ']'
-    AfterForegroundColor                        = [ConsoleColor]::Yellow
-    AfterBackgroundColor                        = $null
-
-    FileAddedText                               = '+'
-    FileModifiedText                            = '~'
-    FileRemovedText                             = '-'
-    FileConflictedText                          = '!'
-
-    LocalDefaultStatusSymbol                    = $null
-    LocalDefaultStatusForegroundColor           = [ConsoleColor]::DarkGreen
-    LocalDefaultStatusForegroundBrightColor     = [ConsoleColor]::Green
-    LocalDefaultStatusBackgroundColor           = $null
-
-    LocalWorkingStatusSymbol                    = '!'
-    LocalWorkingStatusForegroundColor           = [ConsoleColor]::DarkRed
-    LocalWorkingStatusForegroundBrightColor     = [ConsoleColor]::Red
-    LocalWorkingStatusBackgroundColor           = $null
-
-    LocalStagedStatusSymbol                     = '~'
-    LocalStagedStatusForegroundColor            = [ConsoleColor]::Cyan
-    LocalStagedStatusBackgroundColor            = $null
-
-    BranchUntrackedSymbol                       = $null
-    BranchForegroundColor                       = [ConsoleColor]::Cyan
-    BranchBackgroundColor                       = $null
-
-    BranchGoneStatusSymbol                      = [char]0x00D7 # × Multiplication sign
-    BranchGoneStatusForegroundColor             = [ConsoleColor]::DarkCyan
-    BranchGoneStatusBackgroundColor             = $null
-
-    BranchIdenticalStatusToSymbol               = [char]0x2261 # ≡ Three horizontal lines
-    BranchIdenticalStatusToForegroundColor      = [ConsoleColor]::Cyan
-    BranchIdenticalStatusToBackgroundColor      = $null
-
-    BranchAheadStatusSymbol                     = [char]0x2191 # ↑ Up arrow
-    BranchAheadStatusForegroundColor            = [ConsoleColor]::Green
-    BranchAheadStatusBackgroundColor            = $null
-
-    BranchBehindStatusSymbol                    = [char]0x2193 # ↓ Down arrow
-    BranchBehindStatusForegroundColor           = [ConsoleColor]::Red
-    BranchBehindStatusBackgroundColor           = $null
-
-    BranchBehindAndAheadStatusSymbol            = [char]0x2195 # ↕ Up & Down arrow
-    BranchBehindAndAheadStatusForegroundColor   = [ConsoleColor]::Yellow
-    BranchBehindAndAheadStatusBackgroundColor   = $null
-
-    BeforeIndexText                             = ""
-    BeforeIndexForegroundColor                  = [ConsoleColor]::DarkGreen
-    BeforeIndexForegroundBrightColor            = [ConsoleColor]::Green
-    BeforeIndexBackgroundColor                  = $null
-
-    IndexForegroundColor                        = [ConsoleColor]::DarkGreen
-    IndexForegroundBrightColor                  = [ConsoleColor]::Green
-    IndexBackgroundColor                        = $null
-
-    WorkingForegroundColor                      = [ConsoleColor]::DarkRed
-    WorkingForegroundBrightColor                = [ConsoleColor]::Red
-    WorkingBackgroundColor                      = $null
-
-    EnableStashStatus                           = $false
-    BeforeStashText                             = ' ('
-    BeforeStashBackgroundColor                  = $null
-    BeforeStashForegroundColor                  = [ConsoleColor]::Red
-    AfterStashText                              = ')'
-    AfterStashBackgroundColor                   = $null
-    AfterStashForegroundColor                   = [ConsoleColor]::Red
-    StashBackgroundColor                        = $null
-    StashForegroundColor                        = [ConsoleColor]::Red
-
-    ErrorForegroundColor                        = [ConsoleColor]::Red
-    ErrorBackgroundColor                        = $null
-
-    ShowStatusWhenZero                          = $true
-
-    # Valid values are "all", "no", and "normal"
-    UntrackedFilesMode                          = $null
-
-    AutoRefreshIndex                            = $true
-
-    # Valid values are "Full", "Compact", and "Minimal"
-    BranchBehindAndAheadDisplay                 = "Full"
-
-    EnablePromptStatus                          = !$Global:GitMissing
-    EnableFileStatus                            = $true
-    EnableFileStatusFromCache                   = $null
-    RepositoriesInWhichToDisableFileStatus      = @( ) # Array of repository paths
-    DescribeStyle                               = ''
-
-    EnableWindowTitle                           = 'posh~git ~ '
-    AdminTitlePrefixText                        = 'Administrator: '
-
-    DefaultPromptPrefix                         = ''
-    DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptDebugSuffix                    = ' [DBG]$(''>'' * ($nestedPromptLevel + 1)) '
-    DefaultPromptEnableTiming                   = $false
-
-    DefaultPromptPath                           = '$(Get-PromptPath)'
-    DefaultPromptAbbreviateHomeDirectory        = $false
-
-    Debug                                       = $false
-
-    BranchNameLimit                             = 0
-    TruncatedBranchSuffix                       = '...'
+# Override some of the normal colors if the background color is set to the default DarkMagenta.
+$s = $global:GitPromptSettings
+if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
+    $s.LocalDefaultStatusSymbol.ForegroundColor = 'Green'
+    $s.LocalWorkingStatusSymbol.ForegroundColor = 'Red'
+    $s.BeforeIndex.ForegroundColor              = 'Green'
+    $s.IndexColor.ForegroundColor               = 'Green'
+    $s.WorkingColor.ForegroundColor             = 'Red'
 }
 
-$isAdminProcess = Test-Administrator
+<#
+.SYNOPSIS
+    Writes the object to the display or renders it as a string using ANSI/VT sequences.
+.DESCRIPTION
+    Writes the specified object to the display unless $GitPromptSettings.AnsiConsole
+    is enabled.  In this case, the Object is rendered, along with the specified
+    colors, as a string with the appropriate ANSI/VT sequences for colors embedded
+    in the string.  If a StringBuilder is provided, the string is appended to the
+    StringBuilder.
+.EXAMPLE
+    PS C:\> Write-Prompt "PS > " -ForegroundColor Cyan -BackgroundColor Black
+    On a system where $GitPromptSettings.AnsiConsole is set to $false, this
+    will write the above to the display using the Write-Host command.
+    If AnsiConsole is set to $true, this will return a string of the form:
+    "`e[96m`e[40mPS > `e[0m".
+.EXAMPLE
+    PS C:\> $sb = [System.Text.StringBuilder]::new()
+    PS C:\> $sb | Write-Prompt "PS > " -ForegroundColor Cyan -BackgroundColor Black
+    On a system where $GitPromptSettings.AnsiConsole is set to $false, this
+    will write the above to the display using the Write-Host command.
+    If AnsiConsole is set to $true, this will append the following string to the
+    StringBuilder object piped into the command:
+    "`e[96m`e[40mPS > `e[0m".
+#>
+function Write-Prompt {
+    [CmdletBinding(DefaultParameterSetName="Default")]
+    param(
+        # Specifies objects to display in the console or render as a string if
+        # $GitPromptSettings.AnsiConsole is enabled. If the Object is of type
+        # [PoshGitTextSpan] the other color parameters are ignored since a
+        # [PoshGitTextSpan] provides the colors.
+        [Parameter(Mandatory, Position=0)]
+        $Object,
 
-$WindowTitleSupported = $true
-if (Get-Module NuGet) {
-    $WindowTitleSupported = $false
-}
+        # Specifies the foreground color.
+        [Parameter(ParameterSetName="Default")]
+        $ForegroundColor = $null,
 
-function Write-Prompt($Object, $ForegroundColor = $null, $BackgroundColor = $null) {
+        # Specifies the background color.
+        [Parameter(ParameterSetName="Default")]
+        $BackgroundColor = $null,
+
+        # Specifies both the background and foreground colors via [PoshGitCellColor] object.
+        [Parameter(ParameterSetName="CellColor")]
+        [ValidateNotNull()]
+        [PoshGitCellColor]
+        $Color,
+
+        # When specified and $GitPromptSettings.AnsiConsole is enabled, the Object parameter
+        # is written to the StringBuilder along with the appropriate ANSI/VT sequences for
+        # the specified foreground and background colors.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder
+    )
+
+    if (!$Object -or (($Object -is [PoshGitTextSpan]) -and !$Object.Text)) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    if ($PSCmdlet.ParameterSetName -eq "CellColor") {
+        $bgColor = $Color.BackgroundColor
+        $fgColor = $Color.ForegroundColor
+    }
+    else {
+        $bgColor = $BackgroundColor
+        $fgColor = $ForegroundColor
+    }
+
     $s = $global:GitPromptSettings
-    if ($s -and ($null -eq $ForegroundColor)) {
-        $ForegroundColor = $s.DefaultForegroundColor
+    if ($s) {
+        if ($null -eq $fgColor) {
+            $fgColor = $s.DefaultColor.ForegroundColor
+        }
+
+        if ($null -eq $bgColor) {
+            $bgColor = $s.DefaultColor.BackgroundColor
+        }
+
+        if ($s.AnsiConsole) {
+            if ($Object -is [PoshGitTextSpan]) {
+                $str = $Object.ToAnsiString()
+            }
+            else {
+                $e = [char]27 + "["
+                $fg = Get-ForegroundVirtualTerminalSequence $fgColor
+                $bg = Get-BackgroundVirtualTerminalSequence $bgColor
+                $str = "${fg}${bg}${Object}${e}0m"
+            }
+
+            return $(if ($StringBuilder) { $StringBuilder.Append($str) } else { $str })
+        }
     }
 
-    if ($BackgroundColor -is [string]) {
-        $BackgroundColor = [ConsoleColor]$BackgroundColor
-    }
-    if ($ForegroundColor -is [string]) {
-        $ForegroundColor = [ConsoleColor]$ForegroundColor
+    if ($Object -is [PoshGitTextSpan]) {
+        $bgColor = $Object.BackgroundColor
+        $fgColor = $Object.ForegroundColor
+        $Object = $Object.Text
     }
 
     $writeHostParams = @{
         Object = $Object;
         NoNewLine = $true;
     }
-    if (($BackgroundColor -ge 0) -and ($BackgroundColor -le 15)) {
-        $writeHostParams.BackgroundColor = $BackgroundColor
+
+    if ($bgColor -and ($bgColor -ge 0) -and ($bgColor -le 15)) {
+        $writeHostParams.BackgroundColor = $bgColor
     }
-    if (($ForegroundColor -ge 0) -and ($ForegroundColor -le 15)) {
-        $writeHostParams.ForegroundColor = $ForegroundColor
+
+    if ($fgColor -and ($fgColor -ge 0) -and ($fgColor -le 15)) {
+        $writeHostParams.ForegroundColor = $fgColor
     }
+
     Write-Host @writeHostParams
+    return $(if ($StringBuilder) { $StringBuilder } else { "" })
 }
 
-function Format-BranchName($branchName){
-    $s = $global:GitPromptSettings
+<#
+.SYNOPSIS
+    Writes the Git status for repo.  Typically, you use Write-VcsStatus
+    function instead of this one.
+.DESCRIPTION
+    Writes the Git status for repo. This includes the branch name, branch
+    status with respect to its remote (if exists), index status, working
+    dir status, working dir local status and stash count (optional).
+    Various settings from GitPromptSettngs are used to format and color
+    the Git status.
 
-    if($s.BranchNameLimit -gt 0 -and $branchName.Length -gt $s.BranchNameLimit)
+    On systems that support ANSI terminal sequences, this method will
+    return a string containing ANSI sequences to color various parts of
+    the Git status string.  This string can be written to the host and
+    the ANSI sequences will be interpreted and converted to the specified
+    behaviors which is typically setting the foreground and/or background
+    color of text.
+.EXAMPLE
+    PS C:\> Write-GitStatus (Get-GitStatus)
+
+    Writes the Git status for the current repo.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String
+        This command returns a System.String object.
+#>
+function Write-GitStatus {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return ""
+    }
+
+    $sb = [System.Text.StringBuilder]::new(150)
+
+    # When prompt is first (default), place the separator before the status summary
+    if (!$s.DefaultPromptWriteStatusFirst) {
+        $sb | Write-Prompt $s.PathStatusSeparator > $null
+    }
+
+    $sb | Write-Prompt $s.BeforeStatus > $null
+    $sb | Write-GitBranchName $Status -NoLeadingSpace > $null
+    $sb | Write-GitBranchStatus $Status > $null
+
+    if ($s.EnableFileStatus -and $Status.HasIndex) {
+        $sb | Write-Prompt $s.BeforeIndex > $null
+        $sb | Write-GitIndexStatus $Status > $null
+
+        if ($Status.HasWorking) {
+            $sb | Write-Prompt $s.DelimStatus > $null
+        }
+    }
+
+    if ($s.EnableFileStatus -and $Status.HasWorking) {
+        $sb | Write-GitWorkingDirStatus $Status > $null
+    }
+
+    $sb | Write-GitWorkingDirStatusSummary $Status > $null
+
+    if ($s.EnableStashStatus -and ($Status.StashCount -gt 0)) {
+        $sb | Write-GitStashCount $Status > $null
+    }
+
+    $sb | Write-Prompt $s.AfterStatus > $null
+
+    # When status is first, place the separator after the status summary
+    if ($s.DefaultPromptWriteStatusFirst) {
+        $sb | Write-Prompt $s.PathStatusSeparator > $null
+    }
+
+    $sb.ToString()
+}
+
+<#
+.SYNOPSIS
+    Formats the branch name text according to $GitPromptSettings.
+.DESCRIPTION
+    Formats the branch name text according the $GitPromptSettings:
+    BranchNameLimit and TruncatedBranchSuffix.
+.EXAMPLE
+    PS C:\> $branchName = Format-GitBranchName (Get-GitStatus).Branch
+
+    Gets the branch name formatted as specified by the user's $GitPromptSettings.
+.INPUTS
+    System.String
+        This is the branch name as a string.
+.OUTPUTS
+    System.String
+        This command returns a System.String object.
+#>
+function Format-GitBranchName {
+    param(
+        # The branch name to format according to the GitPromptSettings:
+        # BranchNameLimit and TruncatedBranchSuffix.
+        [Parameter(Position=0)]
+        [string]
+        $BranchName
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$s -or !$BranchName) {
+        return "$BranchName"
+    }
+
+    $res = $BranchName
+    if (($s.BranchNameLimit -gt 0) -and ($BranchName.Length -gt $s.BranchNameLimit))
     {
-        $branchName = "{0}{1}" -f $branchName.Substring(0,$s.BranchNameLimit), $s.TruncatedBranchSuffix
+        $res = "{0}{1}" -f $BranchName.Substring(0, $s.BranchNameLimit), $s.TruncatedBranchSuffix
     }
 
-    return $branchName
+    $res
 }
 
-function Write-GitStatus($status) {
+<#
+.SYNOPSIS
+    Gets the colors to use for the branch status.
+.DESCRIPTION
+    Gets the colors to use for the branch status. This color is typically
+    used for the branch name as well.  The default color is specified by
+    $GitPromptSettins.BranchColor.  But depending on the Git status object
+    passed in, the colors could be changed to match that of one these
+    other $GitPromptSettings: BranchBehindAndAheadStatusSymbol,
+    BranchBehindStatusSymbol or BranchAheadStatusSymbol.
+.EXAMPLE
+    PS C:\> $branchStatusColor = Get-GitBranchStatusColor (Get-GitStatus)
+
+    Returns a PoshGitTextSpan with the foreground and background colors
+    for the branch status.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    PoshGitTextSpan
+        A PoshGitTextSpan with colors reflecting those to be used by
+        branch status symbols.
+#>
+function Get-GitBranchStatusColor {
+    param(
+        # The Git status object that provides branch status information.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status
+    )
+
     $s = $global:GitPromptSettings
-    if ($status -and $s) {
-        Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
-
-        $branchStatusText            = $null
-        $branchStatusBackgroundColor = $s.BranchBackgroundColor
-        $branchStatusForegroundColor = $s.BranchForegroundColor
-
-        if (!$status.Upstream) {
-            $branchStatusText            = $s.BranchUntrackedSymbol
-        } elseif ($status.UpstreamGone -eq $true) {
-            # Upstream branch is gone
-            $branchStatusText            = $s.BranchGoneStatusSymbol
-            $branchStatusBackgroundColor = $s.BranchGoneStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchGoneStatusForegroundColor
-        } elseif ($status.BehindBy -eq 0 -and $status.AheadBy -eq 0) {
-            # We are aligned with remote
-            $branchStatusText            = $s.BranchIdenticalStatusToSymbol
-            $branchStatusBackgroundColor = $s.BranchIdenticalStatusToBackgroundColor
-            $branchStatusForegroundColor = $s.BranchIdenticalStatusToForegroundColor
-        } elseif ($status.BehindBy -ge 1 -and $status.AheadBy -ge 1) {
-            # We are both behind and ahead of remote
-            if ($s.BranchBehindAndAheadDisplay -eq "Full") {
-                $branchStatusText        = ("{0}{1} {2}{3}" -f $s.BranchBehindStatusSymbol, $status.BehindBy, $s.BranchAheadStatusSymbol, $status.AheadBy)
-            } elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
-                $branchStatusText        = ("{0}{1}{2}" -f $status.BehindBy, $s.BranchBehindAndAheadStatusSymbol, $status.AheadBy)
-            } else {
-                $branchStatusText        = $s.BranchBehindAndAheadStatusSymbol
-            }
-            $branchStatusBackgroundColor = $s.BranchBehindAndAheadStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchBehindAndAheadStatusForegroundColor
-        } elseif ($status.BehindBy -ge 1) {
-            # We are behind remote
-            if ($s.BranchBehindAndAheadDisplay -eq "Full" -Or $s.BranchBehindAndAheadDisplay -eq "Compact") {
-                $branchStatusText        = ("{0}{1}" -f $s.BranchBehindStatusSymbol, $status.BehindBy)
-            } else {
-                $branchStatusText        = $s.BranchBehindStatusSymbol
-            }
-            $branchStatusBackgroundColor = $s.BranchBehindStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchBehindStatusForegroundColor
-        } elseif ($status.AheadBy -ge 1) {
-            # We are ahead of remote
-            if ($s.BranchBehindAndAheadDisplay -eq "Full" -Or $s.BranchBehindAndAheadDisplay -eq "Compact") {
-                $branchStatusText        = ("{0}{1}" -f $s.BranchAheadStatusSymbol, $status.AheadBy)
-            } else {
-                $branchStatusText        = $s.BranchAheadStatusSymbol
-            }
-            $branchStatusBackgroundColor = $s.BranchAheadStatusBackgroundColor
-            $branchStatusForegroundColor = $s.BranchAheadStatusForegroundColor
-        } else {
-            # This condition should not be possible but defaulting the variables to be safe
-            $branchStatusText            = "?"
-        }
-
-        Write-Prompt (Format-BranchName($status.Branch)) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
-
-        if ($branchStatusText) {
-            Write-Prompt  (" {0}" -f $branchStatusText) -BackgroundColor $branchStatusBackgroundColor -ForegroundColor $branchStatusForegroundColor
-        }
-
-        if($s.EnableFileStatus -and $status.HasIndex) {
-            Write-Prompt $s.BeforeIndexText -BackgroundColor $s.BeforeIndexBackgroundColor -ForegroundColor $s.BeforeIndexForegroundColor
-
-            if($s.ShowStatusWhenZero -or $status.Index.Added) {
-                Write-Prompt (" $($s.FileAddedText)$($status.Index.Added.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
-            }
-            if($s.ShowStatusWhenZero -or $status.Index.Modified) {
-                Write-Prompt (" $($s.FileModifiedText)$($status.Index.Modified.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
-            }
-            if($s.ShowStatusWhenZero -or $status.Index.Deleted) {
-                Write-Prompt (" $($s.FileRemovedText)$($status.Index.Deleted.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
-            }
-
-            if ($status.Index.Unmerged) {
-                Write-Prompt (" $($s.FileConflictedText)$($status.Index.Unmerged.Count)") -BackgroundColor $s.IndexBackgroundColor -ForegroundColor $s.IndexForegroundColor
-            }
-
-            if($status.HasWorking) {
-                Write-Prompt $s.DelimText -BackgroundColor $s.DelimBackgroundColor -ForegroundColor $s.DelimForegroundColor
-            }
-        }
-
-        if($s.EnableFileStatus -and $status.HasWorking) {
-            if($s.ShowStatusWhenZero -or $status.Working.Added) {
-                Write-Prompt (" $($s.FileAddedText)$($status.Working.Added.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
-            }
-            if($s.ShowStatusWhenZero -or $status.Working.Modified) {
-                Write-Prompt (" $($s.FileModifiedText)$($status.Working.Modified.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
-            }
-            if($s.ShowStatusWhenZero -or $status.Working.Deleted) {
-                Write-Prompt (" $($s.FileRemovedText)$($status.Working.Deleted.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
-            }
-
-            if ($status.Working.Unmerged) {
-                Write-Prompt (" $($s.FileConflictedText)$($status.Working.Unmerged.Count)") -BackgroundColor $s.WorkingBackgroundColor -ForegroundColor $s.WorkingForegroundColor
-            }
-        }
-
-        if ($status.HasWorking) {
-            # We have un-staged files in the working tree
-            $localStatusSymbol          = $s.LocalWorkingStatusSymbol
-            $localStatusBackgroundColor = $s.LocalWorkingStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalWorkingStatusForegroundColor
-        } elseif ($status.HasIndex) {
-            # We have staged but uncommited files
-            $localStatusSymbol          = $s.LocalStagedStatusSymbol
-            $localStatusBackgroundColor = $s.LocalStagedStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalStagedStatusForegroundColor
-        } else {
-            # No uncommited changes
-            $localStatusSymbol          = $s.LocalDefaultStatusSymbol
-            $localStatusBackgroundColor = $s.LocalDefaultStatusBackgroundColor
-            $localStatusForegroundColor = $s.LocalDefaultStatusForegroundColor
-        }
-
-        if ($localStatusSymbol) {
-            Write-Prompt (" {0}" -f $localStatusSymbol) -BackgroundColor $localStatusBackgroundColor -ForegroundColor $localStatusForegroundColor
-        }
-
-        if ($s.EnableStashStatus -and ($status.StashCount -gt 0)) {
-             Write-Prompt $s.BeforeStashText -BackgroundColor $s.BeforeStashBackgroundColor -ForegroundColor $s.BeforeStashForegroundColor
-             Write-Prompt $status.StashCount -BackgroundColor $s.StashBackgroundColor -ForegroundColor $s.StashForegroundColor
-             Write-Prompt $s.AfterStashText -BackgroundColor $s.AfterStashBackgroundColor -ForegroundColor $s.AfterStashForegroundColor
-        }
-
-        Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
-
-        if ($WindowTitleSupported -and $s.EnableWindowTitle) {
-            if( -not $Global:PreviousWindowTitle ) {
-                $Global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
-            }
-            $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
-            $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-            $adminHeader = if ($script:isAdminProcess) { $s.AdminTitlePrefixText } else { '' }
-            $Host.UI.RawUI.WindowTitle = "$adminHeader$prefix$repoName [$($status.Branch)]"
-        }
-    } elseif ( $Global:PreviousWindowTitle ) {
-        $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
+    if (!$s) {
+        return [PoshGitTextSpan]::new()
     }
+
+    $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchColor)
+
+    if (($Status.BehindBy -ge 1) -and ($Status.AheadBy -ge 1)) {
+        # We are both behind and ahead of remote
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchBehindAndAheadStatusSymbol)
+    }
+    elseif ($Status.BehindBy -ge 1) {
+        # We are behind remote
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchBehindStatusSymbol)
+    }
+    elseif ($Status.AheadBy -ge 1) {
+        # We are ahead of remote
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchAheadStatusSymbol)
+    }
+
+    $branchStatusTextSpan.Text = ''
+    $branchStatusTextSpan
 }
 
-if(!(Test-Path Variable:Global:VcsPromptStatuses)) {
-    $Global:VcsPromptStatuses = @()
+<#
+.SYNOPSIS
+    Writes the branch name given the current Git status.
+.DESCRIPTION
+    Writes the branch name given the current Git status which can retrieved
+    via the Get-GitStatus command. Branch name can be affected by the
+    $GitPromptSettings: BranchColor, BranchNameLimit, TruncatedBranchSuffix
+    and Branch*StatusSymbol colors.
+.EXAMPLE
+    PS C:\> Write-GitBranchName (Get-GitStatus)
+
+    Writes the name of the current branch.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitBranchName {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the branch name is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    # Use the branch status colors (or CustomAnsi) to display the branch name
+    $branchNameTextSpan = Get-GitBranchStatusColor $Status
+    $branchNameTextSpan.Text = Format-GitBranchName $Status.Branch
+    if (!$NoLeadingSpace) {
+        $branchNameTextSpan.Text = " " + $branchNameTextSpan.Text
+    }
+
+    if ($StringBuilder) {
+        $StringBuilder | Write-Prompt $branchNameTextSpan > $null
+    }
+    else {
+        $str = Write-Prompt $branchNameTextSpan
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
 }
-$s = $global:GitPromptSettings
 
-# Override some of the normal colors if the background color is set to the default DarkMagenta.
-if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
-    $s.LocalDefaultStatusForegroundColor    = $s.LocalDefaultStatusForegroundBrightColor
-    $s.LocalWorkingStatusForegroundColor    = $s.LocalWorkingStatusForegroundBrightColor
+<#
+.SYNOPSIS
+    Writes the branch status text given the current Git status.
+.DESCRIPTION
+    Writes the branch status text given the current Git status which can retrieved
+    via the Get-GitStatus command. Branch status includes information about the
+    upstream branch, how far behind and/or ahead the local branch is from the remote.
+.EXAMPLE
+    PS C:\> Write-GitBranchStatus (Get-GitStatus)
 
-    $s.BeforeIndexForegroundColor           = $s.BeforeIndexForegroundBrightColor
-    $s.IndexForegroundColor                 = $s.IndexForegroundBrightColor
+    Writes the status of the current branch to the host.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitBranchStatus {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
 
-    $s.WorkingForegroundColor               = $s.WorkingForegroundBrightColor
+        # If specified the branch status is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $branchStatusTextSpan = Get-GitBranchStatusColor $Status
+
+    if (!$Status.Upstream) {
+        $branchStatusTextSpan.Text = $s.BranchUntrackedText
+    }
+    elseif ($Status.UpstreamGone -eq $true) {
+        # Upstream branch is gone
+        $branchStatusTextSpan.Text = $s.BranchGoneStatusSymbol.Text
+    }
+    elseif (($Status.BehindBy -eq 0) -and ($Status.AheadBy -eq 0)) {
+        # We are aligned with remote
+        $branchStatusTextSpan.Text = $s.BranchIdenticalStatusSymbol.Text
+    }
+    elseif (($Status.BehindBy -ge 1) -and ($Status.AheadBy -ge 1)) {
+        # We are both behind and ahead of remote
+        if ($s.BranchBehindAndAheadDisplay -eq "Full") {
+            $branchStatusTextSpan.Text = ("{0}{1} {2}{3}" -f $s.BranchBehindStatusSymbol.Text, $Status.BehindBy, $s.BranchAheadStatusSymbol.Text, $status.AheadBy)
+        }
+        elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
+            $branchStatusTextSpan.Text = ("{0}{1}{2}" -f $Status.BehindBy, $s.BranchBehindAndAheadStatusSymbol.Text, $Status.AheadBy)
+        }
+    }
+    elseif ($Status.BehindBy -ge 1) {
+        # We are behind remote
+        if (($s.BranchBehindAndAheadDisplay -eq "Full") -Or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
+            $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchBehindStatusSymbol.Text, $Status.BehindBy)
+        }
+    }
+    elseif ($Status.AheadBy -ge 1) {
+        # We are ahead of remote
+        if (($s.BranchBehindAndAheadDisplay -eq "Full") -or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
+            $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchAheadStatusSymbol.Text, $Status.AheadBy)
+        }
+    }
+    else {
+        # This condition should not be possible but defaulting the variables to be safe
+        $branchStatusTextSpan.Text = "?"
+    }
+
+    $str = ""
+    if ($branchStatusTextSpan.Text) {
+        $textSpan = [PoshGitTextSpan]::new($branchStatusTextSpan)
+        if (!$NoLeadingSpace) {
+            $textSpan.Text = " " + $branchStatusTextSpan.Text
+        }
+
+        if ($StringBuilder) {
+            $StringBuilder | Write-Prompt $textSpan > $null
+        }
+        else {
+            $str = Write-Prompt $textSpan
+        }
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
 }
 
+<#
+.SYNOPSIS
+    Writes the index status text given the current Git status.
+.DESCRIPTION
+    Writes the index status text given the current Git status.
+.EXAMPLE
+    PS C:\> Write-GitIndexStatus (Get-GitStatus)
+
+    Writes the Git index status to the host.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitIndexStatus {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the index status is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    if ($Status.HasIndex) {
+        if ($s.ShowStatusWhenZero -or $Status.Index.Added) {
+            $indexStatusText = " "
+            if ($NoLeadingSpace) {
+                $indexStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $indexStatusText += "$($s.FileAddedText)$($Status.Index.Added.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
+            }
+            else {
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
+            }
+        }
+
+        if ($s.ShowStatusWhenZero -or $status.Index.Modified) {
+            $indexStatusText = " "
+            if ($NoLeadingSpace) {
+                $indexStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $indexStatusText += "$($s.FileModifiedText)$($status.Index.Modified.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
+            }
+            else {
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
+            }
+        }
+
+        if ($s.ShowStatusWhenZero -or $Status.Index.Deleted) {
+            $indexStatusText = " "
+            if ($NoLeadingSpace) {
+                $indexStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $indexStatusText += "$($s.FileRemovedText)$($Status.Index.Deleted.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
+            }
+            else {
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
+            }
+        }
+
+        if ($Status.Index.Unmerged) {
+            $indexStatusText = " "
+            if ($NoLeadingSpace) {
+                $indexStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $indexStatusText += "$($s.FileConflictedText)$($Status.Index.Unmerged.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
+            }
+            else {
+                $str += Write-Prompt $indexStatusText -Color $s.IndexColor
+            }
+        }
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
+}
+
+<#
+.SYNOPSIS
+    Writes the working directory status text given the current Git status.
+.DESCRIPTION
+    Writes the working directory status text given the current Git status.
+.EXAMPLE
+    PS C:\> Write-GitWorkingDirStatus (Get-GitStatus)
+
+    Writes the Git working directory status to the host.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitWorkingDirStatus {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the working dir status is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    if ($Status.HasWorking) {
+        if ($s.ShowStatusWhenZero -or $Status.Working.Added) {
+            $workingStatusText = " "
+            if ($NoLeadingSpace) {
+                $workingStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $workingStatusText += "$($s.FileAddedText)$($Status.Working.Added.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
+            }
+            else {
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
+            }
+        }
+
+        if ($s.ShowStatusWhenZero -or $Status.Working.Modified) {
+            $workingStatusText = " "
+            if ($NoLeadingSpace) {
+                $workingStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $workingStatusText += "$($s.FileModifiedText)$($Status.Working.Modified.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
+            }
+            else {
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
+            }
+        }
+
+        if ($s.ShowStatusWhenZero -or $Status.Working.Deleted) {
+            $workingStatusText = " "
+            if ($NoLeadingSpace) {
+                $workingStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $workingStatusText += "$($s.FileRemovedText)$($Status.Working.Deleted.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
+            }
+            else {
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
+            }
+        }
+
+        if ($Status.Working.Unmerged) {
+            $workingStatusText = " "
+            if ($NoLeadingSpace) {
+                $workingStatusText = ""
+                $NoLeadingSpace = $false
+            }
+
+            $workingStatusText += "$($s.FileConflictedText)$($Status.Working.Unmerged.Count)"
+
+            if ($StringBuilder) {
+                $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
+            }
+            else {
+                $str += Write-Prompt $workingStatusText -Color $s.WorkingColor
+            }
+        }
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
+}
+
+<#
+.SYNOPSIS
+    Writes the working directory status summary text given the current Git status.
+.DESCRIPTION
+    Writes the working directory status summary text given the current Git status.
+    If there are any unstaged commits, the $GitPromptSettings.LocalWorkingStatusSymbol
+    will be output.  If not, then if are any staged but uncommmited changes, the
+    $GitPromptSettings.LocalStagedStatusSymbol will be output.  If not, then
+    $GitPromptSettings.LocalDefaultStatusSymbol will be output.
+.EXAMPLE
+    PS C:\> Write-GitWorkingDirStatusSummary (Get-GitStatus)
+
+    Outputs the Git working directory status summary text.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitWorkingDirStatusSummary {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the working dir local status is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder,
+
+        # If specified, suppresses the output of the leading space character.
+        [Parameter()]
+        [switch]
+        $NoLeadingSpace
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    # No uncommited changes
+    $localStatusSymbol = $s.LocalDefaultStatusSymbol
+
+    if ($Status.HasWorking) {
+        # We have un-staged files in the working tree
+        $localStatusSymbol = $s.LocalWorkingStatusSymbol
+    }
+    elseif ($Status.HasIndex) {
+        # We have staged but uncommited files
+        $localStatusSymbol = $s.LocalStagedStatusSymbol
+    }
+
+    if ($localStatusSymbol.Text) {
+        $textSpan = [PoshGitTextSpan]::new($localStatusSymbol)
+        if (!$NoLeadingSpace) {
+            $textSpan.Text = " " + $localStatusSymbol.Text
+        }
+
+        if ($StringBuilder) {
+            $StringBuilder | Write-Prompt $textSpan > $null
+        }
+        else {
+            $str += Write-Prompt $textSpan
+        }
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
+}
+
+<#
+.SYNOPSIS
+    Writes the stash count given the current Git status.
+.DESCRIPTION
+    Writes the stash count given the current Git status.
+.EXAMPLE
+    PS C:\> Write-GitStashCount (Get-GitStatus)
+
+    Writes the Git stash count to the host.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitStashCount {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the working dir local status is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    if ($Status.StashCount -gt 0) {
+        $stashText = "$($Status.StashCount)"
+
+        if ($StringBuilder) {
+            $StringBuilder | Write-Prompt $s.BeforeStash > $null
+            $StringBuilder | Write-Prompt $stashText -Color $s.StashColor > $null
+            $StringBuilder | Write-Prompt $s.AfterStash > $null
+        }
+        else {
+            $str += Write-Prompt $s.BeforeStash
+            $str += Write-Prompt $stashText -Color $s.StashColor
+            $str += Write-Prompt $s.AfterStash
+        }
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
+}
+
+if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
+    $global:VcsPromptStatuses = @()
+}
+
+<#
+.SYNOPSIS
+    Writes all version control prompt statuses configured in $global:VscPromptStatuses.
+.DESCRIPTION
+    Writes all version control prompt statuses configured in $global:VscPromptStatuses.
+    By default, this includes the PoshGit prompt status.
+.EXAMPLE
+    PS C:\> Write-VcsStatus
+
+    Writes all version control prompt statuses that have been configured
+    with the global variable $VscPromptStatuses
+#>
 function Global:Write-VcsStatus {
-    $Global:VcsPromptStatuses | ForEach-Object { & $_ }
+    Set-ConsoleMode -ANSI
+
+    $OFS = ""
+    "$($global:VcsPromptStatuses | ForEach-Object { & $_ })"
 }
 
 # Add scriptblock that will execute for Write-VcsStatus
 $PoshGitVcsPrompt = {
     try {
-        $Global:GitStatus = Get-GitStatus
+        $global:GitStatus = Get-GitStatus
         Write-GitStatus $GitStatus
     }
     catch {
-        $s = $Global:GitPromptSettings
+        $s = $global:GitPromptSettings
         if ($s) {
-            Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
-            Write-Prompt "Error: $_" -BackgroundColor $s.ErrorBackgroundColor -ForegroundColor $s.ErrorForegroundColor
+            $errorText = "PoshGitVcsPrompt error: $_"
+            $sb = [System.Text.StringBuilder]::new()
+
+            # When prompt is first (default), place the separator before the status summary
+            if (!$s.DefaultPromptWriteStatusFirst) {
+                $sb | Write-Prompt $s.PathStatusSeparator > $null
+            }
+            $sb | Write-Prompt $s.BeforeStatus > $null
+
+            $sb | Write-Prompt $errorText -Color $s.ErrorColor > $null
             if ($s.Debug) {
-                Write-Host
+                if (!$s.AnsiConsole) { Write-Host }
                 Write-Verbose "PoshGitVcsPrompt error details: $($_ | Format-List * -Force | Out-String)" -Verbose
             }
-            Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
+            $sb | Write-Prompt $s.AfterStatus > $null
+
+            $sb.ToString()
         }
     }
 }
 
-$Global:VcsPromptStatuses += $PoshGitVcsPrompt
+$global:VcsPromptStatuses += $PoshGitVcsPrompt

@@ -171,10 +171,42 @@ function GetUniquePaths($pathCollections) {
 
 $castStringSeq = [Linq.Enumerable].GetMethod("Cast").MakeGenericMethod([string])
 
-function Get-GitStatus($gitDir = (Get-GitDirectory)) {
+<#
+.SYNOPSIS
+    Gets a Git status object that is used by Write-GitStatus.
+.DESCRIPTION
+    Gets a Git status object that is used by Write-GitStatus.
+    The status object provides the information to be displayed in the various
+    sections of the posh-git prompt.
+.EXAMPLE
+    PS C:\> $s = Get-GitStatus; Write-GitStatus $s
+    Gets a Git status object. Then passes the object to Write-GitStatus which
+    writes out a posh-git prompt (or returns a string in ANSI mode) with the
+    information contained in the status object.
+.INPUTS
+    None
+.OUTPUTS
+    System.Management.Automation.PSObject
+.LINK
+    Write-GitStatus
+#>
+function Get-GitStatus {
+    param(
+        # The path of a directory within a Git repository that you want to get
+        # the Git status.
+        [Parameter(Position=0)]
+        $GitDir = (Get-GitDirectory),
+
+        # If specified, overrides $GitPromptSettings.EnablePromptStatus when it
+        # is set to $false.
+        [Parameter()]
+        [switch]
+        $Force
+    )
+
     $settings = $Global:GitPromptSettings
-    $enabled = (-not $settings) -or $settings.EnablePromptStatus
-    if ($enabled -and $gitDir) {
+    $enabled = $Force -or !$settings -or $settings.EnablePromptStatus
+    if ($enabled -and $GitDir) {
         if($settings.Debug) {
             $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
         }
@@ -196,9 +228,9 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $gitDir) -and !$(InDisabledRepository)) {
-            if ($settings.EnableFileStatusFromCache -eq $null) {
-                $settings.EnableFileStatusFromCache = (Get-Module GitStatusCachePoshClient) -ne $null
+        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
+            if ($null -eq $settings.EnableFileStatusFromCache) {
+                $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
 
             if ($settings.EnableFileStatusFromCache) {
@@ -232,7 +264,11 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
                 if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
             } else {
                 dbg 'Getting status' $sw
-                $untrackedFilesOption = if($settings.UntrackedFilesMode) { "-u$($settings.UntrackedFilesMode)" } else { "" }
+                switch ($settings.UntrackedFilesMode) {
+                    "No"      { $untrackedFilesOption = "-uno" }
+                    "All"     { $untrackedFilesOption = "-uall" }
+                    "Normal"  { $untrackedFilesOption = "-unormal" }
+                }
                 $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
                 if($settings.EnableStashStatus) {
                     dbg 'Getting stash count' $sw
@@ -286,7 +322,7 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             }
         }
 
-        if(!$branch) { $branch = Get-GitBranch $gitDir $sw }
+        if(!$branch) { $branch = Get-GitBranch $GitDir $sw }
 
         dbg 'Building status object' $sw
         #
@@ -308,7 +344,8 @@ function Get-GitStatus($gitDir = (Get-GitDirectory)) {
             Add-Member -Force -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
 
         $result = New-Object PSObject -Property @{
-            GitDir          = $gitDir
+            GitDir          = $GitDir
+            RepoName        = Split-Path (Split-Path $GitDir -Parent) -Leaf
             Branch          = $branch
             AheadBy         = $aheadBy
             BehindBy        = $behindBy
@@ -351,235 +388,9 @@ function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
     $res
 }
 
-function Enable-GitColors {
-    Write-Warning 'Enable-GitColors is Obsolete and will be removed in a future version of posh-git.'
-}
-
 function Get-AliasPattern($exe) {
    $aliases = @($exe) + @(Get-Alias | Where-Object { $_.Definition -eq $exe } | Select-Object -Exp Name)
    "($($aliases -join '|'))"
-}
-
-function setenv($key, $value) {
-    [void][Environment]::SetEnvironmentVariable($key, $value)
-    Set-TempEnv $key $value
-}
-
-function Get-TempEnv($key) {
-    $path = Get-TempEnvPath($key)
-    if (Test-Path $path) {
-        $value =  Get-Content $path
-        [void][Environment]::SetEnvironmentVariable($key, $value)
-    }
-}
-
-function Set-TempEnv($key, $value) {
-    $path = Get-TempEnvPath($key)
-    if ($value -eq $null) {
-        if (Test-Path $path) {
-            Remove-Item $path
-        }
-    }
-    else {
-        New-Item $path -Force -ItemType File > $null
-        $value | Out-File -FilePath $path -Encoding ascii -Force
-    }
-}
-
-function Get-TempEnvPath($key){
-    $path = Join-Path ([System.IO.Path]::GetTempPath()) ".ssh\$key.env"
-    return $path
-}
-
-# Retrieve the current SSH agent PID (or zero). Can be used to determine if there
-# is a running agent.
-function Get-SshAgent() {
-    if ($env:GIT_SSH -imatch 'plink') {
-        $pageantPid = Get-Process | Where-Object { $_.Name -eq 'pageant' } | Select-Object -ExpandProperty Id -First 1
-        if ($null -ne $pageantPid) { return $pageantPid }
-    }
-    else {
-        $agentPid = $Env:SSH_AGENT_PID
-        if ($agentPid) {
-            $sshAgentProcess = Get-Process | Where-Object { ($_.Id -eq $agentPid) -and ($_.Name -eq 'ssh-agent') }
-            if ($null -ne $sshAgentProcess) {
-                return $agentPid
-            }
-            else {
-                setenv 'SSH_AGENT_PID' $null
-                setenv 'SSH_AUTH_SOCK' $null
-            }
-        }
-    }
-
-    return 0
-}
-
-# Attempt to guess Pageant's location
-function Find-Pageant() {
-    Write-Verbose "Pageant not in path. Trying to guess location."
-
-    $gitSsh = $env:GIT_SSH
-    if ($gitSsh -and (test-path $gitSsh)) {
-        $pageant = join-path (split-path $gitSsh) pageant
-    }
-
-    if (!(get-command $pageant -Erroraction SilentlyContinue)) {
-        return # Guessing failed.
-    }
-    else {
-        return $pageant
-    }
-}
-
-# Attempt to guess $program's location. For ssh-agent/ssh-add.
-function Find-Ssh($program = 'ssh-agent') {
-    Write-Verbose "$program not in path. Trying to guess location."
-    $gitItem = Get-Command git -CommandType Application -Erroraction SilentlyContinue | Get-Item
-    if ($null -eq $gitItem) {
-        Write-Warning 'git not in path'
-        return
-    }
-
-    $sshLocation = join-path $gitItem.directory.parent.fullname bin/$program
-    if (get-command $sshLocation -Erroraction SilentlyContinue) {
-        return $sshLocation
-    }
-
-    $sshLocation = join-path $gitItem.directory.parent.fullname usr/bin/$program
-    if (get-command $sshLocation -Erroraction SilentlyContinue) {
-        return $sshLocation
-    }
-}
-
-# Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
-function Start-SshAgent([switch]$Quiet) {
-    [int]$agentPid = Get-SshAgent
-    if ($agentPid -gt 0) {
-        if (!$Quiet) {
-            $agentName = Get-Process -Id $agentPid | Select-Object -ExpandProperty Name
-            if (!$agentName) { $agentName = "SSH Agent" }
-            Write-Host "$agentName is already running (pid $($agentPid))"
-        }
-        return
-    }
-
-    if ($env:GIT_SSH -imatch 'plink') {
-        Write-Host "GIT_SSH set to $($env:GIT_SSH), using Pageant as SSH agent."
-
-        $pageant = Get-Command pageant -TotalCount 1 -Erroraction SilentlyContinue
-        $pageant = if ($pageant) { $pageant } else { Find-Pageant }
-        if (!$pageant) {
-            if (!$Quiet) {
-                Write-Warning 'Could not find Pageant'
-            }
-            return
-        }
-
-        Start-Process -NoNewWindow $pageant
-    }
-    else {
-        $sshAgent = Get-Command ssh-agent -TotalCount 1 -ErrorAction SilentlyContinue
-        $sshAgent = if ($sshAgent) { $sshAgent } else { Find-Ssh('ssh-agent') }
-        if (!$sshAgent) {
-            if (!$Quiet) {
-                Write-Warning 'Could not find ssh-agent'
-            }
-            return
-        }
-
-        & $sshAgent | ForEach-Object {
-            if ($_ -match '(?<key>[^=]+)=(?<value>[^;]+);') {
-                setenv $Matches['key'] $Matches['value']
-            }
-        }
-    }
-
-    Add-SshKey -Quiet:$Quiet
-}
-
-function Get-SshPath($File = 'id_rsa') {
-    # Avoid paths with path separator char since it is different on Linux/macOS.
-    # Also avoid ~ as it is invalid if the user is cd'd into say cert:\ or hklm:\.
-    # Also, apparently using the PowerShell built-in $HOME variable may not cut it for msysGit with has different
-    # ideas about the path to the user's home dir e.g. /c/Users/Keith
-    $homePath = Invoke-NullCoalescing $Env:HOME $Home
-    Join-Path $homePath (Join-Path .ssh $File)
-}
-
-<#
-.SYNOPSIS
-    Add a key to the SSH agent
-.DESCRIPTION
-    Adds one or more SSH keys to the SSH agent.
-.EXAMPLE
-    PS C:\> Add-SshKey
-    Adds ~\.ssh\id_rsa to the SSH agent.
-.EXAMPLE
-    PS C:\> Add-SshKey ~\.ssh\mykey, ~\.ssh\myotherkey
-    Adds ~\.ssh\mykey and ~\.ssh\myotherkey to the SSH agent.
-.INPUTS
-    None.
-    You cannot pipe input to this cmdlet.
-#>
-function Add-SshKey([switch]$Quiet) {
-    if ($env:GIT_SSH -imatch 'plink') {
-        $pageant = Get-Command pageant -Erroraction SilentlyContinue | Select-Object -First 1 -ExpandProperty Name
-        $pageant = if ($pageant) { $pageant } else { Find-Pageant }
-        if (!$pageant) {
-            if (!$Quiet) {
-                Write-Warning 'Could not find Pageant'
-            }
-            return
-        }
-
-        if ($args.Count -eq 0) {
-            $keyPath = Join-Path $Env:HOME .ssh
-            $keys = Get-ChildItem $keyPath/*.ppk -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
-            if ($keys) {
-                & $pageant $keys
-            }
-        }
-        else {
-            foreach ($value in $args) {
-                & $pageant $value
-            }
-        }
-    }
-    else {
-        $sshAdd = Get-Command ssh-add -TotalCount 1 -ErrorAction SilentlyContinue
-        $sshAdd = if ($sshAdd) { $sshAdd } else { Find-Ssh('ssh-add') }
-        if (!$sshAdd) {
-            if (!$Quiet) {
-                Write-Warning 'Could not find ssh-add'
-            }
-            return
-        }
-
-        if ($args.Count -eq 0) {
-            & $sshAdd
-        }
-        else {
-            foreach ($value in $args) {
-                & $sshAdd $value
-            }
-        }
-    }
-}
-
-# Stop a running SSH agent
-function Stop-SshAgent() {
-    [int]$agentPid = Get-SshAgent
-    if ($agentPid -gt 0) {
-        # Stop agent process
-        $proc = Get-Process -Id $agentPid -ErrorAction SilentlyContinue
-        if ($null -ne $proc) {
-            Stop-Process $agentPid
-        }
-
-        setenv 'SSH_AGENT_PID' $null
-        setenv 'SSH_AUTH_SOCK' $null
-    }
 }
 
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
@@ -596,5 +407,6 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
             Write-Warning "Rebase failed for $branch"
         }
     }
+
     git checkout -q $head
 }

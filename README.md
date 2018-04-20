@@ -15,6 +15,24 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
 
 ## Versions
 
+### posh-git v1.0
+
+[![master build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master)
+[![master build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master)](https://coveralls.io/github/dahlbyk/posh-git?branch=master)
+( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
+• [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
+
+- Supports Windows PowerShell 5.x
+- Supports PowerShell Core 6+ on all platforms
+- Supports [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) for color customization
+- Includes breaking changes from v0.x ([roadmap](https://github.com/dahlbyk/posh-git/issues/328))
+
+#### Releases
+
+- v1.0.0-beta1
+  ( [README](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/CHANGELOG.md) )
+
 ### posh-git v0.x
 
 [![v0 build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/v0?svg=true&pendingText=v0%20%E2%80%A3%20pending&failingText=v0%20%E2%80%A3%20failing&passingText=v0%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/v0)
@@ -38,30 +56,6 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
   ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
   • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
 
-### posh-git v1.0
-
-[![master build status](https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing)](https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master)
-[![master build coverage](https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master)](https://coveralls.io/github/dahlbyk/posh-git?branch=master)
-( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
-• [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
-
-- Supports Windows PowerShell 5.x
-- Supports PowerShell Core 6+ on all platforms
-- Supports [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) for color customization
-- Includes breaking changes from v0.x ([roadmap](https://github.com/dahlbyk/posh-git/issues/328))
-
-#### Releases
-
-- v1.0.0
-  ( [README](https://github.com/dahlbyk/posh-git/blob/v1.0.0/README.md)
-  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v1.0.0/CHANGELOG.md) )
-- v1.0.0-beta2
-  ( [README](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta2/README.md)
-  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta2/CHANGELOG.md) )
-- v1.0.0-beta1
-  ( [README](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/README.md)
-  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/CHANGELOG.md) )
-
 ## Notes
 posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
 For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the [Customizing Your PowerShell Prompt](https://github.com/dahlbyk/posh-git#step-3-optional-customize-your-powershell-prompt) section below.
@@ -73,7 +67,7 @@ Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus 
 ### Prerequisites
 Before installing posh-git make sure the following prerequisites have been met.
 
-1. PowerShell 2.0 or higher. Check your PowerShell version by executing `$PSVersionTable.PSVersion`.
+1. PowerShell 3.0 or higher. Check your PowerShell version by executing `$PSVersionTable.PSVersion`.
 
 2. Script execution policy must be set to either `RemoteSigned` or `Unrestricted`.
    Check the script execution policy setting by executing `Get-ExecutionPolicy`.
@@ -108,7 +102,7 @@ Update-Module posh-git
 ```
 
 ### Installing posh-git via Chocolatey
-If you have PowerShell version 2 or are having issues using `Install-Module` with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
+If you are having issues using `Install-Module` with PowerShell version 3 or 4, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
 If you don't have Chocolatey, you can install it from the [Chocolately Install page](https://chocolatey.org/install).
 With Chocolatey installed, execute the following command to install posh-git:
 ```powershell
