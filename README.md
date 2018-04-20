@@ -161,7 +161,7 @@ Before installing posh-git make sure the following prerequisites have been met.
 
 3. Git must be installed and available via the PATH environment variable.
    Check that `git` is accessible from PowerShell by executing `git --version` from PowerShell.
-   If `git` is not recognized as the name of a command verify that you have Git installed.
+   If `git` is not recognized as the name of a command, verify that you have Git installed.
    If not, install Git from [https://git-scm.com](https://git-scm.com).
    If you have Git installed, make sure the path to git is in your PATH environment variable.
 
@@ -175,7 +175,7 @@ posh-git is available on the [PowerShell Gallery][psgallery-beta1] and can be in
 
    ```powershell
    # If you have never installed posh-git from the PowerShell Gallery
-   # NOTE: If asked to trust packages from the PowerShell Gallery, answer yes to continue install of posh-git
+   # NOTE: If asked to trust packages from the PowerShell Gallery, answer yes to continue installation of posh-git
    PowerShellGet\Install-Module posh-git -Scope CurrentUser -Force
    ```
 
@@ -299,7 +299,7 @@ This will change the prompt to:
 If you would like to make your prompt span two lines, with a newline after the Git status summary, use this setting:
 
 ```text
-$GitPromptSettings.DefaultPromptMiddle.Text = '`n'
+$GitPromptSettings.DefaultPromptBeforeSuffix.Text = '`n'
 ```
 
 This will change the prompt to:
@@ -321,8 +321,8 @@ In the `DefaultPromptSuffix` field below, we are prepending the PowerShell histo
 
 ```text
 $GitPromptSettings.DefaultPromptWriteStatusFirst = $true
-$GitPromptSettings.DefaultPromptMiddle.Text = '`n$([DateTime]::now.ToString("MM-dd HH:mm:ss"))'
-$GitPromptSettings.DefaultPromptMiddle.ForegroundColor = 0x808080
+$GitPromptSettings.DefaultPromptBeforeSuffix.Text = '`n$([DateTime]::now.ToString("MM-dd HH:mm:ss"))'
+$GitPromptSettings.DefaultPromptBeforeSuffix.ForegroundColor = 0x808080
 $GitPromptSettings.DefaultPromptSuffix = ' $((Get-History -Count 1).id + 1)$(">" * ($nestedPromptLevel + 1)) '
 ```
 
@@ -338,16 +338,16 @@ Note that `<>` denotes parts of the prompt that may not appear depending on the 
 the current dir is in a Git repository.
 To simplify the layout, `DP` is being used as an abbreviation for `DefaultPrompt` settings.
 
-Default prompt layout:
+Default prompt layout (DP is short for DefaultPrompt):
 
 ```text
-{DPPrefix}{DPPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPMiddle}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+{DPPrefix}{DPPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
 ```
 
 Prompt layout when DefaultPromptWriteStatusFirst is set to $true:
 
 ```text
-{DPPrefix}<{BeforeStatus}{Status}{AfterStatus}>{PathStatusSeparator}{DPPath}{DPMiddle}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+{DPPrefix}<{BeforeStatus}{Status}{AfterStatus}>{PathStatusSeparator}{DPPath}{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
 ```
 
 If you require even more customization than `$GitPromptSettings` provides, you can create your own prompt
@@ -376,8 +376,8 @@ function prompt {
     # Your non-prompt logic here
     $prompt = Write-Prompt "Text before posh-git prompt " -ForegroundColor ([ConsoleColor]::Green)
     $prompt += & $GitPromptScriptBlock
-    $prompt += Write-Prompt "Text after posh-git prompt " -ForegroundColor ([ConsoleColor]::Magenta)
-    if ($prompt) { $prompt }
+    $prompt += Write-Prompt "Text after posh-git prompt" -ForegroundColor ([ConsoleColor]::Magenta)
+    if ($prompt) { "$prompt " } else { " " }
 }
 ```
 
