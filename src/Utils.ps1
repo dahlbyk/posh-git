@@ -300,8 +300,10 @@ function Get-PromptPath {
 
     $stringComparison = Get-PathStringComparison
 
-    # Abbreviate path by replacing beginning of path with ~ *iff* the path is in the user's home dir
-    if ($abbrevHomeDir -and $currentPath -and $currentPath.StartsWith($Home, $stringComparison)) {
+    # Abbreviate path by replacing beginning of path with ~ *iff* the path is under the user's home dir
+    if ($abbrevHomeDir -and $currentPath -and !$currentPath.Equals($Home, $stringComparison) -and
+        $currentPath.StartsWith($Home, $stringComparison)) {
+
         $currentPath = "~" + $currentPath.SubString($Home.Length)
     }
 
