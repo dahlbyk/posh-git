@@ -126,6 +126,7 @@ $exportModuleMemberParams = @{
         'Enable-GitColors',
         'Get-GitDirectory',
         'TabExpansion',
+        'Expand-GitCommand',
         'Get-AliasPattern',
         'Get-SshAgent',
         'Start-SshAgent',

@@ -87,6 +87,9 @@ $global:GitPromptSettings = [pscustomobject]@{
 
     ShowStatusWhenZero                          = $true
 
+    # Valid values are "all", "no", and "normal"
+    UntrackedFilesMode                          = $null
+
     AutoRefreshIndex                            = $true
 
     # Valid values are "Full", "Compact", and "Minimal"
@@ -99,6 +102,7 @@ $global:GitPromptSettings = [pscustomobject]@{
     DescribeStyle                               = ''
 
     EnableWindowTitle                           = 'posh~git ~ '
+    AdminTitlePrefixText                        = 'Administrator: '
 
     DefaultPromptPrefix                         = ''
     DefaultPromptSuffix                         = '$(''>'' * ($nestedPromptLevel + 1)) '
@@ -115,8 +119,6 @@ $global:GitPromptSettings = [pscustomobject]@{
 }
 
 $isAdminProcess = Test-Administrator
-
-$adminHeader = if ($isAdminProcess) { 'Administrator: ' } else { '' }
 
 $WindowTitleSupported = $true
 if (Get-Module NuGet) {
@@ -294,7 +296,8 @@ function Write-GitStatus($status) {
             }
             $repoName = Split-Path -Leaf (Split-Path $status.GitDir)
             $prefix = if ($s.EnableWindowTitle -is [string]) { $s.EnableWindowTitle } else { '' }
-            $Host.UI.RawUI.WindowTitle = "$script:adminHeader$prefix$repoName [$($status.Branch)]"
+            $adminHeader = if ($script:isAdminProcess) { $s.AdminTitlePrefixText } else { '' }
+            $Host.UI.RawUI.WindowTitle = "$adminHeader$prefix$repoName [$($status.Branch)]"
         }
     } elseif ( $Global:PreviousWindowTitle ) {
         $Host.UI.RawUI.WindowTitle = $Global:PreviousWindowTitle
@@ -332,6 +335,10 @@ $PoshGitVcsPrompt = {
         if ($s) {
             Write-Prompt $s.BeforeText -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
             Write-Prompt "Error: $_" -BackgroundColor $s.ErrorBackgroundColor -ForegroundColor $s.ErrorForegroundColor
+            if ($s.Debug) {
+                Write-Host
+                Write-Verbose "PoshGitVcsPrompt error details: $($_ | Format-List * -Force | Out-String)" -Verbose
+            }
             Write-Prompt $s.AfterText -BackgroundColor $s.AfterBackgroundColor -ForegroundColor $s.AfterForegroundColor
         }
     }
