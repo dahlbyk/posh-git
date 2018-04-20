@@ -4,7 +4,7 @@
 ModuleToProcess = 'posh-git.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.7.2'
+ModuleVersion = '0.7.3.0'
 
 # ID used to uniquely identify this module
 GUID = '74c9fd30-734b-4c89-a8ae-7727ad21d1d5'
@@ -63,13 +63,16 @@ PrivateData = @{
         Tags = @('git', 'prompt', 'tab', 'tab-completion', 'tab-expansion', 'tabexpansion')
 
         # A URL to the license for this module.
-        LicenseUri = 'https://github.com/dahlbyk/posh-git/blob/v0.7.2/LICENSE.txt'
+        LicenseUri = 'https://github.com/dahlbyk/posh-git/blob/v0/LICENSE.txt'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/dahlbyk/posh-git'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/v0.7.2/CHANGELOG.md'
+        ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/v0/CHANGELOG.md'
+
+        # TODO: REMOVE BEFORE RELEASE
+        Prerelease = 'pre0'
     }
 
 }
