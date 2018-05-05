@@ -4,6 +4,40 @@ Describe 'TabExpansion Tests' {
     It 'Exports a TabExpansion function' {
         $module.ExportedFunctions.Keys -contains 'TabExpansion' | Should Be $true
     }
+    Context 'Subcommand TabExpansion Tests' {
+        It 'Tab completes without subcommands' {
+            $result = & $module GitTabExpansionInternal 'git whatever '
+
+            $result | Should Be @()
+        }
+        It 'Tab completes bisect subcommands' {
+            $result = & $module GitTabExpansionInternal 'git bisect '
+
+            $result -contains '' | Should Be $false
+            $result -contains 'start' | Should Be $true
+            $result -contains 'run' | Should Be $true
+
+            $result2 = & $module GitTabExpansionInternal 'git bisect s'
+
+            $result2 -contains 'start' | Should Be $true
+            $result2 -contains 'skip' | Should Be $true
+        }
+        It 'Tab completes remote subcommands' {
+            $result = & $module GitTabExpansionInternal 'git remote '
+
+            $result -contains '' | Should Be $false
+            $result -contains 'add' | Should Be $true
+            $result -contains 'set-branches' | Should Be $true
+            $result -contains 'get-url' | Should Be $true
+            $result -contains 'update' | Should Be $true
+
+            $result2 = & $module GitTabExpansionInternal 'git remote s'
+
+            $result2 -contains 'set-branches' | Should Be $true
+            $result2 -contains 'set-head' | Should Be $true
+            $result2 -contains 'set-url' | Should Be $true
+        }
+    }
     Context 'Fetch/Push/Pull TabExpansion Tests' {
         BeforeEach {
             # Ensure master branch exists

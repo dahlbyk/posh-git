@@ -6,16 +6,31 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
 }
 
 $subcommands = @{
-    bisect = 'start bad good skip reset visualize replay log run'
-    notes = 'edit show'
-    reflog = 'expire delete show'
-    remote = 'add rename rm set-head show prune update'
-    stash = 'list show drop pop apply branch save clear create'
-    submodule = 'add status init update summary foreach sync'
-    svn = 'init fetch clone rebase dcommit branch tag log blame find-rev set-tree create-ignore show-ignore mkdirs commit-diff info proplist propget show-externals gc reset'
-    tfs = 'bootstrap checkin checkintool ct cleanup cleanup-workspaces clone diagnostics fetch help init pull quick-clone rcheckin shelve shelve-list unshelve verify'
-    flow = 'init feature bugfix release hotfix support help version config finish delete publish rebase'
-    worktree = 'add list prune'
+    bisect = "start bad good skip reset visualize replay log run"
+    notes = 'add append copy edit get-ref list merge prune remove show'
+    reflog = "show delete expire"
+    remote = "
+        add rename remove set-head set-branches
+        get-url set-url show prune update
+        "
+    rerere = "clear forget diff remaining status gc"
+    stash = 'push save list show apply clear drop pop create branch'
+    submodule = "add status init deinit update summary foreach sync"
+    svn = "
+        init fetch clone rebase dcommit log find-rev
+        set-tree commit-diff info create-ignore propget
+        proplist show-ignore show-externals branch tag blame
+        migrate mkdirs reset gc
+        "
+    tfs = "
+        list-remote-branches clone quick-clone bootstrap init
+        clone fetch pull quick-clone unshelve shelve-list labels
+        rcheckin checkin checkintool shelve shelve-delete
+        branch
+        info cleanup cleanup-workspaces help verify autotag subtree reset-remote checkout
+        "
+    flow = "init feature release hotfix support help version"
+    worktree = "add list lock move prune remove unlock"
 }
 
 $gitflowsubcommands = @{
@@ -29,7 +44,7 @@ $gitflowsubcommands = @{
 }
 
 function script:gitCmdOperations($commands, $command, $filter) {
-    $commands.$command -split ' ' | Where-Object { $_ -like "$filter*" }
+    $commands.$command.Trim() -split '\s+' | Where-Object { $_ -like "$filter*" }
 }
 
 $script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry',
