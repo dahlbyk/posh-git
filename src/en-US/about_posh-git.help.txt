@@ -51,7 +51,7 @@ POWERSHELL PROMPT
     You can customize the posh-git prompt with the following settings:
 
     $GitPromptSettings.DefaultPromptPrefix
-    $GitPromptSettings.DefaultPromptMiddle
+    $GitPromptSettings.DefaultPromptBeforeSuffix
     $GitPromptSettings.DefaultPromptSuffix
     $GitPromptSettings.DefaultPromptDebug
     $GitPromptSettings.DefaultPromptEnableTiming
