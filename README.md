@@ -9,17 +9,11 @@ Table of contents:
 - [Overview](#overview)
 - [Git Status Summary Information](#git-status-summary-information)
 - [Customization variables](#customization-variables)
-- [Supported version](#supported-versions)
+- [Versions](#versions)
 - [Installation](#installation)
 - [Using posh-git](#using-posh-git)
 - [Customizing the posh-git prompt](#customizing-the-posh-git-prompt)
 - [Based on work by](#based-on-work-by)
-
-## Build status
-
-| Windows (AppVeyor) | Linux/macOS (Travis | Code Coverage Status |
-|--------------------|---------------------|----------------------|
-| [![master build status][av-master-img]][av-master-site] | [![master build status][tv-master-img]][tv-master-site] | [![master build coverage][cc-master-img]][cc-master-site] |
 
 ## Overview
 
@@ -105,53 +99,57 @@ For an example of how to configure your PowerShell profile script to import the 
 Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
 Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus = $false`), you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
 
-## Supported Versions
+## Versions
 
-Two versions of posh-git are available to provide support for Windows PowerShell v2 up through PowerShell Core v6.
+### posh-git v1.0
+
+| Windows (AppVeyor) | Linux/macOS (Travis | Code Coverage Status |
+|--------------------|---------------------|----------------------|
+| [![master build status][av-master-img]][av-master-site] | [![master build status][tv-master-img]][tv-master-site] | [![master build coverage][cc-master-img]][cc-master-site] |
+
+[README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
+• [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md)
+
+- Supports Windows PowerShell 5.x
+- Supports PowerShell Core 6+ on all platforms
+- Supports [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) for color customization
+- Includes breaking changes from v0.x ([roadmap](https://github.com/dahlbyk/posh-git/issues/328))
+
+#### Releases
+
+- v1.0.0-beta1
+  ( [README](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/CHANGELOG.md) )
 
 ### posh-git v0.x
 
-Version 0.x of posh-git continues to support Windows PowerShell versions 2, 3 and 4.
-And if you don't need ANSI escape sequence support, v0.x can be used on Windows PowerShell v5.x.
-See the v0.x [README][!!!PATH-TO-0x-README-HERE!!!] for installation instructions.
+| Windows (AppVeyor) | Code Coverage Status |
+|--------------------|----------------------|
+| [![v0 build status][av-v0-img]][av-v0-site] | [![v0 build coverage][cc-v0-img]][cc-v0-site] |
 
-This version is being maintained on the branch:
+[README][v0-readme]
+• [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0/CHANGELOG.md)
 
-- `master` avoids breaking changes, maintaining v0.x.
-  ( [README](https://github.com/dahlbyk/posh-git/blob/master/README.md)
-  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md) )
+- Supports Windows PowerShell 3+
+- Does not support PowerShell Core
+- Avoids breaking changes, maintaining v0.x
 
-- Previous releases:
-  - v0.7.1
-    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.1/README.md)
-    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.1/CHANGELOG.md) )
-  - v0.7.0
-    ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
-    • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
+#### Releases
 
-### posh-git v1.x
-
-Version 1.x of posh-git is targeted specifically at Windows PowerShell 5.x and (cross-platform)
-PowerShell Core 6.x.  It takes advantage of features only available in these versions such as the
-class and enum keywords to better organize the `$GitPromptSettings` object.
-Consequently this version of posh-git introduces BREAKING changes with 0.x which including dropping support
-for Windows PowerShell version 2, 3 and 4. There are other breaking changes, see the
-[CHANGELOG](./CHANGELOG.md) for details.
-
-In addition, version 1.x is able to render prompt status strings using [ANSI escape sequences][ansi-esc-code].
-This can be used in hosts that support virtual terminal escape sequences such as PowerShell Core on Linux,
-macOS and Windows and Windows PowerShell 5.x on Windows 10. Support for
-[Console Virtual Terminal Sequences][console-vt-seq] was added in Windows 10 version 1511.
-
-This version is being developed on the branch:
-
-- `develop` includes breaking changes, toward [v1.0](https://github.com/dahlbyk/posh-git/issues/328).
-  ( [README](./README.md)
-  • [CHANGELOG](./CHANGELOG.md) )
-
-The rest of this readme applies only to version 1.x of posh-git.
+- v0.7.3
+  ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.3/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.3/CHANGELOG.md) )
+- v0.7.1
+  ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.1/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.1/CHANGELOG.md) )
+- v0.7.0
+  ( [README](https://github.com/dahlbyk/posh-git/blob/v0.7.0/README.md)
+  • [CHANGELOG](https://github.com/dahlbyk/posh-git/blob/v0.7.0/CHANGELOG.md) )
 
 ## Installation
+
+These installation instructions, as well as rest of this readme, applies only to version 1.x of posh-git.
+For v0.x installation instructions see this [README][v0-readme].
 
 ### Prerequisites
 
@@ -396,14 +394,16 @@ function prompt {
 
 [av-master-site]:  https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master
 [av-master-img]:   https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing
+[av-v0-img]:       https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/v0?svg=true&pendingText=v0%20%E2%80%A3%20pending&failingText=v0%20%E2%80%A3%20failing&passingText=v0%20%E2%80%A3%20passing
+[av-v0-site]:      https://ci.appveyor.com/project/dahlbyk/posh-git/branch/v0
 
 [tv-master-img]:   https://travis-ci.org/dahlbyk/posh-git.svg?branch=master
 [tv-master-site]:  https://travis-ci.org/dahlbyk/posh-git
 
-[cc-develop-img]:  https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop
-[cc-develop-site]: https://coveralls.io/github/dahlbyk/posh-git?branch=develop
 [cc-master-img]:   https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=master
 [cc-master-site]:  https://coveralls.io/github/dahlbyk/posh-git?branch=master
+[cc-v0-img]:       https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=v0
+[cc-v0-site]:      https://coveralls.io/github/dahlbyk/posh-git?branch=v0
 
 [ansi-esc-code]:   https://en.wikipedia.org/wiki/ANSI_escape_code
 [console-vt-seq]:  https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
@@ -426,5 +426,7 @@ function prompt {
 [prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡] ~\GitHub\posh-git> "
 [prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "~\GitHub\posh-git [master ≡]&#10;> "
 [prompt-custom]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustom.png        "[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> "
+
+[v0-readme]:       https://github.com/dahlbyk/posh-git/blob/v0/README.md
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
