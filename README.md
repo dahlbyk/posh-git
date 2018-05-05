@@ -19,8 +19,7 @@ Table of contents:
 
 | Windows (AppVeyor) | Linux/macOS (Travis | Code Coverage Status |
 |--------------------|---------------------|----------------------|
-| [![master build status][av-master-img]][av-master-site] | | [![master build coverage][cc-master-img]][cc-master-site] |
-| [![develop build status][av-develop-img]][av-develop-site] | [![develop pscore build status][tv-develop-img]][tv-develop-site] | [![develop build coverage][cc-develop-img]][cc-develop-site] |
+| [![master build status][av-master-img]][av-master-site] | [![master build status][tv-master-img]][tv-master-site] | [![master build coverage][cc-master-img]][cc-master-site] |
 
 ## Overview
 
@@ -387,13 +386,11 @@ function prompt {
 - Mark Embling,   http://www.markembling.info/
 - Jeremy Skinner, http://www.jeremyskinner.co.uk/
 
-[av-develop-site]: https://ci.appveyor.com/project/dahlbyk/posh-git/branch/develop
-[av-develop-img]:  https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/develop?svg=true&pendingText=develop%20%E2%80%A3%20pending&failingText=develop%20%E2%80%A3%20failing&passingText=develop%20%E2%80%A3%20passing
 [av-master-site]:  https://ci.appveyor.com/project/dahlbyk/posh-git/branch/master
 [av-master-img]:   https://ci.appveyor.com/api/projects/status/eb8erd5afaa01w80/branch/master?svg=true&pendingText=master%20%E2%80%A3%20pending&failingText=master%20%E2%80%A3%20failing&passingText=master%20%E2%80%A3%20passing
 
-[tv-develop-img]:  https://travis-ci.org/dahlbyk/posh-git.svg?branch=develop
-[tv-develop-site]: https://travis-ci.org/dahlbyk/posh-git
+[tv-master-img]:   https://travis-ci.org/dahlbyk/posh-git.svg?branch=master
+[tv-master-site]:  https://travis-ci.org/dahlbyk/posh-git
 
 [cc-develop-img]:  https://coveralls.io/repos/github/dahlbyk/posh-git/badge.svg?branch=develop
 [cc-develop-site]: https://coveralls.io/github/dahlbyk/posh-git?branch=develop
