@@ -46,20 +46,26 @@ By default, the status summary has the following format:
   - Green means the branch is ahead of its remote (green light to push)
   - Red means the branch is behind its remote
   - Yellow means the branch is both ahead of and behind its remote
-- S represents the branch status in relation to remote (tracked origin) branch. Note: This information reflects the state of the remote tracked branch after the last `git fetch/pull` of the remote.
-  - ≡ = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
-  - ↑`<num>` = The local branch is ahead of the remote branch by the specified number of commits; a `git push` is required to update the remote branch (`BranchAheadStatus`)
-  - ↓`<num>` = The local branch is behind the remote branch by the specified number of commits; a `git pull` is required to update the local branch (`BranchBehindStatus`)
-  - `<a>`↕`<b>` = The local branch is both ahead of the remote branch by the specified number of commits (a) and behind by the specified number of commits (b); a rebase of the local branch is required before pushing local changes to the remote branch (`BranchBehindAndAheadStatus`).  NOTE: this status is only available if `$GitPromptSettings.BranchBehindAndAheadDisplay` is set to `Compact`.
-  - × = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus`)
-- ABCD represent the index; `|` (`DelimText`); EFGH represent the working directory
+- `S` represents the branch status in relation to remote (tracked origin) branch. Note: This information reflects
+  the state of the remote tracked branch after the last `git fetch/pull` of the remote.
+  - `≡` = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
+  - `↑<num>` = The local branch is ahead of the remote branch by the specified number of commits; a `git push` is
+    required to update the remote branch (`BranchAheadStatus`)
+  - `↓<num>` = The local branch is behind the remote branch by the specified number of commits; a `git pull` is
+    required to update the local branch (`BranchBehindStatus`)
+  - `<a>↕<b>` = The local branch is both ahead of the remote branch by the specified number of commits (a) and behind
+    by the specified number of commits (b); a rebase of the local branch is required before pushing local changes to
+    the remote branch (`BranchBehindAndAheadStatus`).  NOTE: this status is only available if
+    `$GitPromptSettings.BranchBehindAndAheadDisplay` is set to `Compact`.
+  - `×` = The local branch is tracking a branch that is gone from the remote (`BranchGoneStatus`)
+- `ABCD` represent the index; `|` (`DelimText`); `EFGH` represent the working directory
   - `+` = Added files
   - `~` = Modified files
   - `-` = Removed files
   - `!` = Conflicted files
-  - As in `git status`, index status is dark green and working directory status is dark red
+  - As with `git status` output, index status is displayed in dark green and working directory status in dark red
 
-- W represents the overall status of the working directory
+- `W` represents the overall status of the working directory
   - `!` = There are unstaged changes in the working tree (`LocalWorkingStatus`)
   - `~` = There are uncommitted changes i.e. staged changes in the working tree waiting to be committed (`LocalStagedStatus`)
   - None = There are no unstaged or uncommitted changes to the working tree (`LocalDefault`)
@@ -134,7 +140,8 @@ for Windows PowerShell version 2, 3 and 4. There are other breaking changes, see
 
 In addition, version 1.x is able to render prompt status strings using [ANSI escape sequences][ansi-esc-code].
 This can be used in hosts that support virtual terminal escape sequences such as PowerShell Core on Linux,
-macOS and Windows and Windows PowerShell 5.x on Windows 10. Support for [Console Virtual Terminal Sequences][console-vt-seq] was added in Windows 10 version 1511.
+macOS and Windows and Windows PowerShell 5.x on Windows 10. Support for
+[Console Virtual Terminal Sequences][console-vt-seq] was added in Windows 10 version 1511.
 
 This version is being developed on the branch:
 
@@ -156,7 +163,8 @@ Before installing posh-git make sure the following prerequisites have been met.
 
 2. On Windows, script execution policy must be set to either `RemoteSigned` or `Unrestricted`.
    Check the script execution policy setting by executing `Get-ExecutionPolicy`.
-   If the policy is not set to one of the two required values, run PowerShell as Administrator and execute `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm`.
+   If the policy is not set to one of the two required values, run PowerShell as Administrator and
+   execute `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm`.
 
 3. Git must be installed and available via the PATH environment variable.
    Check that `git` is accessible from PowerShell by executing `git --version` from PowerShell.
@@ -187,7 +195,7 @@ posh-git is available on the [PowerShell Gallery][psgallery-beta1] and can be in
 
 ### Extra step for Linux and macOS users
 
-The version of `PSReadLine` (1.2) that ships PowerShell Core 6.0.0 has known issues that cause problems with the
+The version of `PSReadLine` (1.2) that ships with PowerShell Core 6.0 has known issues that cause problems with the
 prompt function that posh-git uses.  Fortunately, there is a beta of PSReadLine 2.0.0 that fixes these problems.
 You can check the version of PSReadLine you have by executing: `get-module psreadline`.
 If it less than 2.0.0, follow this procedure.
