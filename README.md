@@ -91,7 +91,7 @@ Before installing posh-git make sure the following prerequisites have been met.
    If not, install Git from [https://git-scm.com](https://git-scm.com).
    If you have Git installed, make sure the path to git is in your PATH environment variable.
 
-### Installing posh-git
+### Installing posh-git via PowerShellGet
 
 posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be installed using the PowerShellGet module.
 
@@ -115,7 +115,7 @@ posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be insta
    PowerShellGet\Update-Module posh-git
    ```
 
-### Extra step for Linux and macOS users
+#### Extra step for Linux and macOS users
 
 The version of `PSReadLine` (1.2) that ships with PowerShell Core 6.0 has known issues that cause problems with the
 prompt function that posh-git uses.  Fortunately, there is a beta of PSReadLine 2.0.0 that fixes these problems.
@@ -129,6 +129,16 @@ If it less than 2.0.0, follow this procedure.
    ```
 
 2. Restart `pwsh` and verify you have at least the `2.0.0` version of PSReadLine by executing: `Get-Module PSReadLine`.
+
+### Installing posh-git via Chocolatey
+
+If you prefer to manage posh-git as a Windows package, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
+If you don't have Chocolatey, you can install it from the [Chocolately Install page](https://chocolatey.org/install).
+With Chocolatey installed, execute the following command to install posh-git:
+
+```powershell
+choco install poshgit
+```
 
 ## Using posh-git
 
