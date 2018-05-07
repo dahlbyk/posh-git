@@ -51,10 +51,13 @@ POWERSHELL PROMPT
     You can customize the posh-git prompt with the following settings:
 
     $GitPromptSettings.DefaultPromptPrefix
+    $GitPromptSettings.DefaultPromptBeforeSuffix
     $GitPromptSettings.DefaultPromptSuffix
-    $GitPromptSettings.DefaultPromptDebugSuffix
+    $GitPromptSettings.DefaultPromptDebug
     $GitPromptSettings.DefaultPromptEnableTiming
+    $GitPromptSettings.DefaultPromptPath
     $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory
+    $GitPromptSettings.DefaultPromptWriteStatusFirst
 
     For more information on customizing the posh-git prompt or creating your
     own custom PowerShell prompt see:
@@ -64,7 +67,7 @@ POWERSHELL PROMPT
 GIT STATUS SUMMARY
     [{HEAD-name} S +A ~B -C !D | +E ~F -G !H W]
 
-    * [ (BeforeText)
+    * [ (BeforeStatus)
       * {HEAD-name} is the current branch, or the SHA of a detached HEAD
         * Cyan means the branch matches its remote
         * Green means the branch is ahead of its remote (green light to push)
@@ -100,11 +103,11 @@ GIT STATUS SUMMARY
           reflecting the colors used by 'git status'.
 
       * W represents the overall status of the working directory
-        * ! = There are unstaged changes (LocalWorkingStatus)
+        * ! = There are unstaged changes (LocalWorkingStatusSymbol)
         * ~ = There are uncommitted changes i.e. staged changes waiting to be
-              committed (LocalStagedStatus)
-        * None = There are no unstaged or uncommitted changes (LocalDefault)
-    * ] (AfterText)
+              committed (LocalStagedStatusSymbol)
+        * None = There are no unstaged or uncommitted changes (LocalDefaultStatusSymbol)
+    * ] (AfterStatus)
 
     The (symbols) and surrounding text can be customized by the corresponding
     properties of the global variable $GitPromptSettings.
@@ -161,17 +164,28 @@ PERFORMANCE
 
 PRIMARY COMMANDS
     Get-GitStatus:
-    Returns information about the current Git repository as
-    well as the index and working directory.
+    Returns information about the current Git repository as well as the index
+    and working directory.
 
     Write-GitStatus:
-    Writes directly to host the formatted text, as described above in the
-    GIT STATUS PROMPT section, when passed in the repository information
-    returned by Get-GitStatus e.g. Write-GitStatus (Get-GitStatus)
+    Given a status object returned by Get-GitStatus, this command formats it
+    as described above in the GIT STATUS PROMPT section. On a host that
+    supports virtual terminal sequences and where
+    $GitPromptSettings.AnsiConsole is set to $true, the prompt text is
+    returned by the function as a string which may contain ANSI escape
+    sequences. Otherise, the prompt text is written directly to the host.
 
     Write-VcsStatus:
-    Gets the Git repository information and writes it formatted, as described
-    above in the GIT STATUS PROMPT section, directly to the host.
+    Gets the Git repository information and formats it, as described
+    above in the GIT STATUS PROMPT section. On a host that supports virtual
+    terminal sequences and where $GitPromptSettings.AnsiConsole is set to
+    $true, the prompt text is returned by the function as a string which
+    may contain ANSI escape sequences. Otherise, the prompt text is written
+    directly to the host.
+
+    This command can be used with other version control systems that append
+    a scriptblock, which uses Write-Prompt to supply their prompt text, to
+    $global:VcsPromptStatuses.
 
 BASED ON WORK BY:
     Keith Dahlby, http://solutionizing.net/
