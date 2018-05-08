@@ -105,7 +105,7 @@ posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be insta
    # NOTE: If asked to trust packages from the PowerShell Gallery, answer yes to continue installation of posh-git
    # NOTE: If the AllowPrerelease parameter is not recognized, update your version of PowerShellGet to >= 1.6 e.g.
    #       Install-Module PowerShellGet -Scope CurrentUser -Force -AllowClobber
-   PowerShellGet\Install-Module posh-git -Scope CurrentUser -AllowPrelease -Force
+   PowerShellGet\Install-Module posh-git -Scope CurrentUser -AllowPrerelease -Force
    ```
 
    OR
