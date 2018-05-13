@@ -1,59 +1,80 @@
 # posh-git Release History
 
-## 1.0.0-beta2 - April 23, 2018
+## 1.0.0-beta2 - May 13, 2018
 
 The 1.0.0 release is targeted specifically at Windows PowerShell 5.x and (cross-platform) PowerShell Core 6.x, both of
-which support writing prompt strings using [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code)
-and classes which enable the enhanced structure of `$GitPromptSettings`.
-Consequently this release introduces BREAKING changes with 0.x.
-If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use the 0.x version of posh-git.
+which support classes, enabling the enhanced structure of `$GitPromptSettings`,
+and writing prompt strings using [ANSI escape sequences][ansi-esc-code] /
+[Console Virtual Terminal Sequences][console-vt-seq] (supported since Windows 10 version 1511).
 
-> On Windows, support for [Console Virtual Terminal Sequences](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences)
-was added in Windows 10 version 1511.
+Consequently, this release introduces BREAKING changes with 0.x.
+If you are still on Windows PowerShell 2.0, 3.0 or 4.0, please continue to use the 0.x version of posh-git.
 
 ### Changed
 
-- Renamed `$GitPromptSettings.BeforeText/DelimText/AfterText` to `$GitPromptSettings.BeforeStatus/DelimStatus/AfterStatus`.
-  This results in easier to read script e.g. this `$GitPromptSettings.BeforeStatus.Text = '<['` instead of this
-  `$GitPromptSettings.BeforeText.Text = '<['`.
-- Renamed `$GitPromptSettings.BeforeIndexText/BeforeStashText/AfterStashText` to `$GitPromptSettings.BeforeIndex/BeforeStash/AfterStash`.
-- Renamed `$GitPromptSettigs.EnableWindowTitle` to `$GitPromptSettigs.WindowTitle`.  This setting now takes either a string or a ScriptBlock.
-  The default value is a ScriptBlock that takes two parameters: `$GitStatus`, `$IsAdmin`.
-  To prevent posh-git from changing the host's WindowTitle text, set `$GitPromptSettigs.WindowTitle` to `$null`.
-- The script that updates the WindowTitle text has been moved from the `Write-GitStatus` command to the built-in prompt function.
-- `$GitPromptSettigs.WindowTitle` is now used to set the WindowTitle text all the time, not just when inside a Git repo.
-- When a color setting is specified by a string (color name), HtmlColors are looked up before ConsoleColors on platforms that support `System.Drawing.ColorTranslator`.
-  ConsoleColors can be forced with `[ConsoleColor]::Cyan`.
+- Renamed `$GitPromptSettings` values
+  - `BeforeText` to `BeforeStatus`
+  - `DelimText` to `DelimStatus`
+  - `AfterText` to `AfterStatus`
+  - `BeforeIndexText` to `BeforeIndex`
+  - `BeforeStashText` to `BeforeStash`
+  - `AfterStashText` to `AfterStash`
+- Split `$GirPromptSettings.DefaultPromptSuffix` and `$GitPromptSettings.DefaultPromptDebugSuffix` into:
+  1. `DefaultPromptBeforeSuffix` (`''`)
+  2. `DefaultPromptDebug` (`' [DBG]:'`), which is rendered if a debugger is attached
+  3. `DefaultPromptSuffix` (`'$(">" * ($nestedPromptLevel + 1)) '`), which is rendered last
+     (or returned from `prompt`, for terminals that don't support escape sequences)
+- Renamed `$GitPromptSettings.EnableWindowTitle` to `$GitPromptSettings.WindowTitle` with significant improvements:
+  - `$Host.UI.RawUI.WindowTitle` is now set on every `prompt`, not just when inside a Git repo.
+  - To prevent setting `WindowTitle`, set `$GitPromptSettigs.WindowTitle` to `$null`.
+  - The `WindowTitle` update has been moved from the `Write-GitStatus` command to the built-in `prompt` function.
+  - `$GitPromptSettings.WindowTitle` is now fully customizable:
+    - As a `string`, it will be processed with [`ExpandString`][invokecommand-expandstring].
+    - As a `ScriptBlock` (default), it will be executed with two parameters: `$GitStatus` and `$IsAdmin`.
+- When a color setting is specified by a `string` (color name), it is parsed as an HTML color
+  (on platforms that support `System.Drawing.ColorTranslator`) before being parsed as a `ConsoleColor`.
+  To force using `ConsoleColors`, use static member syntax (e.g. `[ConsoleColor]::Cyan`).
   ([PR #536](https://github.com/dahlbyk/posh-git/pull/536))
+- `PoshGitVcsPrompt` errors now show details if `$GitPromptSettings.Debug`
+  ([PR #560](https://github.com/dahlbyk/posh-git/pull/560))
 
 ### Added
 
-- New `$GitPromptSettings`:
-  - PathStatusSeparator
-  - DefaultPromptPath
-  - DefaultPromptBeforeSuffix
-  - DefaultPromptDebug
-  - DefaultPromptWriteStatusFirst
-  - DefaultPromptTimingFormat
+- New command `Get-PromptPath` which formats the path displayed in the prompt and window title.
+  This command honors `$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory`.
+  - A path exactly matching `$HOME` is now shown in full, rather than abbreviated to `~`
+    ([PR #567](https://github.com/dahlbyk/posh-git/pull/567))
+- New `$GitPromptSettings` values (default):
+  - `PathStatusSeparator` (` `)
+  - `DefaultPromptPath` (`'$(Get-PromptPath)'`)
+  - `DefaultPromptWriteStatusFirst` (`$false`)
+  - `DefaultPromptTimingFormat` (`' {0}ms'`)
 - `RepoName` property has been addded to the `$global:GitStatus` object returned by `Get-GitStatus`.
-- New command `Get-PromptPath` which formats the path displayed in the prompt. This command is called from the
-  `$GitPromptSettings.DefaultPromptPath` setting.  This command honors the
-  `$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory` setting.
-- New `Expand-GitCommand` to allow posh-gits tab expansion functionality to be used by others in their tabexpansion function.
+- Added `$GitPromptSettings.UntrackedFilesMode`;
+  accepted values are `$null` (inherit `status.showUntrackedFiles`), "all", "no", and "normal"
+  ([#556](https://github.com/dahlbyk/posh-git/pull/556))
+  ([PR #557](https://github.com/dahlbyk/posh-git/pull/557))
+  Thanks David Snedecor (@TheSned)
+- Exported `Expand-GitCommand` for use with custom tab expansion
+  ([#562](https://github.com/dahlbyk/posh-git/pull/562))
+  ([PR #563](https://github.com/dahlbyk/posh-git/pull/563))
 
 ### Fixed
 
 - Fixed `$GitPromptSettings.EnablePromptStatus` should not affect `Get-GitStatus` by adding `-Force` parameter.
   ([#475](https://github.com/dahlbyk/posh-git/issues/475))
   ([PR #535](https://github.com/dahlbyk/posh-git/pull/535))
-- Fixed PowerShell Core bug where we were using `Get-Content -Encoding Byte` when processing profile scripts during Chocolatey install/uninstall.
-  That encoding doesn't exist in PowerShell Core.
+- Fixed PowerShell Core bug where we were using `Get-Content -Encoding Byte` when processing profile scripts during
+  Chocolatey install/uninstall. That encoding doesn't exist in PowerShell Core.
   Switched to `Get-Content -AsByteStream` on PowerShell Core.
   ([PR #532](https://github.com/dahlbyk/posh-git/pull/532))
-- Fixed ANSI rendering bug when both ForegroundColor and BackgroundColor colors are $null (default),
+- Fixed ANSI rendering bug: when both `ForegroundColor` and `BackgroundColor` colors are `$null` (default),
   we were emitting an unnecessary terminating escape sequence `"$([char]27)[0m"`.
   ([PR #532](https://github.com/dahlbyk/posh-git/pull/532))
-- Fixed issue where setting Foreground/BackgroundColor to 0 (Black) resulted in posh-git rendering the default color.
+- Fixed issue where setting `ForegroundColor` or `BackgroundColor` to 0 (Black) rendered the default color instead.
+- Updated Git subcommand lists
+  ([#561](https://github.com/dahlbyk/posh-git/issues/561))
+  ([PR #571](https://github.com/dahlbyk/posh-git/pull/571))
 
 ## 1.0.0-beta1 - January 10, 2018
 
@@ -419,3 +440,7 @@ Thank you to the following folks who contributed their time and scripting skills
     ([PR #449](https://github.com/dahlbyk/posh-git/pull/449))
   - Add -verbose parameter to install.ps1
     ([PR #451](https://github.com/dahlbyk/posh-git/pull/451))
+
+[ansi-esc-code]:   https://en.wikipedia.org/wiki/ANSI_escape_code
+[console-vt-seq]:  https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
+[invokecommand-expandstring]: https://docs.microsoft.com/en-us/dotnet/api/system.management.automation.commandinvocationintrinsics.expandstring
