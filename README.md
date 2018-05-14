@@ -43,6 +43,8 @@ You can also tab complete remote names and branch names e.g.: `git pull or<tab> 
 
 #### Releases
 
+- v1.0.0-beta2
+  ( [README][v1b2-readme] • [CHANGELOG][v1b2-change] )
 - v1.0.0-beta1
   ( [README][v1b1-readme] • [CHANGELOG][v1b1-change] )
 
@@ -423,7 +425,7 @@ function prompt {
 [choco-site]:      https://chocolatey.org/packages/poshgit/
 [psgallery-img]:   https://img.shields.io/powershellgallery/dt/posh-git.svg
 [psgallery-site]:  https://www.powershellgallery.com/packages/posh-git
-[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0-beta1
+[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0-beta2
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
 [prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "~\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
@@ -452,5 +454,8 @@ function prompt {
 
 [v1b1-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/CHANGELOG.md
 [v1b1-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/README.md
+
+[v1b2-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta2/CHANGELOG.md
+[v1b2-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta2/README.md
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
