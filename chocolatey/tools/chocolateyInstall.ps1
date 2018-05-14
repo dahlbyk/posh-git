@@ -1,49 +1,35 @@
-﻿try {
-    $poshgitPath = join-path (Get-ToolsLocation) 'poshgit'
+﻿$ErrorActionPreference = 'Stop'
 
-    try {
-      if (test-path($poshgitPath)) {
-        Write-Host "Attempting to remove existing `'$poshgitPath`'."
-        remove-item $poshgitPath -recurse -force
-      }
-    } catch {
-      Write-Host "Could not remove `'$poshgitPath`'"
-    }
+$toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
+$moduleName = 'posh-git'  # this may be different from the package name and different case
 
-    $version = "v$Env:chocolateyPackageVersion"
-    if ($version -eq 'v') { $version = 'master' }
-    $poshGitInstall = if ($env:poshGit ) { $env:poshGit } else { "https://github.com/dahlbyk/posh-git/zipball/$version" }
-    $zip = Install-ChocolateyZipPackage 'poshgit' $poshGitInstall $poshgitPath
-    $currentVersionPath = Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
+# module may already be installed outside of Chocolatey
+Remove-Module -Name $moduleName -Force -ErrorAction SilentlyContinue
 
-    if(Test-Path $PROFILE) {
-        $oldProfile = @(Get-Content $PROFILE)
+$sourcePath = Join-Path -Path $toolsDir -ChildPath "$modulename\*"
+$destPath = Join-Path -Path $env:ProgramFiles -ChildPath "WindowsPowerShell\Modules\$moduleName"
 
-        . $currentVersionPath\src\Utils.ps1
-        $oldProfileEncoding = Get-FileEncoding $PROFILE
-
-        $newProfile = @()
-        foreach($line in $oldProfile) {
-            if ($line -like '*PoshGitPrompt*') { continue; }
-
-            if($line -like '. *posh-git*profile.example.ps1*') {
-                $line = ". '$currentVersionPath\profile.example.ps1' choco"
-            }
-            if($line -like 'Import-Module *\src\posh-git.psd1*') {
-                $line = "Import-Module '$currentVersionPath\src\posh-git.psd1'"
-            }
-            $newProfile += $line
-        }
-        Set-Content -path $profile -value $newProfile -Force -Encoding $oldProfileEncoding
-    }
-
-    $installer = Join-Path $currentVersionPath 'install.ps1'
-    & $installer
-} catch {
-  try {
-    if($oldProfile){ Set-Content -path $PROFILE -value $oldProfile -Force -Encoding $oldProfileEncoding }
-  }
-  catch {}
-  throw
+if ($PSVersionTable.PSVersion.Major -ge 5) {
+    $manifestFile = Join-Path -Path $toolsDir -ChildPath "$moduleName\$moduleName.psd1"
+    $manifest = Test-ModuleManifest -Path $manifestFile -WarningAction Ignore -ErrorAction Stop
+    $destPath = Join-Path -Path $destPath -ChildPath $manifest.Version.ToString()
 }
 
+Write-Verbose "Creating destination directory '$destPath' for module."
+New-Item -Path $destPath -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+
+Write-Verbose "Moving '$moduleName' files from '$sourcePath' to '$destPath'."
+Move-Item -Path $sourcePath -Destination $destPath -Force
+
+if ($PSVersionTable.PSVersion.Major -lt 4) {
+    $modulePaths = [Environment]::GetEnvironmentVariable('PSModulePath', 'Machine') -split ';'
+    if ($modulePaths -notcontains $destPath) {
+        Write-Verbose "Adding '$destPath' to PSModulePath."
+        $newModulePath = @($destPath, $modulePaths) -join ';'
+
+        [Environment]::SetEnvironmentVariable('PSModulePath', $newModulePath, 'Machine')
+        $env:PSModulePath = $newModulePath
+    }
+}
+
+Write-Host "To add posh-git to your profile use 'Import-Module posh-git; Add-PoshGitToProfile'."

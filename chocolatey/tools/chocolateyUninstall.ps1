@@ -1,44 +1,17 @@
-﻿try {
-    $poshgitPath = join-path (Get-ToolsLocation) 'poshgit'
+﻿$ErrorActionPreference = 'Stop'
 
-    $currentVersionPath = Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
+$moduleName = 'posh-git'
+$sourcePath = Join-Path -Path $env:ProgramFiles -ChildPath "WindowsPowerShell\Modules\$moduleName"
 
-    if(Test-Path $PROFILE) {
-        $oldProfile = @(Get-Content $PROFILE)
+Write-Verbose "Removing all version of '$moduleName' from '$sourcePath'."
+Remove-Item -Path $sourcePath -Recurse -Force -ErrorAction SilentlyContinue
 
-        . $currentVersionPath\src\Utils.ps1
-        $oldProfileEncoding = Get-FileEncoding $PROFILE
+if ($PSVersionTable.PSVersion.Major -lt 4) {
+    $modulePaths = [Environment]::GetEnvironmentVariable('PSModulePath', 'Machine') -split ';'
 
-        $newProfile = @()
-        foreach($line in $oldProfile) {
-            if ($line -like '*PoshGitPrompt*') { continue; }
-            if ($line -like '*Load posh-git example profile*') { continue; }
-            if ($line -like '*Start-SshAgent*') { continue; }
+    Write-Verbose "Removing '$sourcePath' from PSModulePath."
+    $newModulePath = $modulePaths | Where-Object { $_ -ne $sourcePath }
 
-            if($line -like '. *posh-git*profile.example.ps1*') {
-                continue;
-            }
-            if($line -like 'Import-Module *\src\posh-git.psd1*') {
-                continue;
-            }
-            $newProfile += $line
-        }
-        Set-Content -path $profile -value $newProfile -Force -Encoding $oldProfileEncoding
-    }
-
-    try {
-      if (test-path($poshgitPath)) {
-        Write-Host "Attempting to remove existing `'$poshgitPath`'."
-        remove-item $poshgitPath -recurse -force
-      }
-    } catch {
-      Write-Host "Could not remove `'$poshgitPath`'"
-    }
-} catch {
-  try {
-    if($oldProfile){ Set-Content -path $PROFILE -value $oldProfile -Force -Encoding $oldProfileEncoding }
-  }
-  catch {}
-  throw
+    [Environment]::SetEnvironmentVariable('PSModulePath', $newModulePath, 'Machine')
+    $env:PSModulePath = $newModulePath
 }
-
