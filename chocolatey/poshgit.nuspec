@@ -25,10 +25,13 @@ See profile.example.ps1 as to how you can integrate the tab completion and/or gi
 Note on performance: displaying file status in the git prompt for a very large repo can be prohibitively slow. Rather than turn off file status entirely, you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
     </description>
     <summary>Provides prompt with Git status summary information and tab completion for Git commands, parameters, remotes and branch names.</summary>
-    <tags>poshgit posh-git powershell git</tags>
+    <tags>admin posh-git powershell module git</tags>
     <projectUrl>https://github.com/dahlbyk/posh-git</projectUrl>
     <licenseUrl>https://github.com/dahlbyk/posh-git/blob/v0/LICENSE.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <packageSourceUrl>https://github.com/dahlbyk/posh-git</packageSourceUrl>
+    <docsUrl>https://github.com/pauby/posh-git/blob/master/README.md</docsUrl>
+    <bugTrackerUrl>https://github.com/dahlbyk/posh-git/issues</bugTrackerUrl>
     <dependencies>
       <dependency id="chocolatey" version="0.9.10" />
       <dependency id="git" />
