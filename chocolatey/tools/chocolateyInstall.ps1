@@ -16,7 +16,7 @@
     $zip = Install-ChocolateyZipPackage 'poshgit' $poshGitInstall $poshgitPath
     $currentVersionPath = Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
 
-    if(Test-Path $PROFILE) {
+    if ($PROFILE -and (Test-Path $PROFILE)) {
         $oldProfile = @(Get-Content $PROFILE)
 
         . $currentVersionPath\src\Utils.ps1
