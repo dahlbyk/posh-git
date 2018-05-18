@@ -15,6 +15,6 @@ elseif (!$(git ls-remote $Remote $tag)) {
 }
 
 choco pack poshgit.nuspec
-choco install -f -y poshgit -pre --version=$version -s .
+choco install -f -v -y poshgit -pre --version=$version -s .
 
 Pop-Location

@@ -3,7 +3,8 @@
 
     $currentVersionPath = Get-ChildItem "$poshgitPath\*posh-git*\" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
 
-    if(Test-Path $PROFILE) {
+    if ($PROFILE -and (Test-Path $PROFILE)) {
+        Write-Verbose "Removing posh-git references in `'$PROFILE`'."
         $oldProfile = @(Get-Content $PROFILE)
 
         . $currentVersionPath\src\Utils.ps1
@@ -35,10 +36,14 @@
       Write-Host "Could not remove `'$poshgitPath`'"
     }
 } catch {
-  try {
-    if($oldProfile){ Set-Content -path $PROFILE -value $oldProfile -Force -Encoding $oldProfileEncoding }
-  }
-  catch {}
-  throw
+    Write-Verbose "posh-git install error details: $($_ | Format-List * -Force | Out-String)"
+    try {
+        if ($oldProfile) {
+            Write-Warning "Something went wrong! Resetting contents of `'$PROFILE`'."
+            Set-Content -path $PROFILE -value $oldProfile -Force -Encoding $oldProfileEncoding
+        }
+    }
+    catch {}
+    throw
 }
 
