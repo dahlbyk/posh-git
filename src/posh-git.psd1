@@ -75,7 +75,7 @@ PrivateData = @{
         ReleaseNotes = 'https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md'
 
         # OVERRIDE THIS FIELD FOR PUBLISHED RELEASES - LEAVE AT 'alpha' FOR CLONED/LOCAL REPO USAGE
-        Prerelease = 'beta1x'
+        Prerelease = 'beta2x'
     }
 }
 
