@@ -231,21 +231,21 @@ function script:expandGitAlias($cmd, $rest) {
 }
 
 function script:expandLongParams($hash, $cmd, $filter) {
-    $hash[$cmd] -split ' ' |
+    $hash[$cmd].Trim() -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("--", $_) }
 }
 
 function script:expandShortParams($hash, $cmd, $filter) {
-    $hash[$cmd] -split ' ' |
+    $hash[$cmd].Trim() -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("-", $_) }
 }
 
 function script:expandParamValues($cmd, $param, $filter) {
-    $gitParamValues[$cmd][$param] -split ' ' |
+    $gitParamValues[$cmd][$param].Trim() -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
         ForEach-Object { -join ("--", $param, "=", $_) }

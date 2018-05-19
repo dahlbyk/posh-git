@@ -12,6 +12,16 @@ Describe 'ParamsTabExpansion VSTS Tests' {
             RemoveGitTempRepo $repoPath
         }
 
+        It 'Tab completes empty for git pr oops parameters values' {
+            $result = & $module GitTabExpansionInternal 'git pr oops --'
+            $result | Should Be @()
+        }
+
+        It 'Tab completes empty for git pr oops short parameter values' {
+            $result = & $module GitTabExpansionInternal 'git pr oops -'
+            $result | Should Be @()
+        }
+
         It 'Tab completes git pr create parameters values' {
             $result = & $module GitTabExpansionInternal 'git pr create --'
             $result -contains '--auto-complete' | Should Be $true
@@ -20,6 +30,17 @@ Describe 'ParamsTabExpansion VSTS Tests' {
             $result = & $module GitTabExpansionInternal 'git pr create --auto-complete --'
             $result -contains '--delete-source-branch' | Should Be $true
         }
+
+        It 'Tab completes git pr show all parameters values' {
+            $result = & $module GitTabExpansionInternal 'git pr show --'
+            $result -contains '--' | Should Be $false
+            $result -contains '--debug' | Should Be $true
+            $result -contains '--help' | Should Be $true
+            $result -contains '--output' | Should Be $true
+            $result -contains '--query' | Should Be $true
+            $result -contains '--verbose' | Should Be $true
+        }
+
         It 'Tab completes git pr create all short push parameters' {
             $result = & $module GitTabExpansionInternal 'git pr create -'
             $result -contains '-d' | Should Be $true
