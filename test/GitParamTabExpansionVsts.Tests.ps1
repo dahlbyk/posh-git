@@ -5,20 +5,11 @@ Describe 'ParamsTabExpansion VSTS Tests' {
         # Create a git alias for 'pr', as if we'd installed vsts-cli
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $origPath = Get-Location
-            $temp = [System.IO.Path]::GetTempPath()
-            $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
-
-            &$gitbin init $repoPath
-            Set-Location $repoPath
-
+            $repoPath = NewGitTempRepo
             &$gitbin config alias.pr "!f() { exec vsts code pr \`"`$`@\`"; }; f"
         }
         AfterEach {
-            Set-Location $origPath
-            if (Test-Path $repoPath) {
-                Remove-Item $repoPath -Recurse -Force
-            }
+            RemoveGitTempRepo $repoPath
         }
 
         It 'Tab completes git pr create parameters values' {

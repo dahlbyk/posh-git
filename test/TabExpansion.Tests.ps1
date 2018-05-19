@@ -168,6 +168,14 @@ Describe 'TabExpansion Tests' {
     }
 
     Context 'Vsts' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo
+            &$gitbin config alias.pr "!f() { exec vsts code pr \`"`$`@\`"; }; f"
+        }
+        AfterEach {
+            RemoveGitTempRepo $repoPath
+        }
         It 'Tab completes pr options' {
             $result = & $module GitTabExpansionInternal 'git pr '
             $result -contains 'abandon' | Should Be $true
