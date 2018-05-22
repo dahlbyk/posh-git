@@ -276,23 +276,6 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
-        # Handles git pr alias
-        "vsts\.pr\s+(?<op>\S*)$" {
-            gitCmdOperations $subcommands 'vsts.pr' $matches['op']
-        }
-
-        # Handles git pr <cmd> --<param>
-        "vsts\.pr\s+(?<cmd>$vstsCommandsWithLongParams).*--(?<param>\S*)$"
-        {
-            expandLongParams $longVstsParams $matches['cmd'] $matches['param']
-        }
-
-        # Handles git pr <cmd> -<shortparam>
-        "vsts\.pr\s+(?<cmd>$vstsCommandsWithShortParams).*-(?<shortparam>\S*)$"
-        {
-            expandShortParams $shortVstsParams $matches['cmd'] $matches['shortparam']
-        }
-
         # Handles git <cmd> <op>
         "^(?<cmd>$($subcommands.Keys -join '|'))\s+(?<op>\S*)$" {
             gitCmdOperations $subcommands $matches['cmd'] $matches['op']
@@ -436,6 +419,24 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         "^(?<cmd>$gitCommandsWithShortParams).* -(?<shortparam>\S*)$" {
             expandShortParams $shortGitParams $matches['cmd'] $matches['shortparam']
         }
+
+        # Handles git pr alias
+        "vsts\.pr\s+(?<op>\S*)$" {
+            gitCmdOperations $subcommands 'vsts.pr' $matches['op']
+        }
+
+        # Handles git pr <cmd> --<param>
+        "vsts\.pr\s+(?<cmd>$vstsCommandsWithLongParams).*--(?<param>\S*)$"
+        {
+            expandLongParams $longVstsParams $matches['cmd'] $matches['param']
+        }
+
+        # Handles git pr <cmd> -<shortparam>
+        "vsts\.pr\s+(?<cmd>$vstsCommandsWithShortParams).*-(?<shortparam>\S*)$"
+        {
+            expandShortParams $shortVstsParams $matches['cmd'] $matches['shortparam']
+        }
+
     }
 }
 
