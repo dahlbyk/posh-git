@@ -167,6 +167,23 @@ Describe 'TabExpansion Tests' {
         }
     }
 
+    Context 'Vsts' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo
+
+            # Test with non-standard vsts pr alias name
+            &$gitbin config alias.test-vsts-pr "!f() { exec vsts code pr \`"`$`@\`"; }; f"
+        }
+        AfterEach {
+            RemoveGitTempRepo $repoPath
+        }
+        It 'Tab completes pr options' {
+            $result = & $module GitTabExpansionInternal 'git test-vsts-pr '
+            $result -contains 'abandon' | Should Be $true
+        }
+    }
+
     Context 'Add/Reset/Checkout TabExpansion Tests' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
