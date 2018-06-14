@@ -415,6 +415,52 @@ function Get-SshAgent() {
     return 0
 }
 
+function Get-NativeSshAgent {
+    # The ssh.exe binary version must include "OpenSSH"
+    # The windows ssh-agent service must exist
+    $service = Get-Service ssh-agent
+    $executableMatches = Get-Command ssh.exe | ForEach-Object FileVersionInfo | Where-Object ProductVersion -match OpenSSH
+    $valid = $service -and $executableMatches
+
+    if ($valid) {
+        return $service;
+    }
+
+    return $false;
+}
+function Start-NativeSshAgent([switch]$Quiet) {
+    $service = Get-NativeSshAgent
+    
+    if (!$service) {
+        return $false;
+    }
+
+    # Enable the servivce if it's disabled and we're an admin
+    if ($service.StartupType -eq "Disabled") {
+        if (Test-Administrator) {
+            Set-Service $service -StartupType Automatic
+        }
+        else {
+            # Todo: Do we want to display a message, throw an exception or something else if the service is disabled?
+            write-host The ssh-agent service is disabled. Please start the service and try again.
+            # Exit with true so Start-SshAgent doesn't try to do any other work.
+            return $true 
+        }
+    }
+
+    # Start the service
+    if ($service.Status -ne "Running") {
+        if (!$Quiet) {
+            write-host "Starting ssh agent service."
+        }
+        Start-Service $service
+    }
+
+    Add-SshKey -Quiet:$Quiet
+
+    return $true
+}
+
 # Attempt to guess Pageant's location
 function Find-Pageant() {
     Write-Verbose "Pageant not in path. Trying to guess location."
@@ -454,6 +500,13 @@ function Find-Ssh($program = 'ssh-agent') {
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
 function Start-SshAgent([switch]$Quiet) {
+
+    # If we're using the win10 native ssh client,
+    # we can just interact with the service directly.
+    if (Start-NativeSshAgent -Quiet:$Quiet) {
+        return
+    }
+
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         if (!$Quiet) {
@@ -557,6 +610,19 @@ function Add-SshKey([switch]$Quiet) {
         }
 
         if ($args.Count -eq 0) {
+            # Win10 ssh agent will prompt for key password even if the key has already been added
+            # Check to see if any keys have been added. Only add keys if it's empty.
+            if (Get-NativeSshAgent) {
+                # Review: Is this safe? Is this string localized in openssh or is it always in English?
+                $empty = (& $sshAdd -L) -eq "The agent has no identities."
+                if (!$empty) {
+                    if (!$Quiet) {
+                        Write-Host Keys have already been added to the ssh agent.
+                    }
+                    return;
+                }
+            }
+
             & $sshAdd
         }
         else {
@@ -569,6 +635,20 @@ function Add-SshKey([switch]$Quiet) {
 
 # Stop a running SSH agent
 function Stop-SshAgent() {
+    $nativeAgent = Get-NativeSshAgent
+
+    if ($nativeAgent) {
+        if ($nativeAgent.Status -eq 'Running') {
+            if (Test-Administrator) {
+                Stop-Service $nativeAgent
+            }
+            else {
+                write-host Access denied. Please open a prompt as administrator and try again.
+            }
+        }
+        return;
+    }
+
     [int]$agentPid = Get-SshAgent
     if ($agentPid -gt 0) {
         # Stop agent process
