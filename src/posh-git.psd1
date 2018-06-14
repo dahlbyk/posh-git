@@ -40,11 +40,6 @@ FunctionsToExport = @(
     'Write-GitWorkingDirStatusSummary',
     'Write-Prompt',
     'Write-VcsStatus',
-    'Get-SshAgent',
-    'Start-SshAgent',
-    'Stop-SshAgent',
-    'Add-SshKey',
-    'Get-SshPath',
     'TabExpansion',
     'tgit'
 )
