@@ -23,8 +23,11 @@ if ($psv.Major -lt 3 -and !$NoVersionWarn) {
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
 if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
-Get-TempEnv 'SSH_AGENT_PID'
-Get-TempEnv 'SSH_AUTH_SOCK'
+if (!(Get-NativeSshAgent)) {
+    # Do not set these variables if we're using the Win10 native SSH agent as it breaks ssh-add.
+    Get-TempEnv 'SSH_AGENT_PID'
+    Get-TempEnv 'SSH_AUTH_SOCK'
+}
 
 # Get the default prompt definition.
 if (($psv.Major -eq 2) -or ![Runspace]::DefaultRunspace.InitialSessionState.Commands) {
