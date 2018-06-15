@@ -38,8 +38,6 @@ Describe 'SSH Function Tests' {
                 Path = "C:\Windows\System32\OpenSSH\openssh.exe"
             }
 
-            
-
             Mock Get-Service { return $service } -ParameterFilter { $Name -eq "ssh-agent" }
             Mock Get-Command { return $sshCommand } -ParameterFilter { $Name -eq "ssh.exe" }
             Mock Get-Command { return {} } -ParameterFilter { $Name -eq "ssh-add" }
@@ -127,7 +125,6 @@ Describe 'SSH Function Tests' {
 
             $script:keysAdded | Should Be $false
         }
-
         It "Sets the GIT_SSH environment variable" {
             $service.Status = "Running"
             $result = Start-NativeSshAgent -Quiet
