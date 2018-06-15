@@ -416,19 +416,20 @@ function Get-SshAgent() {
 }
 
 function Get-NativeSshAgent {
-    # The ssh.exe binary version must include "OpenSSH"
-    # The windows ssh-agent service must exist
-    $service = Get-Service ssh-agent
-    $executableMatches = Get-Command ssh.exe | ForEach-Object FileVersionInfo | Where-Object ProductVersion -match OpenSSH
-    $valid = $service -and $executableMatches
-
-    if ($valid) {
-        return $service;
+    # $IsWindows is defined in PS Core. 
+    if (($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows) {
+        # The ssh.exe binary version must include "OpenSSH"
+        # The windows ssh-agent service must exist
+        $service = Get-Service ssh-agent -ErrorAction Ignore
+        $executableMatches = Get-Command ssh.exe | ForEach-Object FileVersionInfo | Where-Object ProductVersion -match OpenSSH
+        $valid = $service -and $executableMatches
+        if ($valid) {
+            return $service;
+        }
     }
-
-    return $false;
 }
-function Start-NativeSshAgent([switch]$Quiet) {
+
+function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
     $service = Get-NativeSshAgent
     
     if (!$service) {
@@ -436,13 +437,13 @@ function Start-NativeSshAgent([switch]$Quiet) {
     }
 
     # Enable the servivce if it's disabled and we're an admin
-    if ($service.StartupType -eq "Disabled") {
+    if ($service.StartType -eq "Disabled") {
         if (Test-Administrator) {
-            Set-Service $service -StartupType Automatic
+            # Must pipe rather than calling Set-Service $service or this won't work on PS <= 5.
+            $service | Set-Service -StartupType $StartupType
         }
         else {
-            # Todo: Do we want to display a message, throw an exception or something else if the service is disabled?
-            write-host The ssh-agent service is disabled. Please start the service and try again.
+            Write-Error "The ssh-agent service is disabled. Please start the service and try again."
             # Exit with true so Start-SshAgent doesn't try to do any other work.
             return $true 
         }
@@ -451,7 +452,7 @@ function Start-NativeSshAgent([switch]$Quiet) {
     # Start the service
     if ($service.Status -ne "Running") {
         if (!$Quiet) {
-            write-host "Starting ssh agent service."
+            Write-Host "Starting ssh agent service."
         }
         Start-Service $service
     }
@@ -499,11 +500,10 @@ function Find-Ssh($program = 'ssh-agent') {
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
-function Start-SshAgent([switch]$Quiet) {
-
+function Start-SshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
     # If we're using the win10 native ssh client,
     # we can just interact with the service directly.
-    if (Start-NativeSshAgent -Quiet:$Quiet) {
+    if (Start-NativeSshAgent -Quiet:$Quiet -StartupType:$StartupType) {
         return
     }
 
@@ -613,7 +613,7 @@ function Add-SshKey([switch]$Quiet) {
             # Win10 ssh agent will prompt for key password even if the key has already been added
             # Check to see if any keys have been added. Only add keys if it's empty.
             if (Get-NativeSshAgent) {
-                & $sshAdd -L | Out-Null
+                (& $sshAdd -L) | Out-Null
                 if ($LASTEXITCODE -eq 0) {
                     # Keys have already been added
                     if (!$Quiet) {
@@ -643,7 +643,7 @@ function Stop-SshAgent() {
                 Stop-Service $nativeAgent
             }
             else {
-                write-host Access denied. Please open a prompt as administrator and try again.
+                Write-Error "Access denied. Please open a prompt as administrator and try again."
             }
         }
         return;
