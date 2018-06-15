@@ -613,9 +613,9 @@ function Add-SshKey([switch]$Quiet) {
             # Win10 ssh agent will prompt for key password even if the key has already been added
             # Check to see if any keys have been added. Only add keys if it's empty.
             if (Get-NativeSshAgent) {
-                # Review: Is this safe? Is this string localized in openssh or is it always in English?
-                $empty = (& $sshAdd -L) -eq "The agent has no identities."
-                if (!$empty) {
+                & $sshAdd -L | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    # Keys have already been added
                     if (!$Quiet) {
                         Write-Host Keys have already been added to the ssh agent.
                     }
