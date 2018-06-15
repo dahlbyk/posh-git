@@ -439,8 +439,7 @@ function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
     # Enable the servivce if it's disabled and we're an admin
     if ($service.StartType -eq "Disabled") {
         if (Test-Administrator) {
-            # Must pipe rather than calling Set-Service $service or this won't work on PS <= 5.
-            $service | Set-Service -StartupType $StartupType
+            Set-Service "ssh-agent" -StartupType $StartupType
         }
         else {
             Write-Error "The ssh-agent service is disabled. Please start the service and try again."
@@ -454,11 +453,11 @@ function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
         if (!$Quiet) {
             Write-Host "Starting ssh agent service."
         }
-        Start-Service $service
+        Start-Service "ssh-agent"
     }
 
     # Make sure GIT_SSH is set to OpenSSH-Win32
-    setenv 'GIT_SSH' (Get-Command ssh.exe -ErrorAction Ignore | Select-Object -ExpandProperty Path)
+    setenv "GIT_SSH" (Get-Command ssh.exe -ErrorAction Ignore | Select-Object -ExpandProperty Path)
     
     if (!$Quiet) {
         Write-Host "Setting GIT_SSH set to $($env:GIT_SSH)."
