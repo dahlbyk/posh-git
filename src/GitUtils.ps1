@@ -456,11 +456,17 @@ function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
         Start-Service "ssh-agent"
     }
 
-    # Make sure GIT_SSH is set to OpenSSH-Win32
-    setenv "GIT_SSH" (Get-Command ssh.exe -ErrorAction Ignore | Select-Object -ExpandProperty Path)
-    
-    if (!$Quiet) {
-        Write-Host "Setting GIT_SSH set to $($env:GIT_SSH)."
+    # Make sure git is configured to use OpenSSH-Win32
+    $hasSshExplicitlySet = git config --global core.sshCommand
+
+    if (!$hasSshExplicitlySet) {
+        $path = (Get-Command ssh.exe -ErrorAction Ignore | Select-Object -ExpandProperty Path)
+        if (!$Quiet) {
+            Write-Host "Setting core.sshCommand to $path in .gitconfig"
+        }
+        $path = $path.Replace("\", "/")
+        $path = "`"$path`""
+        git config --global core.sshCommand $path
     }
 
     Add-SshKey -Quiet:$Quiet

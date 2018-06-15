@@ -35,8 +35,10 @@ Describe 'SSH Function Tests' {
 
             $sshCommand = New-Object PSObject -Property @{ 
                 FileVersionInfo = @{ProductVersion="OpenSSH"}; 
-                Path = "C:\Windows\System32\OpenSSH\openssh.exe"
+                Path = "C:\Windows\System32\OpenSSH\ssh.exe"
             }
+
+            $gitConfigSsh = ''
 
             Mock Get-Service { return $service } -ParameterFilter { $Name -eq "ssh-agent" }
             Mock Get-Command { return $sshCommand } -ParameterFilter { $Name -eq "ssh.exe" }
@@ -44,6 +46,7 @@ Describe 'SSH Function Tests' {
             Mock Start-Service {} -ParameterFilter { $Name -eq "ssh-agent" }
             Mock Set-Service {} -ParameterFilter { $Name -eq "ssh-agent" }
             Mock Test-Administrator { return $false }
+            Mock git {}
             Mock setenv {}
         }
         AfterEach {
@@ -59,7 +62,7 @@ Describe 'SSH Function Tests' {
             Mock Test-Administrator { return $true }
             $result = Start-NativeSshAgent -Quiet
             $result | Should Be $true
-            Assert-MockCalled Start-Service -Times 1
+            Assert-MockCalled Start-Service -Times 1 -Exactly -Scope It
         }
 
         It "Starts and Enables the service when disabled and user is admin" {
@@ -69,8 +72,8 @@ Describe 'SSH Function Tests' {
             $result = Start-NativeSshAgent -Quiet 
             $result | Should Be $true
 
-            Assert-MockCalled Set-Service -Times 1 -ParameterFilter { $StartupType -eq "Manual" }
-            Assert-MockCalled Start-Service -Times 1
+            Assert-MockCalled Set-Service -Times 1 -Exactly -ParameterFilter { $StartupType -eq "Manual" } -Scope It
+            Assert-MockCalled Start-Service -Times 1 -Exactly -Scope It
         }
         
         It "Doesn't enable the service when user is not an admin" {
@@ -80,8 +83,8 @@ Describe 'SSH Function Tests' {
             $result = Start-NativeSshAgent
             $result | Should Be $true
 
-            Assert-MockCalled Start-Service -Times 0 -Exactly -ParameterFilter { $StartupType -eq "Manual" }
-            Assert-MockCalled Write-Error -ParameterFilter { $Message -eq "The ssh-agent service is disabled. Please start the service and try again." }
+            Assert-MockCalled Start-Service -Times 0 -Exactly -ParameterFilter { $StartupType -eq "Manual" } -Scope It
+            Assert-MockCalled Write-Error -ParameterFilter { $Message -eq "The ssh-agent service is disabled. Please start the service and try again." } -Scope It
         }
 
         It "Adds keys if not already added" {
@@ -125,13 +128,28 @@ Describe 'SSH Function Tests' {
 
             $script:keysAdded | Should Be $false
         }
-        It "Sets the GIT_SSH environment variable" {
+        It "Sets the sshCommand in .gitconfig" {
             $service.Status = "Running"
+            
             $result = Start-NativeSshAgent -Quiet
             
-            Assert-MockCalled setenv -ParameterFilter { 
-                $key -eq 'GIT_SSH' -and $value -eq $sshCommand.Path  
+            Assert-MockCalled git -Times 1 -Exactly -ParameterFilter { 
+                "$args" -eq 'config --global core.sshCommand "C:/Windows/System32/OpenSSH/ssh.exe"'
+            } -Scope It
+        }
+
+        It "Doesn't set the sshCommand in .gitconfig if it's already populated" {
+            $service.Status = "Running"
+            
+            Mock git { return "already-populated-ssh.exe" } -ParameterFilter {
+                "$args" -eq "config --global core.sshCommand"
             }
+            
+            $result = Start-NativeSshAgent -Quiet
+            
+            Assert-MockCalled git -Times 0 -Exactly -ParameterFilter { 
+                "$args" -eq 'config --global core.sshCommand "C:/Windows/System32/OpenSSH/ssh.exe"'
+            } -Scope It
         }
     }
 
