@@ -457,6 +457,13 @@ function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
         Start-Service $service
     }
 
+    # Make sure GIT_SSH is set to OpenSSH-Win32
+    setenv 'GIT_SSH' (Get-Command ssh.exe -ErrorAction Ignore | Select-Object -ExpandProperty Path)
+    
+    if (!$Quiet) {
+        Write-Host "Setting GIT_SSH set to $($env:GIT_SSH)."
+    }
+
     Add-SshKey -Quiet:$Quiet
 
     return $true
