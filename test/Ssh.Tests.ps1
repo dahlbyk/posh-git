@@ -141,7 +141,7 @@ Describe 'SSH Function Tests' {
         It "Doesn't set the sshCommand in .gitconfig if it's already populated" {
             $service.Status = "Running"
             
-            Mock git { return "already-populated-ssh.exe" } -ParameterFilter {
+            Mock git { return "C:/Windows/System32/OpenSSH/ssh.exe" } -ParameterFilter {
                 "$args" -eq "config --global core.sshCommand"
             }
             

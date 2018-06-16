@@ -457,16 +457,21 @@ function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
     }
 
     # Make sure git is configured to use OpenSSH-Win32
-    $hasSshExplicitlySet = git config --global core.sshCommand
+    $sshCommand = (Get-Command ssh.exe -ErrorAction Ignore | Select-Object -ExpandProperty Path).Replace("\", "/")
+    $configuredSshCommand = git config --global core.sshCommand
 
-    if (!$hasSshExplicitlySet) {
-        $path = (Get-Command ssh.exe -ErrorAction Ignore | Select-Object -ExpandProperty Path)
-        if (!$Quiet) {
-            Write-Host "Setting core.sshCommand to $path in .gitconfig"
+    if ($configuredSshCommand) {
+        # If it's already set to something else, warn the user.
+        if ($configuredSshCommand -ne $sshCommand) {
+            Write-Warning "core.sshCommand in your .gitconfig is set to $configuredSshCommand, but it should be set to $sshCommand."
         }
-        $path = $path.Replace("\", "/")
-        $path = "`"$path`""
-        git config --global core.sshCommand $path
+    } 
+    else {
+        if (!$Quiet) {
+            Write-Host "Setting core.sshCommand to $sshCommand in .gitconfig"
+        }
+        $sshCommand = "`"$sshCommand`""
+        git config --global core.sshCommand $sshCommand
     }
 
     Add-SshKey -Quiet:$Quiet
