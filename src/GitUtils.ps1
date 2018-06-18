@@ -517,11 +517,18 @@ function Find-Ssh($program = 'ssh-agent') {
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
-function Start-SshAgent(
-    [switch]$Quiet,
+function Start-SshAgent {
+    param(
+       [Parameter(Position = 0)]
+       [ValidateSet("Automatic", "Boot", "Disabled", "Manual", "System")]
+       [string]
+       $StartupType = "Manual",
 
-    [ValidateSet("Automatic", "Boot", "Disabled", "Manual", "System")]
-    [string]$StartupType = 'Manual') {
+       [Parameter()]
+       [switch]
+       $Quiet
+    )
+
     # If we're using the win10 native ssh client,
     # we can just interact with the service directly.
     if (Start-NativeSshAgent -Quiet:$Quiet -StartupType:$StartupType) {
