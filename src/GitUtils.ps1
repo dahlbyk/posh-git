@@ -416,7 +416,7 @@ function Get-SshAgent() {
 }
 
 function Get-NativeSshAgent {
-    # $IsWindows is defined in PS Core. 
+    # $IsWindows is defined in PS Core.
     if (($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows) {
         # The ssh.exe binary version must include "OpenSSH"
         # The windows ssh-agent service must exist
@@ -431,7 +431,7 @@ function Get-NativeSshAgent {
 
 function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
     $service = Get-NativeSshAgent
-    
+
     if (!$service) {
         return $false;
     }
@@ -444,7 +444,7 @@ function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
         else {
             Write-Error "The ssh-agent service is disabled. Please start the service and try again."
             # Exit with true so Start-SshAgent doesn't try to do any other work.
-            return $true 
+            return $true
         }
     }
 
@@ -465,7 +465,7 @@ function Start-NativeSshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
         if ($configuredSshCommand -ne $sshCommand) {
             Write-Warning "core.sshCommand in your .gitconfig is set to $configuredSshCommand, but it should be set to $sshCommand."
         }
-    } 
+    }
     else {
         if (!$Quiet) {
             Write-Host "Setting core.sshCommand to $sshCommand in .gitconfig"
@@ -517,7 +517,11 @@ function Find-Ssh($program = 'ssh-agent') {
 }
 
 # Loosely based on bash script from http://help.github.com/ssh-key-passphrases/
-function Start-SshAgent([switch]$Quiet, [string]$StartupType = 'Manual') {
+function Start-SshAgent(
+    [switch]$Quiet,
+
+    [ValidateSet("Automatic", "Boot", "Disabled", "Manual", "System")]
+    [string]$StartupType = 'Manual') {
     # If we're using the win10 native ssh client,
     # we can just interact with the service directly.
     if (Start-NativeSshAgent -Quiet:$Quiet -StartupType:$StartupType) {
