@@ -1,5 +1,9 @@
 # posh-git Release History
 
+## 1.0.0-beta3 - June 14, 2018
+
+- Moved SSH agent functionality to <https://github.com/dahlbyk/posh-sshell>.
+
 ## 1.0.0-beta2 - May 13, 2018
 
 The 1.0.0 release is targeted specifically at Windows PowerShell 5.x and (cross-platform) PowerShell Core 6.x, both of

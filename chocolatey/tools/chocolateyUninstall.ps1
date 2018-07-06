@@ -13,7 +13,6 @@
         foreach($line in $oldProfile) {
             if ($line -like '*PoshGitPrompt*') { continue; }
             if ($line -like '*Load posh-git example profile*') { continue; }
-            if ($line -like '*Start-SshAgent*') { continue; }
 
             if($line -like '. *posh-git*profile.example.ps1*') {
                 continue;

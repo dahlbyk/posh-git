@@ -86,8 +86,6 @@ function Test-Administrator {
 .PARAMETER Force
     Do not check if the specified profile script is already importing
     posh-git. Just add Import-Module posh-git command.
-.PARAMETER StartSshAgent
-    Also add `Start-SshAgent -Quiet` to the specified profile script.
 .EXAMPLE
     PS C:\> Add-PoshGitToProfile
     Updates your profile script for the current PowerShell host to import the
@@ -115,10 +113,6 @@ function Add-PoshGitToProfile {
         [Parameter()]
         [switch]
         $Force,
-
-        [Parameter()]
-        [switch]
-        $StartSshAgent,
 
         [Parameter(ValueFromRemainingArguments)]
         [psobject[]]
@@ -222,9 +216,6 @@ function Add-PoshGitToProfile {
 
     if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module posh-git' to profile")) {
         Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
-    }
-    if ($StartSshAgent -and $PSCmdlet.ShouldProcess($profilePath, "Add 'Start-SshAgent -Quiet' to profile")) {
-        Add-Content -LiteralPath $profilePath -Value 'Start-SshAgent -Quiet' -Encoding UTF8
     }
 }
 
