@@ -301,6 +301,20 @@ function Get-PromptPath {
     return $currentPath
 }
 
+$sshType = 'System.Management.Automation.Runspaces.SSHConnectionInfo' -as [Type]
+$sshUserName = Get-Runspace | ForEach-Object ConnectionInfo |
+  Where-Object { $sshType -and $_ -is $sshType } | ForEach-Object UserName
+
+function Get-PromptConnectionInfo {
+    if (Test-Path Env:SSH_CONNECTION) {
+        if ($sshUserName -and $sshUserName -ne [System.Environment]::UserName) {
+            "[$sshUserName@$([System.Environment]::MachineName)]: "
+        } else {
+            "[$([System.Environment]::MachineName)]: "
+        }
+    }
+}
+
 function Get-PSModulePath {
     $modulePaths = $Env:PSModulePath -split ';'
     $modulePaths

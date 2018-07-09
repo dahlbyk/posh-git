@@ -101,6 +101,37 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         }
     }
 
+    Context 'Get-PromptConnectionInfo' {
+        BeforeEach {
+            if (Test-Path Env:SSH_CONNECTION) {
+                [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+                $ssh_connection = $Env:SSH_CONNECTION
+
+                Remove-Item Env:SSH_CONNECTION
+            }
+        }
+        AfterEach {
+            if ($ssh_connection) {
+                Set-Item Env:SSH_CONNECTION $ssh_connection
+            } elseif (Test-Path Env:SSH_CONNECTION) {
+                Remove-Item Env:SSH_CONNECTION
+            }
+        }
+        It 'Returns null if Env:SSH_CONNECTION is not set' {
+            Get-PromptConnectionInfo | Should BeExactly $null
+        }
+        It 'Returns null if Env:SSH_CONNECTION is empty' {
+            Set-Item Env:SSH_CONNECTION ''
+
+            Get-PromptConnectionInfo | Should BeExactly $null
+        }
+        It 'Returns "[hostname]: " if Env:SSH_CONNECTION is set' {
+            Set-Item Env:SSH_CONNECTION 'test'
+
+            Get-PromptConnectionInfo | Should BeExactly "[$([System.Environment]::MachineName)]: "
+        }
+    }
+
     Context 'Test-PoshGitImportedInScript Tests' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
