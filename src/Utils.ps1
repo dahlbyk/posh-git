@@ -307,7 +307,7 @@ $sshUserName = Get-Runspace | ForEach-Object ConnectionInfo |
 
 function Get-PromptConnectionInfo {
     if (Test-Path Env:SSH_CONNECTION) {
-        if ($sshUserName -and $sshUserName -ne [System.Environment]::UserName) {
+        if ($sshUserName -and $sshUserName -cne [System.Environment]::UserName) {
             "[$sshUserName@$([System.Environment]::MachineName)]: "
         } else {
             "[$([System.Environment]::MachineName)]: "
