@@ -125,10 +125,10 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
 
             Get-PromptConnectionInfo | Should BeExactly $null
         }
-        It 'Returns "[hostname]: " if Env:SSH_CONNECTION is set' {
+        It 'Returns "[username@hostname]: " if Env:SSH_CONNECTION is set' {
             Set-Item Env:SSH_CONNECTION 'test'
 
-            Get-PromptConnectionInfo | Should BeExactly "[$([System.Environment]::MachineName)]: "
+            Get-PromptConnectionInfo | Should BeExactly "[$([System.Environment]::UserName)@$([System.Environment]::MachineName)]: "
         }
     }
 
