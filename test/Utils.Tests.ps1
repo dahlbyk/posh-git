@@ -101,6 +101,42 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         }
     }
 
+    Context 'Get-PromptConnectionInfo' {
+        BeforeEach {
+            if (Test-Path Env:SSH_CONNECTION) {
+                [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+                $ssh_connection = $Env:SSH_CONNECTION
+
+                Remove-Item Env:SSH_CONNECTION
+            }
+        }
+        AfterEach {
+            if ($ssh_connection) {
+                Set-Item Env:SSH_CONNECTION $ssh_connection
+            } elseif (Test-Path Env:SSH_CONNECTION) {
+                Remove-Item Env:SSH_CONNECTION
+            }
+        }
+        It 'Returns null if Env:SSH_CONNECTION is not set' {
+            Get-PromptConnectionInfo | Should BeExactly $null
+        }
+        It 'Returns null if Env:SSH_CONNECTION is empty' {
+            Set-Item Env:SSH_CONNECTION ''
+
+            Get-PromptConnectionInfo | Should BeExactly $null
+        }
+        It 'Returns "[username@hostname]: " if Env:SSH_CONNECTION is set' {
+            Set-Item Env:SSH_CONNECTION 'test'
+
+            Get-PromptConnectionInfo | Should BeExactly "[$([System.Environment]::UserName)@$([System.Environment]::MachineName)]: "
+        }
+        It 'Returns formatted string if Env:SSH_CONNECTION is set with -Format' {
+            Set-Item Env:SSH_CONNECTION 'test'
+
+            Get-PromptConnectionInfo -Format "[{0}]({1}) " | Should BeExactly "[$([System.Environment]::MachineName)]($([System.Environment]::UserName)) "
+        }
+    }
+
     Context 'Test-PoshGitImportedInScript Tests' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]

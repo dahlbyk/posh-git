@@ -29,6 +29,7 @@ FunctionsToExport = @(
     'Get-GitBranchStatusColor',
     'Get-GitStatus',
     'Get-GitDirectory',
+    'Get-PromptConnectionInfo',
     'Get-PromptPath',
     'Update-AllBranches',
     'Write-GitStatus',

@@ -301,6 +301,25 @@ function Get-PromptPath {
     return $currentPath
 }
 
+<#
+.SYNOPSIS
+    Gets a string with current machine name and user name when connected with SSH
+.PARAMETER Format
+    Format string to use for displaying machine name ({0}) and user name ({1}).
+    Default: "[{1}@{0}]: ", i.e. "[user@machine]: "
+.INPUTS
+    None
+.OUTPUTS
+    [String]
+#>
+function Get-PromptConnectionInfo($Format = '[{1}@{0}]: ') {
+    if ($GitPromptSettings -and (Test-Path Env:SSH_CONNECTION)) {
+        $MachineName = [System.Environment]::MachineName
+        $UserName = [System.Environment]::UserName
+        $Format -f $MachineName,$UserName
+    }
+}
+
 function Get-PSModulePath {
     $modulePaths = $Env:PSModulePath -split ';'
     $modulePaths
