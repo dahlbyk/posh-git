@@ -302,8 +302,13 @@ function Get-PromptPath {
 }
 
 function Get-PromptConnectionInfo {
-    if (Test-Path Env:SSH_CONNECTION) {
-        "[$([System.Environment]::UserName)@$([System.Environment]::MachineName)]: "
+    if ($GitPromptSettings -and (Test-Path Env:SSH_CONNECTION)) {
+        $format = $GitPromptSettings.DefaultPromptConnectionFormat
+        if (!$format) { return }
+
+        $MachineName = [System.Environment]::MachineName
+        $UserName = [System.Environment]::UserName
+        $format -f $MachineName,$UserName
     }
 }
 
