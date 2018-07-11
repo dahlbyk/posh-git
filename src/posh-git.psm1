@@ -18,16 +18,17 @@ if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 $IsAdmin = Test-Administrator
 
 # Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
-$WindowTitleSupported = $false
+$HostSupportsSettingWindowTitle = $false
 try {
-    $global:PreviousWindowTitle = $Host.UI.RawUI.WindowTitle
-    $newTitle = "${global:PreviousWindowTitle} "
+    $global:PoshGitOrigWindowTitle = $Host.UI.RawUI.WindowTitle
+    $newTitle = "${global:PoshGitOrigWindowTitle} "
     $Host.UI.RawUI.WindowTitle = $newTitle
-    $WindowTitleSupported = ($Host.UI.RawUI.WindowTitle -eq $newTitle)
-    $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+    $HostSupportsSettingWindowTitle = ($Host.UI.RawUI.WindowTitle -eq $newTitle)
+    $Host.UI.RawUI.WindowTitle = $global:PoshGitOrigWindowTitle
 }
 catch {
-    Write-Debug "Probing for WindowTitleSupported errored: $_"
+    $global:PoshGitOrigWindowTitle = $null
+    Write-Debug "Probing for HostSupportsSettingWindowTitle errored: $_"
 }
 
 # Get the default prompt definition.
@@ -43,10 +44,6 @@ else {
 $GitPromptScriptBlock = {
     $settings = $global:GitPromptSettings
     if (!$settings) {
-        if ($WindowTitleSupported -and $global:PreviousWindowTitle) {
-            $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
-        }
-
         return "<`$GitPromptSettings not found> "
     }
 
@@ -92,34 +89,22 @@ $GitPromptScriptBlock = {
         $promptSuffix.Text = $promptSuffix.Text.Substring(0, $promptSuffix.Text.Length - 1)
     }
 
-    # Update the host's WindowTitle is host supports it and user has not disabled $GitPromptSettings.WindowTitle
+    # Update the host's WindowTitle if host supports it and user has not disabled $GitPromptSettings.WindowTitle
     # This has to be *after* the call to Write-VcsStatus, which populates $global:GitStatus
-    if ($WindowTitleSupported) {
-        $windowTitle = $settings.WindowTitle
-        if (!$windowTitle) {
-            if ($global:PreviousWindowTitle) {
-                $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+    if ($HostSupportsSettingWindowTitle -and $settings.WindowTitle) {
+        try {
+            if ($settings.WindowTitle -is [scriptblock]) {
+                $windowTitleText = & $settings.WindowTitle $global:GitStatus $IsAdmin
             }
+            else {
+                $windowTitleText = $ExecutionContext.SessionState.InvokeCommand.ExpandString("$($settings.WindowTitle)")
+            }
+
+            # Put $windowTitleText in a string to ensure results returned by scriptblock are flattened into a string
+            $Host.UI.RawUI.WindowTitle = "$windowTitleText"
         }
-        else {
-            try {
-                if ($windowTitle -is [scriptblock]) {
-                    $windowTitleText = & $windowTitle $global:GitStatus $IsAdmin
-                }
-                else {
-                    $windowTitleText = $ExecutionContext.SessionState.InvokeCommand.ExpandString("$windowTitle")
-                }
-
-                # Put $windowTitleText in a string to ensure results returned by scriptblock are flattened to a string
-                $Host.UI.RawUI.WindowTitle = "$windowTitleText"
-            }
-            catch {
-                if ($global:PreviousWindowTitle) {
-                    $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
-                }
-
-                Write-Debug "Error occurred during evaluation of `$GitPromptSettings.WindowTitle: $_"
-            }
+        catch {
+            Write-Debug "Error occurred during evaluation of `$GitPromptSettings.WindowTitle: $_"
         }
     }
 
@@ -171,9 +156,9 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
 $ExecutionContext.SessionState.Module.OnRemove = {
     $global:VcsPromptStatuses = $global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
 
-    # Revert original WindowTitle
-    if ($WindowTitleSupported -and $global:PreviousWindowTitle) {
-        $Host.UI.RawUI.WindowTitle = $global:PreviousWindowTitle
+    # Revert original WindowTitle but only if posh-git is currently configured to set it
+    if ($HostSupportsSettingWindowTitle -and $global:GitPromptSettings.WindowTitle -and $global:PoshGitOrigWindowTitle) {
+        $Host.UI.RawUI.WindowTitle = $global:PoshGitOrigWindowTitle
     }
 
     # Check if the posh-git prompt function itself has been replaced. If so, do not restore the prompt function
