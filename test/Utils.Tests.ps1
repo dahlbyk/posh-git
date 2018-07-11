@@ -103,9 +103,6 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
 
     Context 'Get-PromptConnectionInfo' {
         BeforeEach {
-            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $format = $GitPromptSettings.DefaultPromptConnectionFormat
-
             if (Test-Path Env:SSH_CONNECTION) {
                 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
                 $ssh_connection = $Env:SSH_CONNECTION
@@ -114,8 +111,6 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             }
         }
         AfterEach {
-            $GitPromptSettings.DefaultPromptConnectionFormat = $format
-
             if ($ssh_connection) {
                 Set-Item Env:SSH_CONNECTION $ssh_connection
             } elseif (Test-Path Env:SSH_CONNECTION) {
@@ -135,11 +130,10 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
 
             Get-PromptConnectionInfo | Should BeExactly "[$([System.Environment]::UserName)@$([System.Environment]::MachineName)]: "
         }
-        It 'Returns custom string if Env:SSH_CONNECTION is set with custom format' {
+        It 'Returns formatted string if Env:SSH_CONNECTION is set with -Format' {
             Set-Item Env:SSH_CONNECTION 'test'
-            $GitPromptSettings.DefaultPromptConnectionFormat = "[{0}]({1}) "
 
-            Get-PromptConnectionInfo | Should BeExactly "[$([System.Environment]::MachineName)]($([System.Environment]::UserName)) "
+            Get-PromptConnectionInfo -Format "[{0}]({1}) " | Should BeExactly "[$([System.Environment]::MachineName)]($([System.Environment]::UserName)) "
         }
     }
 

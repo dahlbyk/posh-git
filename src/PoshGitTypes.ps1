@@ -273,14 +273,13 @@ class PoshGitPromptSettings {
     [string]$DescribeStyle = ''
     [psobject]$WindowTitle = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Admin: '})$(if ($GitStatus) {"$($GitStatus.RepoName) [$($GitStatus.Branch)]"} else {Get-PromptPath}) ~ PowerShell $($PSVersionTable.PSVersion) $([IntPtr]::Size * 8)-bit ($PID)"}
 
-    [PoshGitTextSpan]$DefaultPromptPrefix       = '$(Get-PromptConnectionInfo)'
+    [PoshGitTextSpan]$DefaultPromptPrefix       = '$(Get-PromptConnectionInfo -Format "[{1}@{0}]: ")'
     [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
     [PoshGitTextSpan]$DefaultPromptBeforeSuffix = ''
     [PoshGitTextSpan]$DefaultPromptDebug        = [PoshGitTextSpan]::new(' [DBG]:', [ConsoleColor]::Magenta)
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
 
     [bool]$DefaultPromptAbbreviateHomeDirectory = $true
-    [string]$DefaultPromptConnectionFormat      = '[{1}@{0}]: '
     [bool]$DefaultPromptWriteStatusFirst        = $false
     [bool]$DefaultPromptEnableTiming            = $false
     [PoshGitTextSpan]$DefaultPromptTimingFormat = ' {0}ms'
