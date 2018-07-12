@@ -10,11 +10,13 @@ function Test-WindowTitleIsWriteable {
             $Host.UI.RawUI.WindowTitle = $newTitle
             $script:HostSupportsSettingWindowTitle = ($Host.UI.RawUI.WindowTitle -eq $newTitle)
             $Host.UI.RawUI.WindowTitle = $OriginalWindowTitle
+            Write-Debug "HostSupportsSettingWindowTitle: $HostSupportsSettingWindowTitle"
+            Write-Debug "OriginalWindowTitle: $OriginalWindowTitle"
         }
         catch {
             $script:OriginalWindowTitle = $null
             $script:HostSupportsSettingWindowTitle = $false
-            Write-Debug "Probing for HostSupportsSettingWindowTitle errored: $_"
+            Write-Debug "HostSupportsSettingWindowTitle error: $_"
         }
     }
     return $HostSupportsSettingWindowTitle
@@ -27,6 +29,7 @@ function Reset-WindowTitle {
 
     # Revert to original WindowTitle, but only if posh-git is currently configured to set it
     if ($HostSupportsSettingWindowTitle -and $OriginalWindowTitle -and $settings.WindowTitle) {
+        Write-Debug "Resetting WindowTitle: '$OriginalWindowTitle'"
         $Host.UI.RawUI.WindowTitle = $OriginalWindowTitle
     }
 }
@@ -40,13 +43,14 @@ function Set-WindowTitle {
     if ($settings.WindowTitle -and (Test-WindowTitleIsWriteable)) {
         try {
             if ($settings.WindowTitle -is [scriptblock]) {
-                $windowTitleText = & $settings.WindowTitle $GitStatus $IsAdmin
+                # ensure results returned by scriptblock are flattened into a string
+                $windowTitleText = "$(& $settings.WindowTitle $GitStatus $IsAdmin)"
             }
             else {
                 $windowTitleText = $ExecutionContext.SessionState.InvokeCommand.ExpandString("$($settings.WindowTitle)")
             }
 
-            # Put $windowTitleText in a string to ensure results returned by scriptblock are flattened into a string
+            Write-Debug "Setting WindowTitle: $windowTitleText"
             $Host.UI.RawUI.WindowTitle = "$windowTitleText"
         }
         catch {
