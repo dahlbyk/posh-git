@@ -1,17 +1,18 @@
 $HostSupportsSettingWindowTitle = $null
+$OriginalWindowTitle = $null
 
 function Test-WindowTitleIsWriteable {
     if ($null -eq $HostSupportsSettingWindowTitle) {
         # Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
         try {
-            $global:PoshGitOrigWindowTitle = $Host.UI.RawUI.WindowTitle
-            $newTitle = "${global:PoshGitOrigWindowTitle} "
+            $script:OriginalWindowTitle = $Host.UI.RawUI.WindowTitle
+            $newTitle = "${OriginalWindowTitle} "
             $Host.UI.RawUI.WindowTitle = $newTitle
             $script:HostSupportsSettingWindowTitle = ($Host.UI.RawUI.WindowTitle -eq $newTitle)
-            $Host.UI.RawUI.WindowTitle = $global:PoshGitOrigWindowTitle
+            $Host.UI.RawUI.WindowTitle = $OriginalWindowTitle
         }
         catch {
-            $global:PoshGitOrigWindowTitle = $null
+            $script:OriginalWindowTitle = $null
             $script:HostSupportsSettingWindowTitle = $false
             Write-Debug "Probing for HostSupportsSettingWindowTitle errored: $_"
         }
@@ -22,10 +23,11 @@ function Test-WindowTitleIsWriteable {
 function Reset-WindowTitle {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
+    $settings = $global:GitPromptSettings
 
-    # Revert original WindowTitle but only if posh-git is currently configured to set it
-    if ($HostSupportsSettingWindowTitle -and $global:GitPromptSettings.WindowTitle -and $global:PoshGitOrigWindowTitle) {
-        $Host.UI.RawUI.WindowTitle = $global:PoshGitOrigWindowTitle
+    # Revert to original WindowTitle, but only if posh-git is currently configured to set it
+    if ($HostSupportsSettingWindowTitle -and $OriginalWindowTitle -and $settings.WindowTitle) {
+        $Host.UI.RawUI.WindowTitle = $OriginalWindowTitle
     }
 }
 
