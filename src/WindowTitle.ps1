@@ -1,19 +1,22 @@
 $HostSupportsSettingWindowTitle = $null
 
 function Test-WindowTitleIsWriteable {
-    # Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
-    $script:HostSupportsSettingWindowTitle = $false
-    try {
-        $global:PoshGitOrigWindowTitle = $Host.UI.RawUI.WindowTitle
-        $newTitle = "${global:PoshGitOrigWindowTitle} "
-        $Host.UI.RawUI.WindowTitle = $newTitle
-        $script:HostSupportsSettingWindowTitle = ($Host.UI.RawUI.WindowTitle -eq $newTitle)
-        $Host.UI.RawUI.WindowTitle = $global:PoshGitOrigWindowTitle
+    if ($null -eq $HostSupportsSettingWindowTitle) {
+        # Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
+        try {
+            $global:PoshGitOrigWindowTitle = $Host.UI.RawUI.WindowTitle
+            $newTitle = "${global:PoshGitOrigWindowTitle} "
+            $Host.UI.RawUI.WindowTitle = $newTitle
+            $script:HostSupportsSettingWindowTitle = ($Host.UI.RawUI.WindowTitle -eq $newTitle)
+            $Host.UI.RawUI.WindowTitle = $global:PoshGitOrigWindowTitle
+        }
+        catch {
+            $global:PoshGitOrigWindowTitle = $null
+            $script:HostSupportsSettingWindowTitle = $false
+            Write-Debug "Probing for HostSupportsSettingWindowTitle errored: $_"
+        }
     }
-    catch {
-        $global:PoshGitOrigWindowTitle = $null
-        Write-Debug "Probing for HostSupportsSettingWindowTitle errored: $_"
-    }
+    return $HostSupportsSettingWindowTitle
 }
 
 function Reset-WindowTitle {
@@ -32,7 +35,7 @@ function Set-WindowTitle {
     $settings = $global:GitPromptSettings
 
     # Update the host's WindowTitle if host supports it and user has not disabled $GitPromptSettings.WindowTitle
-    if ($HostSupportsSettingWindowTitle -and $settings.WindowTitle) {
+    if ($settings.WindowTitle -and (Test-WindowTitleIsWriteable)) {
         try {
             if ($settings.WindowTitle -is [scriptblock]) {
                 $windowTitleText = & $settings.WindowTitle $GitStatus $IsAdmin

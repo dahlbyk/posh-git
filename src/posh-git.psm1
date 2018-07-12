@@ -18,8 +18,6 @@ if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
 $IsAdmin = Test-Administrator
 
-Test-WindowTitleIsWriteable
-
 # Get the default prompt definition.
 $initialSessionState = [Runspace]::DefaultRunspace.InitialSessionState
 if (!$initialSessionState.Commands -or !$initialSessionState.Commands['prompt']) {
