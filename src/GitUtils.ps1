@@ -65,15 +65,20 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     Invoke-Utf8ConsoleCommand {
         dbg 'Finding branch' $sw
         $r = ''; $b = ''; $c = ''
+        dbg 'Running git rev-parse' $sw;
+        $GitOutput = $(git rev-parse --symbolic-full-name --abbrev-ref --is-inside-git-dir --is-bare-repository HEAD 2>$null)
+        $IsInsideGitDir = 'true' -eq $GitOutput[0]
+        $IsBareRepository = 'true' -eq $GitOutput[1]
+        $GitRefName = $GitOutput[2]
         if (Test-Path $gitDir\rebase-merge\interactive) {
             dbg 'Found rebase-merge\interactive' $sw
             $r = '|REBASE-i'
-            $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
+            $b = "$(Get-Content $gitDir\rebase-merge\head-name)" -replace 'refs/heads/', ''
         }
         elseif (Test-Path $gitDir\rebase-merge) {
             dbg 'Found rebase-merge' $sw
             $r = '|REBASE-m'
-            $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
+            $b = "$(Get-Content $gitDir\rebase-merge\head-name)" -replace 'refs/heads/', ''
         }
         else {
             if (Test-Path $gitDir\rebase-apply) {
@@ -104,56 +109,54 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 $r = '|BISECTING'
             }
 
-            $b = Invoke-NullCoalescing `
-                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD -q 2>$null } `
-                { '({0})' -f (Invoke-NullCoalescing `
-                    {
-                        dbg 'Trying describe' $sw
-                        switch ($Global:GitPromptSettings.DescribeStyle) {
-                            'contains' { git describe --contains HEAD 2>$null }
-                            'branch' { git describe --contains --all HEAD 2>$null }
-                            'describe' { git describe HEAD 2>$null }
-                            default { git tag --points-at HEAD 2>$null }
-                        }
-                    } `
-                    {
-                        dbg 'Falling back on parsing HEAD' $sw
-                        $ref = $null
+            if ('HEAD' -eq $GitRefName) {
+                $b = '({0})' -f (Invoke-NullCoalescing `
+                  {
+                      dbg 'Trying describe' $sw
+                      switch ($Global:GitPromptSettings.DescribeStyle) {
+                          'contains' { git describe --contains HEAD 2>$null }
+                          'branch' { git describe --contains --all HEAD 2>$null }
+                          'describe' { git describe HEAD 2>$null }
+                          default { git tag --points-at HEAD 2>$null }
+                      }
+                  } `
+                  {
+                      dbg 'Falling back on parsing HEAD' $sw
+                      $ref = $null
 
-                        if (Test-Path $gitDir\HEAD) {
-                            dbg 'Reading from .git\HEAD' $sw
-                            $ref = Get-Content $gitDir\HEAD 2>$null
-                        }
-                        else {
-                            dbg 'Trying rev-parse' $sw
-                            $ref = git rev-parse HEAD 2>$null
-                        }
-
-                        if ($ref -match 'ref: (?<ref>.+)') {
-                            return $Matches['ref']
-                        }
-                        elseif ($ref -and $ref.Length -ge 7) {
-                            return $ref.Substring(0,7)+'...'
-                        }
-                        else {
-                            return 'unknown'
-                        }
-                    }
-                ) }
+                      if (Test-Path $gitDir\HEAD) {
+                          dbg 'Reading from .git\HEAD' $sw
+                          $ref = Get-Content $gitDir\HEAD 2>$null
+                          if ($ref -match 'ref: (?<ref>.+)') {
+                              return $Matches['ref'] -replace 'refs/heads/', ''
+                          }
+                          elseif ($ref -and $ref.Length -ge 7) {
+                              return $ref.Substring(0,7)+'...'
+                          }
+                          else {
+                              return 'unknown'
+                          }
+                      }
+                      else {
+                          return 'unknown'
+                      }
+                  }
+                )
+            }
+            else {
+                $b = $GitRefName
+            }
         }
 
-        dbg 'Inside git directory?' $sw
-        if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
-            dbg 'Inside git directory' $sw
-            if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
+        if ($IsInsideGitDir) {
+            if ($IsBareRepository) {
                 $c = 'BARE:'
             }
             else {
                 $b = 'GIT_DIR!'
             }
         }
-
-        "$c$($b -replace 'refs/heads/','')$r"
+        "$c$b$r"
     }
 }
 
