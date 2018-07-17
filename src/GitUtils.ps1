@@ -65,25 +65,25 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     Invoke-Utf8ConsoleCommand {
         dbg 'Finding branch' $sw
         $r = ''; $b = ''; $c = ''
-        if (Test-Path $gitDir\rebase-merge\interactive) {
-            dbg 'Found rebase-merge\interactive' $sw
+        if (Test-Path $gitDir/rebase-merge/interactive) {
+            dbg 'Found rebase-merge/interactive' $sw
             $r = '|REBASE-i'
-            $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
+            $b = "$(Get-Content $gitDir/rebase-merge/head-name)"
         }
-        elseif (Test-Path $gitDir\rebase-merge) {
+        elseif (Test-Path $gitDir/rebase-merge) {
             dbg 'Found rebase-merge' $sw
             $r = '|REBASE-m'
-            $b = "$(Get-Content $gitDir\rebase-merge\head-name)"
+            $b = "$(Get-Content $gitDir/rebase-merge/head-name)"
         }
         else {
-            if (Test-Path $gitDir\rebase-apply) {
+            if (Test-Path $gitDir/rebase-apply) {
                 dbg 'Found rebase-apply' $sw
-                if (Test-Path $gitDir\rebase-apply\rebasing) {
-                    dbg 'Found rebase-apply\rebasing' $sw
+                if (Test-Path $gitDir/rebase-apply/rebasing) {
+                    dbg 'Found rebase-apply/rebasing' $sw
                     $r = '|REBASE'
                 }
-                elseif (Test-Path $gitDir\rebase-apply\applying) {
-                    dbg 'Found rebase-apply\applying' $sw
+                elseif (Test-Path $gitDir/rebase-apply/applying) {
+                    dbg 'Found rebase-apply/applying' $sw
                     $r = '|AM'
                 }
                 else {
@@ -91,15 +91,15 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                     $r = '|AM/REBASE'
                 }
             }
-            elseif (Test-Path $gitDir\MERGE_HEAD) {
+            elseif (Test-Path $gitDir/MERGE_HEAD) {
                 dbg 'Found MERGE_HEAD' $sw
                 $r = '|MERGING'
             }
-            elseif (Test-Path $gitDir\CHERRY_PICK_HEAD) {
+            elseif (Test-Path $gitDir/CHERRY_PICK_HEAD) {
                 dbg 'Found CHERRY_PICK_HEAD' $sw
                 $r = '|CHERRY-PICKING'
             }
-            elseif (Test-Path $gitDir\BISECT_LOG) {
+            elseif (Test-Path $gitDir/BISECT_LOG) {
                 dbg 'Found BISECT_LOG' $sw
                 $r = '|BISECTING'
             }
@@ -120,9 +120,9 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                         dbg 'Falling back on parsing HEAD' $sw
                         $ref = $null
 
-                        if (Test-Path $gitDir\HEAD) {
-                            dbg 'Reading from .git\HEAD' $sw
-                            $ref = Get-Content $gitDir\HEAD 2>$null
+                        if (Test-Path $gitDir/HEAD) {
+                            dbg 'Reading from .git/HEAD' $sw
+                            $ref = Get-Content $gitDir/HEAD 2>$null
                         }
                         else {
                             dbg 'Trying rev-parse' $sw
