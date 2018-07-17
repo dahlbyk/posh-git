@@ -65,14 +65,15 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     Invoke-Utf8ConsoleCommand {
         dbg 'Finding branch' $sw
         $r = ''; $b = ''; $c = ''
-        if (Test-Path $gitDir/rebase-merge/interactive) {
-            dbg 'Found rebase-merge/interactive' $sw
-            $r = '|REBASE-i'
-            $b = "$(Get-Content $gitDir/rebase-merge/head-name)"
-        }
-        elseif (Test-Path $gitDir/rebase-merge) {
+        if (Test-Path $gitDir/rebase-merge) {
             dbg 'Found rebase-merge' $sw
-            $r = '|REBASE-m'
+            if (Test-Path $gitDir/rebase-merge/interactive) {
+                dbg 'Found rebase-merge/interactive' $sw
+                $r = '|REBASE-i'
+            }
+            else {
+                $r = '|REBASE-m'
+            }
             $b = "$(Get-Content $gitDir/rebase-merge/head-name)"
         }
         else {
@@ -87,7 +88,6 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                     $r = '|AM'
                 }
                 else {
-                    dbg 'Found rebase-apply' $sw
                     $r = '|AM/REBASE'
                 }
             }
