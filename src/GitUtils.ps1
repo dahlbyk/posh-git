@@ -105,6 +105,10 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 dbg 'Found CHERRY_PICK_HEAD' $sw
                 $r = '|CHERRY-PICKING'
             }
+            elseif (Test-Path $gitDir/REVERT_HEAD) {
+                dbg 'Found REVERT_HEAD' $sw
+                $r = '|REVERTING'
+            }
             elseif (Test-Path $gitDir/BISECT_LOG) {
                 dbg 'Found BISECT_LOG' $sw
                 $r = '|BISECTING'
