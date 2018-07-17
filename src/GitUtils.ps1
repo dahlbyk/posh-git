@@ -65,6 +65,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
     Invoke-Utf8ConsoleCommand {
         dbg 'Finding branch' $sw
         $r = ''; $b = ''; $c = ''
+        $step = ''; $total = ''
         if (Test-Path $gitDir/rebase-merge) {
             dbg 'Found rebase-merge' $sw
             if (Test-Path $gitDir/rebase-merge/interactive) {
@@ -75,10 +76,15 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 $r = '|REBASE-m'
             }
             $b = "$(Get-Content $gitDir/rebase-merge/head-name)"
+            $step = "$(Get-Content $gitDir/rebase-merge/msgnum)"
+            $total = "$(Get-Content $gitDir/rebase-merge/end)"
         }
         else {
             if (Test-Path $gitDir/rebase-apply) {
                 dbg 'Found rebase-apply' $sw
+                $step = "$(Get-Content $gitDir/rebase-merge/next)"
+                $total = "$(Get-Content $gitDir/rebase-merge/last)"
+
                 if (Test-Path $gitDir/rebase-apply/rebasing) {
                     dbg 'Found rebase-apply/rebasing' $sw
                     $r = '|REBASE'
@@ -151,6 +157,10 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             else {
                 $b = 'GIT_DIR!'
             }
+        }
+
+        if ($step -and $total) {
+            $r += " $step/$total"
         }
 
         "$c$($b -replace 'refs/heads/','')$r"
