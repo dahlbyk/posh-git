@@ -209,6 +209,29 @@ function Write-GitStatus {
     }
 
     $sb.ToString()
+
+    # If the user is running Powershell ISE then name the tab
+    if($psISE){
+        $repo = $Status.RepoName
+        $branch = $Status.Branch
+        $tabName = "$repo=>$branch"
+        #you can't have 2 tabs with the same name so shove a number on the end
+        $tabCount = 0
+        foreach($tab in $psISE.PowerShellTabs){
+            $existingTabName = $tab.DisplayName
+            if($existingTabName.StartsWith($tabName) -and $existingTabName -ne $psise.CurrentPowerShellTab.DisplayName){
+                $tabCount++
+                $tabNumber = [int]$existingTabName.Replace($tabName, "").Replace("(", "").Replace(")", "").Trim()
+                if($tabCount -lt $tabNumber + 1){
+                    $tabCount = $tabNumber + 1
+                }
+            }
+        }
+        if($tabCount -gt 0){
+            $tabName= "$tabName ($tabCount)"
+        }
+        $psise.CurrentPowerShellTab.DisplayName = $tabName
+    }
 }
 
 <#
