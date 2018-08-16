@@ -214,7 +214,7 @@ function Write-GitStatus {
     if($psISE){
         $repo = $Status.RepoName
         $branch = $Status.Branch
-        $tabName = "$repo=>$branch"
+        $tabName = "$repo [$branch]"
         #you can't have 2 tabs with the same name so shove a number on the end
         $tabCount = 0
         foreach($tab in $psISE.PowerShellTabs){
