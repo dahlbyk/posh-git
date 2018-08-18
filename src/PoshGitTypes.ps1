@@ -222,6 +222,7 @@ class PoshGitTextSpan {
 
 class PoshGitPromptSettings {
     [bool]$AnsiConsole = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
+    [bool]$SetEnvColumns = $true
 
     [PoshGitCellColor]$DefaultColor = [PoshGitCellColor]::new()
     [PoshGitCellColor]$BranchColor  = [PoshGitCellColor]::new([ConsoleColor]::Cyan)
