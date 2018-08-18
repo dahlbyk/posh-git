@@ -64,7 +64,7 @@ function Set-TabTitle {
     param($GitStatus)
     $settings = $global:GitPromptSettings
 
-    if ($settings.TabTitle == $false) {
+    if ($settings.TabTitle -eq $false) {
         return
     }
 
