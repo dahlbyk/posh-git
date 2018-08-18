@@ -59,13 +59,13 @@ $Global:TortoiseGitSettings = new-object PSObject -Property @{
 }
 
 function tgit {
-    if($args) {
+    if ($args) {
         # Replace any aliases with actual TortoiseGit commands
         if ($Global:TortoiseGitSettings.TortoiseGitCommands.ContainsKey($args[0])) {
             $args[0] = $Global:TortoiseGitSettings.TortoiseGitCommands.Get_Item($args[0])
         }
 
-        if($args[0] -eq "help") {
+        if ($args[0] -eq "help") {
             # Replace the built-in help behaviour with just a list of commands
             $Global:TortoiseGitSettings.TortoiseGitCommands.Values.GetEnumerator() | Sort-Object | Get-Unique
             return
@@ -76,7 +76,7 @@ function tgit {
 
         $cmd = $args[0]
 
-        if($args.length -gt 1) {
+        if ($args.length -gt 1) {
             $args[1..$args.length] | ForEach-Object { $newArgs += $_ }
         }
 
