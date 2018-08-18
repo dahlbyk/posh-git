@@ -78,6 +78,7 @@ $GitPromptScriptBlock = {
 
     # This has to be *after* the call to Write-VcsStatus, which populates $global:GitStatus
     Set-WindowTitle $global:GitStatus $IsAdmin
+    Set-TabTitle $global:GitStatus
 
     # If prompt timing enabled, write elapsed milliseconds
     if ($settings.DefaultPromptEnableTiming) {

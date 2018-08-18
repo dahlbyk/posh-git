@@ -58,3 +58,45 @@ function Set-WindowTitle {
         }
     }
 }
+
+function Set-TabTitle {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+    param($GitStatus)
+    $settings = $global:GitPromptSettings
+
+    if ($settings.TabTitle == $false) {
+        return
+    }
+
+    # If the user is running Powershell ISE then name the tab
+    if($psISE -and $GitStatus){
+        $existingTabNames = $psISE.PowerShellTabs | % {$_.DisplayName}
+        $currentTabName = $psise.CurrentPowerShellTab.DisplayName
+        $tabName = Get-TabTitle $GitStatus $existingTabNames $currentTabName
+        $psise.CurrentPowerShellTab.DisplayName = $tabName
+    }
+}
+
+function Get-TabTitle {
+   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+    param($GitStatus, [string[]]$existingTabNames, [string]$currentTabName)
+
+    $repo = $GitStatus.RepoName
+    $branch = $GitStatus.Branch
+    $tabName = "$repo [$branch]"
+    #you can't have 2 tabs with the same name so shove a number on the end
+    $tabCount = 0
+    foreach($existingTabName in $existingTabNames){
+        if($existingTabName.StartsWith($tabName) -and $existingTabName -ne $currentTabName){
+            $tabCount++
+            $tabNumber = [int]$existingTabName.Replace($tabName, "").Replace("(", "").Replace(")", "").Trim()
+            if($tabCount -lt $tabNumber + 1){
+                $tabCount = $tabNumber + 1
+            }
+        }
+    }
+    if($tabCount -gt 0){
+        $tabName= "$tabName ($tabCount)"
+    }
+    return $tabName
+}
