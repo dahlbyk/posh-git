@@ -40,6 +40,11 @@ $GitPromptScriptBlock = {
 
     $origLastExitCode = $global:LASTEXITCODE
 
+    if ($settings.SetEnvColumns) {
+        # Set COLUMNS so git knows how wide the terminal is
+        $Env:COLUMNS = $Host.UI.RawUI.WindowSize.Width
+    }
+
     # Construct/write the prompt text
     $prompt = ''
 
