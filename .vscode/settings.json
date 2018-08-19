@@ -1,12 +1,21 @@
 {
-    "editor.rulers": [ 120 ],
+    "editor.insertSpaces": true,
+    "editor.rulers": [
+        120
+    ],
+    "editor.tabSize": 4,
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "powershell.codeFormatting.preset": "Stroustrup",
     "powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
     "markdownlint.config": {
         "MD013": false,
         "MD024": false,
         "MD029": false,
         "MD033": {
-            "allowed_elements": [ "kbd" ]
+            "allowed_elements": [
+                "kbd"
+            ]
         },
         "MD034": false,
         "MD038": false

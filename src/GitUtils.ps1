@@ -221,7 +221,7 @@ function Get-GitStatus {
     $settings = $Global:GitPromptSettings
     $enabled = $Force -or !$settings -or $settings.EnablePromptStatus
     if ($enabled -and $GitDir) {
-        if($settings.Debug) {
+        if ($settings.Debug) {
             $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
         }
         else {
@@ -242,7 +242,7 @@ function Get-GitStatus {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
+        if ($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
             if ($null -eq $settings.EnableFileStatusFromCache) {
                 $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
@@ -276,7 +276,8 @@ function Get-GitStatus {
 
                 if ($cacheResponse.Stashes) { $stashCount = $cacheResponse.Stashes.Length }
                 if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
-            } else {
+            }
+            else {
                 dbg 'Getting status' $sw
                 switch ($settings.UntrackedFilesMode) {
                     "No"      { $untrackedFilesOption = "-uno" }
@@ -284,7 +285,7 @@ function Get-GitStatus {
                     "Normal"  { $untrackedFilesOption = "-unormal" }
                 }
                 $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
-                if($settings.EnableStashStatus) {
+                if ($settings.EnableStashStatus) {
                     dbg 'Getting stash count' $sw
                     $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
                 }
@@ -331,15 +332,14 @@ function Get-GitStatus {
                     }
 
                     default { if ($sw) { dbg "Status: $_" $sw } }
-
                 }
             }
         }
 
-        if(!$branch) { $branch = Get-GitBranch $GitDir $sw }
+        if (!$branch) { $branch = Get-GitBranch $GitDir $sw }
 
         dbg 'Building status object' $sw
-        #
+
         # This collection is used twice, so create the array just once
         $filesAdded = $filesAdded.ToArray()
 
@@ -374,7 +374,7 @@ function Get-GitStatus {
         }
 
         dbg 'Finished' $sw
-        if($sw) { $sw.Stop() }
+        if ($sw) { $sw.Stop() }
         return $result
     }
 }

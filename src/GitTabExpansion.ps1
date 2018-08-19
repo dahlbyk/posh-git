@@ -140,7 +140,7 @@ function script:gitTags($filter, $prefix = '') {
         quoteStringWithSpecialChars
 }
 
-function script:gitFeatures($filter, $command){
+function script:gitFeatures($filter, $command) {
     $featurePrefix = git config --local --get "gitflow.prefix.$command"
     $branches = @(git branch --no-color | ForEach-Object { if ($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
@@ -270,7 +270,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 
     # Handles gitk
-    if ($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
+    if ($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$") {
         return gitBranches $matches['ref'] $true
     }
 
