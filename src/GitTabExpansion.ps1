@@ -440,37 +440,9 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 }
 
-$PowerTab_RegisterTabExpansion = if (Get-Module -Name powertab) { Get-Command Register-TabExpansion -Module powertab -ErrorAction SilentlyContinue }
-if ($PowerTab_RegisterTabExpansion) {
-    & $PowerTab_RegisterTabExpansion "git.exe" -Type Command {
-        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
-
-        $line = $Context.Line
-        $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
-        $TabExpansionHasOutput.Value = $true
-        Expand-GitCommand $lastBlock
-    }
-    return
-}
-
-if (Test-Path Function:\TabExpansion) {
-    Rename-Item Function:\TabExpansion TabExpansionBackup
-}
-
-function TabExpansion($line, $lastWord) {
-    $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
-
-    switch -regex ($lastBlock) {
-        # Execute git tab completion for all git-related commands
-        "^$(Get-AliasPattern git) (.*)" { Expand-GitCommand $lastBlock }
-        "^$(Get-AliasPattern tgit) (.*)" { Expand-GitCommand $lastBlock }
-        "^$(Get-AliasPattern gitk) (.*)" { Expand-GitCommand $lastBlock }
-
-        # Fall back on existing tab expansion
-        default {
-            if (Test-Path Function:\TabExpansionBackup) {
-                TabExpansionBackup $line $lastWord
-            }
-        }
+@('git', 'tgit', 'gitk') | ForEach-Object {
+    Register-ArgumentCompleter -CommandName $_ -Native -ScriptBlock {
+        param($wordToComplete, $commandAst, $cursorPosition)
+        Expand-GitCommand $commandAst.toString().PadRight($cursorPosition, ' ').substring(0, $cursorPosition)
     }
 }
