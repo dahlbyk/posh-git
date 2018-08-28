@@ -1,9 +1,6 @@
 . $PSScriptRoot\Shared.ps1
 
 Describe 'TabExpansion Tests' {
-    It 'Exports a TabExpansion function' {
-        $module.ExportedFunctions.Keys -contains 'TabExpansion' | Should Be $true
-    }
     Context 'Subcommand TabExpansion Tests' {
         It 'Tab completes without subcommands' {
             $result = & $module GitTabExpansionInternal 'git whatever '
