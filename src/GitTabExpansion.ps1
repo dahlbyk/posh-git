@@ -443,6 +443,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 @('git', 'tgit', 'gitk') | ForEach-Object {
     Register-ArgumentCompleter -CommandName $_ -Native -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
-        Expand-GitCommand $commandAst.toString().PadRight($cursorPosition, ' ').substring(0, $cursorPosition)
+        $trimToLength = $cursorPosition - $commandAst.Extent.StartOffset
+        Expand-GitCommand $commandAst.toString().PadRight($trimToLength, ' ').substring(0, $trimToLength)
     }
 }
