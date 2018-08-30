@@ -138,14 +138,21 @@ class PoshGitTextSpan {
     }
 
     [PoshGitTextSpan] Expand() {
-        if (!$this.Text) {
+        if (!$this.Text -and !$this.CustomAnsi) {
             return $this
         }
 
         $execContext = Get-Variable ExecutionContext -ValueOnly
-        $expandedText = $execContext.SessionState.InvokeCommand.ExpandString($this.Text)
-        $newTextSpan = [PoshGitTextSpan]::new($expandedText, $this.ForegroundColor, $this.BackgroundColor)
-        $newTextSpan.CustomAnsi = $this.CustomAnsi
+        if ($this.CustomAnsi -and $global:GitPromptSettings.AnsiConsole) {
+            $expandedText = $execContext.SessionState.InvokeCommand.ExpandString($this.CustomAnsi)
+            $newTextSpan = [PoshGitTextSpan]::new($this.Text, $this.ForegroundColor, $this.BackgroundColor)
+            $newTextSpan.CustomAnsi = $expandedText
+        }
+        else {
+            $expandedText = $execContext.SessionState.InvokeCommand.ExpandString($this.Text)
+            $newTextSpan = [PoshGitTextSpan]::new($expandedText, $this.ForegroundColor, $this.BackgroundColor)
+        }
+
         return $newTextSpan
     }
 
@@ -153,9 +160,9 @@ class PoshGitTextSpan {
         $e = [char]27 + "["
         $txt = $this.Text
 
-        if ($this.CustomAnsi) {
+        if ($this.CustomAnsi -and $global:GitPromptSettings.AnsiConsole) {
             $ansi = $this.CustomAnsi
-            $str = "${ansi}${txt}${e}0m"
+            $str = "${ansi}${e}0m"
         }
         else {
             $bg = $this.BackgroundColor
@@ -202,7 +209,7 @@ class PoshGitTextSpan {
                 $ansi = $this.CustomAnsi
                 $escAnsi = EscapeAnsiString $this.CustomAnsi
                 $txt = $this.ToAnsiString()
-                $str = "Text: '$txt',${sep}CustomAnsi: '${ansi}${escAnsi}${e}0m'"
+                $str = "CustomAnsi: '${ansi}${escAnsi}${e}0m'"
             }
             else {
                 $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
