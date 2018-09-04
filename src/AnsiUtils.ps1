@@ -35,12 +35,14 @@ function EscapeAnsiString([string]$AnsiString) {
     $res
 }
 
-function Test-VirtualTerminalSequece([psobject]$Object) {
-    if ($global:GitPromptSettings.AnsiConsole -and ($Object -is [string])) {
-        return $Object.Contains($AnsiEscape)
-    }
-    else {
-        return $false
+function Test-VirtualTerminalSequece([psobject[]]$Object, [switch]$Force) {
+    foreach ($obj in $Object) {
+        if (($Force -or $global:GitPromptSettings.AnsiConsole) -and ($obj -is [string])) {
+            return $obj.Contains($AnsiEscape)
+        }
+        else {
+            return $false
+        }
     }
 }
 
