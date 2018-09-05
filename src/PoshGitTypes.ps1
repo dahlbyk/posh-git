@@ -155,28 +155,29 @@ class PoshGitTextSpan {
     [string] ToAnsiString() {
         $e = [char]27 + "["
 
-        if (!$global:GitPromptSettings.AnsiConsole) {
-            $str = $this.Text
-            if (Test-VirtualTerminalSequece $str -Force) {
-                # ALWAYS terminate a VT seq in case the host supports VT, or the host display can get messed up.
-                $str += "${e}0m"
+        if ($global:GitPromptSettings.AnsiConsole) {
+            $bg = $this.BackgroundColor
+            if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
+                $bg = Get-BackgroundVirtualTerminalSequence $bg
             }
 
-            return $str
+            $fg = $this.ForegroundColor
+            if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
+                $fg = Get-ForegroundVirtualTerminalSequence $fg
+            }
+
+            $txt = $this.Text
+            $str = "${fg}${bg}${txt}"
+        }
+        else {
+            $str = $this.Text
         }
 
-        $bg = $this.BackgroundColor
-        if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
-            $bg = Get-BackgroundVirtualTerminalSequence $bg
+        # ALWAYS terminate a VT sequence in case the host supports VT (regardless of AnsiConsole setting),
+        # or the host display can get messed up.
+        if (Test-VirtualTerminalSequece $str -Force) {
+            $str += "${e}0m"
         }
-
-        $fg = $this.ForegroundColor
-        if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
-            $fg = Get-ForegroundVirtualTerminalSequence $fg
-        }
-
-        $txt = $this.Text
-        $str = "${fg}${bg}${txt}${e}0m"
 
         return $str
     }
