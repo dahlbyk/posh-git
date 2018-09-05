@@ -20,7 +20,7 @@ class PoshGitCellColor {
         $this.BackgroundColor = $BackgroundColor
     }
 
-    hidden static [string] ToString($color) {
+    hidden [string] ToString($color) {
         $ansiTerm = "$([char]27)[0m"
         $colorSwatch = "  "
         $str = ""
@@ -29,12 +29,17 @@ class PoshGitCellColor {
             $str = "<default>"
         }
         elseif (Test-VirtualTerminalSequece $color -Force) {
-            $txt = EscapeAnsiString $color
-
             if ($global:GitPromptSettings.AnsiConsole) {
-                $str = "${color}${colorSwatch}${ansiTerm} "
+                # Use '#' for FG color swatch since we are just applying the VT seqs as-is and
+                # a " " swatch char won't show anything for a FG color.
+                if ($color -eq $this.ForegroundColor) {
+                    $colorSwatch = "#"
+                }
+
+                $str = "${color}$colorSwatch${ansiTerm} "
             }
 
+            $txt = EscapeAnsiString $color
             $str += "$txt"
         }
         else {
@@ -86,9 +91,9 @@ class PoshGitCellColor {
 
     [string] ToString() {
         $str = "ForegroundColor: "
-        $str += [PoshGitCellColor]::ToString($this.ForegroundColor) + ", "
+        $str += $this.ToString($this.ForegroundColor) + ", "
         $str += "BackgroundColor: "
-        $str += [PoshGitCellColor]::ToString($this.BackgroundColor)
+        $str += $this.ToString($this.BackgroundColor)
         return $str
     }
 }

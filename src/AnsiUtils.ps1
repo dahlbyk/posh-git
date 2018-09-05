@@ -38,10 +38,10 @@ function EscapeAnsiString([string]$AnsiString) {
 function Test-VirtualTerminalSequece([psobject[]]$Object, [switch]$Force) {
     foreach ($obj in $Object) {
         if (($Force -or $global:GitPromptSettings.AnsiConsole) -and ($obj -is [string])) {
-            return $obj.Contains($AnsiEscape)
+            $obj.Contains($AnsiEscape)
         }
         else {
-            return $false
+            $false
         }
     }
 }
@@ -68,7 +68,7 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
             Write-Debug $_
         }
 
-        # Hard to get here but DarkYellow is not an HTML color but is a ConsoleColor
+        # Hard to get here but DarkYellow is not an HTML color but it is a ConsoleColor
         if (($color -isnot $ColorType) -and ($null -ne ($consoleColor = $color -as [System.ConsoleColor]))) {
             $color = $consoleColor
         }
