@@ -196,12 +196,13 @@ Describe 'TabExpansion Tests' {
             &$gitbin config core.quotepath true # Problematic (default) config
 
             $fileName = "posh$([char]8226)git.txt"
-            New-Item $fileName -ItemType File
+            $file = New-Item $fileName -ItemType File
+            $expected = ($file | Resolve-Path -Relative)  # ./posh\u8226git.txt or .\posh\u8226git.txt, depending on OS
 
             $gitStatus = & $module Get-GitStatus
 
             $result = & $module GitTabExpansionInternal 'git add ' $gitStatus
-            $result | Should BeExactly $fileName
+            $result | Should BeExactly $expected
         }
     }
 
@@ -299,12 +300,13 @@ Describe 'TabExpansion Tests' {
         }
         It 'Tab completes add file in working dir with special char as quoted' {
             $filename = 'foo{bar} (x86).txt';
-            New-Item $filename -ItemType File
+            $file = New-Item $filename -ItemType File
+            $expected = ($file | Resolve-Path -Relative)  # ./posh\u8226git.txt or .\posh\u8226git.txt, depending on OS
 
             $gitStatus = & $module Get-GitStatus
 
             $result = & $module GitTabExpansionInternal 'git add ' $gitStatus
-            $result | Should BeExactly "'$filename'"
+            $result | Should BeExactly "'$expected'"
         }
     }
 }
