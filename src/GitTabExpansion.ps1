@@ -168,39 +168,43 @@ function script:gitTfsShelvesets($filter) {
         quoteStringWithSpecialChars
 }
 
-function script:gitFiles($filter, $files) {
+function script:gitFiles($filter, $gitDir, $files) {
+    [string] $repoDir = Split-Path -Path $gitDir -Parent
+
     $files | Sort-Object |
         Where-Object { $_ -like "$filter*" } |
+        ForEach-Object { Join-Path -Path $repoDir -ChildPath $_ } |
+        Resolve-Path -Relative |
         quoteStringWithSpecialChars
 }
 
 function script:gitIndex($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Index
+    gitFiles $filter $GitStatus.GitDir $GitStatus.Index
 }
 
 function script:gitAddFiles($GitStatus, $filter) {
-    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Added))
+    gitFiles $filter $GitStatus.GitDir (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Added))
 }
 
 function script:gitCheckoutFiles($GitStatus, $filter) {
-    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
+    gitFiles $filter $GitStatus.GitDir (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
 function script:gitDiffFiles($GitStatus, $filter, $staged) {
     if ($staged) {
-        gitFiles $filter $GitStatus.Index.Modified
+        gitFiles $filter $GitStatus.GitDir $GitStatus.Index.Modified
     }
     else {
-        gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Index.Modified))
+        gitFiles $filter $GitStatus.GitDir (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Index.Modified))
     }
 }
 
 function script:gitMergeFiles($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Working.Unmerged
+    gitFiles $filter $GitStatus.GitDir $GitStatus.Working.Unmerged
 }
 
 function script:gitDeleted($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Working.Deleted
+    gitFiles $filter $GitStatus.GitDir $GitStatus.Working.Deleted
 }
 
 function script:gitAliases($filter) {
