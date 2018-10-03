@@ -39,8 +39,7 @@ class PoshGitCellColor {
                 $str = "${color}$colorSwatch${ansiTerm} "
             }
 
-            $txt = EscapeAnsiString $color
-            $str += "$txt"
+            $str = "`"$(EscapeAnsiString $color)`""
         }
         else {
             if ($global:GitPromptSettings.AnsiConsole) {
@@ -150,28 +149,24 @@ class PoshGitTextSpan {
         return $newTextSpan
     }
 
-    # This method is used by Write-Prompt to render an instance of a PoshGitTextSpan and
-    # $GitPromptSettings.AnsiConsole is $true.
+    # This method is used by Write-Prompt to render an instance of a PoshGitTextSpan when
+    # $GitPromptSettings.AnsiConsole is $true.  It is also used by the default ToString()
+    # implementation to display any ANSI seqs when AnsiConsole is $true.
     [string] ToAnsiString() {
         $e = [char]27 + "["
 
-        if ($global:GitPromptSettings.AnsiConsole) {
-            $bg = $this.BackgroundColor
-            if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
-                $bg = Get-BackgroundVirtualTerminalSequence $bg
-            }
-
-            $fg = $this.ForegroundColor
-            if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
-                $fg = Get-ForegroundVirtualTerminalSequence $fg
-            }
-
-            $txt = $this.Text
-            $str = "${fg}${bg}${txt}"
+        $bg = $this.BackgroundColor
+        if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
+            $bg = Get-BackgroundVirtualTerminalSequence $bg
         }
-        else {
-            $str = $this.Text
+
+        $fg = $this.ForegroundColor
+        if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
+            $fg = Get-ForegroundVirtualTerminalSequence $fg
         }
+
+        $txt = $this.Text
+        $str = "${fg}${bg}${txt}"
 
         # ALWAYS terminate a VT sequence in case the host supports VT (regardless of AnsiConsole setting),
         # or the host display can get messed up.
@@ -194,23 +189,24 @@ class PoshGitTextSpan {
             $sep = " " * (3 - $this.Text.Length)
         }
 
-        if ((Test-VirtualTerminalSequece $this.Text, $this.ForegroundColor, $this.BackgroundColor -Force) -contains $true) {
+        if ($global:GitPromptSettings.AnsiConsole) {
             $txt = $this.ToAnsiString()
-            $escAnsi = "ANSI: '$(EscapeAnsiString $txt)'"
-
-            if ($global:GitPromptSettings.AnsiConsole) {
-                $str = "Text: '$txt',${sep}${escAnsi}"
+            if (Test-VirtualTerminalSequece $txt) {
+                $escAnsi = "ANSI: `"$(EscapeAnsiString $txt)`""
+                $str = "Text: `"$txt`",${sep}${escAnsi}"
             }
             else {
-                $str = "${escAnsi}"
+                $str = "Text: `"$txt`""
             }
-            $escAnsi = "ANSI: '$(EscapeAnsiString $txt)'"
-            $str = "Text: '$txt',${sep}${escAnsi}"
         }
         else {
             $txt = $this.Text
+            if (Test-VirtualTerminalSequece $txt -Force) {
+                $txt = EscapeAnsiString $txt
+            }
+
             $color = [PoshGitCellColor]::new($this.ForegroundColor, $this.BackgroundColor)
-            $str = "Text: '$txt',${sep}$($color.ToString())"
+            $str = "Text: `"$txt`",${sep}$($color.ToString())"
         }
 
         return $str
