@@ -1,4 +1,4 @@
-param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
+param([bool]$ForcePoshGitPrompt = $false)
 
 & $PSScriptRoot\CheckRequirements.ps1 > $null
 
@@ -15,6 +15,26 @@ param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
 
 if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
 if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
+
+# Check if posh-sshell not installed. If not, install CommandNotFoundAction handler to give info on installing posh-sshell
+$prevCommandNotFoundActionHandler = $null
+$commandNotFoundActionHandlerInstalled = $false
+if (!$Env:POSHGIT_NO_SSH_CHECK -and !(Get-Module posh-sshell -ListAvailable)) {
+    $prevCommandNotFoundActionHandler = $ExecutionContext.InvokeCommand.CommandNotFoundAction
+    $ExecutionContext.InvokeCommand.CommandNotFoundAction = {
+        param($commandName, $eventArgs)
+        if ($commandName -in "Get-SshAgent", "Start-SshAgent", "Stop-SshAgent", "Add-SshKey", "Get-SshPath") {
+            Write-Warning ("The posh-git SSH commands have been moved to the posh-sshell module. " +
+                "You can install posh-sshell by executing: Install-Module posh-sshell -Scope CurrentUser")
+        }
+
+        if ($prevCommandNotFoundActionHandler) {
+            return $prevCommandNotFoundActionHandler.Invoke($commandName, $eventArgs)
+        }
+    }
+
+    $commandNotFoundActionHandlerInstalled = $true
+}
 
 $IsAdmin = Test-Administrator
 
@@ -131,6 +151,10 @@ if ($ForcePoshGitPrompt -or !$currentPromptDef -or ($currentPromptDef -eq $defau
 # Install handler for removal/unload of the module
 $ExecutionContext.SessionState.Module.OnRemove = {
     $global:VcsPromptStatuses = $global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
+
+    if ($commandNotFoundActionHandlerInstalled) {
+        $ExecutionContext.InvokeCommand.CommandNotFoundAction = $prevCommandNotFoundActionHandler
+    }
 
     Reset-WindowTitle
 
