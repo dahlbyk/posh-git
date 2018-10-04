@@ -169,7 +169,7 @@ function script:gitTfsShelvesets($filter) {
 }
 
 function script:gitFiles($filter, $gitDir, $files) {
-    [string] $repoDir = Split-Path -Path $gitDir -Parent
+    $repoDir = Split-Path -Path $gitDir -Parent
 
     $files | Sort-Object |
         Where-Object { $_ -like "$filter*" } |
