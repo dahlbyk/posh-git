@@ -2,13 +2,16 @@ $modulePath = Convert-Path $PSScriptRoot\..\src
 $moduleManifestPath = "$modulePath\posh-git.psd1"
 
 $csi = [char]0x1b + "["
-if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
-    # On Windows, we can access the git binary via git.exe
-    $global:gitbin = Get-Command -Name git -CommandType Application -TotalCount 1
-}
-else {
-    # On Linux/macOS, we can access the git binary via its path /usr/bin/git
-    $global:gitbin = (Get-Command -Name git -CommandType Application -TotalCount 1).Path
+
+if (!(Get-Variable -Name gitbin -Scope global -ErrorAction SilentlyContinue)) {
+    if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
+        # On Windows, we can access the git binary via git.exe
+        $global:gitbin = Get-Command -Name git -CommandType Application -TotalCount 1
+    }
+    else {
+        # On Linux/macOS, we can access the git binary via its path /usr/bin/git
+        $global:gitbin = (Get-Command -Name git -CommandType Application -TotalCount 1).Path
+    }
 }
 
 # We need this or the Git mocks don't work
@@ -73,6 +76,8 @@ function NewGitTempRepo([switch]$MakeInitialCommit) {
     Set-Location $repoPath
 
     if ($MakeInitialCommit) {
+        git config user.email "spaceman.spiff@appveyor.com"
+        git config user.name "Spaceman Spiff"
         'readme' | Out-File ./README.md -Encoding ascii
         &$gitbin add ./README.md *>$null
         &$gitbin commit -m "initial commit." *>$null
@@ -90,8 +95,8 @@ function RemoveGitTempRepo($RepoPath) {
 
 function ResetGitTempRepoWorkingDir($RepoPath, $Branch = 'master') {
     Set-Location $repoPath
-    &$gitbin checkout -fq $Branch 2>$null
-    &$gitbin clean -xdfq 2>$null
+    &$gitbin checkout -fq $Branch *>$null
+    &$gitbin clean -xdfq *>$null
 }
 
 Remove-Item Function:\prompt
