@@ -76,8 +76,8 @@ function NewGitTempRepo([switch]$MakeInitialCommit) {
     Set-Location $repoPath
 
     if ($MakeInitialCommit) {
-        git config user.email "spaceman.spiff@appveyor.com"
-        git config user.name "Spaceman Spiff"
+        &$gitbin config user.email "spaceman.spiff@appveyor.com"
+        &$gitbin config user.name "Spaceman Spiff"
         'readme' | Out-File ./README.md -Encoding ascii
         &$gitbin add ./README.md *>$null
         &$gitbin commit -m "initial commit." *>$null
