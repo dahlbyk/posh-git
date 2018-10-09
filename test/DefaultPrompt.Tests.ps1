@@ -97,6 +97,44 @@ A  test/Foo.Tests.ps1
             $path = GetHomeRelPath $PSScriptRoot
             $res | Should BeExactly "$path [master +1 ~0 -0 | +0 ~1 -1 !]> "
         }
+
+        It 'Returns the expected prompt string with changed PathStatusSeparator' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+
+'@
+            }
+            $GitPromptSettings.PathStatusSeparator.Text = ' !! '
+            $res = [string](&$prompt *>&1)
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $path = GetHomeRelPath $PSScriptRoot
+            $res | Should BeExactly "$path !! [master]> "
+        }
+
+        It 'Returns the expected prompt string with expanded PathStatusSeparator' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+
+'@
+            }
+            $GitPromptSettings.PathStatusSeparator.Text = ' - $(6*7) '
+            $res = [string](&$prompt *>&1)
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $path = GetHomeRelPath $PSScriptRoot
+            $res | Should BeExactly "$path - 42 [master]> "
+        }
     }
 }
 
@@ -201,6 +239,45 @@ A  test/Foo.Tests.ps1
             Assert-MockCalled git -ModuleName posh-git
             $path = GetHomeRelPath $PSScriptRoot
             $res | Should BeExactly "$path ${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}93m |${csi}0m${csi}31m${csi}49m +0${csi}0m${csi}31m${csi}49m ~1${csi}0m${csi}31m${csi}49m -1${csi}0m${csi}31m !${csi}0m${csi}93m]${csi}0m> "
+        }
+
+        It 'Returns the expected prompt string with changed PathStatusSeparator' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+
+'@
+            }
+            $GitPromptSettings.PathStatusSeparator.Text = ' !! '
+            $GitPromptSettings.PathStatusSeparator.BackgroundColor = [ConsoleColor]::White
+            $res = [string](&$prompt *>&1)
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $path = GetHomeRelPath $PSScriptRoot
+            $res | Should BeExactly "$path${csi}107m !! ${csi}0m${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}93m]${csi}0m> "
+        }
+        It 'Returns the expected prompt string with expanded PathStatusSeparator' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+
+'@
+            }
+            $GitPromptSettings.PathStatusSeparator.Text = ' [$(hostname)] '
+            $GitPromptSettings.PathStatusSeparator.BackgroundColor = [ConsoleColor]::White
+            $res = [string](&$prompt *>&1)
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $path = GetHomeRelPath $PSScriptRoot
+            $res | Should BeExactly "$path${csi}107m [$(hostname)] ${csi}0m${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}93m]${csi}0m> "
         }
     }
 }
