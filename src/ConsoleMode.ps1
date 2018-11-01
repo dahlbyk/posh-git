@@ -1,14 +1,18 @@
 # Hack! https://gist.github.com/lzybkr/f2059cb2ee8d0c13c65ab933b75e998c
 
-if ($IsWindows -eq $false) {
+# We do not need to set the console mode in PowerShell Core on any platform.
+# On Windows, PowerShell Core added this support in this PR:
+# https://github.com/PowerShell/PowerShell/pull/2991
+if ($PSVersionTable.PSVersion.Major -ge 6) {
     function Set-ConsoleMode {
         [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param()
     }
+
     return
 }
 
-Add-Type @"
+$consoleModeSource = @"
 using System;
 using System.Runtime.InteropServices;
 
@@ -85,19 +89,29 @@ function Set-ConsoleMode
         $StandardInput
     )
 
-    if ($ANSI)
-    {
-        $outputMode = [NativeConsoleMethods]::GetConsoleMode($false)
-        $null = [NativeConsoleMethods]::SetConsoleMode($false, $outputMode -bor [ConsoleModeOutputFlags]::ENABLE_VIRTUAL_TERMINAL_PROCESSING)
-
-        if ($StandardInput)
-        {
-            $inputMode = [NativeConsoleMethods]::GetConsoleMode($true)
-            $null = [NativeConsoleMethods]::SetConsoleMode($true, $inputMode -bor [ConsoleModeInputFlags]::ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+    begin {
+        # Module import is speeded up by deferring the Add-Type until the first time this function is called.
+        # Add the NativeConsoleMethods type but only once per session.
+        if (!('NativeConsoleMethods' -as [System.Type])) {
+            Add-Type $consoleModeSource
         }
     }
-    else
-    {
-        [NativeConsoleMethods]::SetConsoleMode($StandardInput, $Mode)
+
+    end {
+        if ($ANSI)
+        {
+            $outputMode = [NativeConsoleMethods]::GetConsoleMode($false)
+            $null = [NativeConsoleMethods]::SetConsoleMode($false, $outputMode -bor [ConsoleModeOutputFlags]::ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+
+            if ($StandardInput)
+            {
+                $inputMode = [NativeConsoleMethods]::GetConsoleMode($true)
+                $null = [NativeConsoleMethods]::SetConsoleMode($true, $inputMode -bor [ConsoleModeInputFlags]::ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+            }
+        }
+        else
+        {
+            [NativeConsoleMethods]::SetConsoleMode($StandardInput, $Mode)
+        }
     }
 }
