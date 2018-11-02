@@ -849,13 +849,14 @@ function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
 
     $OFS = ""
-    $str = ""
+    $sb = [System.Text.StringBuilder]::new(150)
+
     foreach ($promptStatus in $global:VcsPromptStatuses) {
-        $str += "$(& $promptStatus)"
+        [void]$sb.Append("$(& $promptStatus)")
     }
 
-    if ($str) {
-        $str
+    if ($sb.Length -gt 0) {
+        $sb.ToString()
     }
 }
 
