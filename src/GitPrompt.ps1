@@ -175,7 +175,7 @@ function Write-GitStatus {
 
     # When prompt is first (default), place the separator before the status summary
     if (!$s.DefaultPromptWriteStatusFirst) {
-        $sb | Write-Prompt $s.PathStatusSeparator > $null
+        $sb | Write-Prompt $s.PathStatusSeparator.Expand() > $null
     }
 
     $sb | Write-Prompt $s.BeforeStatus > $null
@@ -205,7 +205,7 @@ function Write-GitStatus {
 
     # When status is first, place the separator after the status summary
     if ($s.DefaultPromptWriteStatusFirst) {
-        $sb | Write-Prompt $s.PathStatusSeparator > $null
+        $sb | Write-Prompt $s.PathStatusSeparator.Expand() > $null
     }
 
     $sb.ToString()
@@ -864,7 +864,7 @@ $PoshGitVcsPrompt = {
 
             # When prompt is first (default), place the separator before the status summary
             if (!$s.DefaultPromptWriteStatusFirst) {
-                $sb | Write-Prompt $s.PathStatusSeparator > $null
+                $sb | Write-Prompt $s.PathStatusSeparator.Expand() > $null
             }
             $sb | Write-Prompt $s.BeforeStatus > $null
 
