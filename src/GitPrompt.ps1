@@ -168,7 +168,7 @@ function Write-GitStatus {
 
     $s = $global:GitPromptSettings
     if (!$Status -or !$s) {
-        return ""
+        return
     }
 
     $sb = [System.Text.StringBuilder]::new(150)
@@ -208,7 +208,9 @@ function Write-GitStatus {
         $sb | Write-Prompt $s.PathStatusSeparator.Expand() > $null
     }
 
-    $sb.ToString()
+    if ($sb.Length -gt 0) {
+        $sb.ToString()
+    }
 }
 
 <#
@@ -847,7 +849,15 @@ function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
 
     $OFS = ""
-    "$($global:VcsPromptStatuses | ForEach-Object { & $_ })"
+    $sb = [System.Text.StringBuilder]::new(150)
+
+    foreach ($promptStatus in $global:VcsPromptStatuses) {
+        [void]$sb.Append("$(& $promptStatus)")
+    }
+
+    if ($sb.Length -gt 0) {
+        $sb.ToString()
+    }
 }
 
 # Add scriptblock that will execute for Write-VcsStatus
@@ -875,7 +885,9 @@ $PoshGitVcsPrompt = {
             }
             $sb | Write-Prompt $s.AfterStatus > $null
 
-            $sb.ToString()
+            if ($sb.Length -gt 0) {
+                $sb.ToString()
+            }
         }
     }
 }
