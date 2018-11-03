@@ -1,6 +1,10 @@
 # Hack! https://gist.github.com/lzybkr/f2059cb2ee8d0c13c65ab933b75e998c
 
-if ($IsWindows -eq $false) {
+# Always skip setting the console mode on non-Windows platforms.
+# On Windows, *if* we are running in PowerShell Core *and* the host is the "ConsoleHost",
+# rely on PS Core to manage the console mode.  This speeds up module import on standard
+# PowerShell Core on Windows.
+if (($IsWindows -eq $false) -or (($PSVersionTable.PSVersion.Major -ge 6) -and ($host.Name -eq 'ConsoleHost'))) {
     function Set-ConsoleMode {
         [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param()
