@@ -1,9 +1,6 @@
 # Hack! https://gist.github.com/lzybkr/f2059cb2ee8d0c13c65ab933b75e998c
 
-# We do not need to set the console mode in PowerShell Core on any platform.
-# On Windows, PowerShell Core added this support in this PR:
-# https://github.com/PowerShell/PowerShell/pull/2991
-if ($PSVersionTable.PSVersion.Major -ge 6) {
+if ($IsWindows -eq $false) {
     function Set-ConsoleMode {
         [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param()
