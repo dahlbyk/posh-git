@@ -101,6 +101,13 @@ function script:gitCommands($filter, $includeAliases) {
     $cmdList | Sort-Object
 }
 
+function script:lastCheckouts($filter){
+    git reflog |
+    Where-Object { $_ -match ': checkout: moving from (.*) to (.*)' } |
+    ForEach-Object { $Matches[1] } |
+    Where-Object { $_ -like "$filter*" }
+}
+
 function script:gitRemotes($filter) {
     git remote |
         Where-Object { $_ -like "$filter*" } |
@@ -387,6 +394,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         # Handles git checkout <ref>
         "^(?:checkout).* (?<ref>\S*)$" {
             & {
+                lastCheckouts $matches['ref']
                 gitBranches $matches['ref'] $true
                 gitRemoteUniqueBranches $matches['ref']
                 gitTags $matches['ref']
