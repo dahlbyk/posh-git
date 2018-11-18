@@ -37,6 +37,17 @@ Describe 'TabExpansion Tests' {
             $result2 -contains 'set-head' | Should Be $true
             $result2 -contains 'set-url' | Should Be $true
         }
+        It 'Tab completes update-git-for-windows only on Windows' {
+            $result = & $module GitTabExpansionInternal 'git update-'
+
+            if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows)) {
+                $result -contains '' | Should Be $false
+                $result -contains 'update-git-for-windows' | Should Be $true
+            }
+            else {
+                $result | Should BeNullOrEmpty
+            }
+        }
     }
     Context 'Fetch/Push/Pull TabExpansion Tests' {
         BeforeEach {
