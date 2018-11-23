@@ -104,7 +104,7 @@ function script:gitCommands($filter, $includeAliases) {
 function script:lastCheckouts($filter){
     # for performance reasons we limit the number of returned entries from reflog to avoid scanning
     # all reflog entries which can be huge in some cases. Number 10 is chose as "good enough" for most cases.
-    git log --walk-reflogs --max-count=10 --grep-reflog='checkout: moving from ' --fixed-strings --format=%gs |
+    git log --walk-reflogs --max-count=10 '--grep-reflog="checkout: moving from "' --fixed-strings --format=%gs |
     Where-Object { $_ -match 'checkout: moving from (.*) to (.*)' } |
     ForEach-Object { $Matches[1] } |
     Where-Object { $_ -like "$filter*" }
