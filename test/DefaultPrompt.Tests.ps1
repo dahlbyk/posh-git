@@ -1,10 +1,14 @@
 . $PSScriptRoot\Shared.ps1
 
+$sshPrefix = '(\[[^\]+\]: )?'
+
 Describe 'Default Prompt Tests - NO ANSI' {
     BeforeAll {
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $prompt = Get-Item Function:\prompt
         $OFS = ''
+
+        $homePath = [regex]::Escape((GetHomePath))
     }
     BeforeEach {
         # Ensure these settings start out set to the default values
@@ -16,13 +20,14 @@ Describe 'Default Prompt Tests - NO ANSI' {
         It 'Returns the expected prompt string' {
             Set-Location $env:HOME -ErrorAction Stop
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "$(GetHomePath)> "
+            $res | Should Match "^${sshPrefix}$homePath> $"
         }
         It 'Returns the expected prompt string with changed DefaultPromptPrefix' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptPrefix.Text = 'PS '
             $res = [string](&$prompt *>&1)
             $res | Should BeExactly "PS $(GetHomePath)> "
+            $res | Should Match "^${sshPrefix}PS $homePath> $"
         }
         It 'Returns the expected prompt string with expanded DefaultPromptPrefix' {
             Set-Location $Home -ErrorAction Stop
