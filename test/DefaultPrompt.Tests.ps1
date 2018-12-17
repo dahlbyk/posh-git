@@ -1,6 +1,6 @@
 . $PSScriptRoot\Shared.ps1
 
-$sshPrefix = '(\[[^\]+\]: )?'
+$sshPrefix = '(\[[^\]]+\]: )?'
 
 Describe 'Default Prompt Tests - NO ANSI' {
     BeforeAll {
