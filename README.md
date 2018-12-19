@@ -146,7 +146,7 @@ choco install poshgit
 
 ### Installing post-git Manually
 
-If you need to test/debug changes prior to contrubiting here, or would otherwise prefer to install post-git without the aid of a package manager you can run `Import-Module POST-GET-PATH` where `POST-GET-PATH` is the path to the `src\posh-git.psd1` file.
+If you need to test/debug changes prior to contributing here, or would otherwise prefer to install post-git without the aid of a package manager, you can run `Import-Module POST-GIT-PATH` where `POST-GIT-PATH` is the path to the `src\posh-git.psd1` file.
 
 Say you have posh-git located at `$home\documents\github\posh-git`, you can import posh-git by running `Import-Module $home\documents\github\posh-git\src\posh-git.psd1`.
 
