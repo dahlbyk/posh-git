@@ -21,7 +21,7 @@ function global:git {
     $cmdline = "$args"
     # Write-Warning "in global git func with: $cmdline"
     switch ($cmdline) {
-        '--version' { 'git version 2.11.0.windows.1' }
+        '--version' { 'git version 2.16.2.windows.1' }
         'help'      { Get-Content $PSScriptRoot\git-help.txt  }
         default     {
             $res = Invoke-Expression "&$gitbin $cmdline"
