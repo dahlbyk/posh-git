@@ -4,6 +4,11 @@
 
 - Moved SSH agent functionality to <https://github.com/dahlbyk/posh-sshell>.
 
+### Added
+
+- New-GitPromptSettings to provide an easy way to create a PoshGitPromptSettings object which can be used to
+  reset to the default settings.
+
 ## 1.0.0-beta2 - May 13, 2018
 
 The 1.0.0 release is targeted specifically at Windows PowerShell 5.x and (cross-platform) PowerShell Core 6.x, both of

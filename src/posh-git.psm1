@@ -154,6 +154,7 @@ $exportModuleMemberParams = @{
         'Get-GitStatus',
         'Get-PromptConnectionInfo',
         'Get-PromptPath',
+        'New-GitPromptSettings',
         'Update-AllBranches',
         'Write-GitStatus',
         'Write-GitBranchName',

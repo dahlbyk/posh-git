@@ -15,6 +15,24 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
 
 <#
 .SYNOPSIS
+    Creates a new instance of the PoshGitPromptSettings that can be assigned to $GitPromptSettings.
+.DESCRIPTION
+    Creates a new instance of the PoshGitPromptSettings that can be used to reset the
+    $GitPromptSettings values back to their defaults.
+.INPUTS
+    None
+.OUTPUTS
+    PoshGitPromptSettings
+.EXAMPLE
+    PS> $GitPromptSettings = New-GitPromptSettings
+    This will reset the current $GitPromptSettings back to the defaults.
+#>
+function New-GitPromptSettings {
+    [PoshGitPromptSettings]::new()
+}
+
+<#
+.SYNOPSIS
     Writes the object to the display or renders it as a string using ANSI/VT sequences.
 .DESCRIPTION
     Writes the specified object to the display unless $GitPromptSettings.AnsiConsole
