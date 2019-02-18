@@ -4,8 +4,10 @@
 
 ### Removed
 
-- SSH agent functionality has been removed from `posh-git` and put into another module focused solely on
+- BREAKING: Removed SSH agent functionality from `posh-git` and put into another module focused solely on
   Git SSH support. See [posh-sshell](https://github.com/dahlbyk/posh-sshell).
+- BREAKING: Removed `PoshGitTextSpan.CustomAnsi` property - now just put your custom VT sequences in the
+  `PoshGitTextSpan.Text` property. Be sure to terminate your VT sequences with `"$([char]27)[0m"`
 
 ### Added
 
