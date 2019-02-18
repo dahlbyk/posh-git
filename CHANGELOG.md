@@ -1,13 +1,56 @@
 # posh-git Release History
 
-## 1.0.0-beta3 - June 14, 2018
+## 1.0.0-beta3 - March 1, 2019
 
-- Moved SSH agent functionality to <https://github.com/dahlbyk/posh-sshell>.
+### Removed
+
+- SSH agent functionality has been removed from `posh-git` and put into another module focused solely on
+  Git SSH support. See [posh-sshell](https://github.com/dahlbyk/posh-sshell).
 
 ### Added
 
+- Add support for vsts-cli Git integration.
+  ([#549](https://github.com/dahlbyk/posh-git/issues/549))
+  ([PR #581](https://github.com/dahlbyk/posh-git/pull/581))
+  Thanks David Gardiner (@flcdrg)
+- Enhance prompt function to show username/hostname in SSH connection. Adds Get-PromptConnectionInfo command.
+  ([#591](https://github.com/dahlbyk/posh-git/issues/591))
+  ([PR #595](https://github.com/dahlbyk/posh-git/pull/595))
+- Show Rebase Progress (plus |REVERTING).
+  ([#102](https://github.com/dahlbyk/posh-git/issues/102))
+  ([PR #599](https://github.com/dahlbyk/posh-git/pull/599))
+- Set `$Env:COLUMNS` on prompt if necessary.
+  ([PR #607](https://github.com/dahlbyk/posh-git/pull/607))
+- Tab-completion for `git log --stat`, `git log --patch` and `git diff --staged`.
+  ([PR #620](https://github.com/dahlbyk/posh-git/pull/620))
+  Thanks Vasily Korytov (@chillum)
+- Tab-completion for `git update-git-for-windows` on Windows Git >= 2.16.2.
 - New-GitPromptSettings to provide an easy way to create a PoshGitPromptSettings object which can be used to
   reset to the default settings.
+
+### Changed
+
+- Eliminate traiing `=` on the tab-completion of `--force-with-lease=`.
+  ([PR #622](https://github.com/dahlbyk/posh-git/pull/622))
+  Thanks Chuck Lu (@chucklu)
+- Expand `PathStatusSeparator` string when composing prompt. This allows you to use string interpolation in the
+  `$GitPromptSettings.PathStatusSeparator.Text` setting.
+  ([PR #630](https://github.com/dahlbyk/posh-git/pull/630))
+  Thanks Jason Shirk (@lzybkr)
+
+### Fixed
+
+- WindowTitle set by user overwritten by module.  No longer updates Window title if WindowTitle setting set to $null.
+  ([#594](https://github.com/dahlbyk/posh-git/issues/594))
+  ([PR #597](https://github.com/dahlbyk/posh-git/pull/597))
+- `Write-VcsStatus` behaving differently.  When AnsiConsole -eq $false, Write-VcsStatus must not emit any strings.
+  ([#612](https://github.com/dahlbyk/posh-git/issues/612))
+  ([PR #617](https://github.com/dahlbyk/posh-git/pull/617))
+- Skip the ConsoleMode hack for new Windows versions.  On Windows PowerShell, defer `Add-Type` until
+  Set-ConsoleMode executed.  On PowerShell Core, do not change console mode at all since PowerShell does this
+  automatically.  This improves module load time.
+  ([#637](https://github.com/dahlbyk/posh-git/issues/637))
+  ([PR #638](https://github.com/dahlbyk/posh-git/pull/638))
 
 ## 1.0.0-beta2 - May 13, 2018
 
