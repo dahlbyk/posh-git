@@ -144,6 +144,12 @@ With Chocolatey installed, execute the following command to install posh-git:
 choco install poshgit
 ```
 
+### Installing post-git Manually
+
+If you need to test/debug changes prior to contributing here, or would otherwise prefer to install posh-git without the aid 
+of a package manager, you can execute `Import-Module <path-to-src\posh-git.psd1>`.  For example, if you have git cloned posh-git
+to `~\git\posh-git` you can import this version of posh-git by executing `Import-Module ~\git\posh-git\src\posh-git.psd1`.
+
 ## Using posh-git
 
 After you have installed posh-git, you need to configure your PowerShell session to use the posh-git module.
