@@ -15,17 +15,17 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
 
 <#
 .SYNOPSIS
-    Creates a new instance of the PoshGitPromptSettings that can be assigned to $GitPromptSettings.
+    Creates a new instance of a PoshGitPromptSettings object that can be assigned to $GitPromptSettings.
 .DESCRIPTION
-    Creates a new instance of the PoshGitPromptSettings that can be used to reset the
-    $GitPromptSettings values back to their defaults.
+    Creates a new instance of a PoshGitPromptSettings object that can be used to reset the
+    $GitPromptSettings back to its default.
 .INPUTS
     None
 .OUTPUTS
     PoshGitPromptSettings
 .EXAMPLE
     PS> $GitPromptSettings = New-GitPromptSettings
-    This will reset the current $GitPromptSettings back to the defaults.
+    This will reset the current $GitPromptSettings back to its default.
 #>
 function New-GitPromptSettings {
     [PoshGitPromptSettings]::new()
