@@ -53,6 +53,10 @@
   automatically.  This improves module load time.
   ([#637](https://github.com/dahlbyk/posh-git/issues/637))
   ([PR #638](https://github.com/dahlbyk/posh-git/pull/638))
+- How do you manually install this? Added manual instructions for git clone of posh-git to README.md.
+  ([#648](https://github.com/dahlbyk/posh-git/issues/648))
+  ([PR #649](https://github.com/dahlbyk/posh-git/pull/649))
+  Thanks Kyle Spier-Swenson (@MrStonedOne)
 
 ## 1.0.0-beta2 - May 13, 2018
 
