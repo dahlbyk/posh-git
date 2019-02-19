@@ -407,6 +407,76 @@ function Get-AliasPattern($exe) {
    "($($aliases -join '|'))"
 }
 
+<#
+.SYNOPSIS
+    Removes all Git branches merged into the sepcified commit (HEAD by default).
+.DESCRIPTION
+    Removes all Git branches that have been merged into the sepcified commit
+    (HEAD by default).
+
+    By default, several potentially merged branches are always excluded. This
+    includes the current branch as well as develop and master.
+.EXAMPLE
+    PS> Remove-MergedGitBranch
+    Removes all merged branches except the current, develop and master.
+.EXAMPLE
+    PS> Remove-MergedGitBranch -Force
+    Removes all merged branches except the current, develop and master.
+    Using -Force, skips the confirmation prompts.
+.EXAMPLE
+    PS> Remove-MergedGitBranch -Pattern 'feature/.*'
+    Removes all merged feature/* branches except the current branch.
+#>
+function Remove-MergedGitBranch {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="Medium")]
+    param(
+        # Branches whose tips are reachable from the specified commit will be removed.
+        # The default commit is HEAD.
+        [Parameter(Position=0)]
+        [string]
+        $Commit = "HEAD",
+
+        # Removes merged branches without prompting for confirmation. By default,
+        # Remove-MergedGitBranch prompts for confirmation before removing merged branches.
+        [Parameter()]
+        [switch]
+        $Force,
+
+        # Specifies a regular expression used to exclude merged branches from being removed.
+        # The default pattern excludes the current branch, develop and master branches.
+        [Parameter()]
+        [string]
+        $ExcludeBranchPattern = '(^\*)|(^. (develop|master)$)',
+
+        # Specifies a regular expression to limit the non-excluded merged branches to be removed.
+        # The default pattern '.*' allows all non-excluded merged branches.
+        [Parameter()]
+        [string]
+        $Pattern = ".*"
+    )
+
+    $branchesToDelete = git branch --merged $Commit |
+        Where-Object {$_ -notmatch $ExcludeBranchPattern } |
+        Where-Object {$_ -match $Pattern}
+
+    $action = "remove merged branch"
+    $yesToAll = $noToAll = $false
+
+    foreach ($branch in $branchesToDelete) {
+        $targetBranch = $branch.Trim()
+        if ($PSCmdlet.ShouldProcess($targetBranch, $action)) {
+            if ($Force -or $yesToAll -or
+                $PSCmdlet.ShouldContinue("Are you sure you want to ${action} `"$targetBranch`"?",
+                                         "Confirm removing branch", [ref]$yesToAll, [ref]$noToAll)) {
+
+                if ($noToAll) { return }
+
+                Invoke-Utf8ConsoleCommand { git branch -d $targetBranch }
+            }
+        }
+    }
+}
+
 function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
     $head = git rev-parse --abbrev-ref HEAD
     git checkout -q $Upstream
