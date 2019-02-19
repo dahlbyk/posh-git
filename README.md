@@ -17,14 +17,16 @@ Table of contents:
 
 ## Overview
 
-posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that can be displayed in the PowerShell prompt, e.g.:
+posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that
+can be displayed in the PowerShell prompt, e.g.:
 
 ![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> ][prompt-def-long]
 
 posh-git also provides tab completion support for common git commands, branch names, paths and more.
-For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing the <kbd>tab</kbd> key.
-That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will cycle through other command matches such as `cherry` and `cherry-pick`.
-You can also tab complete remote names and branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
+For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing
+the <kbd>tab</kbd> key. That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will
+cycle through other command matches such as `cherry` and `cherry-pick`. You can also tab complete remote names and
+branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
 
 ## Versions
 
@@ -131,9 +133,10 @@ choco install poshgit
 
 ### Installing post-git Manually
 
-If you need to test/debug changes prior to contributing here, or would otherwise prefer to install posh-git without the aid
-of a package manager, you can execute `Import-Module <path-to-src\posh-git.psd1>`.  For example, if you have git cloned posh-git
-to `~\git\posh-git` you can import this version of posh-git by executing `Import-Module ~\git\posh-git\src\posh-git.psd1`.
+If you need to test/debug changes prior to contributing here, or would otherwise prefer to install posh-git without
+the aid of a package manager, you can execute `Import-Module <path-to-src\posh-git.psd1>`.  For example, if you
+have git cloned posh-git to `~\git\posh-git` you can import this version of posh-git by executing
+`Import-Module ~\git\posh-git\src\posh-git.psd1`.
 
 ## Using posh-git
 
@@ -151,8 +154,9 @@ Let's have PowerShell import this module for you in each new PowerShell session.
 We can do this by either executing the command `Add-PoshGitToProfile` or by editing your PowerShell profile script and
 adding the command `Import-Module posh-git`.
 
-If you want posh-git to be available in all your PowerShell hosts (console, ISE, etc) then execute `Add-PoshGitToProfile -AllHosts`.
-This will add a line containing `Import-Module posh-git` to the file `$profile.CurrentUserAllHosts`.
+If you want posh-git to be available in all your PowerShell hosts (console, ISE, etc) then execute
+`Add-PoshGitToProfile -AllHosts`. This will add a line containing `Import-Module posh-git` to the file
+`$profile.CurrentUserAllHosts`.
 
 If you want posh-git to be available in just the current host, then execute `Add-PoshGitToProfile`.
 This will add the same command but to the file `$profile.CurrentUserCurrentHost`.
@@ -173,11 +177,13 @@ Import-Module posh-git
 ```
 
 Save the profile script, then close PowerShell and open a new PowerShell session.
-Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to `git fetch`.
+Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to
+`git fetch`.
 
 ## Git status summary information
 
-The Git status summary information provides a wealth of "Git status" information at a glance, all the time in your prompt.
+The Git status summary information provides a wealth of "Git status" information at a glance, all the time in your
+prompt.
 
 By default, the status summary has the following format:
 
@@ -189,8 +195,12 @@ By default, the status summary has the following format:
   - Green means the branch is ahead of its remote (green light to push)
   - Red means the branch is behind its remote
   - Yellow means the branch is both ahead of and behind its remote
-- `S` represents the branch status in relation to remote (tracked origin) branch. Note: This information reflects
-  the state of the remote tracked branch after the last `git fetch/pull` of the remote.
+- `S` represents the branch status in relation to remote (tracked origin) branch.
+
+  Note: This status information reflects the state of the remote tracked branch after the last `git fetch/pull`
+  of the remote. Execute `git fetch` to update to the latest on the default remote repo. If you have multiple remotes,
+  execute `git fetch --all`.
+
   - `≡` = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
   - `↑<num>` = The local branch is ahead of the remote branch by the specified number of commits; a `git push` is
     required to update the remote branch (`BranchAheadStatus`)
@@ -242,24 +252,29 @@ For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the f
 
 ## Customization variables
 
-posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and `$TortoiseGitSettings`.
-For an example of how to configure your PowerShell profile script to import the posh-git module and create a custom prompt function that displays git status info, see the [Customizing Your PowerShell Prompt](#customizing-the-posh-git-prompt) section below.
+posh-git adds variables to your session to let you customize it, including `$GitPromptSettings`, `$GitTabSettings`, and
+`$TortoiseGitSettings`. For an example of how to configure your PowerShell profile script to import the posh-git
+module and create a custom prompt function that displays git status info, see the
+[Customizing Your PowerShell Prompt](#customizing-the-posh-git-prompt) section below.
 
 Note on performance: Displaying file status in the git prompt for a very large repo can be prohibitively slow.
-Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus = $false`), you can disable it on a repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
+Rather than turn off file status entirely (`$GitPromptSettings.EnableFileStatus = $false`), you can disable it on a
+repo-by-repo basis by adding individual repository paths to `$GitPromptSettings.RepositoriesInWhichToDisableFileStatus`.
 
 ## Customizing the posh-git prompt
 
 When you import the posh-git module, it will replace PowerShell's default prompt function with a new prompt function.
-The posh-git prompt function will display Git status summary information when the current directory is inside a Git repository.
-posh-git will not replace the prompt function if it has detected that you have your own, customized prompt function.
+The posh-git prompt function will display Git status summary information when the current directory is inside a Git
+repository. posh-git will not replace the prompt function if it has detected that you have your own, customized prompt
+function.
 
 The prompt function provided by posh-git creates a prompt that looks like this:
 
 ![~\GitHub\posh-git [master ≡]> ][prompt-default]
 
 You can customize the posh-git prompt function or define your own custom prompt function.
-The rest of this section covers how to customize posh-git's prompt function using the global variable `$GitPromptSettings`.
+The rest of this section covers how to customize posh-git's prompt function using the global variable
+`$GitPromptSettings`.
 
 For instance, you can customize the default prompt prefix to display a colored timestamp with these settings:
 
@@ -289,8 +304,8 @@ $GitPromptSettings.DefaultPromptPath.ForegroundColor = 'Orange'
 ```
 
 > Note: Setting the ForegroundColor to a color name, other than one of the standard ConsoleColor names, only works on Windows.
-On Windows, posh-git uses the `System.Drawing.ColorTranslator.FromHtml()` method to parse a color name as an HTML color.
-For a complete list of HTML colors, see this [W3Schools page][w3c-colors].
+On Windows, posh-git uses the `[System.Drawing.ColorTranslator]::FromHtml(string colorName)` method to parse a color
+name as an HTML color. For a complete list of HTML colors, see this [W3Schools page][w3c-colors].
 
 If you are on Linux or macOS and desire an Orange path, you will need to specify the RGB value for Orange e.g.:
 
@@ -323,7 +338,8 @@ This will change the prompt to:
 ![[master ≡] ~\GitHub\posh-git> ][prompt-swap]
 
 Finally, you can combine these settings to customize the posh-git prompt fairly significantly.
-In the `DefaultPromptSuffix` field below, we are prepending the PowerShell history id number before the prompt char `>` e.g.:
+In the `DefaultPromptSuffix` field below, we are prepending the PowerShell history id number before the prompt
+char `>` e.g.:
 
 ```text
 $GitPromptSettings.DefaultPromptWriteStatusFirst = $true
@@ -336,8 +352,8 @@ This will change the prompt to:
 
 ![[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
 
-If you'd like to make any of these changes permanent, i.e. available whenever you start PowerShell, put the corresponding
-setting(s) in one of your profile scripts **after** the line that imports posh-git.
+If you'd like to make any of these changes permanent, i.e. available whenever you start PowerShell, put the
+corresponding setting(s) in one of your profile scripts **after** the line that imports posh-git.
 
 For reference, the following layouts show the relative position of the various parts of the posh-git prompt.
 Note that `<>` denotes parts of the prompt that may not appear depending on the status of settings and whether or not
