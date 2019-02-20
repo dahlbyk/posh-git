@@ -1,4 +1,4 @@
-param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
+param([switch]$ForcePoshGitPrompt)
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
