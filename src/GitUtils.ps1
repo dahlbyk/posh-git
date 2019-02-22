@@ -466,7 +466,7 @@ function Remove-GitBranch {
         $targetBranch = $branch.Trim()
         if ($PSCmdlet.ShouldProcess($targetBranch, $action)) {
             if ($Force -or $yesToAll -or
-                $PSCmdlet.ShouldContinue("Are you sure you want to $action `"$targetBranch`"?",
+                $PSCmdlet.ShouldContinue("Are you REALLY sure you want to $action `"$targetBranch`"?",
                                          "Confirm removing branch", [ref]$yesToAll, [ref]$noToAll)) {
 
                 if ($noToAll) { return }
