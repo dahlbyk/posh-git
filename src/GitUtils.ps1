@@ -459,13 +459,14 @@ function Remove-GitBranch {
         Where-Object {$_ -notmatch $ExcludeBranchPattern } |
         Where-Object {$_ -match $BranchPattern}
 
+    $action = "remove branch"
     $yesToAll = $noToAll = $false
 
     foreach ($branch in $branchesToDelete) {
         $targetBranch = $branch.Trim()
         if ($PSCmdlet.ShouldProcess($targetBranch, $action)) {
             if ($Force -or $yesToAll -or
-                $PSCmdlet.ShouldContinue("Are you sure you want to remove branch `"$targetBranch`"?",
+                $PSCmdlet.ShouldContinue("Are you sure you want to $action `"$targetBranch`"?",
                                          "Confirm removing branch", [ref]$yesToAll, [ref]$noToAll)) {
 
                 if ($noToAll) { return }
