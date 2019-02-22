@@ -439,7 +439,7 @@ function Remove-GitBranch {
         # as well as the develop and master branches.  See the -ExcludeBranchPattern
         # parameter to modify that pattern.
         [Parameter(Mandatory, Position=0)]
-        [string[]]
+        [string]
         $BranchPattern,
 
         # Specifies a regular expression used to exclude merged branches from being removed.
