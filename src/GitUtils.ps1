@@ -438,7 +438,7 @@ function Remove-GitBranch {
         # Certain branches are always excluded from deletion e.g. the current branch
         # as well as the develop and master branches.  See the -ExcludeBranchPattern
         # parameter to modify that pattern.
-        [Parameter(Mandatory, Position=0)]
+        [Parameter(Mandatory, Position=0, HelpMessage="Enter a regular expression pattern to match branch names to delete")]
         [string]
         $BranchPattern,
 
