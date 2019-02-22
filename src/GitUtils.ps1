@@ -455,7 +455,7 @@ function Remove-GitBranch {
         $Force
     )
 
-    $branchesToDelete = git branch --merged $Commit |
+    $branchesToDelete = git branch |
         Where-Object {$_ -notmatch $ExcludeBranchPattern } |
         Where-Object {$_ -match $BranchPattern}
 
