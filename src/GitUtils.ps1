@@ -409,21 +409,61 @@ function Get-AliasPattern($exe) {
 
 <#
 .SYNOPSIS
-    Removes the Git branches specified by the -Name parameter.
+    Removes the specified Git branch or branches if a wildcard pattern is used.
 .DESCRIPTION
-    Removes the specified Git branches.  You must either specify a branch
-    name via the -Name parameter, which accepts wildard characters,
-    or via the -Pattern parameter, which accepts a regular expression.
+    Removes the specified Git branches REGARDLESS of their merge status.
+    You must either specify a branch name via the Name parameter, which
+    accepts wildard characters, or via the Pattern parameter, which accepts
+    a regular expression.
 
-    NOTE: this command deletes branches regardless of their merge status.
-    If you want to remove only merged brances, use the Remove-MergedGitBranch
-    command instead.
+    By default, the following branches are always excluded from removal:
+    the current branch and the develop and master branches.
 
-    By default, the following branches are always excluded: the current branch
-    and the develop and master branches.
+    IMPORTANT: BE VERY CAREFUL using this command.  As a consequence of the
+    downside potential of deleting unmerged branches, this command requires
+    confirmation for each branch it deletes by default. You can suppress
+    confirmation prompting by using the Force parameter.  In order to get
+    this command to "force delete" unmerged branches, you have to separately
+    specify the ForceDelete parameter.
+
+    If you only want to remove *merged branches*, please use the
+    Remove-MergedGitBranch command instead. The Remove-MergedGitBranch command
+    limits branch candidates to only those that have been merged. Consequently
+    Remove-MergedGitBranch does not prompt for confirmation.
+
+    The following Git commands are executed by this command:
+
+    git branch | Where-Object {$_ -notmatch $ExcludePattern} |
+        Where-Object {$_.Trim() -like $Name} |
+        Foreach-Object {git branch --delete $_.Trim()}
+
+    If the ForceDelete parameter is specified, this command executes:
+
+    git branch | Where-Object {$_ -notmatch $ExcludePattern} |
+        Where-Object {$_.Trim() -like $Name} |
+        Foreach-Object {git branch --delete --force $_.Trim()}
+
+    If the Pattern parameter is used instead of the Name parameter, the second
+    Where-Object changes to: Where-Object {$_ -match $Pattern }.
+
+    Recovering Deleted Branches:
+    If you wind up deleting a branch you didn't intend to, typically when using
+    the ForceDelete parameter, you can easily recover it with the info provided
+    by Git during the delete.  For instance, let's say you realized you didn't
+    want to delete the branch 'feature/exp1'.  In the output of this command,
+    you should see a delete entry for this branch that looks like:
+
+    Deleted branch feature/exp1 (was 08f9000).
+
+    To recover this branch, execute the following Git command:
+
+    # git branch <branch-name> <sha1>
+    git branch feature/exp1 08f9000
 .EXAMPLE
     PS> Remove-GitBranch -Name "user/${env:USERNAME}/*" -WhatIf
-    Show the branches that would be removed by the specified regular expression.
+    Shows the branches that would be removed by the specified regular
+    expression without actually removing them. Remove the WhatIf parameter
+    when you are happy with the list of branches that will be removed.
 .EXAMPLE
     PS> Remove-GitBranch "feature/*" -Force
     Removes the branches that match the specified wildcard. Using -Force skips
@@ -437,6 +477,11 @@ function Get-AliasPattern($exe) {
 .EXAMPLE
     PS> Remove-GitBranch -Pattern 'user/(dahlbyk|hillr)/.*'
     Removes the branches that match the specified regular expression.
+.EXAMPLE
+    PS> Remove-GitBranch -Name * -ExcludePattern '(^\*)|(^. (develop|master|v\d+)$)'
+    Removes ALL branches except the current branch, develop, master and branches
+    that also match the pattern 'v\d+' e.g. v1, v1.0, v1.x. BE VERY CAREFUL
+    WHEN SPECIYING SUCH A BROAD -NAME WILDCARD TO THIS COMMAND!
 .LINK
     Remove-MergedGitBranch
 #>
@@ -445,7 +490,7 @@ function Remove-GitBranch {
     param(
         # Specifies a regular expression pattern for the branches that will be deleted.
         # Certain branches are always excluded from deletion e.g. the current branch
-        # as well as the develop and master branches.  See the -ExcludePattern
+        # as well as the develop and master branches.  See the ExcludePattern
         # parameter to modify that pattern.
         [Parameter(Position=0, Mandatory, ParameterSetName="Wildcard")]
         [ValidateNotNullOrEmpty()]
@@ -454,7 +499,7 @@ function Remove-GitBranch {
 
         # Specifies a regular expression pattern for the branches that will be deleted.
         # Certain branches are always excluded from deletion e.g. the current branch
-        # as well as the develop and master branches.  See the -ExcludePattern
+        # as well as the develop and master branches.  See the ExcludePattern
         # parameter to modify that pattern.
         [Parameter(Position=0, Mandatory, ParameterSetName="Pattern")]
         [ValidateNotNull()]
@@ -474,7 +519,10 @@ function Remove-GitBranch {
         [switch]
         $Force,
 
-        # Removes the specified branches using git branch --delete --force  <branch-name>.
+        # Removes the specified branches by adding the --force parameter to the
+        # git branch delete command e.g. git branch --delete --force <branch-name>.
+        # This is also the equivalent of using the -D parameter on the git
+        # branch command.
         [Parameter()]
         [switch]
         $ForceDelete
@@ -514,27 +562,70 @@ function Remove-GitBranch {
 
 <#
 .SYNOPSIS
-    Removes all Git branches merged into the sepcified commit (HEAD by default).
+    Removes the specified Git branch or branches that have been merged.
 .DESCRIPTION
-    Removes all Git branches that have been merged into the sepcified commit
-    (HEAD by default).
+    Removes the specified Git branches that have been merged into the
+    commit specified by the Commit parameter (HEAD by default).
 
-    By default, several potentially merged branches are always excluded. This
-    includes the current branch in addition to the develop and master branches.
+    By default, the following branches are always excluded from removal:
+    the current branch and the `develop` and `master` branches.
+
+    IMPORTANT: Be careful using this command. Most, if not all, of your
+    historical branches have been merged but that doesn't mean you want to
+    remove them.  That is why this command excludes `develop` and `master` by
+    default. But you may use different names e.g. `development` or have other
+    historical branches you don't want to delete.  In these cases, you can
+    either:
+
+    * Request confirmation by using the Confirm parameter.
+    * Specify a narrower branch Name wildcard such as "user/$env:USERNAME/*".
+    * Specify an updated ExcludeParameter e.g. '(^\*)|(^. (develop|master|v\d+)$)'
+      which adds any branch matching the pattern 'v\d+' to the exclusion list.
+
+    The following Git commands are executed by this command:
+
+    git branch --merged $Commit | Where-Object {$_ -notmatch $ExcludePattern} |
+        Where-Object {$_.Trim() -like $Name} |
+        Foreach-Object {git branch --delete $_.Trim()}
+
+    If the Pattern parameter is used instead of the Name parameter, the second
+    Where-Object changes to: Where-Object {$_ -match $Pattern }.
+
+    Recovering Deleted Branches:
+    If you wind up deleting a branch you didn't intend to, you can easily
+    recover it with the info provided by Git during the delete.  For instance,
+    let's say you realized you didn't want to delete the branch 'feature/exp1'.
+    In the output of this command, you should see a delete entry for this
+    branch that looks like:
+
+    Deleted branch feature/exp1 (was 08f9000).
+
+    To recover this branch, execute the following Git command:
+
+    # git branch <branch-name> <sha1>
+    git branch feature/exp1 08f9000
 .EXAMPLE
-    PS> Remove-MergedGitBranch
-    Removes all merged branches except the current branch, develop and master.
+    PS> Remove-MergedGitBranch -Name "user/$env:USERNAME/*" -Whatif
+    Shows which branches would be removed without actually removing them.
+    Remove the WhatIf parameter when you are happy with the list of branches
+    that will be removed.
 .EXAMPLE
-    PS> Remove-MergedGitBranch -Name "feature/*"
-    Removes only merged feature/* branches except the current branch, if it's a
-    feature branch.
+    PS> Remove-MergedGitBranch "feature/*"
+    Removes only merged feature/* branches except for the current branch, if
+    it matches this wildcard pattern. Note that Name is a positional (first)
+    parameter.
+.EXAMPLE
+    PS> Remove-MergedGitBranch "*" -Confirm
+    Removes all merged branches but give you the chance to confirm each and
+    every branch deletion.
 .EXAMPLE
     PS> Remove-MergedGitBranch -Pattern "user/(dahlbyk|hillr)/.*"
     Removes only merged feature/* branches except the current branch, if it's a
     feature branch.
 .EXAMPLE
-    PS> Remove-MergedGitBranch -ExcludePattern '(^\*)|(^. (develop|master|v\d+\.\d+)$)'
-    Removes all merged branches except the current branch, develop and master.
+    PS> Remove-MergedGitBranch -ExcludePattern '(^\*)|(^. (develop|master|v\d+)$)'
+    Removes ALL merged branches except the current branch, develop, master and
+    branches that also match the pattern 'v\d+' e.g. v1, v1.0, v1.x.
 .LINK
     Remove-GitBranch
 #>
@@ -543,18 +634,18 @@ function Remove-MergedGitBranch {
     param(
         # Specifies a regular expression pattern for the merged branches that will be deleted.
         # Certain branches are always excluded from deletion e.g. the current branch
-        # as well as the develop and master branches.  See the -ExcludePattern
+        # as well as the develop and master branches.  See the ExcludePattern
         # parameter to modify that pattern.
-        [Parameter(Position=0, ParameterSetName="Wildcard")]
+        [Parameter(Position=0, Mandatory, ParameterSetName="Wildcard")]
         [ValidateNotNullOrEmpty()]
         [string]
-        $Name = "*",
+        $Name,
 
         # Specifies a regular expression pattern for the merged ranches that will be deleted.
         # Certain branches are always excluded from deletion e.g. the current branch
-        # as well as the develop and master branches.  See the -ExcludePattern
+        # as well as the develop and master branches.  See the ExcludePattern
         # parameter to modify that pattern.
-        [Parameter(Position=0, ParameterSetName="Pattern")]
+        [Parameter(Position=0, Mandatory, ParameterSetName="Pattern")]
         [ValidateNotNull()]
         [string]
         $Pattern,
