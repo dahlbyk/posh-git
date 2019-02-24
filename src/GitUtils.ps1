@@ -565,8 +565,11 @@ function Remove-GitBranch {
 .SYNOPSIS
     Removes the specified Git branch or branches that have been merged.
 .DESCRIPTION
-    Removes the specified Git branches that have been merged into the
-    commit specified by the Commit parameter (HEAD by default).
+    Removes the specified Git branches that have been merged into the commit
+    specified by the Commit parameter (HEAD by default). You must either
+    specify a branch name via the Name parameter, which accepts wildard
+    characters, or via the Pattern parameter, which accepts a regular
+    expression.
 
     By default, the following branches are always excluded from removal:
     the current branch and the `develop` and `master` branches.
