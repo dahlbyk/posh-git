@@ -32,6 +32,7 @@ FunctionsToExport = @(
     'Get-PromptConnectionInfo',
     'Get-PromptPath',
     'New-GitPromptSettings',
+    'Remove-GitBranch',
     'Update-AllBranches',
     'Write-GitStatus',
     'Write-GitBranchName',
