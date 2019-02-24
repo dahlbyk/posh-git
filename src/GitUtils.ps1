@@ -423,8 +423,8 @@ function Get-AliasPattern($exe) {
     downside potential of deleting unmerged branches, this command requires
     confirmation for each branch it deletes by default. You can suppress
     confirmation prompting by using the Force parameter.  In order to get
-    this command to "force delete" unmerged branches, you have to separately
-    specify the ForceDelete parameter.
+    this command to "delete force" unmerged branches, you have to separately
+    specify the DeleteForce parameter.
 
     If you only want to remove *merged branches*, please use the
     Remove-MergedGitBranch command instead. The Remove-MergedGitBranch command
@@ -437,7 +437,7 @@ function Get-AliasPattern($exe) {
         Where-Object {$_.Trim() -like $Name} |
         Foreach-Object {git branch --delete $_.Trim()}
 
-    If the ForceDelete parameter is specified, this command executes:
+    If the DeleteForce parameter is specified, this command executes:
 
     git branch | Where-Object {$_ -notmatch $ExcludePattern} |
         Where-Object {$_.Trim() -like $Name} |
@@ -448,7 +448,7 @@ function Get-AliasPattern($exe) {
 
     Recovering Deleted Branches:
     If you wind up deleting a branch you didn't intend to, typically when using
-    the ForceDelete parameter, you can easily recover it with the info provided
+    the DeleteForce parameter, you can easily recover it with the info provided
     by Git during the delete.  For instance, let's say you realized you didn't
     want to delete the branch 'feature/exp1'.  In the output of this command,
     you should see a delete entry for this branch that looks like:
@@ -470,10 +470,11 @@ function Get-AliasPattern($exe) {
     all the confirmation prompts. Name is a positional parameter. The
     first argument is assumed to be the value of the -Name parameter.
 .EXAMPLE
-    PS> Remove-GitBranch "bugfix/*" -Force -ForceDelete
-    Removes the branches that match the specified wildcard. Using -Force skips
-    all the confirmation prompts while -ForceDelete uses the --force option
-    in the underlying `git branch --delete <branch-name>` command.
+    PS> Remove-GitBranch "bugfix/*" -Force -DeleteForce
+    Removes the branches that match the specified wildcard. Using the Force
+    parameter skips all the confirmation prompts while the DeleteForce
+    parameter uses the --force option in the underlying
+    `git branch --delete <branch-name>` command.
 .EXAMPLE
     PS> Remove-GitBranch -Pattern 'user/(dahlbyk|hillr)/.*'
     Removes the branches that match the specified regular expression.
@@ -520,12 +521,12 @@ function Remove-GitBranch {
         $Force,
 
         # Removes the specified branches by adding the --force parameter to the
-        # git branch delete command e.g. git branch --delete --force <branch-name>.
+        # git branch --delete command e.g. git branch --delete --force <branch-name>.
         # This is also the equivalent of using the -D parameter on the git
         # branch command.
         [Parameter()]
         [switch]
-        $ForceDelete
+        $DeleteForce
     )
 
     $branches = git branch | Where-Object {$_ -notmatch $ExcludePattern }
@@ -537,7 +538,7 @@ function Remove-GitBranch {
         $branchesToDelete = $branches | Where-Object { $_ -match $Pattern }
     }
 
-    $action = if ($ForceDelete) { "force delete"} else { "delete" }
+    $action = if ($DeleteForce) { "delete force"} else { "delete" }
     $yesToAll = $noToAll = $false
 
     foreach ($branch in $branchesToDelete) {
@@ -549,7 +550,7 @@ function Remove-GitBranch {
 
                 if ($noToAll) { return }
 
-                if ($ForceDelete) {
+                if ($DeleteForce) {
                     Invoke-Utf8ConsoleCommand { git branch --delete --force $targetBranch }
                 }
                 else {
