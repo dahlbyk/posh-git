@@ -12,7 +12,7 @@
 
 ### Added
 
-- Added `Remove-GitBranch` and `Remove-MergedGitBranch` commands. Partially addresses #79.
+- Added `Remove-GitBranch` command. Partially addresses #79.
   These commands currently only delete local branches.
   ([#79](https://github.com/dahlbyk/posh-git/issues/79))
   ([PR #663](https://github.com/dahlbyk/posh-git/pull/663))
