@@ -164,6 +164,13 @@ PRIMARY COMMANDS
     Returns information about the current Git repository as well as the index
     and working directory.
 
+    Remove-GitBranch:
+    Deletes the specified Git branches that have been merged into the commit
+    specified by the Commit parameter (HEAD by default). You must either
+    specify a branch name via the Name parameter, which accepts wildard
+    characters, or via the Pattern parameter, which accepts a regular
+    expression.
+
     Write-GitStatus:
     Given a status object returned by Get-GitStatus, this command formats it
     as described above in the GIT STATUS PROMPT section. On a host that
