@@ -450,7 +450,7 @@ function Get-AliasPattern($exe) {
     If you wind up deleting a branch you didn't intend to, you can easily
     recover it with the info provided by Git during the delete.  For instance,
     let's say you realized you didn't want to delete the branch 'feature/exp1'.
-    In the output of this command, you should see a delete entry for this
+    In the output of this command, you should see a deletion entry for this
     branch that looks like:
 
     Deleted branch feature/exp1 (was 08f9000).
@@ -596,7 +596,7 @@ function Remove-GitBranch {
     If you wind up deleting a branch you didn't intend to, you can easily
     recover it with the info provided by Git during the delete.  For instance,
     let's say you realized you didn't want to delete the branch 'feature/exp1'.
-    In the output of this command, you should see a delete entry for this
+    In the output of this command, you should see a deletion entry for this
     branch that looks like:
 
     Deleted branch feature/exp1 (was 08f9000).
