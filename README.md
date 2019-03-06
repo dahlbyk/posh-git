@@ -131,7 +131,7 @@ With Chocolatey installed, execute the following command to install posh-git:
 choco install poshgit
 ```
 
-### Installing post-git Manually
+### Installing posh-git Manually
 
 If you need to test/debug changes prior to contributing here, or would otherwise prefer to install posh-git without
 the aid of a package manager, you can execute `Import-Module <path-to-src\posh-git.psd1>`.  For example, if you
