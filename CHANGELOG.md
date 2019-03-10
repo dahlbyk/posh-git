@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 1.0.0-beta3 - March 4, 2019
+## 1.0.0-beta3 - March 10, 2019
 
 ### Removed
 
