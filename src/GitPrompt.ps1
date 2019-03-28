@@ -451,17 +451,26 @@ function Write-GitBranchStatus {
         elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
             $branchStatusTextSpan.Text = ("{0}{1}{2}" -f $Status.BehindBy, $s.BranchBehindAndAheadStatusSymbol.Text, $Status.AheadBy)
         }
+        else {
+            $branchStatusTextSpan.Text = $s.BranchBehindAndAheadStatusSymbol.Text
+        }
     }
     elseif ($Status.BehindBy -ge 1) {
         # We are behind remote
         if (($s.BranchBehindAndAheadDisplay -eq "Full") -Or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
             $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchBehindStatusSymbol.Text, $Status.BehindBy)
         }
+        else {
+            $branchStatusTextSpan.Text = $s.BranchBehindStatusSymbol.Text
+        }
     }
     elseif ($Status.AheadBy -ge 1) {
         # We are ahead of remote
         if (($s.BranchBehindAndAheadDisplay -eq "Full") -or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
             $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchAheadStatusSymbol.Text, $Status.AheadBy)
+        }
+        else {
+            $branchStatusTextSpan.Text = $s.BranchAheadStatusSymbol.Text
         }
     }
     else {
