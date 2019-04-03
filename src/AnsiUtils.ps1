@@ -47,6 +47,12 @@ function Test-VirtualTerminalSequece([psobject[]]$Object, [switch]$Force) {
 }
 
 function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
+    # Don't output ANSI escape sequences if the `$color` parameter is `$null`,
+    # they would be broken anyway
+    if ($null -eq $color) {
+        return $null;
+    }
+
     if ($color -is [byte]) {
         return "${AnsiEscape}$(38 + $offset);5;${color}m"
     }

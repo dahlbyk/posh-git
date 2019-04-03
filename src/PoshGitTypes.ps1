@@ -153,16 +153,20 @@ class PoshGitTextSpan {
     # $GitPromptSettings.AnsiConsole is $true.  It is also used by the default ToString()
     # implementation to display any ANSI seqs when AnsiConsole is $true.
     [string] ToAnsiString() {
+        # If we know which colors were changed, we can reset only these and leave others be.
+        [System.Collections.Generic.List[string]]$reset = @()
         $e = [char]27 + "["
 
         $bg = $this.BackgroundColor
         if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
             $bg = Get-BackgroundVirtualTerminalSequence $bg
+            $reset.Add('49')
         }
 
         $fg = $this.ForegroundColor
         if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
             $fg = Get-ForegroundVirtualTerminalSequence $fg
+            $reset.Add('39')
         }
 
         $txt = $this.Text
@@ -170,8 +174,12 @@ class PoshGitTextSpan {
 
         # ALWAYS terminate a VT sequence in case the host supports VT (regardless of AnsiConsole setting),
         # or the host display can get messed up.
-        if (Test-VirtualTerminalSequece $str -Force) {
-            $str += "${e}0m"
+        if (Test-VirtualTerminalSequece $txt -Force) {
+            $reset = @('0')
+        }
+
+        if ($reset.Count -gt 0) {
+            $str += "${e}$($reset -join ';')m"
         }
 
         return $str
