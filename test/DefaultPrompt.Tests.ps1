@@ -16,7 +16,7 @@ Describe 'Default Prompt Tests - NO ANSI' {
         It 'Returns the expected prompt string' {
             Set-Location $env:HOME -ErrorAction Stop
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "$(GetHomePath)> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)> "
         }
         It 'Returns the expected prompt string with changed DefaultPromptPrefix' {
             Set-Location $Home -ErrorAction Stop
@@ -34,25 +34,25 @@ Describe 'Default Prompt Tests - NO ANSI' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptSuffix.Text = '`n> '
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "$(GetHomePath)`n> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)`n> "
         }
         It 'Returns the expected prompt string with expanded DefaultPromptSuffix' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptSuffix.Text = ' - $(6*7)> '
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "$(GetHomePath) - 42> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath) - 42> "
         }
         It 'Returns the expected prompt string with DefaultPromptAbbreviateHomeDirectory enabled' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "$(GetHomePath)> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)> "
         }
         It 'Returns the expected prompt string with DefaultPromptAbbreviateHomeDirectory disabled' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $false
             $res = [string](&$prompt *>&1)
-            $res | Should BeExactly "${Home}> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)> "
         }
         It 'Returns the expected prompt string with prefix, suffix and abbrev home set' {
             Set-Location $Home -ErrorAction Stop
@@ -66,7 +66,7 @@ Describe 'Default Prompt Tests - NO ANSI' {
             Set-Location $Home -ErrorAction Stop
             $GitPromptSettings.DefaultPromptEnableTiming = $true
             $res = [string](&$prompt *>&1)
-            $escapedHome = [regex]::Escape((GetHomePath))
+            $escapedHome = [regex]::Escape("$(Get-PromptConnectionInfo)$(GetHomePath)")
             $res | Should Match "$escapedHome \d+ms> "
         }
     }
@@ -95,7 +95,7 @@ A  test/Foo.Tests.ps1
             $res = [string](&$prompt *>&1)
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $path = GetHomeRelPath $PSScriptRoot
-            $res | Should BeExactly "$path [master +1 ~0 -0 | +0 ~1 -1 !]> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path [master +1 ~0 -0 | +0 ~1 -1 !]> "
         }
 
         It 'Returns the expected prompt string with changed PathStatusSeparator' {
@@ -114,7 +114,7 @@ A  test/Foo.Tests.ps1
             $res = [string](&$prompt *>&1)
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $path = GetHomeRelPath $PSScriptRoot
-            $res | Should BeExactly "$path !! [master]> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path !! [master]> "
         }
 
         It 'Returns the expected prompt string with expanded PathStatusSeparator' {
@@ -133,7 +133,7 @@ A  test/Foo.Tests.ps1
             $res = [string](&$prompt *>&1)
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $path = GetHomeRelPath $PSScriptRoot
-            $res | Should BeExactly "$path - 42 [master]> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path - 42 [master]> "
         }
     }
 }
@@ -154,7 +154,7 @@ Describe 'Default Prompt Tests - ANSI' {
         It 'Returns the expected prompt string' {
             Set-Location $env:HOME -ErrorAction Stop
             $res = &$prompt
-            $res | Should BeExactly "$(GetHomePath)> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)> "
         }
         It 'Returns the expected prompt string with changed DefaultPromptSuffix' {
             Set-Location $Home -ErrorAction Stop
@@ -162,7 +162,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptSuffix.ForegroundColor = [ConsoleColor]::DarkBlue
             $GitPromptSettings.DefaultPromptSuffix.BackgroundColor = 0xFF6000 # Orange
             $res = &$prompt
-            $res | Should BeExactly "$(GetHomePath)${csi}34m${csi}48;2;255;96;0m`n> ${csi}0m"
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)${csi}34m${csi}48;2;255;96;0m`n> ${csi}0m"
         }
         It 'Returns the expected prompt string with expanded DefaultPromptSuffix' {
             Set-Location $Home -ErrorAction Stop
@@ -170,7 +170,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptSuffix.ForegroundColor = [ConsoleColor]::DarkBlue
             $GitPromptSettings.DefaultPromptSuffix.BackgroundColor = 0xFF6000 # Orange
             $res = &$prompt
-            $res | Should BeExactly "$(GetHomePath)${csi}34m${csi}48;2;255;96;0m - 42> ${csi}0m"
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)${csi}34m${csi}48;2;255;96;0m - 42> ${csi}0m"
         }
         It 'Returns the expected prompt string with changed DefaultPromptPrefix' {
             Set-Location $Home -ErrorAction Stop
@@ -192,7 +192,7 @@ Describe 'Default Prompt Tests - ANSI' {
             $GitPromptSettings.DefaultPromptPath.ForegroundColor = [ConsoleColor]::DarkCyan
             $GitPromptSettings.DefaultPromptPath.BackgroundColor = [ConsoleColor]::DarkRed
             $res = &$prompt
-            $res | Should BeExactly "${csi}36m${csi}41m$(GetHomePath)${csi}0m> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)${csi}36m${csi}41m$(GetHomePath)${csi}0m> "
         }
         It 'Returns the expected prompt string with prefix, suffix and abbrev home set' {
             Set-Location $Home -ErrorAction Stop
@@ -238,7 +238,7 @@ A  test/Foo.Tests.ps1
             $res = &$prompt
             Assert-MockCalled git -ModuleName posh-git
             $path = GetHomeRelPath $PSScriptRoot
-            $res | Should BeExactly "$path ${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}93m |${csi}0m${csi}31m${csi}49m +0${csi}0m${csi}31m${csi}49m ~1${csi}0m${csi}31m${csi}49m -1${csi}0m${csi}31m !${csi}0m${csi}93m]${csi}0m> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path ${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}93m |${csi}0m${csi}31m${csi}49m +0${csi}0m${csi}31m${csi}49m ~1${csi}0m${csi}31m${csi}49m -1${csi}0m${csi}31m !${csi}0m${csi}93m]${csi}0m> "
         }
 
         It 'Returns the expected prompt string with changed PathStatusSeparator' {
@@ -258,7 +258,7 @@ A  test/Foo.Tests.ps1
             $res = [string](&$prompt *>&1)
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $path = GetHomeRelPath $PSScriptRoot
-            $res | Should BeExactly "$path${csi}107m !! ${csi}0m${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}93m]${csi}0m> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path${csi}107m !! ${csi}0m${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}93m]${csi}0m> "
         }
         It 'Returns the expected prompt string with expanded PathStatusSeparator' {
             Mock -ModuleName posh-git -CommandName git {
@@ -277,7 +277,7 @@ A  test/Foo.Tests.ps1
             $res = [string](&$prompt *>&1)
             Assert-MockCalled git -ModuleName posh-git -Scope It
             $path = GetHomeRelPath $PSScriptRoot
-            $res | Should BeExactly "$path${csi}107m [$(hostname)] ${csi}0m${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}93m]${csi}0m> "
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path${csi}107m [$(hostname)] ${csi}0m${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}93m]${csi}0m> "
         }
     }
 }

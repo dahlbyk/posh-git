@@ -1,6 +1,6 @@
-param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
+param([switch]$ForcePoshGitPrompt)
 
-& $PSScriptRoot\CheckRequirements.ps1 > $null
+. $PSScriptRoot\CheckRequirements.ps1 > $null
 
 . $PSScriptRoot\ConsoleMode.ps1
 . $PSScriptRoot\Utils.ps1
@@ -154,6 +154,8 @@ $exportModuleMemberParams = @{
         'Get-GitStatus',
         'Get-PromptConnectionInfo',
         'Get-PromptPath',
+        'New-GitPromptSettings',
+        'Remove-GitBranch',
         'Update-AllBranches',
         'Write-GitStatus',
         'Write-GitBranchName',
