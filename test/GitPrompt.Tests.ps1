@@ -44,7 +44,7 @@ M test/Baz.Tests.ps1
 
         It 'Returns status output from Write-VcsStatus as string' {
             $res = Write-VcsStatus
-            $res | Should BeExactly " ${csi}93m[${csi}0m${csi}96mmaster${csi}0m${csi}32m${csi}49m +1${csi}0m${csi}32m${csi}49m ~0${csi}0m${csi}32m${csi}49m -0${csi}0m${csi}96m ~${csi}0m${csi}93m]${csi}0m"
+            $res | Should BeExactly " ${csi}93m[${csi}39m${csi}96mmaster${csi}39m${csi}32m +1${csi}39m${csi}32m ~0${csi}39m${csi}32m -0${csi}39m${csi}96m ~${csi}39m${csi}93m]${csi}39m"
         }
     }
 }

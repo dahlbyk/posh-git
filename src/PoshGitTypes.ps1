@@ -157,16 +157,16 @@ class PoshGitTextSpan {
         [System.Collections.Generic.List[string]]$reset = @()
         $e = [char]27 + "["
 
-        $bg = $this.BackgroundColor
-        if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
-            $bg = Get-BackgroundVirtualTerminalSequence $bg
-            $reset.Add('49')
-        }
-
         $fg = $this.ForegroundColor
         if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
             $fg = Get-ForegroundVirtualTerminalSequence $fg
             $reset.Add('39')
+        }
+
+        $bg = $this.BackgroundColor
+        if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
+            $bg = Get-BackgroundVirtualTerminalSequence $bg
+            $reset.Add('49')
         }
 
         $txt = $this.Text

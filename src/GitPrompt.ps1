@@ -119,16 +119,16 @@ function Write-Prompt {
                 [System.Collections.Generic.List[string]]$reset = @()
                 $e = [char]27 + "["
 
-                $bg = $bgColor
-                if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
-                    $bg = Get-BackgroundVirtualTerminalSequence $bg
-                    $reset.Add('49')
-                }
-
                 $fg = $fgColor
                 if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
                     $fg = Get-ForegroundVirtualTerminalSequence $fg
                     $reset.Add('39')
+                }
+
+                $bg = $bgColor
+                if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
+                    $bg = Get-BackgroundVirtualTerminalSequence $bg
+                    $reset.Add('49')
                 }
 
                 $str = "${Object}"
