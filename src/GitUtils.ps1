@@ -82,8 +82,8 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
         else {
             if (Test-Path $gitDir/rebase-apply) {
                 dbg 'Found rebase-apply' $sw
-                $step = "$(Get-Content $gitDir/rebase-merge/next)"
-                $total = "$(Get-Content $gitDir/rebase-merge/last)"
+                $step = "$(Get-Content $gitDir/rebase-apply/next)"
+                $total = "$(Get-Content $gitDir/rebase-apply/last)"
 
                 if (Test-Path $gitDir/rebase-apply/rebasing) {
                     dbg 'Found rebase-apply/rebasing' $sw
