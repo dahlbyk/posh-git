@@ -116,7 +116,7 @@ function Write-Prompt {
             }
             else {
                 # If we know which colors were changed, we can reset only these and leave others be.
-                [System.Collections.Generic.List[string]]$reset = @()
+                $reset = [System.Collections.Generic.List[string]]::new()
                 $e = [char]27 + "["
 
                 $fg = $fgColor
@@ -133,7 +133,8 @@ function Write-Prompt {
 
                 $str = "${Object}"
                 if (Test-VirtualTerminalSequece $str -Force) {
-                    $reset = @('0')
+                    $reset.Clear()
+                    $reset.Add('0')
                 }
 
                 $str = "${fg}${bg}" + $str
