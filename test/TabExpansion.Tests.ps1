@@ -178,6 +178,17 @@ Describe 'TabExpansion Tests' {
         }
     }
 
+    Context 'Remove-GitBranch TabExpansion Tests' {
+        It 'Tab completes branches by positional parameter' {
+            $result = & $module GitTabExpansionInternal 'Remove-GitBranch mas'
+            $result | Should BeExactly 'master'
+        }
+        It 'Tab completes branches by named parameter' {
+            $result = & $module GitTabExpansionInternal 'Remove-GitBranch -IncludeUnmerged -WhatIf -Name mas'
+            $result | Should BeExactly 'master'
+        }
+    }
+
     Context 'Vsts' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
