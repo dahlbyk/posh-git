@@ -278,6 +278,9 @@ You can customize the posh-git prompt function or define your own custom prompt 
 The rest of this section covers how to customize posh-git's prompt function using the global variable
 `$GitPromptSettings`.
 
+**If you'd like to make any of following changes permanent, i.e. available whenever you start PowerShell, put the
+corresponding setting(s) in one of your profile scripts after the line that imports posh-git.**
+
 For instance, you can customize the default prompt prefix to display a colored timestamp with these settings:
 
 ```text
@@ -353,9 +356,6 @@ $GitPromptSettings.DefaultPromptSuffix = ' $((Get-History -Count 1).id + 1)$(">"
 This will change the prompt to:
 
 ![[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
-
-If you'd like to make any of these changes permanent, i.e. available whenever you start PowerShell, put the
-corresponding setting(s) in one of your profile scripts **after** the line that imports posh-git.
 
 For reference, the following layouts show the relative position of the various parts of the posh-git prompt.
 Note that `<>` denotes parts of the prompt that may not appear depending on the status of settings and whether or not
