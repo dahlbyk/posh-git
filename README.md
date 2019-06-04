@@ -42,6 +42,7 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 - Supports PowerShell Core 6+ on all platforms
 - Supports [ANSI escape sequences][ansi-esc-code] for color customization
 - Includes breaking changes from v0.x ([roadmap](https://github.com/dahlbyk/posh-git/issues/328))
+  - **All SSH commands removed** from `posh-git` and moved into the new module [posh-sshell][posh-sshell-url]
 
 #### Releases
 
@@ -436,6 +437,8 @@ function prompt {
 [psgallery-site]:  https://www.powershellgallery.com/packages/posh-git
 [psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0-beta3
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
+
+[posh-sshell-url]: https://github.com/dahlbyk/posh-sshell
 
 [prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "~\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
 [prompt-default]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png       "~\GitHub\posh-git [master ≡]> "
