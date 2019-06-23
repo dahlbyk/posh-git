@@ -115,10 +115,32 @@ function Write-Prompt {
                 $str = $Object.ToAnsiString()
             }
             else {
+                # If we know which colors were changed, we can reset only these and leave others be.
+                $reset = [System.Collections.Generic.List[string]]::new()
                 $e = [char]27 + "["
-                $fg = Get-ForegroundVirtualTerminalSequence $fgColor
-                $bg = Get-BackgroundVirtualTerminalSequence $bgColor
-                $str = "${fg}${bg}${Object}${e}0m"
+
+                $fg = $fgColor
+                if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
+                    $fg = Get-ForegroundVirtualTerminalSequence $fg
+                    $reset.Add('39')
+                }
+
+                $bg = $bgColor
+                if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
+                    $bg = Get-BackgroundVirtualTerminalSequence $bg
+                    $reset.Add('49')
+                }
+
+                $str = "${Object}"
+                if (Test-VirtualTerminalSequece $str -Force) {
+                    $reset.Clear()
+                    $reset.Add('0')
+                }
+
+                $str = "${fg}${bg}" + $str
+                if ($reset.Count -gt 0) {
+                    $str += "${e}$($reset -join ';')m"
+                }
             }
 
             return $(if ($StringBuilder) { $StringBuilder.Append($str) } else { $str })
