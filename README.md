@@ -358,6 +358,8 @@ This will change the prompt to:
 
 ![[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
 
+### Prompt Layouts
+
 For reference, the following layouts show the relative position of the various parts of the posh-git prompt.
 Note that `<>` denotes parts of the prompt that may not appear depending on the status of settings and whether or not
 the current dir is in a Git repository.
@@ -375,12 +377,51 @@ Prompt layout when DefaultPromptWriteStatusFirst is set to $true:
 {DPPrefix}<{BeforeStatus}{Status}{AfterStatus}>{PathStatusSeparator}{DPPath}{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
 ```
 
+### Displaying Error Information
+
+If you want to display the error status of the last command, you can use the values stored in the `$global:GitPromptValues`
+object which includes the value of `$LastExitCode` and `$?` (represented by the property `DollarQuestion`). Here is
+a prompt customization that displays a Red exit code value when `$LastExitCode` is non-zero or a Red `!` if `$?`
+is `$false`:
+
+```powershell
+function global:PromptWriteErrorInfo() {
+    if ($global:GitPromptValues.DollarQuestion) { return }
+
+    if ($global:GitPromptValues.LastExitCode) {
+        "`e[31m(" + $global:GitPromptValues.LastExitCode + ") `e[0m"
+    }
+    else {
+        "`e[31m! `e[0m"
+    }
+}
+
+$global:GitPromptSettings.DefaultPromptBeforeSuffix.Text = '`n$(PromptWriteErrorInfo)$([DateTime]::now.ToString("MM-dd HH:mm:ss"))'
+```
+
+When a PowerShell command fails, this is the prompt you will see:
+
+![~\GitHub\posh-git [master ≡]&#10;! 07-01 22:36:31> ][prompt-error1]
+
+When an external application returns a non-zero exit code, 1 in this case, you will see the exit code in the prompt:
+
+![~\GitHub\posh-git [master ≡]&#10;(1) 07-01 22:32:28> ][prompt-error2]
+
+Note that until you run an external application that sets `$LASTEXITCODE` to zero or you manually set the variable to
+0, you will see the exit code for any error.  In addition to `LastExitCode` and `DollarQuestion`,
+`$global:GitPromtpValues` also has `IsAdmin` and `LastPrompt` properties.  The `LastPrompt` property contains the ANSI
+escaped string that was used for the last prompt. This can be useful for debugging your prompt display particularly
+when using ANSI/VT sequences.
+
+### $GitPromptScriptBlock
+
 If you require even more customization than `$GitPromptSettings` provides, you can create your own prompt
 function to show whatever information you want.
 See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details.
 
-However, if you need a custom prompt to perform some non-prompt logic, you can still use posh-git's prompt function to
-write out a prompt string.  This can be done with the `$GitPromptScriptBlock` variable as shown below e.g.:
+However, if you need a custom prompt just to perform some non-prompt logic, you can still use posh-git's
+prompt function to write out the prompt string.  This can be done with the `$GitPromptScriptBlock` variable as shown
+below e.g.:
 
 ```powershell
 # my profile.ps1
@@ -448,6 +489,8 @@ function prompt {
 [prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡] ~\GitHub\posh-git> "
 [prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "~\GitHub\posh-git [master ≡]&#10;> "
 [prompt-custom]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustom.png        "[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> "
+[prompt-error1]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptError1.png        "~\GitHub\posh-git [master ≡]&#10;! 07-01 22:36:31> "
+[prompt-error2]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptError2.png        "~\GitHub\posh-git [master ≡]&#10;(1) 07-01 22:32:28> "
 
 [v0-change]:       https://github.com/dahlbyk/posh-git/blob/v0/CHANGELOG.md
 [v0-readme]:       https://github.com/dahlbyk/posh-git/blob/v0/README.md
