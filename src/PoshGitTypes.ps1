@@ -292,3 +292,10 @@ class PoshGitPromptSettings {
 
     [bool]$Debug = $false
 }
+
+class PoshGitPromptValues {
+    [int]$LastExitCode
+    [bool]$DollarQuestion
+    [bool]$IsAdmin
+    [string]$LastPrompt
+}

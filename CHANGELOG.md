@@ -1,5 +1,16 @@
 # posh-git Release History
 
+## 1.0.0-beta4 - TBD
+
+### Added
+
+- `$global:GitPromptValues` with the following properties to enable users to have access to the information necessary
+  to display error status in their prompt as well as debug their prompt customizations:
+  - DollarQuestion
+  - IsAdmin
+  - LastExitCode
+  - LastPrompt
+
 ## 1.0.0-beta3 - March 10, 2019
 
 ### Removed

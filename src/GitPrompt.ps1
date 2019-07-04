@@ -2,6 +2,7 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $global:GitPromptSettings = [PoshGitPromptSettings]::new()
+$global:GitPromptValues = [PoshGitPromptValues]::new()
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
 $s = $global:GitPromptSettings
