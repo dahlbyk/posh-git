@@ -410,3 +410,38 @@ function Update-AllBranches($Upstream = 'master', [switch]$Quiet) {
 
     git checkout -q $head
 }
+
+<#
+.SYNOPSIS
+    Returns GIT log entries in object form.
+.DESCRIPTION
+    Returns GIT log entries in object form. Per default the first 30 GIT log entries are returned.
+    Each returned object has following properties: "Date","CommitId","Author","Email","Subject"
+.EXAMPLE
+    $logs = Get-GitLog
+    $logs[0] | Get-Member -MemberType NoteProperty
+
+
+   TypeName: System.Management.Automation.PSCustomObject
+    Name     MemberType
+    ----     ----------
+    Author   NoteProperty
+    CommitId NoteProperty
+    Date     NoteProperty
+    Email    NoteProperty
+    Subject  NoteProperty
+#>
+function Get-GitLog {
+    [CmdletBinding()]
+    Param (
+        # Param1 help description
+        [Parameter(Mandatory=$false,
+                   Position=0)]
+        [ValidateScript( { $_ -gt 0})]
+        $NrOfLogEntries = 30
+    )
+    end {
+        git log --format="%ai`t%H`t%an`t%ae`t%s" -n $NrOfLogEntries | `
+            ConvertFrom-Csv -Delimiter "`t" -Header ("Date","CommitId","Author","Email","Subject")
+    }
+}
