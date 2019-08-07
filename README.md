@@ -26,7 +26,7 @@ posh-git also provides tab completion support for common git commands, branch na
 For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing
 the <kbd>tab</kbd> key. That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will
 cycle through other command matches such as `cherry` and `cherry-pick`. You can also tab complete remote names and
-branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
+branch names, for example: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
 
 ## Versions
 
