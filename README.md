@@ -18,7 +18,7 @@ Table of contents:
 ## Overview
 
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that
-can be displayed in the PowerShell prompt, e.g.:
+can be displayed in the PowerShell prompt, for example:
 
 ![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> ][prompt-def-long]
 
