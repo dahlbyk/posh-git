@@ -313,7 +313,7 @@ $GitPromptSettings.DefaultPromptPath.ForegroundColor = 'Orange'
 On Windows, posh-git uses the `[System.Drawing.ColorTranslator]::FromHtml(string colorName)` method to parse a color
 name as an HTML color. For a complete list of HTML colors, see this [W3Schools page][w3c-colors].
 
-If you are on Linux or macOS and desire an Orange path, you will need to specify the RGB value for Orange e.g.:
+If you are on Linux or macOS and desire an Orange path, you will need to specify the RGB value for Orange, for example:
 
 ```text
 $GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
