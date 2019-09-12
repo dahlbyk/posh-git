@@ -68,14 +68,17 @@ if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows) -and ($script:GitVe
 $script:gitCommandsWithLongParams = $longGitParams.Keys -join '|'
 $script:gitCommandsWithShortParams = $shortGitParams.Keys -join '|'
 $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
+$script:vstsAllCommands = $subCommands['vsts.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
 $script:vstsCommandsWithShortParams = $shortVstsParams.Keys -join '|'
 $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
+$script:vstsCommandsWithParamValues = ( $vstsParamValues.Keys | Where-Object { $_ -ne '**' } ) -join '|'
+$script:vstsSubCommandCommands = $vstsCommandsWithSubCommands.Keys -join '|'
+$script:azAllCommands = $subCommands['az.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
 $script:azCommandsWithShortParams = $shortAzParams.Keys -join '|'
 $script:azCommandsWithLongParams = $longAzParams.Keys -join '|'
 $script:azCommandsWithParamValues = ( $azParamValues.Keys | Where-Object { $_ -ne '**' } ) -join '|'
-$script:vstsCommandsWithParamValues = ( $vstsParamValues.Keys | Where-Object { $_ -ne '**' } ) -join '|'
-
 $script:azSubCommandCommands = $azCommandsWithSubCommands.Keys -join '|'
+
 # constructs  (?:(?<cmd>Name) (?<subcmd>a|b|c))|(?:(?<cmd>Name2) (?<subcmd>d|e|f))
 # only one group will match, so repeat of capture name is perfectly legal for our use-case
 $script:azSubCommandsWithLongParams = `
@@ -88,10 +91,6 @@ $script:vstsSubCommandsWithLongParams = `
 $script:vstsSubCommandsWithShortParams = `
     ($shortVstsSubCommandParams.Keys | ForEach-Object { "(?:(?<cmd>$_) (?<subcmd>$( $shortVstsSubCommandParams[$_].Keys -join '|' )))" }) -join '|'
 
-
-
-$script:azAllCommands = $subCommands['az.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
-$script:vstsAllCommands = $subCommands['vsts.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
