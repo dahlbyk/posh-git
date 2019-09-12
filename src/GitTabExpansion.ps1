@@ -57,6 +57,10 @@ $script:someCommands = @('add','am','annotate','archive','bisect','blame','branc
                          'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm',
                          'shortlog','show','stash','status','submodule','svn','tag','whatchanged', 'worktree')
 
+if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows) -and ($script:GitVersion -ge [System.Version]'2.16.2')) {
+    $script:someCommands += 'update-git-for-windows'
+}
+
 $script:gitCommandsWithLongParams = $longGitParams.Keys -join '|'
 $script:gitCommandsWithShortParams = $shortGitParams.Keys -join '|'
 $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
@@ -140,7 +144,7 @@ function script:gitTags($filter, $prefix = '') {
         quoteStringWithSpecialChars
 }
 
-function script:gitFeatures($filter, $command){
+function script:gitFeatures($filter, $command) {
     $featurePrefix = git config --local --get "gitflow.prefix.$command"
     $branches = @(git branch --no-color | ForEach-Object { if ($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
@@ -270,7 +274,13 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 
     # Handles gitk
-    if ($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$"){
+    if ($lastBlock -match "^$(Get-AliasPattern gitk).* (?<ref>\S*)$") {
+        return gitBranches $matches['ref'] $true
+    }
+
+    # Handles Remove-GitBranch
+    if (($lastBlock -match "^Remove-GitBranch\s+(?!-)(?<ref>\S*)") -or
+        ($lastBlock -match "^Remove-GitBranch.* -Name\s+(?<ref>\S*)")) {
         return gitBranches $matches['ref'] $true
     }
 
@@ -436,7 +446,6 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         {
             expandShortParams $shortVstsParams $matches['cmd'] $matches['shortparam']
         }
-
     }
 }
 
@@ -465,6 +474,7 @@ function TabExpansion($line, $lastWord) {
         "^$(Get-AliasPattern git) (.*)" { Expand-GitCommand $lastBlock }
         "^$(Get-AliasPattern tgit) (.*)" { Expand-GitCommand $lastBlock }
         "^$(Get-AliasPattern gitk) (.*)" { Expand-GitCommand $lastBlock }
+        "^$(Get-AliasPattern Remove-GitBranch) (.*)" { Expand-GitCommand $lastBlock }
 
         # Fall back on existing tab expansion
         default {

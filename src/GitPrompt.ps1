@@ -2,6 +2,7 @@
 # http://www.markembling.info/view/my-ideal-powershell-prompt-with-git-integration
 
 $global:GitPromptSettings = [PoshGitPromptSettings]::new()
+$global:GitPromptValues = [PoshGitPromptValues]::new()
 
 # Override some of the normal colors if the background color is set to the default DarkMagenta.
 $s = $global:GitPromptSettings
@@ -11,6 +12,24 @@ if ($Host.UI.RawUI.BackgroundColor -eq [ConsoleColor]::DarkMagenta) {
     $s.BeforeIndex.ForegroundColor              = 'Green'
     $s.IndexColor.ForegroundColor               = 'Green'
     $s.WorkingColor.ForegroundColor             = 'Red'
+}
+
+<#
+.SYNOPSIS
+    Creates a new instance of a PoshGitPromptSettings object that can be assigned to $GitPromptSettings.
+.DESCRIPTION
+    Creates a new instance of a PoshGitPromptSettings object that can be used to reset the
+    $GitPromptSettings back to its default.
+.INPUTS
+    None
+.OUTPUTS
+    PoshGitPromptSettings
+.EXAMPLE
+    PS> $GitPromptSettings = New-GitPromptSettings
+    This will reset the current $GitPromptSettings back to its default.
+#>
+function New-GitPromptSettings {
+    [PoshGitPromptSettings]::new()
 }
 
 <#
@@ -97,10 +116,32 @@ function Write-Prompt {
                 $str = $Object.ToAnsiString()
             }
             else {
+                # If we know which colors were changed, we can reset only these and leave others be.
+                $reset = [System.Collections.Generic.List[string]]::new()
                 $e = [char]27 + "["
-                $fg = Get-ForegroundVirtualTerminalSequence $fgColor
-                $bg = Get-BackgroundVirtualTerminalSequence $bgColor
-                $str = "${fg}${bg}${Object}${e}0m"
+
+                $fg = $fgColor
+                if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
+                    $fg = Get-ForegroundVirtualTerminalSequence $fg
+                    $reset.Add('39')
+                }
+
+                $bg = $bgColor
+                if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
+                    $bg = Get-BackgroundVirtualTerminalSequence $bg
+                    $reset.Add('49')
+                }
+
+                $str = "${Object}"
+                if (Test-VirtualTerminalSequece $str -Force) {
+                    $reset.Clear()
+                    $reset.Add('0')
+                }
+
+                $str = "${fg}${bg}" + $str
+                if ($reset.Count -gt 0) {
+                    $str += "${e}$($reset -join ';')m"
+                }
             }
 
             return $(if ($StringBuilder) { $StringBuilder.Append($str) } else { $str })
@@ -168,14 +209,14 @@ function Write-GitStatus {
 
     $s = $global:GitPromptSettings
     if (!$Status -or !$s) {
-        return ""
+        return
     }
 
     $sb = [System.Text.StringBuilder]::new(150)
 
     # When prompt is first (default), place the separator before the status summary
     if (!$s.DefaultPromptWriteStatusFirst) {
-        $sb | Write-Prompt $s.PathStatusSeparator > $null
+        $sb | Write-Prompt $s.PathStatusSeparator.Expand() > $null
     }
 
     $sb | Write-Prompt $s.BeforeStatus > $null
@@ -205,10 +246,12 @@ function Write-GitStatus {
 
     # When status is first, place the separator after the status summary
     if ($s.DefaultPromptWriteStatusFirst) {
-        $sb | Write-Prompt $s.PathStatusSeparator > $null
+        $sb | Write-Prompt $s.PathStatusSeparator.Expand() > $null
     }
 
-    $sb.ToString()
+    if ($sb.Length -gt 0) {
+        $sb.ToString()
+    }
 }
 
 <#
@@ -431,17 +474,26 @@ function Write-GitBranchStatus {
         elseif ($s.BranchBehindAndAheadDisplay -eq "Compact") {
             $branchStatusTextSpan.Text = ("{0}{1}{2}" -f $Status.BehindBy, $s.BranchBehindAndAheadStatusSymbol.Text, $Status.AheadBy)
         }
+        else {
+            $branchStatusTextSpan.Text = $s.BranchBehindAndAheadStatusSymbol.Text
+        }
     }
     elseif ($Status.BehindBy -ge 1) {
         # We are behind remote
         if (($s.BranchBehindAndAheadDisplay -eq "Full") -Or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
             $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchBehindStatusSymbol.Text, $Status.BehindBy)
         }
+        else {
+            $branchStatusTextSpan.Text = $s.BranchBehindStatusSymbol.Text
+        }
     }
     elseif ($Status.AheadBy -ge 1) {
         # We are ahead of remote
         if (($s.BranchBehindAndAheadDisplay -eq "Full") -or ($s.BranchBehindAndAheadDisplay -eq "Compact")) {
             $branchStatusTextSpan.Text = ("{0}{1}" -f $s.BranchAheadStatusSymbol.Text, $Status.AheadBy)
+        }
+        else {
+            $branchStatusTextSpan.Text = $s.BranchAheadStatusSymbol.Text
         }
     }
     else {
@@ -847,7 +899,15 @@ function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
 
     $OFS = ""
-    "$($global:VcsPromptStatuses | ForEach-Object { & $_ })"
+    $sb = [System.Text.StringBuilder]::new(256)
+
+    foreach ($promptStatus in $global:VcsPromptStatuses) {
+        [void]$sb.Append("$(& $promptStatus)")
+    }
+
+    if ($sb.Length -gt 0) {
+        $sb.ToString()
+    }
 }
 
 # Add scriptblock that will execute for Write-VcsStatus
@@ -864,7 +924,7 @@ $PoshGitVcsPrompt = {
 
             # When prompt is first (default), place the separator before the status summary
             if (!$s.DefaultPromptWriteStatusFirst) {
-                $sb | Write-Prompt $s.PathStatusSeparator > $null
+                $sb | Write-Prompt $s.PathStatusSeparator.Expand() > $null
             }
             $sb | Write-Prompt $s.BeforeStatus > $null
 
@@ -875,7 +935,9 @@ $PoshGitVcsPrompt = {
             }
             $sb | Write-Prompt $s.AfterStatus > $null
 
-            $sb.ToString()
+            if ($sb.Length -gt 0) {
+                $sb.ToString()
+            }
         }
     }
 }
