@@ -494,7 +494,7 @@ function VstsAndAzureCliExpansion($alias, $rest) {
 
         # Handles git pr <cmd> --<param>=<value> 
         # matches vstsCommandsWithParamValues or azCommandsWithParamValues
-        "^(?<cmd>$(Get-Variable ('{0}CommandsWithParamValues' -f $cliType) -ValueOnly)).* --(?<param>[^=]+)=(?<value>\S*)$" {
+        "^(?<cmd>$(Get-Variable ('{0}CommandsWithParamValues' -f $cliType) -ValueOnly)).* --(?!\*+)(?<param>[^=]+)=(?<value>\S*)$" {
             expandParamValues (Get-Variable "$($cliType)ParamValues" -ValueOnly) $matches['cmd'] $matches['param'] $matches['value']
         }
 
@@ -512,13 +512,13 @@ function VstsAndAzureCliExpansion($alias, $rest) {
 
         # Handles git pr <cmd> --<param>
         # matches vstsCommandsWithLongParams or azCommandsWithLongParams
-        "^(?<cmd>$(Get-Variable ('{0}CommandsWithLongParams' -f $cliType) -ValueOnly)).* --(?<param>\S*)$" {
+        "^(?<cmd>$(Get-Variable ('{0}CommandsWithLongParams' -f $cliType) -ValueOnly)).* --(?!\*+)(?<param>\S*)$" {
             expandLongParams (Get-Variable "long$($cliType)Params" -ValueOnly) $matches['cmd'] $matches['param']
         }
 
         # Handles git pr <cmd> <subcmd> --<param> => git pr policy list --
         # matches vstsSubCommandsWithLongParams or azSubCommandsWithLongParams
-        "^(?:$(Get-Variable ('{0}SubCommandsWithLongParams' -f $cliType) -ValueOnly)).* --(?<param>\S*)$" {
+        "^(?:$(Get-Variable ('{0}SubCommandsWithLongParams' -f $cliType) -ValueOnly)).* --(?!\*+)(?<param>\S*)$" {
             expandLongParams (Get-Variable "long$($cliType)SubCommandParams" -ValueOnly)[$Matches['cmd']] $Matches['subcmd'] $matches['param']
         }
 
