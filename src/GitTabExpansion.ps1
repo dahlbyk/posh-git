@@ -465,7 +465,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 
         # Handles the vsts/azure CLI commands
         # Assumption is that the majority of commands will NOT invoke these CLI's. In order to reduce
-        # amount of matching we will do in general, first detect the the az.pr / vsts.pr aliases 
+        # amount of matching we will do in general, first detect the az.pr / vsts.pr aliases 
         # and THEN perform secondary matches
         "(?<alias>(?:az|vsts)\.pr)\s+(?<rest>.*)$" {
             VstsAndAzureCliExpansion $matches['alias'] $matches['rest']
@@ -476,10 +476,10 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 
 function VstsAndAzureCliExpansion($alias, $rest) {
 
-        # will be "az" or "vsts"
-        $cliType = $alias.Split('.')[0]
+    # will be "az" or "vsts"
+    $cliType = $alias.Split('.')[0]
 
-        switch -regex ($rest) {
+    switch -regex ($rest) {
 
         # Handles git pr alias
         "^(?<op>\S*)$" {
