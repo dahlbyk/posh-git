@@ -83,6 +83,13 @@ $script:azSubCommandsWithLongParams = `
 $script:azSubCommandsWithShortParams = `
     ($shortAzSubCommandParams.Keys | ForEach-Object { "(?:(?<cmd>$_) (?<subcmd>$( $shortAzSubCommandParams[$_].Keys -join '|' )))" }) -join '|'
 
+$script:vstsSubCommandsWithLongParams = `
+    ($longVstsSubCommandParams.Keys | ForEach-Object { "(?:(?<cmd>$_) (?<subcmd>$( $longVstsSubCommandParams[$_].Keys -join '|' )))" }) -join '|'
+$script:vstsSubCommandsWithShortParams = `
+    ($shortVstsSubCommandParams.Keys | ForEach-Object { "(?:(?<cmd>$_) (?<subcmd>$( $shortVstsSubCommandParams[$_].Keys -join '|' )))" }) -join '|'
+
+
+
 $script:azAllCommands = $subCommands['az.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
 $script:vstsAllCommands = $subCommands['vsts.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
 

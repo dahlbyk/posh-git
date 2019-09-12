@@ -109,10 +109,10 @@ $longVstsParams = @{
     create = "auto-complete delete-source-branch work-items bypass-policy bypass-policy-reason description detect instance merge-commit-message open project repository reviewers source-branch squash target-branch title $longVstsGlobal"
     complete = "id detect instance $longVstsGlobal"
     list = "creator detect include-links instance project repository reviewer skip source-branch status= target-branch top $longVstsGlobal"
-    reactivate = " $longVstsGlobal"
-    'set-vote' = " $longVstsGlobal"
-    show = " $longVstsGlobal"
-    update = "id auto-complete bypass-policy bypass-policy-reason delete-source-branch description detect instance merge-commit-message squash title transition-work-items $longVstsGlobal"
+    reactivate = "id detect instance $longVstsGlobal"
+    'set-vote' = "id vote detect instance $longVstsGlobal"
+    show = "id detect instance open $longVstsGlobal"
+    update = "id auto-complete delete-source-branch bypass-policy bypass-policy-reason description detect instance merge-commit-message squash title transition-work-items $longVstsGlobal"
 }
 
 $longAzGlobal = 'debug help output query verbose'
@@ -125,10 +125,33 @@ $longAzParams = @{
     update = "id auto-complete bypass-policy bypass-policy-reason delete-source-branch description detect draft merge-commit-message organization squash status= title transition-work-items $longAzGlobal"
 }
 
+$vstsCommandsWithSubCommands = @{
+    policies = "list queue"
+    reviewers = "add list remove"
+    'work-items' = "add list remove"
+}
+
 $azCommandsWithSubCommands = @{
     policy = "list queue"
     reviewer = "add list remove"
     'work-item' = "add list remove"
+}
+
+$shortVstsSubCommandParams = @{
+    policies = @{
+        list = "i $shortVstsGlobal"
+        queue = "e i $shortVstsGlobal"
+    }
+    reviewers = @{
+        add = "i $shortVstsGlobal"
+        list = "i $shortVstsGlobal"
+        remove = "i $shortVstsGlobal"
+    }
+    'work-items' = @{
+        add = "i $shortVstsGlobal"
+        list = "i $shortVstsGlobal"
+        remove = "i $shortVstsGlobal"
+    }
 }
 
 $shortAzSubCommandParams = @{
@@ -168,8 +191,25 @@ $longAzSubCommandParams = @{
     }
 }
 
-$vstsParamValues = @{
+$longVstsSubCommandCommon = "id detect instance"
+$longVstsSubCommandParams = @{
+    policies = @{
+        list = "$longVstsSubCommandCommon skip top $longVstsGlobal"
+        queue = "$longVstsSubCommandCommon evaluation-id $longVstsGlobal"
+    }
+    reviewers = @{
+        add = "$longVstsSubCommandCommon reviewers $longVstsGlobal"
+        list = "$longVstsSubCommandCommon $longVstsGlobal"
+        remove = "$longVstsSubCommandCommon reviewers $longVstsGlobal"
+    }
+    'work-items' = @{
+        add = "$longVstsSubCommandCommon work-items $longVstsGlobal"
+        list = "$longVstsSubCommandCommon $longVstsGlobal"
+        remove = "$longVstsSubCommandCommon work-items $longVstsGlobal"
+    }
+}
 
+$vstsParamValues = @{
     'set-vote' = @{
         vote = 'approve approve-with-suggestions reject reset wait-for-author'
     }
