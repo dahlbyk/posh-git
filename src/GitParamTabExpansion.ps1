@@ -93,17 +93,109 @@ $shortVstsParams = @{
     update = "d i $shortVstsGlobal"
 }
 
+$shortAzGlobal = 'h o'
+$shortAzParams = @{
+    checkout = " $shortAzGlobal"
+    create = "d p r s t $shortAzGlobal"
+    list = "p r s t $shortAzGlobal"
+    'set-vote' = " $shortAzGlobal"
+    show = " $shortAzGlobal"
+    update = "d $shortAzGlobal"
+}
+
 $longVstsGlobal = 'debug help output query verbose'
 $longVstsParams = @{
     abandon = "id detect instance $longVstsGlobal"
     create = "auto-complete delete-source-branch work-items bypass-policy bypass-policy-reason description detect instance merge-commit-message open project repository reviewers source-branch squash target-branch title $longVstsGlobal"
     complete = "id detect instance $longVstsGlobal"
-    list = " $longVstsGlobal"
+    list = "creator detect include-links instance project repository reviewer skip source-branch status= target-branch top $longVstsGlobal"
     reactivate = " $longVstsGlobal"
     'set-vote' = " $longVstsGlobal"
     show = " $longVstsGlobal"
-    update = " $longVstsGlobal"
+    update = "id auto-complete bypass-policy bypass-policy-reason delete-source-branch description detect instance merge-commit-message squash title transition-work-items $longVstsGlobal"
 }
+
+$longAzGlobal = 'debug help output query verbose'
+$longAzParams = @{
+    checkout = "id remote-name $longAzGlobal"
+    create = "auto-complete delete-source-branch work-items bypass-policy bypass-policy-reason description detect draft merge-commit-message open organization project repository reviewers source-branch squash target-branch title transition-work-items work-items $longAzGlobal"
+    list = "creator include-links detect organization repository reviewer skip source-branch status= target-branch top $longAzGlobal"
+    'set-vote' = "id vote= $longAzGlobal"
+    show = "id detect open organization $longAzGlobal"
+    update = "id auto-complete bypass-policy bypass-policy-reason delete-source-branch description detect draft merge-commit-message organization squash status= title transition-work-items $longAzGlobal"
+}
+
+$azCommandsWithSubCommands = @{
+    policy = "list queue"
+    reviewer = "add list remove"
+    'work-item' = "add list remove"
+}
+
+$shortAzSubCommandParams = @{
+    policy = @{
+        list = " $shortAzGlobal"
+        queue = "e $shortAzGlobal"
+    }
+    reviewer = @{
+        add = " $shortAzGlobal"
+        list = " $shortAzGlobal"
+        remove = " $shortAzGlobal"
+    }
+    'work-item' = @{
+        add = " $shortAzGlobal"
+        list = " $shortAzGlobal"
+        remove = " $shortAzGlobal"
+    }
+}
+
+# these aren't "global" commands, but *are* common to each of the below
+$longAzSubCommandCommon = "id detect organization"
+
+$longAzSubCommandParams = @{
+    policy = @{
+        list = "$longAzSubCommandCommon skip top $longAzGlobal"
+        queue = "$longAzSubCommandCommon evaluation-id $longAzGlobal"
+    }
+    reviewer = @{
+        add = "$longAzSubCommandCommon reviewers $longAzGlobal"
+        list = "$longAzSubCommandCommon $longAzGlobal"
+        remove = "$longAzSubCommandCommon reviewers $longAzGlobal"
+    }
+    'work-item' = @{
+        add = "$longAzSubCommandCommon work-items $longAzGlobal"
+        list = "$longAzSubCommandCommon $longAzGlobal"
+        remove = "$longAzSubCommandCommon work-items $longAzGlobal"
+    }
+}
+
+$vstsParamValues = @{
+
+    'set-vote' = @{
+        vote = 'approve approve-with-suggestions reject reset wait-for-author'
+    }
+    list = @{
+        status = 'abandoned active all completed'
+    }
+    '**' = @{
+        output = 'json jsonc table tsv'
+    }
+}
+
+$azParamValues = @{
+    update = @{
+        status = 'abandoned active completed'
+    }
+    'set-vote' = @{
+        vote = 'approve approve-with-suggestions reject reset wait-for-author'
+    }
+    list = @{
+        status = 'abandoned active all completed'
+    }
+    '**' = @{
+        output = 'json jsonc table tsv'
+    }
+}
+
 
 # Variable is used in GitTabExpansion.ps1
 $gitParamValues = @{

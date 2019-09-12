@@ -5,6 +5,8 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
     KnownAliases = @{
         '!f() { exec vsts code pr "$@"; }; f' = 'vsts.pr'
+        '!f() { exec az.cmd repos pr "$@"; }; f' = 'az.pr'
+        '!f() { exec az.cmd repos "$@"; }; f' = 'az.repo'
     }
 }
 
@@ -12,6 +14,8 @@ $subcommands = @{
     bisect = "start bad good skip reset visualize replay log run"
     notes = 'add append copy edit get-ref list merge prune remove show'
     'vsts.pr' = 'create update show list complete abandon reactivate reviewers work-items set-vote policies'
+    'az.pr' = 'create update show list checkout reviewer work-item set-vote policy'
+    'az.repo' = 'list show'
     reflog = "show delete expire"
     remote = "
         add rename remove set-head set-branches
@@ -66,6 +70,21 @@ $script:gitCommandsWithShortParams = $shortGitParams.Keys -join '|'
 $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
 $script:vstsCommandsWithShortParams = $shortVstsParams.Keys -join '|'
 $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
+$script:azCommandsWithShortParams = $shortAzParams.Keys -join '|'
+$script:azCommandsWithLongParams = $longAzParams.Keys -join '|'
+$script:azCommandsWithParamValues = ( $azParamValues.Keys | Where-Object { $_ -ne '**' } ) -join '|'
+$script:vstsCommandsWithParamValues = ( $vstsParamValues.Keys | Where-Object { $_ -ne '**' } ) -join '|'
+
+$script:azSubCommandCommands = $azCommandsWithSubCommands.Keys -join '|'
+# constructs  (?:(?<cmd>Name) (?<subcmd>a|b|c))|(?:(?<cmd>Name2) (?<subcmd>d|e|f))
+# only one group will match, so repeat of capture name is perfectly legal for our use-case
+$script:azSubCommandsWithLongParams = `
+    ($longAzSubCommandParams.Keys | ForEach-Object { "(?:(?<cmd>$_) (?<subcmd>$( $longAzSubCommandParams[$_].Keys -join '|' )))" }) -join '|'
+$script:azSubCommandsWithShortParams = `
+    ($shortAzSubCommandParams.Keys | ForEach-Object { "(?:(?<cmd>$_) (?<subcmd>$( $shortAzSubCommandParams[$_].Keys -join '|' )))" }) -join '|'
+
+$script:azAllCommands = $subCommands['az.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
+$script:vstsAllCommands = $subCommands['vsts.pr'].Split(' ', [StringSplitOptions]::RemoveEmptyEntries) -join '|'
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
@@ -190,6 +209,7 @@ function script:gitCheckoutFiles($GitStatus, $filter) {
     gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
+
 function script:gitDiffFiles($GitStatus, $filter, $staged) {
     if ($staged) {
         gitFiles $filter $GitStatus.Index.Modified
@@ -248,11 +268,17 @@ function script:expandShortParams($hash, $cmd, $filter) {
         ForEach-Object { -join ("-", $_) }
 }
 
-function script:expandParamValues($cmd, $param, $filter) {
-    $gitParamValues[$cmd][$param].Trim() -split ' ' |
+function script:expandParamValues($hash, $cmd, $param, $filter, $full = $TRUE) {
+    $hash[$cmd][$param].Trim() -split ' ' |
         Where-Object { $_ -like "$filter*" } |
         Sort-Object |
-        ForEach-Object { -join ("--", $param, "=", $_) }
+        ForEach-Object {
+            if ($full) {
+                -join ("--", $param, "=", $_)
+            } else {
+                $_
+            }
+        }
 }
 
 function Expand-GitCommand($Command) {
@@ -394,6 +420,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             gitMergeFiles $GitStatus $matches['files']
         }
 
+
         # Handles git checkout <ref>
         "^(?:checkout).* (?<ref>\S*)$" {
             & {
@@ -417,7 +444,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 
         # Handles git <cmd> --<param>=<value>
         "^(?<cmd>$gitCommandsWithParamValues).* --(?<param>[^=]+)=(?<value>\S*)$" {
-            expandParamValues $matches['cmd'] $matches['param'] $matches['value']
+            expandParamValues $gitParamValues $matches['cmd'] $matches['param'] $matches['value']
         }
 
         # Handles git <cmd> --<param>
@@ -430,21 +457,71 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             expandShortParams $shortGitParams $matches['cmd'] $matches['shortparam']
         }
 
-        # Handles git pr alias
-        "vsts\.pr\s+(?<op>\S*)$" {
-            gitCmdOperations $subcommands 'vsts.pr' $matches['op']
+        # Handles all git pr aliases with expansion for --output/-o formats (az-cli)
+        "^az\.pr\s+(?:$azAllCommands).*?\s+(?:(--out(put)?(?<eq>=|\s+))|(-o\s+))(?<value>\S*)$" {
+            expandParamValues $azParamValues '**' 'output' $matches['value'] ($matches['eq'] -and $matches['eq'].Trim())
         }
 
-        # Handles git pr <cmd> --<param>
-        "vsts\.pr\s+(?<cmd>$vstsCommandsWithLongParams).*--(?<param>\S*)$"
-        {
+        # Handles all git pr aliases with expansion for --output/-o formats (vsts-cli)
+        "^vsts\.pr\s+(?:$vstsAllCommands).*?\s+(?:(--out(put)?(?<eq>=|\s+))|(-o\s+))(?<value>\S*)$" {
+            expandParamValues $vstsParamValues '**' 'output' $matches['value'] ($matches['eq'] -and $matches['eq'].Trim())
+        }
+
+        # Handles git pr alias (azure and vsts)
+        "(?<type>(?:az|vsts)\.pr)\s+(?<op>\S*)$" {
+            gitCmdOperations $subcommands $matches['type'] $matches['op']
+        }
+
+        # Handles git pr <cmd> --<param>=<value> (azure cli only)
+        "^az\.pr\s+(?<cmd>$azCommandsWithParamValues).* --(?<param>[^=]+)=(?<value>\S*)$" {
+            expandParamValues $azParamValues $matches['cmd'] $matches['param'] $matches['value']
+        }
+
+        # Handles git pr <cmd> --<param>=<value> (vsts cli only)
+        "^vsts\.pr\s+(?<cmd>$vstsCommandsWithParamValues).* --(?<param>[^=]+)=(?<value>\S*)$" {
+            expandParamValues $vstsParamValues $matches['cmd'] $matches['param'] $matches['value']
+        }
+
+        # add branch expansion for git PR target/source branch (vsts and azure)
+        "^(?:az|vsts)\.pr\s+(?:create|list)\s+.*?(?:--(?:target|source)-branch|-(?:t|s))\s+(?<ref>\S*)$"{
+            # should only return non-remote-qualified name of remote branches
+            gitRemoteUniqueBranches $matches['ref']
+        }
+
+        # handles git pr <cmd> <subcmd> (azure cli only)
+        # ie. git pr policy list
+        "az\.pr\s+(?<subcmd>$azSubCommandCommands)\s+(?<op>\S*)$" {
+            gitCmdOperations $azCommandsWithSubCommands $matches['subcmd'] $matches['op']
+        }
+
+        # Handles git pr <cmd> --<param> (vsts cli)
+        "vsts\.pr\s+(?<cmd>$vstsCommandsWithLongParams).*--(?<param>\S*)$" {
             expandLongParams $longVstsParams $matches['cmd'] $matches['param']
         }
+        # Handles git pr <cmd> --<param> (azure cli)
+        "az\.pr\s+(?<cmd>$azCommandsWithLongParams).*--(?<param>\S*)$" {
+            expandLongParams $longAzParams $matches['cmd'] $matches['param']
+        }
 
-        # Handles git pr <cmd> -<shortparam>
-        "vsts\.pr\s+(?<cmd>$vstsCommandsWithShortParams).*-(?<shortparam>\S*)$"
-        {
+        # Handles git pr <cmd> <subcmd> --<param> (azure cli only)
+        # ie. git pr policy list --
+        "az\.pr\s+(?:$azSubCommandsWithLongParams).*--(?<param>\S*)$" {
+            expandLongParams $longAzSubCommandParams[$Matches['cmd']] $Matches['subcmd'] $matches['param']
+        }
+
+        # Handles git pr <cmd> -<shortparam> (vsts cli)
+        "vsts\.pr\s+(?<cmd>$vstsCommandsWithShortParams).*-(?<shortparam>\S*)$" {
             expandShortParams $shortVstsParams $matches['cmd'] $matches['shortparam']
+        }
+        # Handles git pr <cmd> -<shortparam> (azure cli)
+        "az\.pr\s+(?<cmd>$AzCommandsWithShortParams).*-(?<shortparam>\S*)$" {
+            expandShortParams $shortAzParams $matches['cmd'] $matches['shortparam']
+        }
+
+        # Handles git pr <cmd> <subcmd> -<shortparam> (azure cli only)
+        # ie. git pr policy list -d
+        "az\.pr\s+(?:$azSubCommandsWithShortParams).*-(?<shortparam>\S*)$" {
+            expandShortParams $shortAzSubCommandParams[$Matches['cmd']] $Matches['subcmd'] $matches['shortparam']
         }
     }
 }
