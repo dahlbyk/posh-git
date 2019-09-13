@@ -468,13 +468,13 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         # amount of matching we will do in general, first detect the az.pr / vsts.pr aliases 
         # and THEN perform secondary matches
         "(?<alias>(?:az|vsts)\.pr)\s+(?<rest>.*)$" {
-            VstsAndAzureCliExpansion $matches['alias'] $matches['rest']
+            expandVstsAndAzureCli $matches['alias'] $matches['rest']
         }
 
     }
 }
 
-function VstsAndAzureCliExpansion($alias, $rest) {
+function script:expandVstsAndAzureCli($alias, $rest) {
 
     # will be "az" or "vsts"
     $cliType = $alias.Split('.')[0]
@@ -486,20 +486,20 @@ function VstsAndAzureCliExpansion($alias, $rest) {
             gitCmdOperations $subcommands $alias $matches['op']
         }
 
-        # Handles all git pr aliases with expansion for --output/-o formats 
+        # Handles all git pr aliases with expansion for --output/-o formats
         # matches vstsAllCommands or azAllCommands
         "^(?:$(Get-Variable ('{0}AllCommands' -f $cliType) -ValueOnly)).* (?:(--out(put)?(?<eq>=|\s+))|(-o\s+))(?<value>\S*)$" {
-            expandParamValues (Get-Variable "$($cliType)ParamValues" -ValueOnly) '**' 'output' $matches['value'] ($matches['eq'] -and $matches['eq'].Trim())
+            expandParamValues (Get-Variable "$($cliType)ParamValues" -ValueOnly) '**' 'output' $matches['value'] -Full ($matches['eq'] -and $matches['eq'].Trim())
         }
 
-        # Handles git pr <cmd> --<param>=<value> 
+        # Handles git pr <cmd> --<param>=<value>
         # matches vstsCommandsWithParamValues or azCommandsWithParamValues
         "^(?<cmd>$(Get-Variable ('{0}CommandsWithParamValues' -f $cliType) -ValueOnly)).* --(?!\*+)(?<param>[^=]+)=(?<value>\S*)$" {
             expandParamValues (Get-Variable "$($cliType)ParamValues" -ValueOnly) $matches['cmd'] $matches['param'] $matches['value']
         }
 
         # add branch expansion for git PR target/source branch
-        "^(?:create|list)\s+.*?(?:--(?:target|source)-branch|-(?:t|s))\s+(?<ref>\S*)$"{
+        "^(?:create|list)\s+.*?(?:--(?:target|source)-branch|-(?:t|s))\s+(?<ref>\S*)$" {
             # should only return non-remote-qualified name of remote branches
             gitRemoteUniqueBranches $matches['ref']
         }
@@ -516,14 +516,14 @@ function VstsAndAzureCliExpansion($alias, $rest) {
             expandLongParams (Get-Variable "long$($cliType)Params" -ValueOnly) $matches['cmd'] $matches['param']
         }
 
-        # Handles git pr <cmd> <subcmd> --<param> => git pr policy list --
+        # Handles git pr <cmd> <subcmd> --<param> => git pr policy list --debug
         # matches vstsSubCommandsWithLongParams or azSubCommandsWithLongParams
         "^(?:$(Get-Variable ('{0}SubCommandsWithLongParams' -f $cliType) -ValueOnly)).* --(?!\*+)(?<param>\S*)$" {
             expandLongParams (Get-Variable "long$($cliType)SubCommandParams" -ValueOnly)[$Matches['cmd']] $Matches['subcmd'] $matches['param']
         }
 
         # Handles git pr <cmd> -<shortparam>
-        # matches vstsCommandsWithShortParams or azCommandsWithShortParams		
+        # matches vstsCommandsWithShortParams or azCommandsWithShortParams
         "^(?<cmd>$(Get-Variable ('{0}CommandsWithShortParams' -f $cliType) -ValueOnly)).* -(?!-)(?<shortparam>\S*)$" {
             expandShortParams (Get-Variable "short$($cliType)Params" -ValueOnly) $matches['cmd'] $matches['shortparam']
         }
