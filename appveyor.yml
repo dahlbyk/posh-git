@@ -27,7 +27,6 @@ before_test:
   - ps: Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
   - ps: Install-Module Coveralls -MinimumVersion 1.0.5 -Scope CurrentUser
   - ps: Import-Module Coveralls
-  - ps: ./build.ps1
 
 test_script:
   - ps: |
