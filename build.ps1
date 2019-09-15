@@ -1,4 +1,5 @@
-$outputFolder = (Join-Path $PSScriptRoot 'out')
+$moduleVersion = (Import-LocalizedData -FileName 'posh-git.psd1' -BaseDirectory (Join-Path $PSScriptRoot 'src')).ModuleVersion
+$outputFolder = (Join-Path $PSScriptRoot $moduleVersion)
 
 # Clean
 if (Test-Path $outputFolder) {
@@ -19,9 +20,10 @@ foreach ($powerShellScriptToBeMerged in $PowerShellScriptsToBeMerged) {
     if ($contentOfMainModule.Contains($replaceSearchText)) {
         $contentOfMainModule = $contentOfMainModule.Replace(". `$PSScriptRoot\$NameOfScriptToBeMerged",
             @"
-#region
+#region $($powerShellScriptToBeMerged.BaseName)
 $scriptContentToBeMerged
 #endregion
+
 "@)
         Remove-Item $powerShellScriptToBeMerged
     }
