@@ -1,4 +1,5 @@
 . $PSScriptRoot\Shared.ps1
+. $modulePath\Utils.ps1
 
 $expectedEncoding = if ($PSVersionTable.PSVersion.Major -le 5) { "utf8" } else { "ascii" }
 
