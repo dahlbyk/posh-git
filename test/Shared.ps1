@@ -3,8 +3,10 @@ $moduleManifestPath = "$modulePath\posh-git.psd1"
 # Test against built folder in CI (or just set $env:CI locally for that)
 if ($env:CI) {
     $moduleVersion = (Import-LocalizedData -FileName 'posh-git.psd1' -BaseDirectory ($modulePath)).ModuleVersion
-    $builtModulePath = Convert-Path $PSScriptRoot\..\$moduleVersion
-    $moduleManifestPath = "$builtModulePath\posh-git.psd1"
+    $builtModulePath = [System.IO.Path]::Combine($PSScriptRoot, '..', $moduleVersion)
+    if (Test-Path $builtModulePath) {
+        $moduleManifestPath = "$builtModulePath\posh-git.psd1"
+    }
 }
 
 $csi = [char]0x1b + "["
