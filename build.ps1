@@ -17,8 +17,15 @@ foreach ($powerShellScriptToBeMerged in $PowerShellScriptsToBeMerged) {
     $NameOfScriptToBeMerged = $powerShellScriptToBeMerged.Name
     $scriptContentToBeMerged = Get-Content -Path $powerShellScriptToBeMerged.FullName -Raw
     $replaceSearchText = ". `$PSScriptRoot\$NameOfScriptToBeMerged"
+    if (-not $contentOfMainModule.Contains($replaceSearchText)) {
+        $replaceSearchText = ". `$PSScriptRoot\$NameOfScriptToBeMerged > `$null"
+    }
+    if (-not $contentOfMainModule.Contains($replaceSearchText)) {
+        continue
+    }
+
     if ($contentOfMainModule.Contains($replaceSearchText)) {
-        $contentOfMainModule = $contentOfMainModule.Replace(". `$PSScriptRoot\$NameOfScriptToBeMerged",
+        $contentOfMainModule = $contentOfMainModule.Replace($replaceSearchText,
             @"
 #region $($powerShellScriptToBeMerged.BaseName)
 $scriptContentToBeMerged
