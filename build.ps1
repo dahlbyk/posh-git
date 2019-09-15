@@ -14,7 +14,7 @@ $contentOfMainModule = Get-Content -Path $mainModulePath
 $PowerShellScriptsToBeMerged = Get-ChildItem -Path $outputFolder -Filter '*.ps1'
 foreach ($powerShellScriptToBeMerged in $PowerShellScriptsToBeMerged) {
     $NameOfScriptToBeMerged = $powerShellScriptToBeMerged.Name
-    $scriptContentToBeMerged = Get-Content -Path $powerShellScriptToBeMerged
+    $scriptContentToBeMerged = Get-Content -Path $powerShellScriptToBeMerged -Raw
     $replaceSearchText = ". `$PSScriptRoot\$NameOfScriptToBeMerged"
     if ($contentOfMainModule.Contains($replaceSearchText)) {
         $contentOfMainModule = $contentOfMainModule.Replace(". `$PSScriptRoot\$NameOfScriptToBeMerged",
@@ -28,3 +28,5 @@ $scriptContentToBeMerged
 }
 
 Set-Content -Path $mainModulePath -Value $contentOfMainModule
+
+Write-Verbose "Module created at '$outputFolder'" -Verbose
