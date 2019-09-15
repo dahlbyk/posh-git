@@ -49,7 +49,7 @@ test_script:
           exit 1;
       }
 
-      # Builld module and run test against it
+      # Build module and run test against it
       ./build.ps1
       $result = Invoke-Pester @pesterParams
       if (Test-Path $testResultsFile) {
@@ -61,7 +61,6 @@ test_script:
           exit 1;
       }
 
-      $builtModuletestResultsFile = Join-Path $Env:APPVEYOR_BUILD_FOLDER BuildModuleTestResults.xml
       $ErrorActionPreference = 'Stop'
       if (!(Test-Path Env:CA_KEY)) {
           Write-Host 'CA_KEY not set! (Expected on PR builds.)'
