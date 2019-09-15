@@ -50,7 +50,7 @@ test_script:
       }
 
       # Build module and run test against it
-      $buildScriptPath =  "$Env:APPVEYOR_BUILD_FOLDER\build.ps1'
+      $buildScriptPath =  "$Env:APPVEYOR_BUILD_FOLDER\build.ps1"
       & $buildScriptPath
       $result = Invoke-Pester @pesterParams
       if (Test-Path $testResultsFile) {
