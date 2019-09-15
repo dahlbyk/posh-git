@@ -50,7 +50,8 @@ test_script:
       }
 
       # Build module and run test against it
-      ./build.ps1
+      $buildScriptPath =  "$Env:APPVEYOR_BUILD_FOLDER\build.ps1'
+      & $buildScriptPath
       $result = Invoke-Pester @pesterParams
       if (Test-Path $testResultsFile) {
           (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $testResultsFile)
