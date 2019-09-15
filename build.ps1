@@ -19,9 +19,10 @@ foreach ($powerShellScriptToBeMerged in $PowerShellScriptsToBeMerged) {
     if ($contentOfMainModule.Contains($replaceSearchText)) {
         $contentOfMainModule = $contentOfMainModule.Replace(". `$PSScriptRoot\$NameOfScriptToBeMerged",
             @"
-#region
+#region $($powerShellScriptToBeMerged.BaseName)
 $scriptContentToBeMerged
 #endregion
+
 "@)
         Remove-Item $powerShellScriptToBeMerged
     }
