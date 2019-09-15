@@ -1,4 +1,5 @@
-$outputFolder = (Join-Path $PSScriptRoot 'out')
+$moduleVersion = (Import-LocalizedData -FileName 'posh-git.psd1' -BaseDirectory (Join-Path $PSScriptRoot 'src')).ModuleVersion
+$outputFolder = (Join-Path $PSScriptRoot $moduleVersion)
 
 # Clean
 if (Test-Path $outputFolder) {
