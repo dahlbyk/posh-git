@@ -433,7 +433,7 @@ function Get-NativeSshAgent {
         # The ssh.exe binary version must include "OpenSSH"
         # The windows ssh-agent service must exist
         $service = Get-Service ssh-agent -ErrorAction Ignore
-        $executableMatches = Get-Command ssh.exe | ForEach-Object FileVersionInfo | Where-Object ProductVersion -match OpenSSH
+        $executableMatches = Get-Command ssh.exe -ErrorAction Ignore | ForEach-Object FileVersionInfo | Where-Object ProductVersion -match OpenSSH
         $valid = $service -and $executableMatches
         if ($valid) {
             return $service;
