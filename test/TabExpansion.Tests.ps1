@@ -178,6 +178,17 @@ Describe 'TabExpansion Tests' {
         }
     }
 
+    Context 'Restore Source Branch TabExpansion Tests' {
+        It 'Tab completes source branches -s' {
+            $result = & $module GitTabExpansionInternal 'git restore -s mas'
+            $result | Should BeExactly 'master'
+        }
+        It 'Tab completes source branches --source=' {
+            $result = & $module GitTabExpansionInternal 'git restore --source=mas'
+            $result | Should BeExactly '--source=master'
+        }
+    }
+
     Context 'Vsts' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]

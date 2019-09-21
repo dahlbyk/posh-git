@@ -54,8 +54,8 @@ function script:gitCmdOperations($commands, $command, $filter) {
 $script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry',
                          'cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch',
                          'format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv',
-                         'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm',
-                         'shortlog','show','stash','status','submodule','svn','tag','whatchanged', 'worktree')
+                         'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','restore','revert','rm',
+                         'shortlog','show','stash','status','submodule','svn','switch','tag','whatchanged', 'worktree')
 
 if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows) -and ($script:GitVersion -ge [System.Version]'2.16.2')) {
     $script:someCommands += 'update-git-for-windows'
@@ -249,10 +249,16 @@ function script:expandShortParams($hash, $cmd, $filter) {
 }
 
 function script:expandParamValues($cmd, $param, $filter) {
-    $gitParamValues[$cmd][$param].Trim() -split ' ' |
-        Where-Object { $_ -like "$filter*" } |
-        Sort-Object |
-        ForEach-Object { -join ("--", $param, "=", $_) }
+    $paramValues = $gitParamValues[$cmd][$param]
+
+    $completions = if ($paramValues -is [scriptblock]) {
+        & $paramValues $filter | Where-Object { $_ -like "$filter*" }
+    }
+    else {
+        $paramValues.Trim() -split ' ' | Where-Object { $_ -like "$filter*" } | Sort-Object
+    }
+
+    $completions | ForEach-Object { -join ("--", $param, "=", $_) }
 }
 
 function Expand-GitCommand($Command) {
@@ -368,8 +374,15 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             gitAddFiles $GitStatus $matches['files']
         }
 
-        # Handles git checkout -- <path>
-        "^checkout.* -- (?<files>\S*)$" {
+        # Handles git restore -s <ref> - must come before the next regex case
+        "^restore.* -s\s*(?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
+            gitTags $matches['ref']
+            break
+        }
+
+        # Handles git checkout -- <path> and git restore <path>
+        "^(?:checkout.* --|restore.*) (?<files>\S*)$" {
             gitCheckoutFiles $GitStatus $matches['files']
         }
 
@@ -388,8 +401,8 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             gitMergeFiles $GitStatus $matches['files']
         }
 
-        # Handles git checkout <ref>
-        "^(?:checkout).* (?<ref>\S*)$" {
+        # Handles git checkout|switch <ref>
+        "^(?:checkout|switch).* (?<ref>\S*)$" {
             & {
                 gitBranches $matches['ref'] $true
                 gitRemoteUniqueBranches $matches['ref']

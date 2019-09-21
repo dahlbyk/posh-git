@@ -28,12 +28,14 @@ $shortGitParams = @{
     rebase = 'm s X S q v n C f i p x'
     remote = 'v'
     reset = 'q p'
+    restore = 's p W S q m'
     revert = 'e m n S s X'
     rm = 'f n r q'
     shortlog = 'n s e w'
     stash = 'p k u a q'
     status = 's b u z'
     submodule = 'q b f n N'
+    switch = 'c C d f m q t'
     tag = 'a s u f d v n l m F'
     whatchanged = 'p'
 }
@@ -70,6 +72,7 @@ $longGitParams = @{
     reflog = 'stale-fix expire= expire-unreachable= all updateref rewrite verbose'
     remote = 'verbose'
     reset = 'patch quiet soft mixed hard merge keep'
+    restore = 'source= patch worktree staged quiet progress no-progress ours theirs merge conflict= ignore-unmerged ignore-skip-worktree-bits overlay no-overlay'
     revert = 'edit mainline no-edit no-commit gpg-sign signoff strategy= strategy-option continue quit abort'
     rm = 'force dry-run cached ignore-unmatch quiet'
     shortlog = 'numbered summary email format='
@@ -77,6 +80,7 @@ $longGitParams = @{
     stash = 'patch no-keep-index keep-index include-untracked all quiet index'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     submodule = 'quiet branch force cached files summary-limit remote no-fetch checkout merge rebase init name reference recursive depth'
+    switch = 'create force-create detach guess no-guess force discard-changes merge conflict= quiet no-progress track no-track orphan ignore-other-worktrees recurse-submodules no-recurse-submodules'
     tag = 'annotate sign local-user force delete verify list sort column no-column contains points-at message file cleanup'
     whatchanged = 'since'
 }
@@ -173,6 +177,14 @@ $gitParamValues = @{
     rebase = @{
         strategy = 'resolve recursive octopus ours subtree'
     }
+    restore = @{
+        conflict = 'merge diff3'
+        source = {
+            param($ref)
+            gitBranches $matches['ref'] $true
+            gitTags $matches['ref']
+        }
+    }
     revert = @{
         strategy = 'resolve recursive octopus ours subtree'
     }
@@ -184,5 +196,8 @@ $gitParamValues = @{
     status = @{
         'untracked-files' = 'no normal all'
         'ignore-submodules' = 'none untracked dirty all'
+    }
+    switch = @{
+        conflict = 'merge diff3'
     }
 }
