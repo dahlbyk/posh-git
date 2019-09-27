@@ -190,6 +190,10 @@ function script:gitCheckoutFiles($GitStatus, $filter) {
     gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
+function script:gitDeleted($GitStatus, $filter) {
+    gitFiles $filter $GitStatus.Working.Deleted
+}
+
 function script:gitDiffFiles($GitStatus, $filter, $staged) {
     if ($staged) {
         gitFiles $filter $GitStatus.Index.Modified
@@ -203,8 +207,13 @@ function script:gitMergeFiles($GitStatus, $filter) {
     gitFiles $filter $GitStatus.Working.Unmerged
 }
 
-function script:gitDeleted($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Working.Deleted
+function script:gitRestoreFiles($GitStatus, $filter, $staged) {
+    if ($staged) {
+        gitFiles $filter (@($GitStatus.Index.Added) + @($GitStatus.Index.Modified) + @($GitStatus.Index.Deleted))
+    }
+    else {
+        gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
+    }
 }
 
 function script:gitAliases($filter) {
@@ -374,16 +383,21 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             gitAddFiles $GitStatus $matches['files']
         }
 
+        # Handles git checkout -- <path>
+        "^checkout.* -- (?<files>\S*)$" {
+            gitCheckoutFiles $GitStatus $matches['files']
+        }
+
         # Handles git restore -s <ref> - must come before the next regex case
-        "^restore.* -s\s*(?<ref>\S*)$" {
+        "^restore.* (?-i)-s\s*(?<ref>\S*)$" {
             gitBranches $matches['ref'] $true
             gitTags $matches['ref']
             break
         }
 
-        # Handles git checkout -- <path> and git restore <path>
-        "^(?:checkout.* --|restore.*) (?<files>\S*)$" {
-            gitCheckoutFiles $GitStatus $matches['files']
+        # Handles git restore <path>
+        "^restore(?:.* (?<staged>(?:-S|--staged))|.*) (?<files>\S*)$" {
+            gitRestoreFiles $GitStatus $matches['files'] $matches['staged']
         }
 
         # Handles git rm <path>
