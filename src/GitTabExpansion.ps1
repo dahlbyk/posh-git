@@ -396,7 +396,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         }
 
         # Handles git restore <path>
-        "^restore(?:.* (?<staged>(?:-S|--staged))|.*) (?<files>\S*)$" {
+        "^restore(?:.* (?<staged>(?:(?-i)-S|--staged))|.*) (?<files>\S*)$" {
             gitRestoreFiles $GitStatus $matches['files'] $matches['staged']
         }
 
