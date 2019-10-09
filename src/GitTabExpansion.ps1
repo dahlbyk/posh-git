@@ -278,12 +278,6 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         return gitBranches $matches['ref'] $true
     }
 
-    # Handles Remove-GitBranch
-    if (($lastBlock -match "^Remove-GitBranch\s+(?!-)(?<ref>\S*)") -or
-        ($lastBlock -match "^Remove-GitBranch.* -Name\s+(?<ref>\S*)")) {
-        return gitBranches $matches['ref'] $true
-    }
-
     switch -regex ($lastBlock -replace "^$(Get-AliasPattern git) ","") {
 
         # Handles git <cmd> <op>
@@ -474,7 +468,6 @@ function TabExpansion($line, $lastWord) {
         "^$(Get-AliasPattern git) (.*)" { Expand-GitCommand $lastBlock }
         "^$(Get-AliasPattern tgit) (.*)" { Expand-GitCommand $lastBlock }
         "^$(Get-AliasPattern gitk) (.*)" { Expand-GitCommand $lastBlock }
-        "^$(Get-AliasPattern Remove-GitBranch) (.*)" { Expand-GitCommand $lastBlock }
 
         # Fall back on existing tab expansion
         default {
@@ -483,4 +476,10 @@ function TabExpansion($line, $lastWord) {
             }
         }
     }
+}
+
+# Handles Remove-GitBranch -Name parameter auto-completion using the built-in mechanism for cmdlet parameters
+Register-ArgumentCompleter -CommandName Remove-GitBranch -ParameterName Name -ScriptBlock {
+    param($Command, $Parameter, $WordToComplete, $CommandAst, $FakeBoundParams)
+    gitBranches $WordToComplete $true
 }
