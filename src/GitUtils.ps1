@@ -452,7 +452,7 @@ function Get-AliasPattern($cmd) {
 
         Where-Object { $_ -match $Pattern }
 
-    ## Recovering Deleted Branches
+    Recovering Deleted Branches
 
     If you wind up deleting a branch you didn't intend to, you can easily recover it with the info provided by Git during the delete. For instance, let's say you realized you didn't want to delete the branch 'feature/exp1'. In the output of this command, you should see a deletion entry for this branch that looks like:
 
