@@ -8,7 +8,7 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes without subcommands' {
             $result = & $module GitTabExpansionInternal 'git whatever '
 
-            $result | Should Be @()
+            $result | Should BeNullOrEmpty
         }
         It 'Tab completes bisect subcommands' {
             $result = & $module GitTabExpansionInternal 'git bisect '
@@ -192,6 +192,61 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes pr options' {
             $result = & $module GitTabExpansionInternal 'git test-vsts-pr '
             $result -contains 'abandon' | Should Be $true
+            $result -contains 'reactivate' | Should Be $true
+            $result -contains 'create' | Should Be $true
+            $result -contains 'list' | Should Be $true
+            $result -contains 'update' | Should Be $true
+            $result -contains 'show' | Should Be $true
+            $result -contains 'policies' | Should Be $true
+            $result -contains 'work-items' | Should Be $true
+            $result -contains 'reviewers' | Should Be $true
+            # Azure CLI variants
+            $result -contains 'checkout' | Should Be $false
+            $result -contains 'policy' | Should Be $false
+            $result -contains 'reviewer' | Should Be $false
+            $result -contains 'work-item' | Should Be $false
+        }
+
+        It 'Tab completes pr policies all subcommands' {
+            $result = & $module GitTabExpansionInternal 'git test-vsts-pr policies '
+            $result -contains 'list' | Should Be $true
+            $result -contains 'queue' | Should Be $true
+        }
+    }
+
+    Context 'Azure CLI' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo
+
+            # Test with non-standard vsts pr alias name
+            &$gitbin config alias.test-az-pr "!f() { exec az.cmd repos pr \`"`$`@\`"; }; f"
+        }
+        AfterEach {
+            RemoveGitTempRepo $repoPath
+        }
+        It 'Tab completes pr options' {
+            $result = & $module GitTabExpansionInternal 'git test-az-pr '
+            $result -contains 'create' | Should Be $true
+            $result -contains 'list' | Should Be $true
+            $result -contains 'checkout' | Should Be $true
+            $result -contains 'update' | Should Be $true
+            $result -contains 'show' | Should Be $true
+            $result -contains 'policy' | Should Be $true
+            $result -contains 'work-item' | Should Be $true
+            $result -contains 'reviewer' | Should Be $true
+            # VSTS CLI Variants
+            $result -contains 'abandon' | Should Be $false
+            $result -contains 'reactivate' | Should Be $false
+            $result -contains 'policies' | Should Be $false
+            $result -contains 'reviewers' | Should Be $false
+            $result -contains 'work-items' | Should Be $false
+        }
+
+        It 'Tab completes pr policy all subcommands' {
+            $result = & $module GitTabExpansionInternal 'git test-az-pr policy '
+            $result -contains 'list' | Should Be $true
+            $result -contains 'queue' | Should Be $true
         }
     }
 
