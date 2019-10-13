@@ -54,8 +54,8 @@ function script:gitCmdOperations($commands, $command, $filter) {
 $script:someCommands = @('add','am','annotate','archive','bisect','blame','branch','bundle','checkout','cherry',
                          'cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch',
                          'format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv',
-                         'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','revert','rm',
-                         'shortlog','show','stash','status','submodule','svn','tag','whatchanged', 'worktree')
+                         'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','restore','revert','rm',
+                         'shortlog','show','stash','status','submodule','svn','switch','tag','whatchanged', 'worktree')
 
 if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows) -and ($script:GitVersion -ge [System.Version]'2.16.2')) {
     $script:someCommands += 'update-git-for-windows'
@@ -190,6 +190,10 @@ function script:gitCheckoutFiles($GitStatus, $filter) {
     gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
 }
 
+function script:gitDeleted($GitStatus, $filter) {
+    gitFiles $filter $GitStatus.Working.Deleted
+}
+
 function script:gitDiffFiles($GitStatus, $filter, $staged) {
     if ($staged) {
         gitFiles $filter $GitStatus.Index.Modified
@@ -203,8 +207,13 @@ function script:gitMergeFiles($GitStatus, $filter) {
     gitFiles $filter $GitStatus.Working.Unmerged
 }
 
-function script:gitDeleted($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Working.Deleted
+function script:gitRestoreFiles($GitStatus, $filter, $staged) {
+    if ($staged) {
+        gitFiles $filter (@($GitStatus.Index.Added) + @($GitStatus.Index.Modified) + @($GitStatus.Index.Deleted))
+    }
+    else {
+        gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
+    }
 }
 
 function script:gitAliases($filter) {
@@ -249,10 +258,16 @@ function script:expandShortParams($hash, $cmd, $filter) {
 }
 
 function script:expandParamValues($cmd, $param, $filter) {
-    $gitParamValues[$cmd][$param].Trim() -split ' ' |
-        Where-Object { $_ -like "$filter*" } |
-        Sort-Object |
-        ForEach-Object { -join ("--", $param, "=", $_) }
+    $paramValues = $gitParamValues[$cmd][$param]
+
+    $completions = if ($paramValues -is [scriptblock]) {
+        & $paramValues $filter | Where-Object { $_ -like "$filter*" }
+    }
+    else {
+        $paramValues.Trim() -split ' ' | Where-Object { $_ -like "$filter*" } | Sort-Object
+    }
+
+    $completions | ForEach-Object { -join ("--", $param, "=", $_) }
 }
 
 function Expand-GitCommand($Command) {
@@ -373,6 +388,18 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             gitCheckoutFiles $GitStatus $matches['files']
         }
 
+        # Handles git restore -s <ref> - must come before the next regex case
+        "^restore.* (?-i)-s\s*(?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true
+            gitTags $matches['ref']
+            break
+        }
+
+        # Handles git restore <path>
+        "^restore(?:.* (?<staged>(?:(?-i)-S|--staged))|.*) (?<files>\S*)$" {
+            gitRestoreFiles $GitStatus $matches['files'] $matches['staged']
+        }
+
         # Handles git rm <path>
         "^rm.* (?<index>\S*)$" {
             gitDeleted $GitStatus $matches['index']
@@ -388,8 +415,8 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             gitMergeFiles $GitStatus $matches['files']
         }
 
-        # Handles git checkout <ref>
-        "^(?:checkout).* (?<ref>\S*)$" {
+        # Handles git checkout|switch <ref>
+        "^(?:checkout|switch).* (?<ref>\S*)$" {
             & {
                 gitBranches $matches['ref'] $true
                 gitRemoteUniqueBranches $matches['ref']
