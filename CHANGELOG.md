@@ -4,12 +4,48 @@
 
 ### Added
 
+- Branch name completion to the new `Remote-GitBranch` command.
+  ([PR #678](https://github.com/dahlbyk/posh-git/pull/678))
 - `$global:GitPromptValues` with the following properties to enable users to have access to the information necessary
   to display error status in their prompt as well as debug their prompt customizations:
   - DollarQuestion
   - IsAdmin
   - LastExitCode
   - LastPrompt
+  ([PR #684](https://github.com/dahlbyk/posh-git/pull/684))
+- Added tab-completion for new `git restore` and `git switch` commands.
+  ([#691](https://github.com/dahlbyk/posh-git/issues/691))
+  ([PR #702](https://github.com/dahlbyk/posh-git/pull/702))
+  Thanks @pinkfloydx33 for the direction and motivation to add this.
+
+### Changed
+
+- Shortened up the Windows title text to work better with Windows Terminal tabs. Now only displays '32-bit' in 32-bit
+  PowerShell. Otherwise, assumption is you're running 64-bit. Also display on PowerShell major.minor version number.
+  ([PR #707](https://github.com/dahlbyk/posh-git/pull/707))
+- Switched from overriding `TabExpansion` function to using `Register-ArgumentCompleter` for tab-completion.
+  ([PR #609](https://github.com/dahlbyk/posh-git/pull/609))
+  Thanks Andrew Bradley (@cspotcode)
+- Update Ubuntu build system from 14.04 to 16.04
+  ([PR #677](https://github.com/dahlbyk/posh-git/pull/677))
+  Thanks @ExE-Boss
+
+### Fixed
+
+- BranchBehindAndAheadDisplay minimal/compact bug
+  ([#670](https://github.com/dahlbyk/posh-git/issues/670))
+  ([PR #671](https://github.com/dahlbyk/posh-git/pull/671))
+- Fix(status): Only reset changed colors
+  ([PR #673](https://github.com/dahlbyk/posh-git/pull/673))
+  Thanks @ExE-Boss
+- Fix rebase step count
+  ([PR #674](https://github.com/dahlbyk/posh-git/pull/674))
+  Thanks Saša Kajfeš (@skajfes)
+- Fix typo in cherry-pick parameters - `´continue`
+  ([PR #675](https://github.com/dahlbyk/posh-git/pull/675))
+  Thanks @KexyBiscuit
+- Fix bug w/multiple completions of name parameter on remove-gitbranch
+  ([PR #705](https://github.com/dahlbyk/posh-git/pull/705)
 
 ## 1.0.0-beta3 - March 10, 2019
 
