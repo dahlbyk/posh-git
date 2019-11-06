@@ -1,9 +1,17 @@
 . $PSScriptRoot\Shared.ps1
 
-Describe 'TabExpansion Tests' {
-    It 'Exports a TabExpansion function' {
+Describe 'TabExpansion function test' {
+    BeforeAll {
+        if ($PSVersionTable.PSVersion.Major -gt 5) {
+            $PSDefaultParameterValues["it:skip"] = $true
+        }
+    }
+    It 'Windows PowerShell v5 exports a TabExpansion function' {
         $module.ExportedFunctions.Keys -contains 'TabExpansion' | Should Be $true
     }
+}
+
+Describe 'TabExpansion Tests' {
     Context 'Subcommand TabExpansion Tests' {
         It 'Tab completes without subcommands' {
             $result = & $module GitTabExpansionInternal 'git whatever '
