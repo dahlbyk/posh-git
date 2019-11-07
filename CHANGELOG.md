@@ -4,7 +4,7 @@
 
 ### Added
 
-- Branch name completion to the new `Remote-GitBranch` command.
+- Branch name completion to the new `Remove-GitBranch` command.
   ([PR #678](https://github.com/dahlbyk/posh-git/pull/678))
 - `$global:GitPromptValues` with the following properties to enable users to have access to the information necessary
   to display error status in their prompt as well as debug their prompt customizations:
