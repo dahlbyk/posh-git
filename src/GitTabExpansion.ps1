@@ -471,7 +471,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 }
 
 if ($PSVersionTable.PSVersion.Major -ge 6) {
-    Register-ArgumentCompleter -CommandName git,tgit,gitk -Native -ScriptBlock {
+    Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName git,tgit,gitk -Native -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
 
         Expand-GitCommand $commandAst.Extent.Text
@@ -515,7 +515,7 @@ else {
 }
 
 # Handles Remove-GitBranch -Name parameter auto-completion using the built-in mechanism for cmdlet parameters
-Register-ArgumentCompleter -CommandName Remove-GitBranch -ParameterName Name -ScriptBlock {
+Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName Remove-GitBranch -ParameterName Name -ScriptBlock {
     param($Command, $Parameter, $WordToComplete, $CommandAst, $FakeBoundParams)
     gitBranches $WordToComplete $true
 }
