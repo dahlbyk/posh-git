@@ -283,6 +283,7 @@ class PoshGitPromptSettings {
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
 
     [bool]$DefaultPromptAbbreviateHomeDirectory = $true
+    [bool]$DefaultPromptAbbreviateGitDirectory  = $false
     [bool]$DefaultPromptWriteStatusFirst        = $false
     [bool]$DefaultPromptEnableTiming            = $false
     [PoshGitTextSpan]$DefaultPromptTimingFormat = ' {0}ms'

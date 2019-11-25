@@ -281,6 +281,7 @@ function Get-PathStringComparison {
 function Get-PromptPath {
     $settings = $global:GitPromptSettings
     $abbrevHomeDir = $settings -and $settings.DefaultPromptAbbreviateHomeDirectory
+    $abbrevGitDir = $settings -and $settings.DefaultPromptAbbreviateGitDirectory
 
     # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
     # However for any path with a drive defined, it's better to use the Path property.
@@ -289,10 +290,22 @@ function Get-PromptPath {
     $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
     $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
 
+    # Look up the git root
+    if ($abbrevGitDir) {
+        $gitPath = $(Get-GitDirectory)
+        if ($gitPath) { $gitPath = $(Split-Path $gitPath -Parent) }
+    }
+
     $stringComparison = Get-PathStringComparison
 
+    # Abbreviate path by replacing beginning of path with - *iff* the path is under a git repository
+    if ($abbrevGitDir -and $currentPath -and $gitPath -and
+        $currentPath.StartsWith($gitPath, $stringComparison)) {
+        $removePath = $(Split-Path $gitPath -Parent)
+        $currentPath = "-" + $currentPath.SubString($removePath.Length)
+    }
     # Abbreviate path by replacing beginning of path with ~ *iff* the path is under the user's home dir
-    if ($abbrevHomeDir -and $currentPath -and !$currentPath.Equals($Home, $stringComparison) -and
+    elseif ($abbrevHomeDir -and $currentPath -and !$currentPath.Equals($Home, $stringComparison) -and
         $currentPath.StartsWith($Home, $stringComparison)) {
 
         $currentPath = "~" + $currentPath.SubString($Home.Length)
