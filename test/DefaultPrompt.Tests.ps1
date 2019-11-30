@@ -14,7 +14,7 @@ Describe 'Default Prompt Tests - NO ANSI' {
 
     Context 'Prompt with no Git summary' {
         It 'Returns the expected prompt string' {
-            Set-Location $env:HOME -ErrorAction Stop
+            Set-Location $HOME -ErrorAction Stop
             $res = [string](&$prompt *>&1)
             $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)> "
         }
@@ -152,7 +152,7 @@ Describe 'Default Prompt Tests - ANSI' {
 
     Context 'Prompt with no Git summary' {
         It 'Returns the expected prompt string' {
-            Set-Location $env:HOME -ErrorAction Stop
+            Set-Location $HOME -ErrorAction Stop
             $res = &$prompt
             $res | Should BeExactly "$(Get-PromptConnectionInfo)$(GetHomePath)> "
         }

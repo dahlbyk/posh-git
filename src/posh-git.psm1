@@ -13,9 +13,6 @@ param([switch]$ForcePoshGitPrompt)
 . $PSScriptRoot\GitTabExpansion.ps1
 . $PSScriptRoot\TortoiseGit.ps1
 
-if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
-if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
-
 $IsAdmin = Test-Administrator
 
 # Get the default prompt definition.
