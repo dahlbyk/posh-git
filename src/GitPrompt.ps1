@@ -223,8 +223,9 @@ function Write-GitStatus {
     $sb | Write-GitBranchName $Status -NoLeadingSpace > $null
     $sb | Write-GitBranchStatus $Status > $null
 
+    $sb | Write-Prompt $s.BeforeIndex > $null
+
     if ($s.EnableFileStatus -and $Status.HasIndex) {
-        $sb | Write-Prompt $s.BeforeIndex > $null
         $sb | Write-GitIndexStatus $Status > $null
 
         if ($Status.HasWorking) {
