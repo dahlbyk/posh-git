@@ -1,4 +1,7 @@
-$Global:GitMissing = $false
+$global:GitMissing = $false
+
+$requiredVersion = [Version]'1.7.2'
+$script:GitVersion = $requiredVersion
 
 if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
     Write-Warning "git command could not be found. Please create an alias or add it to your PATH."
@@ -6,13 +9,12 @@ if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
     return
 }
 
-$requiredVersion = [Version]'1.7.2'
 if ([string](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)') {
-    $version = [Version]$Matches['ver']
+    $script:GitVersion = [System.Version]$Matches['ver']
 }
 
-if ($version -lt $requiredVersion) {
-    Write-Warning "posh-git requires Git $requiredVersion or better. You have $version."
+if ($GitVersion -lt $requiredVersion) {
+    Write-Warning "posh-git requires Git $requiredVersion or better. You have $GitVersion."
     $false
 }
 else {

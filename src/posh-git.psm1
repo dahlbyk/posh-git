@@ -1,6 +1,6 @@
-param([switch]$NoVersionWarn, [switch]$ForcePoshGitPrompt)
+param([switch]$ForcePoshGitPrompt)
 
-& $PSScriptRoot\CheckRequirements.ps1 > $null
+. $PSScriptRoot\CheckRequirements.ps1 > $null
 
 . $PSScriptRoot\ConsoleMode.ps1
 . $PSScriptRoot\Utils.ps1
@@ -29,6 +29,17 @@ else {
 
 # The built-in posh-git prompt function in ScriptBlock form.
 $GitPromptScriptBlock = {
+    $origDollarQuestion = $global:?
+    $origLastExitCode = $global:LASTEXITCODE
+
+    if (!$global:GitPromptValues) {
+        $global:GitPromptValues = [PoshGitPromptValues]::new()
+    }
+
+    $global:GitPromptValues.DollarQuestion = $origDollarQuestion
+    $global:GitPromptValues.LastExitCode = $origLastExitCode
+    $global:GitPromptValues.IsAdmin = $IsAdmin
+
     $settings = $global:GitPromptSettings
     if (!$settings) {
         return "<`$GitPromptSettings not found> "
@@ -38,7 +49,10 @@ $GitPromptScriptBlock = {
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
     }
 
-    $origLastExitCode = $global:LASTEXITCODE
+    if ($settings.SetEnvColumns) {
+        # Set COLUMNS so git knows how wide the terminal is
+        $Env:COLUMNS = $Host.UI.RawUI.WindowSize.Width
+    }
 
     # Construct/write the prompt text
     $prompt = ''
@@ -95,8 +109,7 @@ $GitPromptScriptBlock = {
     }
     else {
         # If using ANSI, set this global to help debug ANSI issues
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $global:PoshGitLastPrompt = EscapeAnsiString $prompt
+        $global:GitPromptValues.LastPrompt = EscapeAnsiString $prompt
     }
 
     $global:LASTEXITCODE = $origLastExitCode
@@ -149,6 +162,8 @@ $exportModuleMemberParams = @{
         'Get-GitStatus',
         'Get-PromptConnectionInfo',
         'Get-PromptPath',
+        'New-GitPromptSettings',
+        'Remove-GitBranch',
         'Update-AllBranches',
         'Write-GitStatus',
         'Write-GitBranchName',

@@ -1,8 +1,118 @@
 # posh-git Release History
 
-## 1.0.0-beta3 - June 14, 2018
+## 1.0.0-beta4 - TBD
 
-- Moved SSH agent functionality to <https://github.com/dahlbyk/posh-sshell>.
+### Added
+
+- Branch name completion to the new `Remove-GitBranch` command.
+  ([PR #678](https://github.com/dahlbyk/posh-git/pull/678))
+- `$global:GitPromptValues` with the following properties to enable users to have access to the information necessary
+  to display error status in their prompt as well as debug their prompt customizations:
+  - DollarQuestion
+  - IsAdmin
+  - LastExitCode
+  - LastPrompt
+  ([PR #684](https://github.com/dahlbyk/posh-git/pull/684))
+- Added tab-completion for new `git restore` and `git switch` commands.
+  ([#691](https://github.com/dahlbyk/posh-git/issues/691))
+  ([PR #702](https://github.com/dahlbyk/posh-git/pull/702))
+  Thanks @pinkfloydx33 for the direction and motivation to add this.
+
+### Changed
+
+- Shortened up the Windows title text to work better with Windows Terminal tabs. Now only displays '32-bit' in 32-bit
+  PowerShell. Otherwise, assumption is you're running 64-bit. Also display on PowerShell major.minor version number.
+  ([PR #707](https://github.com/dahlbyk/posh-git/pull/707))
+- Switched from overriding `TabExpansion` function to using `Register-ArgumentCompleter` for tab-completion.
+  ([PR #609](https://github.com/dahlbyk/posh-git/pull/609))
+  Thanks Andrew Bradley (@cspotcode)
+- Update Ubuntu build system from 14.04 to 16.04
+  ([PR #677](https://github.com/dahlbyk/posh-git/pull/677))
+  Thanks @ExE-Boss
+
+### Fixed
+
+- BranchBehindAndAheadDisplay minimal/compact bug
+  ([#670](https://github.com/dahlbyk/posh-git/issues/670))
+  ([PR #671](https://github.com/dahlbyk/posh-git/pull/671))
+- Fix(status): Only reset changed colors
+  ([PR #673](https://github.com/dahlbyk/posh-git/pull/673))
+  Thanks @ExE-Boss
+- Fix rebase step count
+  ([PR #674](https://github.com/dahlbyk/posh-git/pull/674))
+  Thanks Saša Kajfeš (@skajfes)
+- Fix typo in cherry-pick parameters - `´continue`
+  ([PR #675](https://github.com/dahlbyk/posh-git/pull/675))
+  Thanks @KexyBiscuit
+- Fix bug w/multiple completions of name parameter on remove-gitbranch
+  ([PR #705](https://github.com/dahlbyk/posh-git/pull/705)
+
+## 1.0.0-beta3 - March 10, 2019
+
+### Removed
+
+- BREAKING: Removed SSH agent functionality from `posh-git` and put into another module focused solely on
+  Git SSH support. See [posh-sshell](https://github.com/dahlbyk/posh-sshell).
+  ([#338](https://github.com/dahlbyk/posh-git/issues/338))
+  ([PR #585](https://github.com/dahlbyk/posh-git/pull/585))
+- BREAKING: Removed `PoshGitTextSpan.CustomAnsi` property - now just put your custom VT sequences in the
+  `PoshGitTextSpan.Text` property. Be sure to terminate your VT sequences with `"$([char]27)[0m"` or
+  ``` "`e[0m" ``` on PowerShell Core.
+  ([PR #616](https://github.com/dahlbyk/posh-git/pull/616))
+
+### Added
+
+- Added `Remove-GitBranch` command. Partially addresses #79.
+  These commands currently only delete local branches.
+  ([#79](https://github.com/dahlbyk/posh-git/issues/79))
+  ([PR #663](https://github.com/dahlbyk/posh-git/pull/663))
+- Added support for vsts-cli Git integration.
+  ([#549](https://github.com/dahlbyk/posh-git/issues/549))
+  ([PR #581](https://github.com/dahlbyk/posh-git/pull/581))
+  Thanks David Gardiner (@flcdrg)
+- Enhance prompt function to show username/hostname in SSH connection. Adds `Get-PromptConnectionInfo` command.
+  ([#591](https://github.com/dahlbyk/posh-git/issues/591))
+  ([PR #595](https://github.com/dahlbyk/posh-git/pull/595))
+- Show Rebase Progress (plus `|REVERTING`).
+  ([#102](https://github.com/dahlbyk/posh-git/issues/102))
+  ([PR #599](https://github.com/dahlbyk/posh-git/pull/599))
+- Set `$Env:COLUMNS` on prompt if necessary.
+  ([PR #607](https://github.com/dahlbyk/posh-git/pull/607))
+- Tab-completion for `git log --stat`, `git log --patch` and `git diff --staged`.
+  ([PR #620](https://github.com/dahlbyk/posh-git/pull/620))
+  Thanks Vasily Korytov (@chillum)
+- Tab-completion for `git update-git-for-windows` on Windows Git >= 2.16.2.
+  ([PR #642](https://github.com/dahlbyk/posh-git/pull/642))
+- `New-GitPromptSettings` to provide an easy way to create a `PoshGitPromptSettings` object which can be used to
+  reset to the default settings.
+  ([PR #659](https://github.com/dahlbyk/posh-git/pull/659))
+
+### Changed
+
+- Eliminate traiing `=` on the tab-completion of `--force-with-lease=`.
+  ([PR #622](https://github.com/dahlbyk/posh-git/pull/622))
+  Thanks Chuck Lu (@chucklu)
+- Expand `PathStatusSeparator` string when composing prompt. This allows you to use string interpolation in the
+  `$GitPromptSettings.PathStatusSeparator.Text` setting.
+  ([PR #630](https://github.com/dahlbyk/posh-git/pull/630))
+  Thanks Jason Shirk (@lzybkr)
+
+### Fixed
+
+- `WindowTitle` set by user overwritten by module.  No longer updates Window title if `WindowTitle` setting set to `$null`.
+  ([#594](https://github.com/dahlbyk/posh-git/issues/594))
+  ([PR #597](https://github.com/dahlbyk/posh-git/pull/597))
+- `Write-VcsStatus` behaving differently.  When `AnsiConsole -eq $false`, `Write-VcsStatus` must not emit any strings.
+  ([#612](https://github.com/dahlbyk/posh-git/issues/612))
+  ([PR #617](https://github.com/dahlbyk/posh-git/pull/617))
+- On Windows PowerShell, defer `Add-Type` until `Set-ConsoleMode` executed. This improves module load time.
+  ([#637](https://github.com/dahlbyk/posh-git/issues/637))
+  ([PR #638](https://github.com/dahlbyk/posh-git/pull/638))
+  ([PR #662](https://github.com/dahlbyk/posh-git/pull/662))
+- How do you manually install this? Added manual instructions for git clone of posh-git to README.md.
+  ([#648](https://github.com/dahlbyk/posh-git/issues/648))
+  ([PR #649](https://github.com/dahlbyk/posh-git/pull/649))
+  Thanks Kyle Spier-Swenson (@MrStonedOne)
 
 ## 1.0.0-beta2 - May 13, 2018
 

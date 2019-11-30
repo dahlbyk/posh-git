@@ -11,7 +11,7 @@ $invokeErrors = New-Object System.Collections.ArrayList 256
 
 function Invoke-NullCoalescing {
     $result = $null
-    foreach($arg in $args) {
+    foreach ($arg in $args) {
         if ($arg -is [ScriptBlock]) {
             $result = & $arg
         }

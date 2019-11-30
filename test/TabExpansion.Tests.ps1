@@ -1,9 +1,17 @@
 . $PSScriptRoot\Shared.ps1
 
-Describe 'TabExpansion Tests' {
-    It 'Exports a TabExpansion function' {
+Describe 'TabExpansion function test' {
+    BeforeAll {
+        if ($PSVersionTable.PSVersion.Major -gt 5) {
+            $PSDefaultParameterValues["it:skip"] = $true
+        }
+    }
+    It 'Windows PowerShell v5 exports a TabExpansion function' {
         $module.ExportedFunctions.Keys -contains 'TabExpansion' | Should Be $true
     }
+}
+
+Describe 'TabExpansion Tests' {
     Context 'Subcommand TabExpansion Tests' {
         It 'Tab completes without subcommands' {
             $result = & $module GitTabExpansionInternal 'git whatever '
@@ -36,6 +44,17 @@ Describe 'TabExpansion Tests' {
             $result2 -contains 'set-branches' | Should Be $true
             $result2 -contains 'set-head' | Should Be $true
             $result2 -contains 'set-url' | Should Be $true
+        }
+        It 'Tab completes update-git-for-windows only on Windows' {
+            $result = & $module GitTabExpansionInternal 'git update-'
+
+            if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows)) {
+                $result -contains '' | Should Be $false
+                $result -contains 'update-git-for-windows' | Should Be $true
+            }
+            else {
+                $result | Should BeNullOrEmpty
+            }
         }
     }
     Context 'Fetch/Push/Pull TabExpansion Tests' {
@@ -164,6 +183,17 @@ Describe 'TabExpansion Tests' {
             finally {
                 &$gitbin branch -D $branchName
             }
+        }
+    }
+
+    Context 'Restore Source Branch TabExpansion Tests' {
+        It 'Tab completes source branches -s' {
+            $result = & $module GitTabExpansionInternal 'git restore -s mas'
+            $result | Should BeExactly 'master'
+        }
+        It 'Tab completes source branches --source=' {
+            $result = & $module GitTabExpansionInternal 'git restore --source=mas'
+            $result | Should BeExactly '--source=master'
         }
     }
 
