@@ -291,14 +291,11 @@ function Get-PromptPath {
 
     $stringComparison = Get-PathStringComparison
 
-    # $HOME is defined by PowerShell on all platforms. If for some reason it isn't defined, use a fallback.
-    $homePath = if ($HOME) {$HOME} else {[System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)}
-
     # Abbreviate path by replacing beginning of path with ~ *iff* the path is under the user's home dir
-    if ($abbrevHomeDir -and $currentPath -and !$currentPath.Equals($homePath, $stringComparison) -and
-        $currentPath.StartsWith($homePath, $stringComparison)) {
+    if ($abbrevHomeDir -and $currentPath -and !$currentPath.Equals($Home, $stringComparison) -and
+        $currentPath.StartsWith($Home, $stringComparison)) {
 
-        $currentPath = "~" + $currentPath.SubString($homePath.Length)
+        $currentPath = "~" + $currentPath.SubString($Home.Length)
     }
 
     return $currentPath
