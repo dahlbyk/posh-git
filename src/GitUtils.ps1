@@ -211,16 +211,17 @@ function Get-GitStatus {
         [Parameter(Position=0)]
         $GitDir = (Get-GitDirectory),
 
-        # If specified, overrides $GitPromptSettings.EnablePromptStatus when it
-        # is set to $false.
+        # If specified, overrides $GitPromptSettings.EnableFileStatus and
+        # $GitPromptSettings.EnablePromptStatus when they are set to $false.
         [Parameter()]
         [switch]
         $Force
     )
 
-    $settings = $Global:GitPromptSettings
-    $enabled = $Force -or !$settings -or $settings.EnablePromptStatus
-    if ($enabled -and $GitDir) {
+    $settings = if ($global:GitPromptSettings) { $global:GitPromptSettings } else { [PoshGitPromptSettings]::new() }
+
+    $promptStatusEnabled = $Force -or $settings.EnablePromptStatus
+    if ($promptStatusEnabled -and $GitDir) {
         if ($settings.Debug) {
             $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
         }
@@ -242,7 +243,8 @@ function Get-GitStatus {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if ($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
+        $fileStatusEnabled = $Force -or $settings.EnableFileStatus
+        if ($fileStatusEnabled -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
             if ($null -eq $settings.EnableFileStatusFromCache) {
                 $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
