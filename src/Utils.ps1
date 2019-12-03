@@ -293,6 +293,7 @@ function Get-PromptPath {
     # Look up the git root
     if ($abbrevGitDir) {
         $gitPath = $(Get-GitDirectory)
+        # Up one level from `.git`
         if ($gitPath) { $gitPath = $(Split-Path $gitPath -Parent) }
     }
 
@@ -301,6 +302,7 @@ function Get-PromptPath {
     # Abbreviate path by replacing beginning of path with - *iff* the path is under a git repository
     if ($abbrevGitDir -and $currentPath -and $gitPath -and
         $currentPath.StartsWith($gitPath, $stringComparison)) {
+        # Up another level to keep repo name in path
         $removePath = $(Split-Path $gitPath -Parent)
         $currentPath = "-" + $currentPath.SubString($removePath.Length)
     }
