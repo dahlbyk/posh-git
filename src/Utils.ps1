@@ -301,15 +301,14 @@ function Get-PromptPath {
         if ($gitPath) { $gitPath = Split-Path $gitPath -Parent }
     }
 
-    # Abbreviate path under a git repository
+    # Abbreviate path under a git repository as "<repo-name>:<relative-path>"
     if ($abbrevGitDir -and $gitPath -and $currentPath.StartsWith($gitPath, $stringComparison)) {
-        # Up another level to keep repo name in the abbreviated path
-        # $removePath = Split-Path $gitPath -Parent
         $gitName = Split-Path $gitPath -Leaf
-        $relPath = if ($currentPath -eq $gitPath) { "/" } else { $currentPath.SubString($gitPath.Length) }
+        $relPath = $currentPath.SubString($gitPath.Length)
+        if ($relPath -eq "") { $relPath = [System.IO.Path]::DirectorySeparatorChar }
         $currentPath = "$gitName`:$relPath"
     }
-    # Abbreviate path under the user's home dir
+    # Abbreviate path under the user's home dir as "~<relative-path>"
     elseif ($abbrevHomeDir -and $currentPath.StartsWith($Home, $stringComparison)) {
         $currentPath = "~" + $currentPath.SubString($Home.Length)
     }

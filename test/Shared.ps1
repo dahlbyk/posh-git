@@ -74,7 +74,6 @@ function GetGitRelPath([string]$Path) {
     }
 
     if ($GitPromptSettings.DefaultPromptAbbreviateGitDirectory) {
-        # Up another level to keep repo name in path
         $gitName = Split-Path $gitPath -Leaf
         "$gitName`:$($Path.Substring($gitPath.Length))"
     }
