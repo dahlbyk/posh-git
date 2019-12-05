@@ -280,8 +280,7 @@ function Get-PathStringComparison {
 
 function Get-PromptPath {
     $settings = $global:GitPromptSettings
-    $abbrevHomeDir = $settings -and $settings.DefaultPromptAbbreviateHomeDirectory
-    $abbrevGitDir = $settings -and $settings.DefaultPromptAbbreviateGitDirectory
+    $stringComparison = Get-PathStringComparison
 
     # A UNC path has no drive so it's better to use the ProviderPath e.g. "\\server\share".
     # However for any path with a drive defined, it's better to use the Path property.
@@ -289,27 +288,29 @@ function Get-PromptPath {
     # The latter is more desirable.
     $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
     $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
+    if (!$settings -or !$currentPath -or $currentPath.Equals($Home, $stringComparison)) {
+        return $currentPath
+    }
+    $abbrevHomeDir = $settings.DefaultPromptAbbreviateHomeDirectory
+    $abbrevGitDir = $settings.DefaultPromptAbbreviateGitDirectory
 
     # Look up the git root
     if ($abbrevGitDir) {
-        $gitPath = $(Get-GitDirectory)
+        $gitPath = Get-GitDirectory
         # Up one level from `.git`
-        if ($gitPath) { $gitPath = $(Split-Path $gitPath -Parent) }
+        if ($gitPath) { $gitPath = Split-Path $gitPath -Parent }
     }
 
-    $stringComparison = Get-PathStringComparison
-
-    # Abbreviate path by replacing beginning of path with - *iff* the path is under a git repository
-    if ($abbrevGitDir -and $currentPath -and $gitPath -and
-        $currentPath.StartsWith($gitPath, $stringComparison)) {
-        # Up another level to keep repo name in path
-        $removePath = $(Split-Path $gitPath -Parent)
-        $currentPath = "-" + $currentPath.SubString($removePath.Length)
+    # Abbreviate path under a git repository
+    if ($abbrevGitDir -and $gitPath -and $currentPath.StartsWith($gitPath, $stringComparison)) {
+        # Up another level to keep repo name in the abbreviated path
+        # $removePath = Split-Path $gitPath -Parent
+        $gitName = Split-Path $gitPath -Leaf
+        $relPath = if ($currentPath -eq $gitPath) { "/" } else { $currentPath.SubString($gitPath.Length) }
+        $currentPath = "$gitName`:$relPath"
     }
-    # Abbreviate path by replacing beginning of path with ~ *iff* the path is under the user's home dir
-    elseif ($abbrevHomeDir -and $currentPath -and !$currentPath.Equals($Home, $stringComparison) -and
-        $currentPath.StartsWith($Home, $stringComparison)) {
-
+    # Abbreviate path under the user's home dir
+    elseif ($abbrevHomeDir -and $currentPath.StartsWith($Home, $stringComparison)) {
         $currentPath = "~" + $currentPath.SubString($Home.Length)
     }
 

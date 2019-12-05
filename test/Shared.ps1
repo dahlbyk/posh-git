@@ -61,12 +61,12 @@ function GetHomeRelPath([string]$Path) {
 }
 
 function GetGitRelPath([string]$Path) {
-    $gitPath = $(Get-GitDirectory)
+    $gitPath = Get-GitDirectory
     if (!$gitPath) {
         throw "GetGitRelPath should be called inside a git repository"
     }
     # Up one level from `.git`
-    $gitPath = $(Split-Path $gitPath -Parent)
+    $gitPath = Split-Path $gitPath -Parent
 
     if (!$Path.StartsWith($gitPath)) {
         # Path not under $gitPath
@@ -75,8 +75,8 @@ function GetGitRelPath([string]$Path) {
 
     if ($GitPromptSettings.DefaultPromptAbbreviateGitDirectory) {
         # Up another level to keep repo name in path
-        $removePath = $(Split-Path $gitPath -Parent)
-        "-$($Path.Substring($removePath.Length))"
+        $gitName = Split-Path $gitPath -Leaf
+        "$gitName`:$($Path.Substring($gitPath.Length))"
     }
     else {
         # Otherwise, honor Home path abbreviation
