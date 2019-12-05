@@ -75,7 +75,9 @@ function GetGitRelPath([string]$Path) {
 
     if ($GitPromptSettings.DefaultPromptAbbreviateGitDirectory) {
         $gitName = Split-Path $gitPath -Leaf
-        "$gitName`:$($Path.Substring($gitPath.Length))"
+        $relPath = $Path.Substring($gitPath.Length)
+        if ($relPath -eq "") { $relPath = [System.IO.Path]::DirectorySeparatorChar }
+        "$gitName`:$relPath"
     }
     else {
         # Otherwise, honor Home path abbreviation
