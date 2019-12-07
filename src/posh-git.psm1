@@ -1,4 +1,4 @@
-param([switch]$ForcePoshGitPrompt)
+param([bool]$ForcePoshGitPrompt)
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
@@ -12,9 +12,6 @@ param([switch]$ForcePoshGitPrompt)
 . $PSScriptRoot\GitParamTabExpansion.ps1
 . $PSScriptRoot\GitTabExpansion.ps1
 . $PSScriptRoot\TortoiseGit.ps1
-
-if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
-if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
 
 $IsAdmin = Test-Administrator
 
