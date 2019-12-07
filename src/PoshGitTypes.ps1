@@ -202,7 +202,7 @@ class PoshGitTextSpan {
             $txt = $this.ToAnsiString()
             if (Test-VirtualTerminalSequece $txt) {
                 $escAnsi = "ANSI: `"$(EscapeAnsiString $txt)`""
-                $str = "Text: `"$txt`",${sep}${escAnsi}"
+                $str = "Text: `"$txt`e[39;49m`",${sep}${escAnsi}"
             }
             else {
                 $str = "Text: `"$txt`""
