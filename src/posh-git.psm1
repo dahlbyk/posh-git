@@ -1,4 +1,4 @@
-param([bool]$ForcePoshGitPrompt, [bool]$SkipHomeEnvVar)
+param([bool]$ForcePoshGitPrompt)
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
@@ -12,18 +12,6 @@ param([bool]$ForcePoshGitPrompt, [bool]$SkipHomeEnvVar)
 . $PSScriptRoot\GitParamTabExpansion.ps1
 . $PSScriptRoot\GitTabExpansion.ps1
 . $PSScriptRoot\TortoiseGit.ps1
-
-# At the point we drop v5 support, we can rely on using the built-in $IsWindows
-if ($PSVersionTable.PSVersion.Major -eq 5) {
-    $IsWindows = $true
-}
-
-# Only create HOME env var on Windows when not defined and using older Git
-if ($IsWindows -and !$Env:HOME -and !$SkipHomeEnvVar -and !(Get-Command git).Source.EndsWith('cmd\git.exe')) {
-    $Env:HOME = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
-    Write-Warning "posh-git set `$Env:HOME for this version of Git. To disable creation of `$Env:HOME"
-    Write-Warning "and this warning, consider upgrading Git or use: Import-Module posh-git -Args 0,1"
-}
 
 $IsAdmin = Test-Administrator
 
