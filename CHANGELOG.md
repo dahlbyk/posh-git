@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 1.0.0-beta4 - TBD
+## 1.0.0-beta4 - December 10, 2019
 
 ### Added
 
@@ -17,6 +17,10 @@
   ([#691](https://github.com/dahlbyk/posh-git/issues/691))
   ([PR #702](https://github.com/dahlbyk/posh-git/pull/702))
   Thanks @pinkfloydx33 for the direction and motivation to add this.
+- Feature request: abbreviate path from git root with new setting `DefaultPromptAbbreviateGitDirectory`
+  ([#719](https://github.com/dahlbyk/posh-git/issues/719))
+  ([PR #720](https://github.com/dahlbyk/posh-git/pull/720)
+  Thanks Philippe Elsass (@elsassph)
 
 ### Changed
 
@@ -31,8 +35,8 @@
 - Update Ubuntu build system from 14.04 to 16.04
   ([PR #677](https://github.com/dahlbyk/posh-git/pull/677))
   Thanks @ExE-Boss
-- `$GitPromptSettings.BeforeIndex` is always displayed even if there is noting in the index.  The intent of
-  this spacing setting is to provide space between the branch name / branch status and the following section of
+- `$GitPromptSettings.BeforeIndex` is always displayed even if there is nothing in the index.  The intent of
+  this separator setting is to provide a separator between the branch name / branch status and the following section of
   index/working/summary/stash indicators.
 - `Get-GitStatus -Force` now also overrides `$GitPromptSettings.EnableFileStatus` as well as
   `$GitPromptSettings.EnablePromptStatus`.
@@ -55,6 +59,9 @@
   Thanks @KexyBiscuit
 - Fix bug w/multiple completions of name parameter on remove-gitbranch
   ([PR #705](https://github.com/dahlbyk/posh-git/pull/705)
+- Prompt error in remote PSSession.
+  ([#708](https://github.com/dahlbyk/posh-git/issues/708))
+  ([PR #727](https://github.com/dahlbyk/posh-git/pull/727)
 - Fix conflict with `TabExpansionPlusPlus` module's `Register-ArgumentCompleter` command.
   ([#715](https://github.com/dahlbyk/posh-git/issues/715))
   ([PR #714](https://github.com/dahlbyk/posh-git/pull/714)
