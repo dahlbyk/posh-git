@@ -135,6 +135,72 @@ A  test/Foo.Tests.ps1
             $path = GetHomeRelPath $PSScriptRoot
             $res | Should BeExactly "$(Get-PromptConnectionInfo)$path - 42 [master]> "
         }
+
+        It 'Returns the expected prompt string with DefaultPromptAbbreviateGitDirectory disabled' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+
+'@
+            }
+            $GitPromptSettings.DefaultPromptAbbreviateGitDirectory = $false
+            $res = [string](&$prompt *>&1)
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $path = GetGitRelPath $PSScriptRoot
+            # Restore default
+            $GitPromptSettings.DefaultPromptAbbreviateGitDirectory = $false
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path [master]> "
+        }
+
+        It 'Returns the expected prompt string with DefaultPromptAbbreviateGitDirectory enabled (root)' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+
+'@
+            }
+            $GitPromptSettings.DefaultPromptAbbreviateGitDirectory = $true
+            $gitRootPath = Split-Path $PSScriptRoot -Parent
+            Set-Location $gitRootPath
+            $res = [string](&$prompt *>&1)
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $path = GetGitRelPath $gitRootPath
+            # Restore default
+            Set-Location $PSScriptRoot
+            $GitPromptSettings.DefaultPromptAbbreviateGitDirectory = $false
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path [master]> "
+        }
+
+        It 'Returns the expected prompt string with DefaultPromptAbbreviateGitDirectory enabled (subfolder)' {
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master
+
+'@
+            }
+            $GitPromptSettings.DefaultPromptAbbreviateGitDirectory = $true
+            $res = [string](&$prompt *>&1)
+            Assert-MockCalled git -ModuleName posh-git -Scope It
+            $path = GetGitRelPath $PSScriptRoot
+            # Restore default
+            $GitPromptSettings.DefaultPromptAbbreviateGitDirectory = $false
+            $res | Should BeExactly "$(Get-PromptConnectionInfo)$path [master]> "
+        }
     }
 }
 

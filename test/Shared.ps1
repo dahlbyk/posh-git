@@ -60,6 +60,31 @@ function GetHomeRelPath([string]$Path) {
     }
 }
 
+function GetGitRelPath([string]$Path) {
+    $gitPath = Get-GitDirectory
+    if (!$gitPath) {
+        throw "GetGitRelPath should be called inside a git repository"
+    }
+    # Up one level from `.git`
+    $gitPath = Split-Path $gitPath -Parent
+
+    if (!$Path.StartsWith($gitPath)) {
+        # Path not under $gitPath
+        return $Path
+    }
+
+    if ($GitPromptSettings.DefaultPromptAbbreviateGitDirectory) {
+        $gitName = Split-Path $gitPath -Leaf
+        $relPath = $Path.Substring($gitPath.Length)
+        if ($relPath -eq "") { $relPath = [System.IO.Path]::DirectorySeparatorChar }
+        "$gitName`:$relPath"
+    }
+    else {
+        # Otherwise, honor Home path abbreviation
+        GetHomeRelPath $Path
+    }
+}
+
 function MakeNativePath([string]$Path) {
     $Path -replace '\\|/', [System.IO.Path]::DirectorySeparatorChar
 }
