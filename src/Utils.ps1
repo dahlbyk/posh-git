@@ -291,6 +291,7 @@ function Get-PromptPath {
     if (!$settings -or !$currentPath -or $currentPath.Equals($Home, $stringComparison)) {
         return $currentPath
     }
+
     $abbrevHomeDir = $settings.DefaultPromptAbbreviateHomeDirectory
     $abbrevGitDir = $settings.DefaultPromptAbbreviateGitDirectory
 
