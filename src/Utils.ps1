@@ -33,13 +33,13 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
         # error records if the user has set $ErrorActionPreference to Stop. Override that value in this scope.
         $ErrorActionPreference = 'Continue'
         if ($currentEncoding.IsSingleByte) {
-            [Console]::OutputEncoding = [Text.Encoding]::UTF8
+            try { [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch [System.IO.IOException] {}
         }
         & $cmd
     }
     finally {
         if ($currentEncoding.IsSingleByte) {
-            [Console]::OutputEncoding = $currentEncoding
+            try { [Console]::OutputEncoding = $currentEncoding } catch [System.IO.IOException] {}
         }
 
         # Clear out stderr output that was added to the $Error collection, putting those errors in a module variable
