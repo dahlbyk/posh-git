@@ -1,6 +1,6 @@
 # posh-git Release History
 
-## 1.0.0-beta4 - TBD
+## 1.0.0-beta4 - December 10, 2019
 
 ### Added
 
@@ -17,11 +17,17 @@
   ([#691](https://github.com/dahlbyk/posh-git/issues/691))
   ([PR #702](https://github.com/dahlbyk/posh-git/pull/702))
   Thanks @pinkfloydx33 for the direction and motivation to add this.
+- Feature request: abbreviate path from git root with new setting `DefaultPromptAbbreviateGitDirectory`
+  ([#719](https://github.com/dahlbyk/posh-git/issues/719))
+  ([PR #720](https://github.com/dahlbyk/posh-git/pull/720)
+  Thanks Philippe Elsass (@elsassph)
 
 ### Changed
 
+- Module parameter changed from a [switch] that forced the posh-git prompt to be used to a bools. The use of this
+  parameters during import is now simplified to: `Import-Module posh-git -Args 1`.
 - Shortened up the Windows title text to work better with Windows Terminal tabs. Now only displays '32-bit' in 32-bit
-  PowerShell. Otherwise, assumption is you're running 64-bit. Also display on PowerShell major.minor version number.
+  PowerShell. Otherwise, assumption is you're running 64-bit. Also display only PowerShell major.minor version number.
   ([PR #707](https://github.com/dahlbyk/posh-git/pull/707))
 - Switched from overriding `TabExpansion` function to using `Register-ArgumentCompleter` for tab-completion.
   ([PR #609](https://github.com/dahlbyk/posh-git/pull/609))
@@ -29,9 +35,16 @@
 - Update Ubuntu build system from 14.04 to 16.04
   ([PR #677](https://github.com/dahlbyk/posh-git/pull/677))
   Thanks @ExE-Boss
+- `$GitPromptSettings.BeforeIndex` is always displayed even if there is nothing in the index.  The intent of
+  this separator setting is to provide a separator between the branch name / branch status and the following section of
+  index/working/summary/stash indicators.
+- `Get-GitStatus -Force` now also overrides `$GitPromptSettings.EnableFileStatus` as well as
+  `$GitPromptSettings.EnablePromptStatus`.
 
 ### Fixed
 
+- Remove ".exe" suffix from PowerTab integration to enable PowerTab integration to work with git, git.cmd or git.exe
+  ([#606](https://github.com/dahlbyk/posh-git/pull/606/))
 - BranchBehindAndAheadDisplay minimal/compact bug
   ([#670](https://github.com/dahlbyk/posh-git/issues/670))
   ([PR #671](https://github.com/dahlbyk/posh-git/pull/671))
@@ -46,6 +59,19 @@
   Thanks @KexyBiscuit
 - Fix bug w/multiple completions of name parameter on remove-gitbranch
   ([PR #705](https://github.com/dahlbyk/posh-git/pull/705)
+- Prompt error in remote PSSession.
+  ([#708](https://github.com/dahlbyk/posh-git/issues/708))
+  ([PR #727](https://github.com/dahlbyk/posh-git/pull/727)
+- Fix conflict with `TabExpansionPlusPlus` module's `Register-ArgumentCompleter` command.
+  ([#715](https://github.com/dahlbyk/posh-git/issues/715))
+  ([PR #714](https://github.com/dahlbyk/posh-git/pull/714)
+  Thanks Kris Borowinski (@kborowinski)
+- Typo in CHANGELOG.md file: Git-RemoteBranch to Git-RemoveBranch.
+  ([PR #716](https://github.com/dahlbyk/posh-git/pull/716)
+  Thanks @theaquamarine
+- posh-git messes with the HOME environment variable.
+  ([#718](https://github.com/dahlbyk/posh-git/issues/718))
+  ([PR #722](https://github.com/dahlbyk/posh-git/pull/722)
 
 ## 1.0.0-beta3 - March 10, 2019
 
