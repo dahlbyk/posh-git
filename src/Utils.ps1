@@ -305,8 +305,7 @@ function Get-PromptPath {
     # Abbreviate path under a git repository as "<repo-name>:<relative-path>"
     if ($abbrevGitDir -and $gitPath -and $currentPath.StartsWith($gitPath, $stringComparison)) {
         $gitName = Split-Path $gitPath -Leaf
-        $relPath = $currentPath.SubString($gitPath.Length)
-        if ($relPath -eq "") { $relPath = [System.IO.Path]::DirectorySeparatorChar }
+        $relPath = if ($currentPath -eq $gitPath) { "" } else { $currentPath.SubString($gitPath.Length + 1) }
         $currentPath = "$gitName`:$relPath"
     }
     # Abbreviate path under the user's home dir as "~<relative-path>"
