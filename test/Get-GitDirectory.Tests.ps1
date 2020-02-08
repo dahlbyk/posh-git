@@ -40,6 +40,11 @@ Describe 'Get-GitDiretory Tests' {
 
             git init $repoPath
             Set-Location $repoPath
+
+            # Git rid of Git warnings about configuring user for the commit we do below
+            git config user.email "you@example.com"
+            git config user.name "Pester User"
+
             'foo' > .\README.md
             git add .\README.md
             # Quoting is a hack due to our use of the global:git function and how it converts args for invoke-expression
