@@ -19,8 +19,11 @@
   Thanks @pinkfloydx33 for the direction and motivation to add this.
 - Feature request: abbreviate path from git root with new setting `DefaultPromptAbbreviateGitDirectory`
   ([#719](https://github.com/dahlbyk/posh-git/issues/719))
-  ([PR #720](https://github.com/dahlbyk/posh-git/pull/720)
+  ([PR #720](https://github.com/dahlbyk/posh-git/pull/720))
   Thanks Philippe Elsass (@elsassph)
+- Two new properties have been added to `$global:GitTabSettings`
+  - `EnableLogging` - default is `$false` but when set to `$true`, tab expansion functions log to a file.
+  - `LogPath` - the path to the log file that is appended to (created if necessary) when `EnableLogging` is `$true`.
 
 ### Changed
 
@@ -29,7 +32,10 @@
 - Shortened up the Windows title text to work better with Windows Terminal tabs. Now only displays '32-bit' in 32-bit
   PowerShell. Otherwise, assumption is you're running 64-bit. Also display only PowerShell major.minor version number.
   ([PR #707](https://github.com/dahlbyk/posh-git/pull/707))
-- Switched from overriding `TabExpansion` function to using `Register-ArgumentCompleter` for tab-completion.
+- Switched from overriding `TabExpansion` function to using `Register-ArgumentCompleter` for tab-completion on
+  PowerShell >= 6.0.  `posh-git` can be configured to use the old `TabExpansion` function on PowerShell >= 6.0 by
+  importing the module using the following arguments: `Import-Module posh-git -ArgumentList 0,1`
+  before importing `posh-git`.
   ([PR #609](https://github.com/dahlbyk/posh-git/pull/609))
   Thanks Andrew Bradley (@cspotcode)
 - Update Ubuntu build system from 14.04 to 16.04
@@ -58,20 +64,23 @@
   ([PR #675](https://github.com/dahlbyk/posh-git/pull/675))
   Thanks @KexyBiscuit
 - Fix bug w/multiple completions of name parameter on remove-gitbranch
-  ([PR #705](https://github.com/dahlbyk/posh-git/pull/705)
+  ([PR #705](https://github.com/dahlbyk/posh-git/pull/705))
 - Prompt error in remote PSSession.
   ([#708](https://github.com/dahlbyk/posh-git/issues/708))
   ([PR #727](https://github.com/dahlbyk/posh-git/pull/727)
 - Fix conflict with `TabExpansionPlusPlus` module's `Register-ArgumentCompleter` command.
   ([#715](https://github.com/dahlbyk/posh-git/issues/715))
-  ([PR #714](https://github.com/dahlbyk/posh-git/pull/714)
+  ([PR #714](https://github.com/dahlbyk/posh-git/pull/714))
   Thanks Kris Borowinski (@kborowinski)
 - Typo in CHANGELOG.md file: Git-RemoteBranch to Git-RemoveBranch.
-  ([PR #716](https://github.com/dahlbyk/posh-git/pull/716)
+  ([PR #716](https://github.com/dahlbyk/posh-git/pull/716))
   Thanks @theaquamarine
 - posh-git messes with the HOME environment variable.
   ([#718](https://github.com/dahlbyk/posh-git/issues/718))
-  ([PR #722](https://github.com/dahlbyk/posh-git/pull/722)
+  ([PR #722](https://github.com/dahlbyk/posh-git/pull/722))
+- Fix tab-completion regression with new `Register-ArgumentCompleter`.
+  ([#733](https://github.com/dahlbyk/posh-git/issues/733))
+  ([PR #738](https://github.com/dahlbyk/posh-git/pull/738))
 
 ## 1.0.0-beta3 - March 10, 2019
 
