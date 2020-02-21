@@ -1,6 +1,8 @@
 # Initial implementation by Jeremy Skinner
 # http://www.jeremyskinner.co.uk/2010/03/07/using-git-with-windows-powershell/
 
+$tabLogPath = Join-Path ([System.IO.Path]::GetTempPath()) posh-git_tabexp.log
+
 $Global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
     KnownAliases = @{
@@ -470,10 +472,13 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 }
 
-if ($PSVersionTable.PSVersion.Major -ge 6) {
+if (!$env:PoshGitUseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
     Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName git,tgit,gitk -Native -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
 
+        $trimToLength = $cursorPosition - $commandAst.Extent.StartOffset
+        $alt = $commandAst.toString().PadRight($trimToLength, ' ').substring(0, $trimToLength)
+        "[$(Get-Date -Format HH:mm:ss)] New tab exp: '$($commandAst.Extent.Text)' - alt: '$alt'" | Out-File -Append $tabLogPath
         Expand-GitCommand $commandAst.Extent.Text
     }
 }
@@ -492,11 +497,15 @@ else {
     }
 
     if (Test-Path Function:\TabExpansion) {
+        "[$(Get-Date -Format HH:mm:ss)] Old tab exp: backing up TabExpansion2 to TabExpansionBackup" | Out-File -Append $tabLogPath
         Rename-Item Function:\TabExpansion TabExpansionBackup
+        "[$(Get-Date -Format HH:mm:ss)] Old tab exp: dir $(Get-ChildItem function:\Tab* | % Name)" | Out-File -Append $tabLogPath
     }
 
     function TabExpansion($line, $lastWord) {
         $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
+
+        "[$(Get-Date -Format HH:mm:ss)] Old tab exp: '$lastBlock'" | Out-File -Append $tabLogPath
 
         switch -regex ($lastBlock) {
             # Execute git tab completion for all git-related commands
@@ -506,8 +515,10 @@ else {
 
             # Fall back on existing tab expansion
             default {
+                "[$(Get-Date -Format HH:mm:ss)] Old tab exp: fallback to default case" | Out-File -Append $tabLogPath
                 if (Test-Path Function:\TabExpansionBackup) {
-                    TabExpansionBackup $line $lastWord
+                    "[$(Get-Date -Format HH:mm:ss)] Old tab exp: line: '$line' lastWord: '$lastWord'" | Out-File -Append $tabLogPath
+                    TabExpansionBackup -InputScript $line $lastWord
                 }
             }
         }
