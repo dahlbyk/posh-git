@@ -6,6 +6,8 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
     KnownAliases = @{
         '!f() { exec vsts code pr "$@"; }; f' = 'vsts.pr'
     }
+    EnableLogging = $false
+    LogPath = Join-Path ([System.IO.Path]::GetTempPath()) posh-git_tabexp.log
 }
 
 $subcommands = @{
@@ -470,46 +472,52 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 }
 
-if ($PSVersionTable.PSVersion.Major -ge 6) {
+function WriteTabExpLog([string] $Message) {
+    if (!$global:GitTabSettings.EnableLogging) { return }
+
+    $timestamp = Get-Date -Format HH:mm:ss
+    "[$timestamp] $Message" | Out-File -Append $global:GitTabSettings.LogPath
+}
+
+if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
     Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName git,tgit,gitk -Native -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
 
-        Expand-GitCommand $commandAst.Extent.Text
+        # The PowerShell completion has a habit of stripping the trailing space when completing:
+        # git checkout <tab>
+        # The Expand-GitCommand expects this trailing space, so pad with a space if necessary.
+        $padLength = $cursorPosition - $commandAst.Extent.StartOffset
+        $textToComplete = $commandAst.ToString().PadRight($padLength, ' ').Substring(0, $padLength)
+
+        WriteTabExpLog "Expand: command: '$($commandAst.Extent.Text)', padded: '$textToComplete', padlen: $padLength"
+        Expand-GitCommand $textToComplete
     }
 }
 else {
     $PowerTab_RegisterTabExpansion = if (Get-Module -Name powertab) { Get-Command Register-TabExpansion -Module powertab -ErrorAction SilentlyContinue }
     if ($PowerTab_RegisterTabExpansion) {
         & $PowerTab_RegisterTabExpansion git -Type Command {
-            param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
+            param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
 
             $line = $Context.Line
             $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
             $TabExpansionHasOutput.Value = $true
+            WriteTabExpLog "PowerTab expand: '$lastBlock'"
             Expand-GitCommand $lastBlock
         }
-        return
-    }
 
-    if (Test-Path Function:\TabExpansion) {
-        Rename-Item Function:\TabExpansion TabExpansionBackup
+        return
     }
 
     function TabExpansion($line, $lastWord) {
         $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
+        $msg = "Legacy expand: '$lastBlock'"
 
         switch -regex ($lastBlock) {
             # Execute git tab completion for all git-related commands
-            "^$(Get-AliasPattern git) (.*)" { Expand-GitCommand $lastBlock }
-            "^$(Get-AliasPattern tgit) (.*)" { Expand-GitCommand $lastBlock }
-            "^$(Get-AliasPattern gitk) (.*)" { Expand-GitCommand $lastBlock }
-
-            # Fall back on existing tab expansion
-            default {
-                if (Test-Path Function:\TabExpansionBackup) {
-                    TabExpansionBackup $line $lastWord
-                }
-            }
+            "^$(Get-AliasPattern git) (.*)"  { WriteTabExpLog $msg; Expand-GitCommand $lastBlock }
+            "^$(Get-AliasPattern tgit) (.*)" { WriteTabExpLog $msg; Expand-GitCommand $lastBlock }
+            "^$(Get-AliasPattern gitk) (.*)" { WriteTabExpLog $msg; Expand-GitCommand $lastBlock }
         }
     }
 }
@@ -517,5 +525,6 @@ else {
 # Handles Remove-GitBranch -Name parameter auto-completion using the built-in mechanism for cmdlet parameters
 Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName Remove-GitBranch -ParameterName Name -ScriptBlock {
     param($Command, $Parameter, $WordToComplete, $CommandAst, $FakeBoundParams)
+
     gitBranches $WordToComplete $true
 }

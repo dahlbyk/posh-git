@@ -1,4 +1,4 @@
-param([bool]$ForcePoshGitPrompt)
+param([bool]$ForcePoshGitPrompt, [bool]$UseLegacyTabExpansion)
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
