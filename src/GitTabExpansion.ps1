@@ -263,7 +263,7 @@ function script:expandParamValues($cmd, $param, $filter) {
     $paramValues = $gitParamValues[$cmd][$param]
 
     $completions = if ($paramValues -is [scriptblock]) {
-        & $paramValues $filter | Where-Object { $_ -like "$filter*" }
+        & $paramValues $filter
     }
     else {
         $paramValues.Trim() -split ' ' | Where-Object { $_ -like "$filter*" } | Sort-Object

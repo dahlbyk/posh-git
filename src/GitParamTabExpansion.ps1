@@ -181,8 +181,8 @@ $gitParamValues = @{
         conflict = 'merge diff3'
         source = {
             param($ref)
-            gitBranches $matches['ref'] $true
-            gitTags $matches['ref']
+            gitBranches $ref $true
+            gitTags $ref
         }
     }
     revert = @{
