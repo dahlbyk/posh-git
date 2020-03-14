@@ -29,7 +29,6 @@ jobs:
       os: osx
       before_install:
         - brew update
-        - brew tap homebrew/cask-cask
         - brew cask install powershell
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
         - pwsh -c 'Install-Module Pester -Scope CurrentUser'
