@@ -46,6 +46,8 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 
 #### Releases
 
+- v1.0.0-beta4
+  ( [README][v1b4-readme] • [CHANGELOG][v1b4-change] )
 - v1.0.0-beta3
   ( [README][v1b3-readme] • [CHANGELOG][v1b3-change] )
 - v1.0.0-beta2
@@ -476,7 +478,7 @@ function prompt {
 [choco-site]:      https://chocolatey.org/packages/poshgit/
 [psgallery-img]:   https://img.shields.io/powershellgallery/dt/posh-git.svg
 [psgallery-site]:  https://www.powershellgallery.com/packages/posh-git
-[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0-beta3
+[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0-beta4
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
 [posh-sshell-url]: https://github.com/dahlbyk/posh-sshell
@@ -515,5 +517,8 @@ function prompt {
 
 [v1b3-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta3/CHANGELOG.md
 [v1b3-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta3/README.md
+
+[v1b4-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta4/CHANGELOG.md
+[v1b4-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta4/README.md
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
