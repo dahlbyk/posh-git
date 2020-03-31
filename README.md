@@ -411,7 +411,7 @@ When an external application returns a non-zero exit code, 1 in this case, you w
 
 Note that until you run an external application that sets `$LASTEXITCODE` to zero or you manually set the variable to
 0, you will see the exit code for any error.  In addition to `LastExitCode` and `DollarQuestion`,
-`$global:GitPromtpValues` also has `IsAdmin` and `LastPrompt` properties.  The `LastPrompt` property contains the ANSI
+`$global:GitPromptValues` also has `IsAdmin` and `LastPrompt` properties.  The `LastPrompt` property contains the ANSI
 escaped string that was used for the last prompt. This can be useful for debugging your prompt display particularly
 when using ANSI/VT sequences.
 
