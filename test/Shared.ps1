@@ -2,6 +2,8 @@ $modulePath = Convert-Path $PSScriptRoot\..\src
 $moduleManifestPath = "$modulePath\posh-git.psd1"
 
 $csi = [char]0x1b + "["
+$expectedEncoding = if ($PSVersionTable.PSVersion.Major -le 5) { "utf8" } else { "ascii" }
+$originalTitle = $Host.UI.RawUI.WindowTitle
 
 if (!(Get-Variable -Name gitbin -Scope global -ErrorAction SilentlyContinue)) {
     if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
@@ -63,7 +65,7 @@ function GetHomeRelPath([string]$Path) {
 function GetGitRelPath([string]$Path) {
     $gitPath = Get-GitDirectory
     if (!$gitPath) {
-        throw "GetGitRelPath should be called inside a git repository"
+        throw "GetGitRelPath Should -be called inside a git repository"
     }
     # Up one level from `.git`
     $gitPath = Split-Path $gitPath -Parent
@@ -82,6 +84,15 @@ function GetGitRelPath([string]$Path) {
         # Otherwise, honor Home path abbreviation
         GetHomeRelPath $Path
     }
+}
+
+function GetMacOSAdjustedTempPath($Path) {
+    if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsMacOS) {
+        # Mac OS's temp folder has a symlink in its path - /var is linked to /private/var
+        return "/private${Path}"
+    }
+
+    $Path
 }
 
 function MakeNativePath([string]$Path) {
@@ -129,4 +140,4 @@ Remove-Module posh-git -Force *>$null
 # Force the posh-git prompt to be installed. Could be runnng on dev system where
 # user has customized the prompt.
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-$module = Import-Module $moduleManifestPath -ArgumentList $true,$true -Force -PassThru
+$module = Import-Module $moduleManifestPath -ArgumentList $true,$false -Force -PassThru
