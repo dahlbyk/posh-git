@@ -187,16 +187,34 @@ $castStringSeq = [Linq.Enumerable].GetMethod("Cast").MakeGenericMethod([string])
 
 <#
 .SYNOPSIS
-    Gets a Git status object that is used by Write-GitStatus.
+    Gets a Git status object that is used by `Write-GitStatus`.
 .DESCRIPTION
-    Gets a Git status object that is used by Write-GitStatus.
-    The status object provides the information to be displayed in the various
-    sections of the posh-git prompt.
+    The `Get-GitStatus` cmdlet gets the status of the current Git repo.
+
+    The status object returned by this cmdlet provides the information
+    displayed in the various sections of the posh-git prompt. The following
+    settings in $GitPromptSettings controls what information is returned
+    in the status object:
+
+    $GitPromptSettings.EnableFileStatus
+    $GitPromptSettings.EnablePromptStatus
+
+    By default both settings are set to $true.  You can disable the return of
+    file and/or prompt status information by setting one or both of these to
+    $false.
+
+    The `Force` parameter can be used to override these settings to ensure that
+    both file and prompt status information is returned in the status object.
 .EXAMPLE
     PS C:\> $s = Get-GitStatus; Write-GitStatus $s
     Gets a Git status object. Then passes the object to Write-GitStatus which
     writes out a posh-git prompt (or returns a string in ANSI mode) with the
     information contained in the status object.
+.EXAMPLE
+    PS C:\> $s = Get-GitStatus -Force
+    Gets a Git status object that always returns all status information even
+    if $GitPromptSettings has disabled `EnableFileStatus` and/or
+    `EnablePromptStatus`.
 .INPUTS
     None
 .OUTPUTS
