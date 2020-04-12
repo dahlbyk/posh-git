@@ -193,18 +193,18 @@ $castStringSeq = [Linq.Enumerable].GetMethod("Cast").MakeGenericMethod([string])
 
     The status object returned by this cmdlet provides the information
     displayed in the various sections of the posh-git prompt. The following
-    settings in $GitPromptSettings controls what information is returned
-    in the status object:
+    properties in $GitPromptSettings control what information is returned in
+    the status object:
 
-    $GitPromptSettings.EnableFileStatus
-    $GitPromptSettings.EnablePromptStatus
+    EnableFileStatus          = $true # Or $false if Git not installed
+    EnableFileStatusFromCache = <unset> # Or $true if GitStatusCachePoshClient installed
+    EnablePromptStatus        = $true
+    EnableStashStatus         = $false
+    UntrackedFilesMode        = Default # Other enum values: No, Normal, All
 
-    By default both settings are set to $true.  You can disable the return of
-    file and/or prompt status information by setting one or both of these to
-    $false.
-
-    The `Force` parameter can be used to override these settings to ensure that
-    both file and prompt status information is returned in the status object.
+    The `Force` parameter can be used to override the EnableFileStatus and
+    EnablePromptStatus properties to ensure that both file and prompt status
+    information is returned in the status object.
 .EXAMPLE
     PS C:\> $s = Get-GitStatus; Write-GitStatus $s
     Gets a Git status object. Then passes the object to Write-GitStatus which
