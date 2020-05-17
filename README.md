@@ -136,6 +136,17 @@ With Chocolatey installed, execute the following command to install posh-git:
 choco install poshgit
 ```
 
+### Installing posh-git via Scoop
+
+Another popular package manager for Windows is [Scoop](https://scoop.sh/), which you can also use
+ to install posh-git. With Scoop installed, execute these commands to install posh-git and import
+ it into your profile:
+
+```powershell
+scoop install posh-git
+Add-PoshGitToProfile
+```
+
 ### Installing posh-git Manually
 
 If you need to test/debug changes prior to contributing here, or would otherwise prefer to install posh-git without
