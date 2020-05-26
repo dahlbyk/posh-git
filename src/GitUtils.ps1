@@ -115,15 +115,15 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             }
 
             $b = Invoke-NullCoalescing `
-                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD -q 2>$null } `
+                { dbg 'Trying symbolic-ref' $sw; git --no-optional-locks symbolic-ref HEAD -q 2>$null } `
                 { '({0})' -f (Invoke-NullCoalescing `
                     {
                         dbg 'Trying describe' $sw
                         switch ($Global:GitPromptSettings.DescribeStyle) {
-                            'contains' { git describe --contains HEAD 2>$null }
-                            'branch' { git describe --contains --all HEAD 2>$null }
-                            'describe' { git describe HEAD 2>$null }
-                            default { git tag --points-at HEAD 2>$null }
+                            'contains' { git --no-optional-locks describe --contains HEAD 2>$null }
+                            'branch' { git --no-optional-locks describe --contains --all HEAD 2>$null }
+                            'describe' { git --no-optional-locks describe HEAD 2>$null }
+                            default { git --no-optional-locks tag --points-at HEAD 2>$null }
                         }
                     } `
                     {
@@ -136,7 +136,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                         }
                         else {
                             dbg 'Trying rev-parse' $sw
-                            $ref = git rev-parse HEAD 2>$null
+                            $ref = git --no-optional-locks rev-parse HEAD 2>$null
                         }
 
                         if ($ref -match 'ref: (?<ref>.+)') {
@@ -153,9 +153,9 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
         }
 
         dbg 'Inside git directory?' $sw
-        if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
+        if ('true' -eq $(git --no-optional-locks rev-parse --is-inside-git-dir 2>$null)) {
             dbg 'Inside git directory' $sw
-            if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
+            if ('true' -eq $(git --no-optional-locks rev-parse --is-bare-repository 2>$null)) {
                 $c = 'BARE:'
             }
             else {
@@ -319,10 +319,10 @@ function Get-GitStatus {
                     "All"     { $untrackedFilesOption = "-uall" }
                     "Normal"  { $untrackedFilesOption = "-unormal" }
                 }
-                $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
+                $status = Invoke-Utf8ConsoleCommand { git --no-optional-locks -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
                 if ($settings.EnableStashStatus) {
                     dbg 'Getting stash count' $sw
-                    $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
+                    $stashCount = $null | git --no-optional-locks stash list 2>$null | measure-object | Select-Object -expand Count
                 }
 
                 dbg 'Parsing status' $sw
