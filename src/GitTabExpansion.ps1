@@ -480,7 +480,10 @@ function WriteTabExpLog([string] $Message) {
 }
 
 if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
-    Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName git,tgit,gitk -Native -ScriptBlock {
+    $cmdNames = "git","tgit","gitk"
+    $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
+
+    Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
 
         # The PowerShell completion has a habit of stripping the trailing space when completing:

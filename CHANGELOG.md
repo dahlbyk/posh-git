@@ -1,5 +1,13 @@
 # posh-git Release History
 
+## 1.0.0 - TBD
+
+### Fixed
+
+- Register-ArgumentCompleter based tab-expansion in beta4 doesn't work with PowerShell aliases to git,tgit,gitk.
+  ([#769](https://github.com/dahlbyk/posh-git/issues/769))
+  ([PR #770](https://github.com/dahlbyk/posh-git/pull/770))
+
 ## 1.0.0-beta4 - March 14, 2020
 
 ### Added
