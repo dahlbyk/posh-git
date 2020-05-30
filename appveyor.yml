@@ -16,7 +16,7 @@ init:
 install:
   - ps: |
       Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
-      Install-Module Pester -MinimumVersion 4.0.8 -MaximumVersion 4.99.99 -Scope CurrentUser -Force | Out-Null
+      Install-Module Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Scope CurrentUser -Force | Out-Null
       "Git version: $(git.exe --version)"
       "PSVersion:   $($PSVersionTable.PSVersion), build: $($PSVersionTable.BuildVersion), clr version: $($PSVersionTable.ClrVersion)"
       "Host name:   $($Host.Name)"
@@ -31,19 +31,22 @@ before_test:
 test_script:
   - ps: |
       $testResultsFile = Join-Path $Env:APPVEYOR_BUILD_FOLDER TestResults.xml
-      $pesterParams = @{
-          Script       = "$Env:APPVEYOR_BUILD_FOLDER\test"
-          OutputFile   = $testResultsFile
-          OutputFormat = "NUnitXml"
-          PassThru     = $true
-          Verbose      = $VerbosePreference
-      }
-      Import-Module Pester
-      $res = Invoke-Pester @pesterParams
+
+      Import-Module Pester -PassThru
+
+      $configuration = [PesterConfiguration]::Default
+      $configuration.Run.Path = "$Env:APPVEYOR_BUILD_FOLDER\test"
+      $configuration.Run.PassThru = $true
+      $configuration.Output.Verbosity = "Detailed"
+      $configuration.TestResult.Enabled = $true
+      $configuration.TestResult.OutputFormat = "NUnit2.5"
+      $configuration.TestResult.OutputPath = $testResultsFile
+
+      $res = Invoke-Pester -Configuration $configuration -ErrorAction SilentlyContinue
       if (Test-Path $testResultsFile) {
           (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $testResultsFile)
       }
-      if ($res.FailedCount -gt 0) {
+      if (!$res -or ($res.FailedCount -gt 0)) {
           # Terminate the script to fail the build
           $Error | Format-List * -Force
           exit 1;

@@ -1,12 +1,5 @@
-. $PSScriptRoot\Shared.ps1
-
-function GetMacOSAdjustedTempPath($Path) {
-    if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsMacOS) {
-        # Mac OS's temp folder has a symlink in its path - /var is linked to /private/var
-        return "/private${Path}"
-    }
-
-    $Path
+BeforeAll {
+    . $PSScriptRoot\Shared.ps1
 }
 
 Describe 'Get-GitDiretory Tests' {
@@ -21,21 +14,21 @@ Describe 'Get-GitDiretory Tests' {
 
         It 'Returns $null for not a Git repo' {
             Set-Location $env:windir
-            Get-GitDirectory | Should BeNullOrEmpty
+            Get-GitDirectory | Should -BeNullOrEmpty
         }
         It 'Returns $null for not a filesystem path' {
             Set-Location Alias:\
-            Get-GitDirectory | Should BeNullOrEmpty
+            Get-GitDirectory | Should -BeNullOrEmpty
         }
         It 'Returns correct path when in the root of repo' {
             $repoRoot = (Resolve-Path $PSScriptRoot\..).Path
             Set-Location $repoRoot
-            Get-GitDirectory | Should BeExactly (MakeNativePath $repoRoot\.git)
+            Get-GitDirectory | Should -BeExactly (MakeNativePath $repoRoot\.git)
         }
         It 'Returns correct path when under a child folder of the root of repo' {
             $repoRoot = (Resolve-Path $PSScriptRoot\..).Path
             Set-Location $PSScriptRoot
-            Get-GitDirectory | Should BeExactly (Join-Path $repoRoot .git)
+            Get-GitDirectory | Should -BeExactly (Join-Path $repoRoot .git)
         }
     }
 
@@ -79,7 +72,7 @@ Describe 'Get-GitDiretory Tests' {
             Set-Location $worktreePath
             $worktreeBaseName = Split-Path $worktreePath -Leaf
             $path = GetMacOSAdjustedTempPath $repoPath
-            Get-GitDirectory | Should BeExactly (MakeGitPath $path\.git\worktrees\$worktreeBaseName)
+            Get-GitDirectory | Should -BeExactly (MakeGitPath $path\.git\worktrees\$worktreeBaseName)
         }
     }
 
@@ -104,12 +97,12 @@ Describe 'Get-GitDiretory Tests' {
 
         It 'Returns correct path when in the root of bare repo' {
             Set-Location $bareRepoPath
-            Get-GitDirectory | Should BeExactly (MakeNativePath $bareRepoPath)
+            Get-GitDirectory | Should -BeExactly (MakeNativePath $bareRepoPath)
         }
         It 'Returns correct path when under a child folder of the root of bare repo' {
             Set-Location $bareRepoPath\hooks -ErrorVariable Stop
             $path = GetMacOSAdjustedTempPath $bareRepoPath
-            Get-GitDirectory | Should BeExactly (MakeNativePath $path)
+            Get-GitDirectory | Should -BeExactly (MakeNativePath $path)
         }
     }
 
@@ -119,7 +112,7 @@ Describe 'Get-GitDiretory Tests' {
         }
         It 'Returns the value in GIT_DIR env var' {
             $env:GIT_DIR = MakeNativePath '/xyzzy/posh-git/.git'
-            Get-GitDirectory | Should BeExactly $env:GIT_DIR
+            Get-GitDirectory | Should -BeExactly $env:GIT_DIR
         }
     }
 }

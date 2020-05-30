@@ -24,14 +24,14 @@ jobs:
             - powershell
       before_install:
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
-        - pwsh -c 'Install-Module Pester -Scope CurrentUser'
+        - pwsh -c 'Install-Module Pester -AllowPrerelease -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Scope CurrentUser -Force | Out-Null'
     - stage: osx
       os: osx
       before_install:
         - brew update
         - brew cask install powershell
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
-        - pwsh -c 'Install-Module Pester -Scope CurrentUser'
+        - pwsh -c 'Install-Module Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Scope CurrentUser -Force | Out-Null'
 
 script:
-  - pwsh -c 'Import-Module Pester; Invoke-Pester -Script test -EnableExit'
+  - pwsh -c 'Import-Module Pester -PassThru; $res = Invoke-Pester -Path test -Output Detailed -PassThru -ErrorAction SilentlyContinue; if (!$res -or ($res.FailedCount -gt 0)) { $Error | Format-List * -Force; exit 1 }'
