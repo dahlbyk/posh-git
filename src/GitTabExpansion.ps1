@@ -35,7 +35,7 @@ $subcommands = @{
         branch
         info cleanup cleanup-workspaces help verify autotag subtree reset-remote checkout
         "
-    flow = "init feature release hotfix support help version"
+    flow = "init feature bugfix release hotfix support help version"
     worktree = "add list lock move prune remove unlock"
 }
 
