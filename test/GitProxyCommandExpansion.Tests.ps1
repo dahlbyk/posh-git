@@ -5,25 +5,25 @@ BeforeAll {
 Describe 'CommandExpansion Tests' {
     Context 'Proxy Subcommand TabExpansion Tests' {
         BeforeEach {
-            if(Test-Path Function:\Invoke-GitFunction) {
+            if(Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
             }
-            if(Test-Path Alias:\igf) {
+            if(Test-Path -Path Alias:\igf) {
                 Rename-Item -Path Alias:\igf -NewName igfbackup
             }
         }
         AfterEach {
-            if(Test-Path Function:\Invoke-GitFunction) {
-                Remove-Item Function:\Invoke-GitFunction
+            if(Test-Path -Path Function:\Invoke-GitFunction) {
+                Remove-Item -Path Function:\Invoke-GitFunction
             }
-            if(Test-Path Function:\Invoke-GitFunctionBackup) {
+            if(Test-Path -Path Function:\Invoke-GitFunctionBackup) {
                 Rename-Item Function:\Invoke-GitFunctionBackup Invoke-GitFunction
             }
-            if(Test-Path Alias:\igf) {
-                Remove-Item Alias:\igf
+            if(Test-Path -Path Alias:\igf) {
+                Remove-Item -Path Alias:\igf
             }
-            if(Test-Path Alias:\igfbackup) {
-                Rename-Item Alias:\igfbackup igf
+            if(Test-Path -Path Alias:\igfbackup) {
+                Rename-Item -Path Alias:\igfbackup -NewName igf
             }
         }
         It 'Expands a single line command' {
@@ -179,15 +179,15 @@ Describe 'CommandExpansion Tests' {
     }
     Context 'Proxy Subcommand TabExpansion Tests' {
         BeforeEach {
-            if(Test-Path Function:\Invoke-GitFunction) {
+            if(Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
             }
         }
         AfterEach {
-            if(Test-Path Function:\Invoke-GitFunction) {
-                Remove-Item Function:\Invoke-GitFunction
+            if(Test-Path -Path Function:\Invoke-GitFunction) {
+                Remove-Item -Path Function:\Invoke-GitFunction
             }
-            if(Test-Path Function:\Invoke-GitFunctionBackup) {
+            if(Test-Path -Path Function:\Invoke-GitFunctionBackup) {
                 Rename-Item -Path Function:\Invoke-GitFunctionBackup -NewName Invoke-GitFunction
             }
         }

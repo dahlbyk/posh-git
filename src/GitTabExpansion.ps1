@@ -488,11 +488,11 @@ function Expand-GitProxyCommand($Command) {
 
     # Traverse alias chain to command name
     $CommandName = $Matches['command']
-    while(Test-Path Alias:\$CommandName) {
+    while(Test-Path -Path Alias:\$CommandName) {
         $CommandName = Get-Item -Path Alias:\$CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
     }
 
-    if(Test-Path Function:\$CommandName) {
+    if(Test-Path -Path Function:\$CommandName) {
         $Definition = Get-Item -Path Function:\$CommandName | Select-Object -ExpandProperty 'Definition'
         $DefinitionRegex = Get-GitProxyCommandRegex
         if ($Definition -match $DefinitionRegex) {
