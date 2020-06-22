@@ -514,12 +514,10 @@ function WriteTabExpLog([string] $Message) {
 }
 
 if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
-    $cmdNames = if ($global:GitTabSettings.EnableProxyCommandExpansion) {
+    $cmdNames = "git","tgit","gitk"
+    if ($global:GitTabSettings.EnableProxyCommandExpansion) {
         # Register proxy commands if the expansion is enabled
-        "git", "tgit", "gitk" + (Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match (Get-GitProxyCommandRegex) })
-    }
-    else {
-        "git", "tgit", "gitk"
+        $cmdNames += Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match (Get-GitProxyCommandRegex) } | Select-Object -ExpandProperty 'Name'
     }
     $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
 
