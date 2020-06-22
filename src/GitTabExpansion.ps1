@@ -514,8 +514,13 @@ function WriteTabExpLog([string] $Message) {
 }
 
 if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
-    $proxyCmdNames = Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match (Get-GitProxyCommandRegex) }
-    $cmdNames = "git","tgit","gitk" + $proxyCmdNames
+    $cmdNames = if ($global:GitTabSettings.EnableProxyCommandExpansion) {
+        # Register proxy commands if the expansion is enabled
+        "git", "tgit", "gitk" + (Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match (Get-GitProxyCommandRegex) })
+    }
+    else {
+        "git", "tgit", "gitk"
+    }
     $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
 
     Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
