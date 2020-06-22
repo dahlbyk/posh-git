@@ -472,6 +472,38 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 }
 
+function Expand-GitProxyCommand($Command) {
+    if ($Command -notmatch '^(?<command>\S+)\s+(?<args>.*)$') {
+        return $Command;
+    }
+
+    # Store arguments for replacement later
+    $Arguments = $Matches['args']
+
+    # Traverse alias chain to command name
+    $CommandName = $Matches['command']
+    while(Test-Path Alias:\$CommandName) {
+        $CommandName = Get-Alias -Name $CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
+    }
+
+    if(Test-Path Function:\$CommandName) {
+        $Definition = Get-Command -Name $CommandName -CommandType 'Function' | Select-Object -ExpandProperty 'Definition'
+
+        # The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
+        # have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
+        $DefinitionRegex = "(^|[|;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
+
+        if ($Definition -match $DefinitionRegex) {
+            $Cmd = $Matches['cmd']
+            # Clean up the parameters by removing delimiting whitespace and backtick preceding newlines
+            $Params = $Matches['params'] -replace '`$|`\r?\n', '' -replace '\s+', ' '
+            return $Cmd.Trim() + ' ' + $Params.Trim() + ' ' + $Arguments.Trim()
+        }
+    }
+
+    return $Command
+}
+
 function WriteTabExpLog([string] $Message) {
     if (!$global:GitTabSettings.EnableLogging) { return }
 
@@ -491,6 +523,7 @@ if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
         # The Expand-GitCommand expects this trailing space, so pad with a space if necessary.
         $padLength = $cursorPosition - $commandAst.Extent.StartOffset
         $textToComplete = $commandAst.ToString().PadRight($padLength, ' ').Substring(0, $padLength)
+        $textToComplete = Expand-GitProxyCommand($textToComplete)
 
         WriteTabExpLog "Expand: command: '$($commandAst.Extent.Text)', padded: '$textToComplete', padlen: $padLength"
         Expand-GitCommand $textToComplete
@@ -514,6 +547,7 @@ else {
 
     function TabExpansion($line, $lastWord) {
         $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
+        $lastBlock = Expand-GitProxyCommand($lastBlock)
         $msg = "Legacy expand: '$lastBlock'"
 
         switch -regex ($lastBlock) {
