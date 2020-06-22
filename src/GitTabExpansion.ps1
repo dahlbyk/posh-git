@@ -498,7 +498,7 @@ function Expand-GitProxyCommand($Command) {
         if ($Definition -match $DefinitionRegex) {
             $Cmd = $Matches['cmd']
             # Clean up the parameters by removing delimiting whitespace and backtick preceding newlines
-            $Params = $Matches['params'] -replace '`$|`\r?\n', '' -replace '\s+', ' '
+            $Params = $Matches['params'] -replace '`\r?\n', '' -replace '\s+', ' '
             return $Cmd.Trim() + ' ' + $Params.Trim() + ' ' + $Arguments.Trim()
         }
     }
