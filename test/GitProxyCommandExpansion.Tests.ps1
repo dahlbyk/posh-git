@@ -132,7 +132,7 @@ Describe 'CommandExpansion Tests' {
             function global:Invoke-GitFunction {
                 git `
                 checkout `
-				-b `
+                -b `
                 $args
             }
             New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Global'
