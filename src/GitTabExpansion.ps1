@@ -497,10 +497,9 @@ function Expand-GitProxyCommand($Command) {
         $Definition = Get-Item -Path Function:\$CommandName | Select-Object -ExpandProperty 'Definition'
         $DefinitionRegex = Get-GitProxyCommandRegex
         if ($Definition -match $DefinitionRegex) {
-            $Cmd = $Matches['cmd']
             # Clean up the parameters by removing delimiting whitespace and backtick preceding newlines
             $Params = $Matches['params'] -replace '`\r?\n', '' -replace '\s+', ' '
-            return $Cmd.Trim() + ' ' + $Params.Trim() + ' ' + $Arguments.Trim()
+            return $Matches['cmd'].Trim() + ' ' + $Params.Trim() + ' ' + $Arguments.Trim()
         }
     }
 
