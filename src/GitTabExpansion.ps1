@@ -472,6 +472,12 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 }
 
+function script:Get-GitProxyCommandRegex() {
+    # The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
+    # have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
+    return "(^|[|;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
+}
+
 function Expand-GitProxyCommand($Command) {
     if ($Command -notmatch '^(?<command>\S+)\s+(?<args>.*)$') {
         return $Command;
@@ -483,16 +489,12 @@ function Expand-GitProxyCommand($Command) {
     # Traverse alias chain to command name
     $CommandName = $Matches['command']
     while(Test-Path Alias:\$CommandName) {
-        $CommandName = Get-Alias -Name $CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
+        $CommandName = Get-Item -Path Alias:\$CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
     }
 
     if(Test-Path Function:\$CommandName) {
-        $Definition = Get-Command -Name $CommandName -CommandType 'Function' | Select-Object -ExpandProperty 'Definition'
-
-        # The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
-        # have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
-        $DefinitionRegex = "(^|[|;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
-
+        $Definition = Get-Item -Path Function:\$CommandName | Select-Object -ExpandProperty 'Definition'
+        $DefinitionRegex = Get-GitProxyCommandRegex
         if ($Definition -match $DefinitionRegex) {
             $Cmd = $Matches['cmd']
             # Clean up the parameters by removing delimiting whitespace and backtick preceding newlines
@@ -512,7 +514,8 @@ function WriteTabExpLog([string] $Message) {
 }
 
 if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
-    $cmdNames = "git","tgit","gitk"
+    $proxyCmdNames = Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match (Get-GitProxyCommandRegex) }
+    $cmdNames = "git","tgit","gitk" + $proxyCmdNames
     $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
 
     Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
