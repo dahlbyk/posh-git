@@ -3,7 +3,59 @@ BeforeAll {
 }
 
 Describe 'Proxy Command Expansion Tests' {
-    Context 'Proxy Command TabExpansion Tests' {
+    Context 'Proxy Command Name TabExpansion Tests' {
+        BeforeEach {
+            if(Test-Path -Path Function:\Invoke-GitFunction) {
+                Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
+            }
+            if(Test-Path -Path Alias:\igf) {
+                Rename-Item -Path Alias:\igf -NewName igfbackup
+            }
+            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Script'
+        }
+        AfterEach {
+            if(Test-Path -Path Function:\Invoke-GitFunction) {
+                Remove-Item -Path Function:\Invoke-GitFunction
+            }
+            if(Test-Path -Path Function:\Invoke-GitFunctionBackup) {
+                Rename-Item Function:\Invoke-GitFunctionBackup Invoke-GitFunction
+            }
+            if(Test-Path -Path Alias:\igf) {
+                Remove-Item -Path Alias:\igf
+            }
+            if(Test-Path -Path Alias:\igfbackup) {
+                Rename-Item -Path Alias:\igfbackup -NewName igf
+            }
+        }
+        It 'Expands a proxy command with parameters' {
+            function script:Invoke-GitFunction { git checkout $args }
+            $result = & $module Expand-GitProxyCommand 'Invoke-GitFunction -b newbranch'
+            $result | Should -Be 'git checkout -b newbranch'
+            $result | Should -Be (& $module Expand-GitProxyCommand 'igf -b newbranch')
+        }
+        It 'Expands a multiline proxy command' {
+            function script:Invoke-GitFunction { git checkout $args }
+            $result = & $module Expand-GitProxyCommand "Invoke-GitFunction ```r`n-b ```r`nnewbranch"
+            $result | Should -Be 'git checkout -b newbranch'
+            $result | Should -Be (& $module Expand-GitProxyCommand "igf ```r`n-b```r`nnewbranch")
+        }
+        It 'Expands a multiline proxy command' {
+            function script:Invoke-GitFunction { git checkout $args }
+            & $module Expand-GitProxyCommand "Invoke-GitFunction ```r`n-b ```r`nnewbranch" | Should -Be 'git checkout -b newbranch'
+            & $module Expand-GitProxyCommand "igf ```r`n-b ```r`nnewbranch" | Should -Be 'git checkout -b newbranch'
+        }
+        It 'Does not expand the proxy command name if there is no preceding whitespace before backtick newlines' {
+            function script:Invoke-GitFunction { git checkout $args }
+            & $module Expand-GitProxyCommand "Invoke-GitFunction```r`n-b```r`nnewbranch" | Should -Be "Invoke-GitFunction```r`n-b```r`nnewbranch"
+            & $module Expand-GitProxyCommand "igf```r`n-b```r`nnewbranch" | Should -Be "igf```r`n-b```r`nnewbranch"
+        }
+        It 'Does not expand the proxy command if there is no trailing space' {
+            function script:Invoke-GitFunction { git checkout $args }
+            & $module Expand-GitProxyCommand 'Invoke-GitFunction' | Should -Be 'Invoke-GitFunction'
+            & $module Expand-GitProxyCommand 'igf' | Should -Be 'igf'
+        }
+    }
+    Context 'Proxy Command Definition Expansion Tests' {
         BeforeEach {
             if(Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
@@ -138,6 +190,17 @@ Describe 'Proxy Command Expansion Tests' {
             $result | Should -Be 'git checkout '
             $result | Should -Be (& $module Expand-GitProxyCommand 'igf ' )
         }
+        It 'Expands multiline command that terminates with semicolon on new line' {
+            function script:Invoke-GitFunction {
+                git `
+                checkout `
+                $args `
+                ;
+            }
+            $result = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
+            $result | Should -Be 'git checkout '
+            $result | Should -Be (& $module Expand-GitProxyCommand 'igf ' )
+        }
         It 'Expands multiline command with short parameter' {
             function script:Invoke-GitFunction {
                 git `
@@ -189,6 +252,17 @@ Describe 'Proxy Command Expansion Tests' {
                 git `
                 checkout
                 Write-Host $args
+            }
+            & $module Expand-GitProxyCommand 'Invoke-GitFunction ' | Should -Be 'Invoke-GitFunction '
+            & $module Expand-GitProxyCommand 'igf ' | Should -Be 'igf '
+        }
+        It 'Does not expand multiline command backtick newlines are not preceded with whitespace' {
+            function script:Invoke-GitFunction {
+                $a = 5
+                git`
+                checkout`
+                $args
+                Write-Host $null
             }
             & $module Expand-GitProxyCommand 'Invoke-GitFunction ' | Should -Be 'Invoke-GitFunction '
             & $module Expand-GitProxyCommand 'igf ' | Should -Be 'igf '

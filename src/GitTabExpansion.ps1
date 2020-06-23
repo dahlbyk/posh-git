@@ -72,7 +72,7 @@ $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
 
 # The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
 # have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
-$script:GitProxyCommandRegex = "(^|[;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
+$script:GitProxyCommandRegex = "(^|[;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|[ \t]``\r?\n)+\S+)*)(([ \t]|[ \t]``\r?\n)+\`$args)(\s|``\r?\n)*($|[|;`n])"
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
@@ -478,8 +478,8 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 }
 
 function Expand-GitProxyCommand($Command) {
-    if ($Command -notmatch '^(?<command>\S+)(?<args>.*)$') {
-        return $Command;
+    if ($Command -notmatch '^(?<command>\S+)(\s|\s`\r?\n)+(?<args>(\s|\s`\r?\n|\S)*)$') {
+        return $Command
     }
 
     # Store arguments for replacement later
@@ -490,13 +490,11 @@ function Expand-GitProxyCommand($Command) {
     while(Test-Path -Path Alias:\$CommandName) {
         $CommandName = Get-Item -Path Alias:\$CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
     }
-
     if(Test-Path -Path Function:\$CommandName) {
         $Definition = Get-Item -Path Function:\$CommandName | Select-Object -ExpandProperty 'Definition'
         if ($Definition -match $script:GitProxyCommandRegex) {
-            # Clean up the parameters by removing delimiting whitespace and backtick preceding newlines
-            $Params = $Matches['params'] -replace '`\r?\n', '' -replace '\s+', ' '
-            return $Matches['cmd'].Trim() + ' ' + $Params.Trim() + ' ' + $Arguments.Trim()
+            # Clean up the command by removing extra delimiting whitespace and backtick preceding newlines
+            return (("$($Matches['cmd'].TrimStart()) $($Matches['params']) $Arguments") -replace '`\r?\n', ' ' -replace '\s+', ' ')
         }
     }
 
