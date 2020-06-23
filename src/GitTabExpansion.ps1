@@ -72,7 +72,7 @@ $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
 
 # The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
 # have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
-$script:GitProxyCommandRegex = return "(^|[|;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
+$script:GitProxyCommandRegex = "(^|[|;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
