@@ -38,6 +38,13 @@ Describe 'Proxy Command Expansion Tests' {
             $result = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
             $result | Should -Be 'git checkout --detach '
         }
+        It 'Expands a single line with piped command suffix' {
+            function script:Invoke-GitFunction {
+                git checkout --detach $args | Write-Host
+            }
+            $result = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
+            $result | Should -Be 'git checkout --detach '
+        }
         It 'Expands the first line in command' {
             function script:Invoke-GitFunction {
                 git checkout $args
@@ -128,6 +135,13 @@ Describe 'Proxy Command Expansion Tests' {
             }
             $result = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
             $result | Should -Be 'git checkout --detach '
+        }
+        It 'Does not expand a single line with piped command prefix' {
+            function script:Invoke-GitFunction {
+                "master" | git checkout --detach $args
+            }
+            $result = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
+            $result | Should -Be 'Invoke-GitFunction '
         }
         It 'Does not expand command if $args is not present' {
             function script:Invoke-GitFunction {
@@ -230,6 +244,12 @@ Describe 'Proxy Command Expansion Tests' {
             }
             & $module Expand-GitProxyCommand 'Invoke-GitFunction ' | Should -Be (& $module Expand-GitProxyCommand 'igf ')
         }
+        It 'Expands a single line with piped command suffix' {
+            function script:Invoke-GitFunction {
+                git checkout --detach $args | Write-Host
+            }
+            & $module Expand-GitProxyCommand 'Invoke-GitFunction ' | Should -Be (& $module Expand-GitProxyCommand 'igf ')
+        }
         It 'Expands the first line in command' {
             function script:Invoke-GitFunction {
                 git checkout $args
@@ -314,6 +334,13 @@ Describe 'Proxy Command Expansion Tests' {
         It 'Does not expand command if $args is not present' {
             function script:Invoke-GitFunction {
                 git checkout
+            }
+            $result = & $module Expand-GitProxyCommand 'igf '
+            $result | Should -Be 'igf '
+        }
+        It 'Does not expand a single line with piped command prefix' {
+            function script:Invoke-GitFunction {
+                "master" | git checkout --detach $args
             }
             $result = & $module Expand-GitProxyCommand 'igf '
             $result | Should -Be 'igf '
