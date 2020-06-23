@@ -480,7 +480,7 @@ function script:Get-GitProxyCommandRegex() {
 }
 
 function Expand-GitProxyCommand($Command) {
-    if ($Command -notmatch '^(?<command>\S+)\s+(?<args>.*)$') {
+    if ($Command -notmatch '^(?<command>\S+)(?<args>.*)$') {
         return $Command;
     }
 
