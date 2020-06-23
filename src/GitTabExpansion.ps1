@@ -70,9 +70,21 @@ $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
 $script:vstsCommandsWithShortParams = $shortVstsParams.Keys -join '|'
 $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
 
-# The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
-# have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
-$script:GitProxyCommandRegex = "(^|[;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([^\S\r\n]|[^\S\r\n]``\r?\n)+\S+)*)(([^\S\r\n]|[^\S\r\n]``\r?\n)+\`$args)(\s|``\r?\n)*($|[|;`n])"
+# The regular expression here is roughly follows this pattern:
+#
+# <begin anchor><whitespace>*<git>(<whitespace><parameter>)*<whitespace>+<$args><whitespace>*<end anchor>
+#
+# The delimiters inside the parameter list and between some of the elements are non-newline whitespace characters ([^\S\r\n]).
+# In those instances, newlines are only allowed if they preceded by a non-newline whitespace character.
+#
+# Begin anchor (^|[;`n])
+# Whitespace   (\s*)
+# Git Command  (?<cmd>$(GetAliasPattern git))
+# Parameters   (?<params>(([^\S\r\n]|[^\S\r\n]``\r?\n)+\S+)*)
+# $args Anchor (([^\S\r\n]|[^\S\r\n]``\r?\n)+\`$args)
+# Whitespace   (\s|``\r?\n)*
+# End Anchor   ($|[|;`n])
+$script:GitProxyCommandRegex = "(^|[;`n])(\s*)(?<cmd>$(Get-AliasPattern git))(?<params>(([^\S\r\n]|[^\S\r\n]``\r?\n)+\S+)*)(([^\S\r\n]|[^\S\r\n]``\r?\n)+\`$args)(\s|``\r?\n)*($|[|;`n])"
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
