@@ -49,10 +49,15 @@ Describe 'Proxy Command Expansion Tests' {
             & $module Expand-GitProxyCommand "Invoke-GitFunction```r`n-b```r`nnewbranch" | Should -Be "Invoke-GitFunction```r`n-b```r`nnewbranch"
             & $module Expand-GitProxyCommand "igf```r`n-b```r`nnewbranch" | Should -Be "igf```r`n-b```r`nnewbranch"
         }
-        It 'Does not expand the proxy command name if there is no preceding whitespace before any backtick newlines' {
+        It 'Does not expand the proxy command name if there is no preceding non-newline whitespace before any backtick newlines' {
             function script:Invoke-GitFunction { git checkout $args }
             & $module Expand-GitProxyCommand "Invoke-GitFunction ```r`n-b```r`nnewbranch" | Should -Be "Invoke-GitFunction ```r`n-b```r`nnewbranch"
             & $module Expand-GitProxyCommand "igf ```r`n-b```r`nnewbranch" | Should -Be "igf ```r`n-b```r`nnewbranch"
+        }
+        It 'Does not expand the proxy command name if the preceding whitespace before backtick newlines are newlines' {
+            function script:Invoke-GitFunction { git checkout $args }
+            & $module Expand-GitProxyCommand "Invoke-GitFunction`r`n```r`n-b`r`n```r`nnewbranch" | Should -Be "Invoke-GitFunction`r`n```r`n-b`r`n```r`nnewbranch"
+            & $module Expand-GitProxyCommand "igf`r`n```r`n-b`r`n```r`nnewbranch" | Should -Be "igf`r`n```r`n-b`r`n```r`nnewbranch"
         }
         It 'Does not expand the proxy command if there is no trailing space' {
             function script:Invoke-GitFunction { git checkout $args }

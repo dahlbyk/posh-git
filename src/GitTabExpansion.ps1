@@ -72,7 +72,7 @@ $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
 
 # The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
 # have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
-$script:GitProxyCommandRegex = "(^|[;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|[ \t]``\r?\n)+\S+)*)(([ \t]|[ \t]``\r?\n)+\`$args)(\s|``\r?\n)*($|[|;`n])"
+$script:GitProxyCommandRegex = "(^|[;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([^\S\r\n]|[^\S\r\n]``\r?\n)+\S+)*)(([^\S\r\n]|[^\S\r\n]``\r?\n)+\`$args)(\s|``\r?\n)*($|[|;`n])"
 
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
@@ -478,7 +478,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 }
 
 function Expand-GitProxyCommand($Command) {
-    if ($Command -notmatch '^(?<command>\S+)([ \t]|\s`\r?\n)+(?<args>([ \t]|\s`\r?\n|\S)*)$') {
+    if ($Command -notmatch '^(?<command>\S+)([^\S\r\n]|[^\S\r\n]`\r?\n)+(?<args>([^\S\r\n]|[^\S\r\n]`\r?\n|\S)*)$') {
         return $Command
     }
 
