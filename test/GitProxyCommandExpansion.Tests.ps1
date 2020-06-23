@@ -188,7 +188,7 @@ Describe 'Proxy Command Expansion Tests' {
             $result | Should -Be 'git checkout -q -f -m --detach master'
         }
     }
-	Context 'Alias of Proxy Command TabExpansion Tests' {
+    Context 'Alias of Proxy Command TabExpansion Tests' {
         BeforeEach {
             if(Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
@@ -337,7 +337,7 @@ Describe 'Proxy Command Expansion Tests' {
             $result = & $module Expand-GitProxyCommand 'igf '
             $result | Should -Be 'igf '
         }
-	}
+    }
     Context 'Proxy Subcommand TabExpansion Tests' {
         BeforeEach {
             if(Test-Path -Path Function:\Invoke-GitFunction) {

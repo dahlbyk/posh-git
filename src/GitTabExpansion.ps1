@@ -70,6 +70,10 @@ $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
 $script:vstsCommandsWithShortParams = $shortVstsParams.Keys -join '|'
 $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
 
+# The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
+# have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
+$script:GitProxyCommandRegex = return "(^|[|;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
+
 try {
     if ($null -ne (git help -a 2>&1 | Select-String flow)) {
         $script:someCommands += 'flow'
@@ -473,12 +477,6 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 }
 
-function script:Get-GitProxyCommandRegex() {
-    # The regular expression here matches commands <git> <param>+ $args.  Some restrictions on delimiting whitespace
-    # have been made to disallow newlines in the middle of the command without the backtick (`) character preceding them
-    return "(^|[|;`n])\s*(?<cmd>$(Get-AliasPattern git))(?<params>(([ \t]|``\r?\n)+\S+)*)(([ \t]|``\r?\n)+\`$args)\s*($|[|;`n])"
-}
-
 function Expand-GitProxyCommand($Command) {
     if ($Command -notmatch '^(?<command>\S+)(?<args>.*)$') {
         return $Command;
@@ -495,8 +493,7 @@ function Expand-GitProxyCommand($Command) {
 
     if(Test-Path -Path Function:\$CommandName) {
         $Definition = Get-Item -Path Function:\$CommandName | Select-Object -ExpandProperty 'Definition'
-        $DefinitionRegex = Get-GitProxyCommandRegex
-        if ($Definition -match $DefinitionRegex) {
+        if ($Definition -match $script:GitProxyCommandRegex) {
             # Clean up the parameters by removing delimiting whitespace and backtick preceding newlines
             $Params = $Matches['params'] -replace '`\r?\n', '' -replace '\s+', ' '
             return $Matches['cmd'].Trim() + ' ' + $Params.Trim() + ' ' + $Arguments.Trim()
@@ -517,7 +514,7 @@ if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
     $cmdNames = "git","tgit","gitk"
     if ($global:GitTabSettings.EnableProxyCommandExpansion) {
         # Register proxy commands if the expansion is enabled
-        $cmdNames += Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match (Get-GitProxyCommandRegex) } | Select-Object -ExpandProperty 'Name'
+        $cmdNames += Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match $script:GitProxyCommandRegex } | Select-Object -ExpandProperty 'Name'
     }
     $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
 
