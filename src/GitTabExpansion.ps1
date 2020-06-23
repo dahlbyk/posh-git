@@ -478,7 +478,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 }
 
 function Expand-GitProxyCommand($Command) {
-    if ($Command -notmatch '^(?<command>\S+)(\s|\s`\r?\n)+(?<args>(\s|\s`\r?\n|\S)*)$') {
+    if ($Command -notmatch '^(?<command>\S+)([ \t]|\s`\r?\n)+(?<args>([ \t]|\s`\r?\n|\S)*)$') {
         return $Command
     }
 
