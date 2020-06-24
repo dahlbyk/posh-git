@@ -552,6 +552,9 @@ else {
 
             $line = $Context.Line
             $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
+            if ($global:GitTabSettings.EnableProxyCommandExpansion) {
+                $lastBlock = Expand-GitProxyCommand($lastBlock)
+            }
             $TabExpansionHasOutput.Value = $true
             WriteTabExpLog "PowerTab expand: '$lastBlock'"
             Expand-GitCommand $lastBlock
