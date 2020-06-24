@@ -513,6 +513,27 @@ function Expand-GitProxyCommand($Command) {
     return $Command
 }
 
+function Enable-GitProxyCommandExpansion {
+    if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
+        $cmdNames = Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match $script:GitProxyCommandRegex } | Select-Object -ExpandProperty 'Name'
+        $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
+
+        Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
+            param($wordToComplete, $commandAst, $cursorPosition)
+
+            $padLength = $cursorPosition - $commandAst.Extent.StartOffset
+            $textToComplete = $commandAst.ToString().PadRight($padLength, ' ').Substring(0, $padLength)
+            $textToComplete = Expand-GitProxyCommand($textToComplete)
+
+            WriteTabExpLog "Expand: command: '$($commandAst.Extent.Text)', padded: '$textToComplete', padlen: $padLength"
+            Expand-GitCommand $textToComplete
+        }
+    }
+    else {
+        $global:GitTabSettings.EnableProxyCommandExpansion = $true;
+    }
+}
+
 function WriteTabExpLog([string] $Message) {
     if (!$global:GitTabSettings.EnableLogging) { return }
 
@@ -522,10 +543,6 @@ function WriteTabExpLog([string] $Message) {
 
 if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
     $cmdNames = "git","tgit","gitk"
-    if ($global:GitTabSettings.EnableProxyCommandExpansion) {
-        # Register proxy commands if the expansion is enabled
-        $cmdNames += Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match $script:GitProxyCommandRegex } | Select-Object -ExpandProperty 'Name'
-    }
     $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
 
     Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
@@ -536,9 +553,6 @@ if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
         # The Expand-GitCommand expects this trailing space, so pad with a space if necessary.
         $padLength = $cursorPosition - $commandAst.Extent.StartOffset
         $textToComplete = $commandAst.ToString().PadRight($padLength, ' ').Substring(0, $padLength)
-        if ($global:GitTabSettings.EnableProxyCommandExpansion) {
-            $textToComplete = Expand-GitProxyCommand($textToComplete)
-        }
 
         WriteTabExpLog "Expand: command: '$($commandAst.Extent.Text)', padded: '$textToComplete', padlen: $padLength"
         Expand-GitCommand $textToComplete
