@@ -1,4 +1,4 @@
-param([bool]$ForcePoshGitPrompt, [bool]$UseLegacyTabExpansion)
+param([bool]$ForcePoshGitPrompt, [bool]$UseLegacyTabExpansion, [bool]$EnableProxyCommandExpansion)
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
@@ -152,7 +152,6 @@ $ExecutionContext.SessionState.Module.OnRemove = {
 $exportModuleMemberParams = @{
     Function = @(
         'Add-PoshGitToProfile',
-        'Enable-GitProxyCommandExpansion',
         'Expand-GitCommand',
         'Format-GitBranchName',
         'Get-GitBranchStatusColor',

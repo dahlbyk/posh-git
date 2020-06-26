@@ -7,7 +7,6 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
         '!f() { exec vsts code pr "$@"; }; f' = 'vsts.pr'
     }
     EnableLogging = $false
-    EnableProxyCommandExpansion = $false
     LogPath = Join-Path ([System.IO.Path]::GetTempPath()) posh-git_tabexp.log
 }
 
@@ -513,27 +512,6 @@ function Expand-GitProxyCommand($Command) {
     return $Command
 }
 
-function Enable-GitProxyCommandExpansion {
-    if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
-        $cmdNames = Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match $script:GitProxyCommandRegex } | Select-Object -ExpandProperty 'Name'
-        $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
-
-        Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
-            param($wordToComplete, $commandAst, $cursorPosition)
-
-            $padLength = $cursorPosition - $commandAst.Extent.StartOffset
-            $textToComplete = $commandAst.ToString().PadRight($padLength, ' ').Substring(0, $padLength)
-            $textToComplete = Expand-GitProxyCommand($textToComplete)
-
-            WriteTabExpLog "Expand: command: '$($commandAst.Extent.Text)', padded: '$textToComplete', padlen: $padLength"
-            Expand-GitCommand $textToComplete
-        }
-    }
-    else {
-        $global:GitTabSettings.EnableProxyCommandExpansion = $true;
-    }
-}
-
 function WriteTabExpLog([string] $Message) {
     if (!$global:GitTabSettings.EnableLogging) { return }
 
@@ -543,6 +521,9 @@ function WriteTabExpLog([string] $Message) {
 
 if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
     $cmdNames = "git","tgit","gitk"
+    if ($EnableProxyCommandExpansion) {
+        $cmdNames += Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match $script:GitProxyCommandRegex } | Select-Object -ExpandProperty 'Name'
+    }
     $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
 
     Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
@@ -553,6 +534,9 @@ if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
         # The Expand-GitCommand expects this trailing space, so pad with a space if necessary.
         $padLength = $cursorPosition - $commandAst.Extent.StartOffset
         $textToComplete = $commandAst.ToString().PadRight($padLength, ' ').Substring(0, $padLength)
+        if ($EnableProxyCommandExpansion) {
+            $textToComplete = Expand-GitProxyCommand($textToComplete)
+        }
 
         WriteTabExpLog "Expand: command: '$($commandAst.Extent.Text)', padded: '$textToComplete', padlen: $padLength"
         Expand-GitCommand $textToComplete
@@ -566,7 +550,7 @@ else {
 
             $line = $Context.Line
             $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
-            if ($global:GitTabSettings.EnableProxyCommandExpansion) {
+            if ($EnableProxyCommandExpansion) {
                 $lastBlock = Expand-GitProxyCommand($lastBlock)
             }
             $TabExpansionHasOutput.Value = $true
@@ -579,7 +563,7 @@ else {
 
     function TabExpansion($line, $lastWord) {
         $lastBlock = [regex]::Split($line, '[|;]')[-1].TrimStart()
-        if ($global:GitTabSettings.EnableProxyCommandExpansion) {
+        if ($EnableProxyCommandExpansion) {
             $lastBlock = Expand-GitProxyCommand($lastBlock)
         }
         $msg = "Legacy expand: '$lastBlock'"
