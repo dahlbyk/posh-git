@@ -39,11 +39,6 @@ Describe 'Proxy Command Expansion Tests' {
             $result | Should -Be 'git checkout -b newbranch'
             $result | Should -Be (& $module Expand-GitProxyCommand "igf ```r`n-b ```r`nnewbranch")
         }
-        It 'Expands a multiline proxy command' {
-            function script:Invoke-GitFunction { git checkout $args }
-            & $module Expand-GitProxyCommand "Invoke-GitFunction ```r`n-b ```r`nnewbranch" | Should -Be 'git checkout -b newbranch'
-            & $module Expand-GitProxyCommand "igf ```r`n-b ```r`nnewbranch" | Should -Be 'git checkout -b newbranch'
-        }
         It 'Does not expand the proxy command name if there is no preceding whitespace before backtick newlines' {
             function script:Invoke-GitFunction { git checkout $args }
             & $module Expand-GitProxyCommand "Invoke-GitFunction```r`n-b```r`nnewbranch" | Should -Be "Invoke-GitFunction```r`n-b```r`nnewbranch"
