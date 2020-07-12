@@ -267,7 +267,7 @@ Describe 'TabExpansion Tests' {
             $alias = "test-$(New-Guid)"
 
             &$gitbin config alias.$alias checkout
-            (&$gitbin config --get-all alias.$alias).Count | Should -Be 1
+            @(&$gitbin config --get-all alias.$alias).Length | Should -Be 1
 
             $result = & $module GitTabExpansionInternal "git $alias ma"
             $result | Should -BeExactly 'master'

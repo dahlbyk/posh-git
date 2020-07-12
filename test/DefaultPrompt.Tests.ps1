@@ -536,6 +536,9 @@ M test/Baz.Tests.ps1
                 if ($Host.Name -eq 'RemoteHostImplementation') {
                     $title | Should -eq $originalTitle
                 }
+                elseif ($PSVersionTable.PSVersion.Major -lt 6) {
+                    $title | Should -match '^Windows PowerShell|:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe$'
+                }
                 else {
                     $title | Should -match '^(Windows )?PowerShell'
                 }
