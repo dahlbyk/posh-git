@@ -21,8 +21,8 @@ if (Test-Path Env:\POSHGIT_ENABLE_STRICTMODE) {
 $IsAdmin = Test-Administrator
 
 # Get the default prompt definition.
-$initialSessionState = [Runspace]::DefaultRunspace.InitialSessionState
-if (!$initialSessionState.Commands -or !$initialSessionState.Commands['prompt']) {
+$initialSessionState = [System.Management.Automation.Runspaces.Runspace]::DefaultRunspace.InitialSessionState
+if (!$initialSessionState -or !$initialSessionState.PSObject.Properties.Match('Commands') -or !$initialSessionState.Commands['prompt']) {
     $defaultPromptDef = "`$(if (test-path variable:/PSDebugContext) { '[DBG]: ' } else { '' }) + 'PS ' + `$(Get-Location) + `$(if (`$nestedpromptlevel -ge 1) { '>>' }) + '> '"
 }
 else {
