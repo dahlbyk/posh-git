@@ -151,7 +151,7 @@ function script:gitFeatures($filter, $command) {
     $branches = @(git branch --no-color | ForEach-Object { if ($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
         Where-Object { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
-        ForEach-Object { $prefix + $_ } |
+        ForEach-Object { $featurePrefix + $_ } |
         quoteStringWithSpecialChars
 }
 
@@ -390,9 +390,9 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
             gitCheckoutFiles $GitStatus $matches['files']
         }
 
-        # Handles git restore -s <ref> - must come before the next regex case
-        "^restore.* (?-i)-s\s*(?<ref>\S*)$" {
-            gitBranches $matches['ref'] $true
+        # Handles git restore -s <ref> / --source=<ref> - must come before the next regex case
+        "^restore.* (?-i)(-s\s*|(?<source>--source=))(?<ref>\S*)$" {
+            gitBranches $matches['ref'] $true $matches['source']
             gitTags $matches['ref']
             break
         }

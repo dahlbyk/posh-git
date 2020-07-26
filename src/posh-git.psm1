@@ -1,5 +1,10 @@
 param([bool]$ForcePoshGitPrompt, [bool]$UseLegacyTabExpansion)
 
+if (Test-Path Env:\POSHGIT_ENABLE_STRICTMODE) {
+    # Set strict mode to latest to help catch scripting errors in the module. This is done by the Pester tests.
+    Set-StrictMode -Version Latest
+}
+
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
 . $PSScriptRoot\ConsoleMode.ps1
