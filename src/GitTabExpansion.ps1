@@ -498,9 +498,9 @@ function Expand-GitProxyCommand($Command) {
     # Store arguments for replacement later
     $Arguments = $Matches['args']
 
-    # Traverse alias chain to command name
+    # Get the command name; if an alias exists, get the actual command name
     $CommandName = $Matches['command']
-    while(Test-Path -Path Alias:\$CommandName) {
+    if(Test-Path -Path Alias:\$CommandName) {
         $CommandName = Get-Item -Path Alias:\$CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
     }
 
