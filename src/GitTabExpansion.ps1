@@ -489,6 +489,8 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
 }
 
 function Expand-GitProxyCommand($Command) {
+    # Make sure the incoming command matches: <Command> <Args>, so we can extract the alias/command
+    # name and the arguments being passed in.
     if ($Command -notmatch '^(?<command>\S+)([^\S\r\n]|[^\S\r\n]`\r?\n)+(?<args>([^\S\r\n]|[^\S\r\n]`\r?\n|\S)*)$') {
         return $Command
     }
@@ -501,6 +503,8 @@ function Expand-GitProxyCommand($Command) {
     while(Test-Path -Path Alias:\$CommandName) {
         $CommandName = Get-Item -Path Alias:\$CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
     }
+
+    # Extract definition of git usage
     if(Test-Path -Path Function:\$CommandName) {
         $Definition = Get-Item -Path Function:\$CommandName | Select-Object -ExpandProperty 'Definition'
         if ($Definition -match $script:GitProxyCommandRegex) {
