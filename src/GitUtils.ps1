@@ -153,9 +153,11 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
         }
 
         dbg 'Inside git directory?' $sw
-        if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
+        $revParseOut = git rev-parse --is-inside-git-dir 2>$null
+        if ('true' -eq $revParseOut) {
             dbg 'Inside git directory' $sw
-            if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
+            $revParseOut = git rev-parse --is-bare-repository 2>$null
+            if ('true' -eq $revParseOut) {
                 $c = 'BARE:'
             }
             else {
@@ -251,6 +253,8 @@ function Get-GitStatus {
         $aheadBy = 0
         $behindBy = 0
         $gone = $false
+        $upstream = $null
+
         $indexAdded = New-Object System.Collections.Generic.List[string]
         $indexModified = New-Object System.Collections.Generic.List[string]
         $indexDeleted = New-Object System.Collections.Generic.List[string]
@@ -317,7 +321,7 @@ function Get-GitStatus {
                 switch ($settings.UntrackedFilesMode) {
                     "No"      { $untrackedFilesOption = "-uno" }
                     "All"     { $untrackedFilesOption = "-uall" }
-                    "Normal"  { $untrackedFilesOption = "-unormal" }
+                    default   { $untrackedFilesOption = "-unormal" }
                 }
                 $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
                 if ($settings.EnableStashStatus) {
