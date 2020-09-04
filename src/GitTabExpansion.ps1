@@ -95,7 +95,7 @@ function script:gitCommands($filter, $includeAliases) {
     }
     else {
         $cmdList += git help --all |
-            Where-Object { $_ -match '^  \S.*' } |
+            Where-Object { $_ -match '^\s{2,}\S.*' } |
             ForEach-Object { $_.Split(' ', [StringSplitOptions]::RemoveEmptyEntries) } |
             Where-Object { $_ -like "$filter*" }
     }
