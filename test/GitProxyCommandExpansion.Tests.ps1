@@ -321,30 +321,30 @@ Describe 'Proxy Command Expansion Tests' {
         }
         It 'Tab completes without subcommands' {
             function script:Invoke-GitFunction { git whatever $args }
-            $CommandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
-            $result = & $module GitTabExpansionInternal $CommandText
+            $commandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
+            $result = & $module GitTabExpansionInternal $commandText
 
             $result | Should -Be @()
         }
         It 'Tab completes bisect subcommands' {
             function script:Invoke-GitFunction { git bisect $args }
-            $CommandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
-            $result = & $module GitTabExpansionInternal $CommandText
+            $commandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
+            $result = & $module GitTabExpansionInternal $commandText
 
             $result -contains '' | Should -Be $false
             $result -contains 'start' | Should -Be $true
             $result -contains 'run' | Should -Be $true
 
-            $CommandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction s'
-            $result2 = & $module GitTabExpansionInternal $CommandText
+            $commandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction s'
+            $result2 = & $module GitTabExpansionInternal $commandText
 
             $result2 -contains 'start' | Should -Be $true
             $result2 -contains 'skip' | Should -Be $true
         }
         It 'Tab completes remote subcommands' {
             function script:Invoke-GitFunction { git remote $args }
-            $CommandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
-            $result = & $module GitTabExpansionInternal $CommandText
+            $commandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction '
+            $result = & $module GitTabExpansionInternal $commandText
 
             $result -contains '' | Should -Be $false
             $result -contains 'add' | Should -Be $true
@@ -352,8 +352,8 @@ Describe 'Proxy Command Expansion Tests' {
             $result -contains 'get-url' | Should -Be $true
             $result -contains 'update' | Should -Be $true
 
-            $CommandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction s'
-            $result2 = & $module GitTabExpansionInternal $CommandText
+            $commandText = & $module Expand-GitProxyCommand 'Invoke-GitFunction s'
+            $result2 = & $module GitTabExpansionInternal $commandText
 
             $result2 -contains 'set-branches' | Should -Be $true
             $result2 -contains 'set-head' | Should -Be $true

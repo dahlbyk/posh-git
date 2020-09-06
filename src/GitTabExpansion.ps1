@@ -488,32 +488,32 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     }
 }
 
-function Expand-GitProxyCommand($Command) {
+function Expand-GitProxyCommand($command) {
     # Make sure the incoming command matches: <Command> <Args>, so we can extract the alias/command
     # name and the arguments being passed in.
-    if ($Command -notmatch '^(?<command>\S+)([^\S\r\n]|[^\S\r\n]`\r?\n)+(?<args>([^\S\r\n]|[^\S\r\n]`\r?\n|\S)*)$') {
-        return $Command
+    if ($command -notmatch '^(?<command>\S+)([^\S\r\n]|[^\S\r\n]`\r?\n)+(?<args>([^\S\r\n]|[^\S\r\n]`\r?\n|\S)*)$') {
+        return $command
     }
 
     # Store arguments for replacement later
-    $Arguments = $Matches['args']
+    $arguments = $matches['args']
 
     # Get the command name; if an alias exists, get the actual command name
-    $CommandName = $Matches['command']
-    if(Test-Path -Path Alias:\$CommandName) {
-        $CommandName = Get-Item -Path Alias:\$CommandName | Select-Object -ExpandProperty 'ResolvedCommandName'
+    $commandName = $matches['command']
+    if(Test-Path -Path Alias:\$commandName) {
+        $commandName = Get-Item -Path Alias:\$commandName | Select-Object -ExpandProperty 'ResolvedCommandName'
     }
 
     # Extract definition of git usage
-    if(Test-Path -Path Function:\$CommandName) {
-        $Definition = Get-Item -Path Function:\$CommandName | Select-Object -ExpandProperty 'Definition'
-        if ($Definition -match $script:GitProxyCommandRegex) {
+    if(Test-Path -Path Function:\$commandName) {
+        $definition = Get-Item -Path Function:\$commandName | Select-Object -ExpandProperty 'Definition'
+        if ($definition -match $script:GitProxyCommandRegex) {
             # Clean up the command by removing extra delimiting whitespace and backtick preceding newlines
-            return (("$($Matches['cmd'].TrimStart()) $($Matches['params']) $Arguments") -replace '`\r?\n', ' ' -replace '\s+', ' ')
+            return (("$($matches['cmd'].TrimStart()) $($matches['params']) $arguments") -replace '`\r?\n', ' ' -replace '\s+', ' ')
         }
     }
 
-    return $Command
+    return $command
 }
 
 function WriteTabExpLog([string] $Message) {
