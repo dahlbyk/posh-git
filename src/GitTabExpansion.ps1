@@ -500,12 +500,12 @@ function Expand-GitProxyCommand($command) {
 
     # Get the command name; if an alias exists, get the actual command name
     $commandName = $matches['command']
-    if(Test-Path -Path Alias:\$commandName) {
+    if (Test-Path -Path Alias:\$commandName) {
         $commandName = Get-Item -Path Alias:\$commandName | Select-Object -ExpandProperty 'ResolvedCommandName'
     }
 
     # Extract definition of git usage
-    if(Test-Path -Path Function:\$commandName) {
+    if (Test-Path -Path Function:\$commandName) {
         $definition = Get-Item -Path Function:\$commandName | Select-Object -ExpandProperty 'Definition'
         if ($definition -match $script:GitProxyCommandRegex) {
             # Clean up the command by removing extra delimiting whitespace and backtick preceding newlines
