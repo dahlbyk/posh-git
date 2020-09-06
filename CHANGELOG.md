@@ -2,11 +2,21 @@
 
 ## 1.0.0 - TBD
 
+### Added
+
+- Added --renormalize to the "git add" parameters for tab-completion.
+  ([PR #791](https://github.com/dahlbyk/posh-git/pull/791))
+  Thanks @dannoe
+
 ### Fixed
 
 - Register-ArgumentCompleter based tab-expansion in beta4 doesn't work with PowerShell aliases to git,tgit,gitk.
   ([#769](https://github.com/dahlbyk/posh-git/issues/769))
   ([PR #770](https://github.com/dahlbyk/posh-git/pull/770))
+- "git help --all" output breaks $GitTabSettings.AllCommands = $true.
+  ([#788](https://github.com/dahlbyk/posh-git/issues/788))
+  ([PR #790](https://github.com/dahlbyk/posh-git/pull/790))
+  Thanks @dannoe
 
 ## 1.0.0-beta4 - March 14, 2020
 
