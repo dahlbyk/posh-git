@@ -10,6 +10,14 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
 
 $modulePath = Convert-Path $PSScriptRoot\..\src
 $moduleManifestPath = "$modulePath\posh-git.psd1"
+# Test against built folder in CI (or just set $env:CI locally for that)
+if ($env:CI) {
+    $moduleVersion = (Import-LocalizedData -FileName 'posh-git.psd1' -BaseDirectory ($modulePath)).ModuleVersion
+    $builtModulePath = [System.IO.Path]::Combine($PSScriptRoot, '..', $moduleVersion)
+    if (Test-Path $builtModulePath) {
+        $moduleManifestPath = "$builtModulePath\posh-git.psd1"
+    }
+}
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 $csi = [char]0x1b + "["
