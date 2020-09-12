@@ -1,3 +1,4 @@
 VERSION
+*.log
 *.nupkg
 obj
