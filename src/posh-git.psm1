@@ -1,4 +1,4 @@
-param([bool]$ForcePoshGitPrompt, [bool]$UseLegacyTabExpansion, [bool]$EnableProxyCommandExpansion)
+param([bool]$ForcePoshGitPrompt, [bool]$UseLegacyTabExpansion, [bool]$EnableProxyFunctionExpansion)
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
