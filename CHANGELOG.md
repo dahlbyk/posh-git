@@ -7,6 +7,10 @@
 - Added --renormalize to the "git add" parameters for tab-completion.
   ([PR #791](https://github.com/dahlbyk/posh-git/pull/791))
   Thanks @dannoe
+- Pass PowerShell aliases down to posh-git TabExpansion autocomplete function
+  ([#257](https://github.com/dahlbyk/posh-git/issues/257))
+  ([PR #779](https://github.com/dahlbyk/posh-git/pull/779))
+  Thanks @csc027
 
 ### Fixed
 
