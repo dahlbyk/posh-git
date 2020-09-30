@@ -32,12 +32,12 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
         # A native executable that writes to stderr AND has its stderr redirected will generate non-terminating
         # error records if the user has set $ErrorActionPreference to Stop. Override that value in this scope.
         $ErrorActionPreference = 'Continue'
-        if (!$currentEncoding.IsSingleByte) {
+        try { 
             [Console]::OutputEncoding = [Text.Encoding]::UTF8
             & $cmd
             [Console]::OutputEncoding = $currentEncoding
         }
-        else {
+        catch [System.IO.IOException] {
             & $cmd
         }
     }
