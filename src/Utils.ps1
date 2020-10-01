@@ -35,7 +35,10 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
         try { 
             [Console]::OutputEncoding = [Text.Encoding]::UTF8
             & $cmd
-            [Console]::OutputEncoding = $currentEncoding
+            try { 
+                [Console]::OutputEncoding = $currentEncoding
+            }
+            catch [System.IO.IOException] {}
         }
         catch [System.IO.IOException] {
             & $cmd
