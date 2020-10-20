@@ -60,7 +60,12 @@ function global:Convert-NativeLineEnding([string]$content, [switch]$SplitLines) 
 }
 
 function GetHomePath() {
-    $Home
+    if ($GitPromptSettings.DefaultPromptAbbreviateHomeDirectory) {
+        "~"
+    }
+    else {
+        $Home
+    }
 }
 
 function GetHomeRelPath([string]$Path) {

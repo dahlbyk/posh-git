@@ -32,13 +32,13 @@ function Invoke-Utf8ConsoleCommand([ScriptBlock]$cmd) {
         # A native executable that writes to stderr AND has its stderr redirected will generate non-terminating
         # error records if the user has set $ErrorActionPreference to Stop. Override that value in this scope.
         $ErrorActionPreference = 'Continue'
-        
+
         try { [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch [System.IO.IOException] {}
         & $cmd
     }
     finally {
         try { [Console]::OutputEncoding = $currentEncoding } catch [System.IO.IOException] {}
-        
+
         # Clear out stderr output that was added to the $Error collection, putting those errors in a module variable
         if ($global:Error.Count -gt $errorCount) {
             $numNewErrors = $global:Error.Count - $errorCount
@@ -285,7 +285,7 @@ function Get-PromptPath {
     # The latter is more desirable.
     $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
     $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-    if (!$settings -or !$currentPath -or $currentPath.Equals($Home, $stringComparison)) {
+    if (!$settings -or !$currentPath) {
         return $currentPath
     }
 
