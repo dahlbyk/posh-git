@@ -150,8 +150,24 @@ $gitParamValues = @{
     log = @{
         decorate = 'short full no'
         'no-walk' = 'sorted unsorted'
-        pretty = 'oneline short medium full fuller email raw'
-        format = 'oneline short medium full fuller email raw'
+        pretty = {
+            param($ref)
+            $completions = @()
+            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
+            'oneline short medium full fuller email raw' -split ' ' |
+                Where-Object { $_ -like "$filter*" } |
+                ForEach-Object { $completions += $_ }
+            return $completions | Sort-Object
+        }
+        format = {
+            param($ref)
+            $completions = @()
+            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
+            'oneline short medium full fuller email raw' -split ' ' |
+                Where-Object { $_ -like "$filter*" } |
+                ForEach-Object { $completions += $_ }
+            return $completions | Sort-Object
+        }
         encoding = 'UTF-8'
         date = 'relative local default iso rfc short raw'
     }
@@ -189,8 +205,24 @@ $gitParamValues = @{
         strategy = 'resolve recursive octopus ours subtree'
     }
     show = @{
-        pretty = 'oneline short medium full fuller email raw'
-        format = 'oneline short medium full fuller email raw'
+        pretty = {
+            param($ref)
+            $completions = @()
+            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
+            'oneline short medium full fuller email raw' -split ' ' |
+                Where-Object { $_ -like "$filter*" } |
+                ForEach-Object { $completions += $_ }
+            return $completions | Sort-Object
+        }
+        format = {
+            param($ref)
+            $completions = @()
+            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
+            'oneline short medium full fuller email raw' -split ' ' |
+                Where-Object { $_ -like "$filter*" } |
+                ForEach-Object { $completions += $_ }
+            return $completions | Sort-Object
+        }
         encoding = 'utf-8'
     }
     status = @{
