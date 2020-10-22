@@ -356,13 +356,13 @@ Describe 'Default Prompt WindowTitle Tests' -Skip:($Host.Name -eq 'RemoteHostImp
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $homePath = [regex]::Escape((GetHomePath))
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $repoAdminRegex = '^Admin: posh-git \[master\] \~ PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
+        $repoAdminRegex = '^Admin: posh-git \[master\] - PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $repoRegex = '^posh-git \[master\] \~ PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
+        $repoRegex = '^posh-git \[master\] - PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $nonRepoAdminRegex = '^Admin: ' + $homePath + ' \~ PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
+        $nonRepoAdminRegex = '^Admin: ' + $homePath + ' - PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $nonRepoRegex = '^' + $homePath + ' \~ PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
+        $nonRepoRegex = '^' + $homePath + ' - PowerShell \d+\.\d+ (\d\d-bit )?\(\d+\)$'
     }
     BeforeEach {
         # Ensure these settings start out set to the default values as the module only grabs

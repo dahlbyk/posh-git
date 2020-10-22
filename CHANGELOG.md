@@ -12,6 +12,13 @@
   ([PR #779](https://github.com/dahlbyk/posh-git/pull/779))
   Thanks @csc027
 
+### Changed
+
+- `$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory` defaults to `$false` on Windows. When enabled, `~` is
+   always substituted for the user's home path. Before this change, when directly in your home dir, this setting would
+   result in the full path displayed in the prompt e.g. `C:\Users\Keith`.  After this change, `~` will be displayed.
+   The new behavior is consistent with how the home path is displayed in prompts in other shells on Linux.
+
 ### Fixed
 
 - Register-ArgumentCompleter based tab-expansion in beta4 doesn't work with PowerShell aliases to git,tgit,gitk.
