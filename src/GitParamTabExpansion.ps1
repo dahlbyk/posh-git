@@ -151,22 +151,12 @@ $gitParamValues = @{
         decorate = 'short full no'
         'no-walk' = 'sorted unsorted'
         pretty = {
-            param($ref)
-            $completions = @()
-            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
-            'oneline short medium full fuller email raw' -split ' ' |
-                Where-Object { $_ -like "$filter*" } |
-                ForEach-Object { $completions += $_ }
-            return $completions | Sort-Object
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
         }
         format = {
-            param($ref)
-            $completions = @()
-            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
-            'oneline short medium full fuller email raw' -split ' ' |
-                Where-Object { $_ -like "$filter*" } |
-                ForEach-Object { $completions += $_ }
-            return $completions | Sort-Object
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
         }
         encoding = 'UTF-8'
         date = 'relative local default iso rfc short raw'
@@ -206,22 +196,12 @@ $gitParamValues = @{
     }
     show = @{
         pretty = {
-            param($ref)
-            $completions = @()
-            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
-            'oneline short medium full fuller email raw' -split ' ' |
-                Where-Object { $_ -like "$filter*" } |
-                ForEach-Object { $completions += $_ }
-            return $completions | Sort-Object
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
         }
         format = {
-            param($ref)
-            $completions = @()
-            gitConfigKeys $ref 'pretty' | ForEach-Object { $completions += $_ }
-            'oneline short medium full fuller email raw' -split ' ' |
-                Where-Object { $_ -like "$filter*" } |
-                ForEach-Object { $completions += $_ }
-            return $completions | Sort-Object
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
         }
         encoding = 'utf-8'
     }

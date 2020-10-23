@@ -155,10 +155,15 @@ function script:gitRemoteUniqueBranches($filter) {
         quoteStringWithSpecialChars
 }
 
-function script:gitConfigKeys($filter, $section) {
+function script:gitConfigKeys($section, $filter, $defaultOptions = '') {
+    $completions = @($defaultOptions -split ' ')
+
     git config --name-only --get-regexp ^$section\..* |
-        ForEach-Object { $_ -replace "$section\.","" } |
+        ForEach-Object { $completions += ($_ -replace "$section\.","") }
+
+    return $completions |
         Where-Object { $_ -like "$filter*" } |
+        Sort-Object |
         quoteStringWithSpecialChars
 }
 
