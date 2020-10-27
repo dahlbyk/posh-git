@@ -155,6 +155,18 @@ function script:gitRemoteUniqueBranches($filter) {
         quoteStringWithSpecialChars
 }
 
+function script:gitConfigKeys($section, $filter, $defaultOptions = '') {
+    $completions = @($defaultOptions -split ' ')
+
+    git config --name-only --get-regexp ^$section\..* |
+        ForEach-Object { $completions += ($_ -replace "$section\.","") }
+
+    return $completions |
+        Where-Object { $_ -like "$filter*" } |
+        Sort-Object |
+        quoteStringWithSpecialChars
+}
+
 function script:gitTags($filter, $prefix = '') {
     git tag |
         Where-Object { $_ -like "$filter*" } |

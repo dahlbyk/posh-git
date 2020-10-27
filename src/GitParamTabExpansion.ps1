@@ -150,8 +150,14 @@ $gitParamValues = @{
     log = @{
         decorate = 'short full no'
         'no-walk' = 'sorted unsorted'
-        pretty = 'oneline short medium full fuller email raw'
-        format = 'oneline short medium full fuller email raw'
+        pretty = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
+        format = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
         encoding = 'UTF-8'
         date = 'relative local default iso rfc short raw'
     }
@@ -189,8 +195,14 @@ $gitParamValues = @{
         strategy = 'resolve recursive octopus ours subtree'
     }
     show = @{
-        pretty = 'oneline short medium full fuller email raw'
-        format = 'oneline short medium full fuller email raw'
+        pretty = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
+        format = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
         encoding = 'utf-8'
     }
     status = @{
