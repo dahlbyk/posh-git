@@ -64,6 +64,11 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
         return "${AnsiEscape}$(38 + $offset);2;${r};${g};${b}m"
     }
 
+    # Force 'DarkYellow' to ConsoleColor, since it is not an HTML color
+    if ($color -eq [System.ConsoleColor]::DarkYellow) {
+        $color = [System.ConsoleColor]::DarkYellow
+    }
+
     if ($color -is [String]) {
         try {
             if ($ColorTranslatorType) {
@@ -72,11 +77,6 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
         }
         catch {
             Write-Debug $_
-        }
-
-        # Hard to get here but DarkYellow is not an HTML color but it is a ConsoleColor
-        if (($color -isnot $ColorType) -and ($null -ne ($consoleColor = $color -as [System.ConsoleColor]))) {
-            $color = $consoleColor
         }
     }
 
