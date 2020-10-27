@@ -68,8 +68,7 @@ function Get-VirtualTerminalSequence ($color, [int]$offset = 0) {
     if ($color -eq [System.ConsoleColor]::DarkYellow) {
         $color = [System.ConsoleColor]::DarkYellow
     }
-
-    if ($color -is [String]) {
+    elseif ($color -is [String]) {
         try {
             if ($ColorTranslatorType) {
                 $color = $ColorTranslatorType::FromHtml($color)
