@@ -18,7 +18,7 @@ if ([string](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)(?<g4w>\.windo
             $script:GitCygwin = $true
 
             if (!$Env:POSHGIT_CYGWIN_WARNING) {
-                Write-Warning "posh-git recommends Git for Windows. You appear to have a different distribution."
+                Write-Warning 'You appear to have an unsupported Git distribution; setting $GitPromptSettings.AnsiConsole = $false. posh-git recommends Git for Windows.'
             }
         }
     }
