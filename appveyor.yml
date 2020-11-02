@@ -42,7 +42,7 @@ test_script:
       $configuration.TestResult.OutputFormat = "NUnit2.5"
       $configuration.TestResult.OutputPath = $testResultsFile
       $configuration.CodeCoverage.Enabled = $true
-      $configuration.CodeCoverage.Path = (gci ..\src\* -include *.ps1,*.psm1)
+      $configuration.CodeCoverage.Path = (gci .\src\* -include *.ps1,*.psm1)
 
       $res = Invoke-Pester -Configuration $configuration -ErrorAction SilentlyContinue
       if (Test-Path $testResultsFile) {
@@ -58,5 +58,5 @@ test_script:
           Write-Host 'CA_KEY not set! (Expected on PR builds.)'
           return;
       }
-      $coverageResult = Format-Coverage -PesterResults $res -CoverallsApiToken $ENV:CA_KEY -RootFolder ../ -BranchName $ENV:APPVEYOR_REPO_BRANCH
+      $coverageResult = Format-Coverage -PesterResults $res -CoverallsApiToken $ENV:CA_KEY -BranchName $ENV:APPVEYOR_REPO_BRANCH
       Publish-Coverage -Coverage $coverageResult
