@@ -269,7 +269,9 @@ Describe 'TabExpansion Tests' {
             &$gitbin config alias.$alias checkout
             @(&$gitbin config --get-all alias.$alias).Length | Should -Be 1
 
-            $result = & $module GitTabExpansionInternal "git $alias ma"
+            $gitStatus = & $module Get-GitStatus
+
+            $result = & $module GitTabExpansionInternal "git $alias ma" $gitStatus
             $result | Should -BeExactly 'master'
         }
         It 'Tab completes when there are multiple aliases of the same name' {
@@ -278,7 +280,9 @@ Describe 'TabExpansion Tests' {
             &$gitbin config alias.co checkout
             (&$gitbin config --get-all alias.co).Count | Should -BeGreaterThan 1
 
-            $result = & $module GitTabExpansionInternal 'git co ma'
+            $gitStatus = & $module Get-GitStatus
+
+            $result = & $module GitTabExpansionInternal 'git co ma' $gitStatus
             $result | Should -BeExactly 'master'
         }
     }
@@ -303,7 +307,9 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes branch name with special char as quoted' {
             &$gitbin branch '#develop' 2>$null
 
-            $result = & $module GitTabExpansionInternal 'git checkout #'
+            $gitStatus = & $module Get-GitStatus
+
+            $result = & $module GitTabExpansionInternal 'git checkout #' $gitStatus
             $result | Should -BeExactly "'#develop'"
         }
         It 'Tab completes git feature branch name with special char as quoted' {
