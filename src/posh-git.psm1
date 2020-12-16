@@ -43,6 +43,7 @@ $GitPromptScriptBlock = {
     $global:GitPromptValues.IsAdmin = $IsAdmin
 
     $settings = $global:GitPromptSettings
+
     if (!$settings) {
         return "<`$GitPromptSettings not found> "
     }
@@ -65,13 +66,17 @@ $GitPromptScriptBlock = {
     # Get the current path - formatted correctly
     $promptPath = $settings.DefaultPromptPath.Expand()
 
-    # Write the path and Git status summary information
+    # Write the delimited path and Git status summary information
     if ($settings.DefaultPromptWriteStatusFirst) {
         $prompt += Write-VcsStatus
+        $prompt += Write-Prompt $settings.BeforePath.Expand()
         $prompt += Write-Prompt $promptPath
+        $prompt += Write-Prompt $settings.AfterPath.Expand()
     }
     else {
+        $prompt += Write-Prompt $settings.BeforePath.Expand()
         $prompt += Write-Prompt $promptPath
+        $prompt += Write-Prompt $settings.AfterPath.Expand()
         $prompt += Write-VcsStatus
     }
 
