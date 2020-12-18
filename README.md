@@ -371,6 +371,21 @@ This will change the prompt to:
 
 ![[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
 
+Finally, the path portion of the prompt can be contained within delimiters.
+For instance, if you would like the containing characters to be red, curly braces, the following settings can be used:
+
+```text
+$GitPromptSettings.BeforePath = '{'
+$GitPromptSettings.AfterPath = '}'
+$GitPromptSettings.BeforePath.ForegroundColor = 'Red'
+$GitPromptSettings.AfterPath.ForegroundColor = 'Red'
+```
+
+With these additional values, the previous prompt would become
+
+![[master ≡] {~\GitHub\posh-git}&#10;02-18 14:04:35 38> ][prompt-custom-wpathdelim]
+
+
 ### Prompt Layouts
 
 For reference, the following layouts show the relative position of the various parts of the posh-git prompt.
@@ -502,6 +517,7 @@ function prompt {
 [prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡] ~\GitHub\posh-git> "
 [prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "~\GitHub\posh-git [master ≡]&#10;> "
 [prompt-custom]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustom.png        "[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> "
+[prompt-custom-wpathdelim]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustomDelim.png        "[master ≡] {~\GitHub\posh-git}&#10;02-18 14:04:35 38> "
 [prompt-error1]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptError1.png        "~\GitHub\posh-git [master ≡]&#10;! 07-01 22:36:31> "
 [prompt-error2]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptError2.png        "~\GitHub\posh-git [master ≡]&#10;(1) 07-01 22:32:28> "
 
