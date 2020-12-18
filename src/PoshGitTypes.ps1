@@ -239,6 +239,9 @@ class PoshGitPromptSettings {
     [PoshGitTextSpan]$DelimStatus              = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
     [PoshGitTextSpan]$AfterStatus              = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
 
+    [PoshGitTextSpan]$BeforePath               = [PoshGitTextSpan]::new('', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$AfterPath                = [PoshGitTextSpan]::new('', [ConsoleColor]::Yellow)
+
     [PoshGitTextSpan]$BeforeIndex              = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
     [PoshGitTextSpan]$BeforeStash              = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
     [PoshGitTextSpan]$AfterStash               = [PoshGitTextSpan]::new(')', [ConsoleColor]::Red)
