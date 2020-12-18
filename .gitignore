@@ -2,4 +2,6 @@ VERSION
 *.log
 *.nupkg
 obj
+
 .history
+.vscode/settings.json
