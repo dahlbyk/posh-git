@@ -19,6 +19,5 @@
         },
         "MD034": false,
         "MD038": false
-    },
-    "powershell.codeFormatting.addWhitespaceAroundPipe": true
+    }
 }

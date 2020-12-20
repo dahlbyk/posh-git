@@ -2,5 +2,4 @@ VERSION
 *.log
 *.nupkg
 obj
-
 .history
