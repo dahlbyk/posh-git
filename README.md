@@ -374,7 +374,7 @@ This will change the prompt to:
 Finally, the path portion of the prompt can be contained within delimiters.
 For instance, if you would like the containing characters to be red, curly braces, the following settings can be used:
 
-```text
+```powershell
 $GitPromptSettings.BeforePath = '{'
 $GitPromptSettings.AfterPath = '}'
 $GitPromptSettings.BeforePath.ForegroundColor = 'Red'
@@ -384,7 +384,6 @@ $GitPromptSettings.AfterPath.ForegroundColor = 'Red'
 With these additional values, the previous prompt would become
 
 ![[master ≡] {~\GitHub\posh-git}&#10;02-18 14:04:35 38> ][prompt-custom-wpathdelim]
-
 
 ### Prompt Layouts
 
@@ -396,7 +395,7 @@ To simplify the layout, `DP` is being used as an abbreviation for `DefaultPrompt
 Default prompt layout:
 
 ```text
-{DPPrefix}{DPPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+{DPPrefix}{BeforePath}{DPPath}{AfterPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
 ```
 
 Prompt layout when DefaultPromptWriteStatusFirst is set to $true:
