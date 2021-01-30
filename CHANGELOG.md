@@ -11,6 +11,9 @@
   ([#257](https://github.com/dahlbyk/posh-git/issues/257))
   ([PR #779](https://github.com/dahlbyk/posh-git/pull/779))
   Thanks @csc027
+- Add example of BeforePath and AfterPath to README.md
+  ([PR #824](https://github.com/dahlbyk/posh-git/pull/824))
+  Thanks @breisfeld Brad Reisfeld
 
 ### Changed
 
