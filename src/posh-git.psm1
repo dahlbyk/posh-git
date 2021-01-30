@@ -69,14 +69,14 @@ $GitPromptScriptBlock = {
     # Write the delimited path and Git status summary information
     if ($settings.DefaultPromptWriteStatusFirst) {
         $prompt += Write-VcsStatus
-        $prompt += Write-Prompt $settings.BeforePath
+        $prompt += Write-Prompt $settings.BeforePath.Expand()
         $prompt += Write-Prompt $promptPath
-        $prompt += Write-Prompt $settings.AfterPath
+        $prompt += Write-Prompt $settings.AfterPath.Expand()
     }
     else {
-        $prompt += Write-Prompt $settings.BeforePath
+        $prompt += Write-Prompt $settings.BeforePath.Expand()
         $prompt += Write-Prompt $promptPath
-        $prompt += Write-Prompt $settings.AfterPath
+        $prompt += Write-Prompt $settings.AfterPath.Expand()
         $prompt += Write-VcsStatus
     }
 
