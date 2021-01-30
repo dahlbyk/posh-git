@@ -401,7 +401,7 @@ Default prompt layout:
 Prompt layout when DefaultPromptWriteStatusFirst is set to $true:
 
 ```text
-{DPPrefix}{BeforePath}{DPPath}{AfterPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+{DPPrefix}<{BeforeStatus}{Status}{AfterStatus}>{PathStatusSeparator}{BeforePath}{DPPath}{AfterPath}{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
 ```
 
 ### Displaying Error Information
