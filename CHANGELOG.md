@@ -21,6 +21,9 @@
    always substituted for the user's home path. Before this change, when directly in your home dir, this setting would
    result in the full path displayed in the prompt e.g. `C:\Users\Keith`.  After this change, `~` will be displayed.
    The new behavior is consistent with how the home path is displayed in prompts in other shells on Linux.
+- Adds `--no-optional-locks` when invoking git to reduce conflicts with other tools.
+  ([PR #774](https://github.com/dahlbyk/posh-git/pull/774))
+  Thanks @jessehouwing
 
 ### Fixed
 
