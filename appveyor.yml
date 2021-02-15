@@ -58,5 +58,7 @@ test_script:
           Write-Host 'CA_KEY not set! (Expected on PR builds.)'
           return;
       }
-      $coverageResult = Format-Coverage -PesterResults $res -CoverallsApiToken $ENV:CA_KEY -BranchName $ENV:APPVEYOR_REPO_BRANCH
-      Publish-Coverage -Coverage $coverageResult
+      Write-Host 'Skipping coverage; anyone know how to fix?'
+      Write-Host '"Please provide pester results with code coverage using the -CodeCoverage parameter"'
+      # $coverageResult = Format-Coverage -PesterResults $res -CoverallsApiToken $ENV:CA_KEY -BranchName $ENV:APPVEYOR_REPO_BRANCH
+      # Publish-Coverage -Coverage $coverageResult
