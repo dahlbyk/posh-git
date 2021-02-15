@@ -1,6 +1,6 @@
 $global:GitMissing = $false
 $script:GitCygwin = $false
-$script:GitVersion = $requiredVersion = [System.Version]'1.7.2'
+$script:GitVersion = $requiredVersion = [System.Version]'2.15'
 
 if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
     Write-Warning "git command could not be found. Please create an alias or add it to your PATH."
