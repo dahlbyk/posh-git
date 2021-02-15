@@ -29,7 +29,7 @@ jobs:
       os: osx
       before_install:
         - brew update
-        - brew cask install powershell
+        - brew install --cask powershell
         - pwsh -c 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
         - pwsh -c 'Install-Module Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Scope CurrentUser -Force | Out-Null'
 
