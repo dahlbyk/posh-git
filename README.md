@@ -198,6 +198,10 @@ Save the profile script, then close PowerShell and open a new PowerShell session
 Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to
 `git fetch`.
 
+If you want posh-git to detect your own aliases for git, then you *must* have set the alias *before* importing posh-git.
+So if you have `Set-Alias g git` then ensure it is executed before `Import-Module posh-git`, and `g checkout` will
+complete as if you'd typed `git`.
+
 ## Git status summary information
 
 The Git status summary information provides a wealth of "Git status" information at a glance, all the time in your
