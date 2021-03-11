@@ -4,7 +4,7 @@
     <id>poshgit</id>
     <title>posh-git</title>
     <version>1.0.0-beta5x</version>
-    <authors>Keith Dahlby, Mark Embling, Jeremy Skinner, Keith Hill</authors>
+    <authors>Keith Dahlby, Keith Hill, Mark Embling, Jeremy Skinner</authors>
     <owners>Keith Dahlby</owners>
     <description>### posh-git
 A set of PowerShell scripts which provide Git/PowerShell integration

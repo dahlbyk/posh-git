@@ -1,5 +1,10 @@
 # posh-git Release History
 
+## 1.0.0 - March 10, 2021
+
+- Released to PowerShell Gallery.
+- Fate of Chocolatey to be determined.
+
 ## 1.0.0-beta5 - February 14, 2021
 
 ### Added
