@@ -36,7 +36,7 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 |--------------------|----------------------|----------------------|
 | [![master build status][av-master-img]][av-master-site] | [![master build status][tv-master-img]][tv-master-site] | [![master build coverage][cc-master-img]][cc-master-site] |
 
-[README][v1-readme] • [CHANGELOG][v1-change]
+[README][main-readme] • [CHANGELOG][main-change]
 
 - Supports Windows PowerShell 5.x
 - Supports PowerShell Core 6+ on all platforms
@@ -46,6 +46,8 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 
 #### Releases
 
+- v1.0.0
+  ( [README][v1-readme] • [CHANGELOG][v1-change] )
 - v1.0.0-beta5
   ( [README][v1b5-readme] • [CHANGELOG][v1b5-change] )
 - v1.0.0-beta4
@@ -509,7 +511,7 @@ function prompt {
 [choco-site]:      https://chocolatey.org/packages/poshgit/
 [psgallery-img]:   https://img.shields.io/powershellgallery/dt/posh-git.svg
 [psgallery-site]:  https://www.powershellgallery.com/packages/posh-git
-[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0-beta5
+[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
 [posh-sshell-url]: https://github.com/dahlbyk/posh-sshell
@@ -538,8 +540,8 @@ function prompt {
 [v073-change]:     https://github.com/dahlbyk/posh-git/blob/v0.7.3/CHANGELOG.md
 [v073-readme]:     https://github.com/dahlbyk/posh-git/blob/v0.7.3/README.md
 
-[v1-change]:       https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md
-[v1-readme]:       https://github.com/dahlbyk/posh-git/blob/master/README.md
+[main-change]:       https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md
+[main-readme]:       https://github.com/dahlbyk/posh-git/blob/master/README.md
 
 [v1b1-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/CHANGELOG.md
 [v1b1-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/README.md
@@ -555,5 +557,9 @@ function prompt {
 
 [v1b5-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta5/CHANGELOG.md
 [v1b5-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta5/README.md
+
+[v1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/CHANGELOG.md
+[v1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/README.md
+
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
