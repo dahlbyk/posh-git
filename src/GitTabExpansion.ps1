@@ -302,6 +302,7 @@ function script:expandParamValues($cmd, $param, $filter) {
 
 function Expand-GitCommand($Command) {
     $res = Invoke-Utf8ConsoleCommand { GitTabExpansionInternal $Command $Global:GitStatus }
+    $res = Add-HintsToParams -Command $Command -PossibleParams $res
     $res
 }
 

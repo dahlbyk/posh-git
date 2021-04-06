@@ -15,6 +15,7 @@ if (Test-Path Env:\POSHGIT_ENABLE_STRICTMODE) {
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
 . $PSScriptRoot\GitParamTabExpansion.ps1
+. $PSScriptRoot\GitHintTabExpansion.ps1
 . $PSScriptRoot\GitTabExpansion.ps1
 . $PSScriptRoot\TortoiseGit.ps1
 
