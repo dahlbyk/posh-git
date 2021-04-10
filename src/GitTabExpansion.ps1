@@ -8,6 +8,7 @@ $Global:GitTabSettings = New-Object PSObject -Property @{
     }
     EnableLogging = $false
     LogPath = Join-Path ([System.IO.Path]::GetTempPath()) posh-git_tabexp.log
+    RegisteredCommands = ""
 }
 
 $subcommands = @{
@@ -537,10 +538,21 @@ function WriteTabExpLog([string] $Message) {
 
 if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
     $cmdNames = "git","tgit","gitk"
+
+    # Create regex pattern from $cmdNames: ^(git|git\.exe|tgit|tgit\.exe|gitk|gitk\.exe)$
+    $cmdNamesPattern = "^($(($cmdNames | ForEach-Object { "${_}|${_}\.exe" }) -join '|'))$"
+    $cmdNames += Get-Alias | Where-Object { $_.Definition -match $cmdNamesPattern } | Foreach-Object Name
+
     if ($EnableProxyFunctionExpansion) {
-        $cmdNames += Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match $script:GitProxyFunctionRegex } | Select-Object -ExpandProperty 'Name'
+        $funcNames += Get-ChildItem -Path Function:\ | Where-Object { $_.Definition -match $script:GitProxyFunctionRegex } | Foreach-Object Name
+        $cmdNames += $funcNames
+
+        # Create regex pattern from $funcNames e.g.: ^(Git-Checkout|Git-Switch)$
+        $funcNamesPattern = "^($($funcNames -join '|'))$"
+        $cmdNames += Get-Alias | Where-Object { $_.Definition -match $funcNamesPattern } | Foreach-Object Name
     }
-    $cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
+
+    $global:GitTabSettings.RegisteredCommands = $cmdNames -join ", "
 
     Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)

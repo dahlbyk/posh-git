@@ -232,7 +232,7 @@ Describe 'TabExpansion Tests' {
         }
     }
 
-    Context 'Alias TabExpansion Tests' {
+    Context 'Git Config Alias TabExpansion Tests' {
         BeforeAll {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $repoPath = NewGitTempRepo -MakeInitialCommit
@@ -279,6 +279,33 @@ Describe 'TabExpansion Tests' {
             (&$gitbin config --get-all alias.co).Count | Should -BeGreaterThan 1
 
             $result = & $module GitTabExpansionInternal 'git co ma'
+            $result | Should -BeExactly 'master'
+        }
+    }
+
+    Context 'PowerShell Alias TabExpansion Tests' {
+        BeforeAll {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo -MakeInitialCommit
+            New-Alias g  git     -Scope Global
+            New-Alias ge git.exe -Scope Global
+        }
+        AfterAll {
+            Remove-Alias g, ge
+            RemoveGitTempRepo $repoPath
+        }
+        It 'Tab completes PowerShell alias specifying git (with no extension)' {
+            $result = & $module GitTabExpansionInternal "g check"
+            $result | Should -BeExactly 'checkout'
+
+            $result = & $module GitTabExpansionInternal "g checkout ma"
+            $result | Should -BeExactly 'master'
+        }
+        It 'Tab completes PowerShell alias specifying git.exe' {
+            $result = & $module GitTabExpansionInternal "ge check"
+            $result | Should -BeExactly 'checkout'
+
+            $result = & $module GitTabExpansionInternal "ge checkout ma"
             $result | Should -BeExactly 'master'
         }
     }
