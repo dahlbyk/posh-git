@@ -106,22 +106,19 @@ Before installing posh-git make sure the following prerequisites have been met.
 
 ### Installing posh-git via PowerShellGet on Linux, macOS and Windows
 
-posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be installed using the PowerShellGet module.
+posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be installed using the built-in PowerShellGet module.
 
-1. Start either Windows PowerShell 5.x or PowerShell Core 6.x (`pwsh`).
+1. Start Windows PowerShell 5.x or PowerShell >= v6 (`pwsh`).
 
 2. Execute one of the following two commands from an elevated PowerShell prompt,
    depending on whether (A) you've never installed posh-git, or (B) you've already installed a previous version:
 
     ```powershell
     # (A) You've never installed posh-git from the PowerShell Gallery
-    #
-    # NOTE: If asked to trust packages from the PowerShell Gallery, answer yes to continue installation of posh-git
-    # NOTE: If the AllowPrerelease parameter is not recognized, update your version of PowerShellGet to >= 1.6 e.g.
-    #       Install-Module PowerShellGet -Scope CurrentUser -Force -AllowClobber
-
-    PowerShellGet\Install-Module posh-git -Scope CurrentUser -AllowPrerelease -Force
+    PowerShellGet\Install-Module posh-git -Scope CurrentUser -Force
     ```
+
+    > **NOTE**: If you're asked to trust packages from the PowerShell Gallery, answer `yes` to continue installation of posh-git
 
     OR
 
