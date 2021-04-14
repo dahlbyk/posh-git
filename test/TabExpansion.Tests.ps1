@@ -308,6 +308,10 @@ Describe 'TabExpansion Tests' {
             $result = & $module GitTabExpansionInternal "ge checkout ma"
             $result | Should -BeExactly 'master'
         }
+        It 'Get-AliasPattern finds the aliases for the given command' {
+            $result = & $module Get-AliasPattern git
+            $result | Should -BeExactly '(git|g|ge)'
+        }
     }
 
     Context 'PowerShell Special Chars Tests' {

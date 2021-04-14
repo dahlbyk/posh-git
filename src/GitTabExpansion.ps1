@@ -302,6 +302,7 @@ function script:expandParamValues($cmd, $param, $filter) {
 }
 
 function Expand-GitCommand($Command) {
+    # Parse all Git output as UTF8, including tab completion output - https://github.com/dahlbyk/posh-git/pull/359
     $res = Invoke-Utf8ConsoleCommand { GitTabExpansionInternal $Command $Global:GitStatus }
     $res
 }
@@ -540,7 +541,7 @@ if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
     $cmdNames = "git","tgit","gitk"
 
     # Create regex pattern from $cmdNames: ^(git|git\.exe|tgit|tgit\.exe|gitk|gitk\.exe)$
-    $cmdNamesPattern = "^($(($cmdNames | ForEach-Object { "${_}|${_}\.exe" }) -join '|'))$"
+    $cmdNamesPattern = "^($($cmdNames -join '|'))(\.exe)?$"
     $cmdNames += Get-Alias | Where-Object { $_.Definition -match $cmdNamesPattern } | Foreach-Object Name
 
     if ($EnableProxyFunctionExpansion) {

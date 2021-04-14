@@ -442,7 +442,7 @@ function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
 }
 
 function Get-AliasPattern($cmd) {
-    $aliases = @($cmd) + @(Get-Alias | Where-Object { $_.Definition -match "^($cmd|$cmd\.exe)$" } | Foreach-Object Name)
+    $aliases = @($cmd) + @(Get-Alias | Where-Object { $_.Definition -match "^$cmd(\.exe)?$" } | Foreach-Object Name)
    "($($aliases -join '|'))"
 }
 
