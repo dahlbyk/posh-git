@@ -11,6 +11,7 @@ if (Test-Path Env:\POSHGIT_ENABLE_STRICTMODE) {
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\AnsiUtils.ps1
 . $PSScriptRoot\WindowTitle.ps1
+. $PSScriptRoot\TabTitle.ps1
 . $PSScriptRoot\PoshGitTypes.ps1
 . $PSScriptRoot\GitUtils.ps1
 . $PSScriptRoot\GitPrompt.ps1
@@ -99,6 +100,7 @@ $GitPromptScriptBlock = {
 
     # This has to be *after* the call to Write-VcsStatus, which populates $global:GitStatus
     Set-WindowTitle $global:GitStatus $IsAdmin
+    Set-TabTitle $global:GitStatus $IsAdmin
 
     # If prompt timing enabled, write elapsed milliseconds
     if ($settings.DefaultPromptEnableTiming) {
@@ -148,6 +150,7 @@ $ExecutionContext.SessionState.Module.OnRemove = {
     $global:VcsPromptStatuses = $global:VcsPromptStatuses | Where-Object { $_ -ne $PoshGitVcsPrompt }
 
     Reset-WindowTitle
+    Reset-TabTitle
 
     # Check if the posh-git prompt function itself has been replaced. If so, do not restore the prompt function
     $promptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }
