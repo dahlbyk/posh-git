@@ -416,7 +416,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         }
 
         # Handles git checkout -- <path>
-        "^checkout.* -- (?<files>\S*)$" {
+        "^checkout.*(?:\s+--)? (?<files>\S*)$" {
             gitCheckoutFiles $GitStatus $matches['files']
         }
 
