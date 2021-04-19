@@ -352,21 +352,13 @@ function Get-GitStatus {
                         continue
                     }
 
-                    '^## (?<branch>\S+?)(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?(?<gone>gone)?\])?$' {
+                    '^## \S+?(?:\.\.\.(?<upstream>\S+))?(?: \[(?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?(?<gone>gone)?\])?$' {
                         if ($sw) { dbg "Status: $_" $sw }
 
-                        $branch = $matches['branch']
                         $upstream = $matches['upstream']
                         $aheadBy = [int]$matches['ahead']
                         $behindBy = [int]$matches['behind']
                         $gone = [string]$matches['gone'] -eq 'gone'
-                        continue
-                    }
-
-                    '^## Initial commit on (?<branch>\S+)$' {
-                        if ($sw) { dbg "Status: $_" $sw }
-
-                        $branch = $matches['branch']
                         continue
                     }
 
