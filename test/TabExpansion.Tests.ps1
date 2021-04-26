@@ -214,7 +214,7 @@ Describe 'TabExpansion Tests' {
     Context 'Add/Reset/Checkout TabExpansion Tests' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $repoPath = NewGitTempRepo
+            $repoPath = NewGitTempRepo -MakeInitialCommit
         }
         AfterEach {
             RemoveGitTempRepo $repoPath
@@ -229,6 +229,17 @@ Describe 'TabExpansion Tests' {
 
             $result = & $module GitTabExpansionInternal 'git add ' $gitStatus
             $result | Should -BeExactly $fileName
+        }
+        It 'Tab completes last checkouts first' {
+            &$gitbin checkout -q -b 'test-branch-b' 2>$null
+            &$gitbin checkout -q -b 'test-branch-c' 2>$null
+            &$gitbin checkout -q -b 'test-branch-a' 2>$null
+            &$gitbin checkout -q 'master' 2>$null
+
+            $result = & $module GitTabExpansionInternal 'git checkout '
+            $firstThreeResults = $result[0..2]
+
+            $firstThreeResults | Should -BeExactly @('test-branch-a', 'test-branch-c', 'test-branch-b')
         }
     }
 
