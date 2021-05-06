@@ -295,8 +295,8 @@ function Get-PromptPath {
     # Look up the git root
     if ($abbrevGitDir) {
         $gitPath = Get-GitDirectory
-        # Up one level from `.git`
-        if ($gitPath) { $gitPath = Split-Path $gitPath -Parent }
+        # Up one level from `.git` if inside git directory
+        if ($gitPath -and $gitPath.EndsWith(".git")) { $gitPath = Split-Path $gitPath -Parent }
     }
 
     # Abbreviate path under a git repository as "<repo-name>:<relative-path>"
