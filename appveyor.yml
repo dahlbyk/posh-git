@@ -48,6 +48,7 @@ test_script:
       if (Test-Path $testResultsFile) {
           (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $testResultsFile)
       }
+      $res | Format-List
       if (!$res -or ($res.FailedCount -gt 0)) {
           # Terminate the script to fail the build
           $Error | Format-List * -Force
