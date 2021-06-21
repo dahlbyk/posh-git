@@ -144,6 +144,7 @@ Another popular package manager for Windows is [Scoop](https://scoop.sh/), which
  it into your profile:
 
 ```powershell
+scoop bucket add extras
 scoop install posh-git
 Add-PoshGitToProfile
 ```
