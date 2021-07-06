@@ -136,8 +136,8 @@ function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
         $filter = $matches['to']
     }
 
-    $branches = @(git branch --no-color | ForEach-Object { if (($_ -notmatch "^\* \(HEAD detached .+\)$") -and ($_ -match "^[\*\+]?\s*(?<ref>.*)")) { $matches['ref'] } }) +
-                @(git branch --no-color -r | ForEach-Object { if ($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
+    $branches = @(git branch --no-color --list "$filter*" | ForEach-Object { if (($_ -notmatch "^\* \(HEAD detached .+\)$") -and ($_ -match "^[\*\+]?\s*(?<ref>.*)")) { $matches['ref'] } }) +
+                @(git branch --no-color --remotes --list "$filter*" | ForEach-Object { if ($_ -match "^  (?<ref>\S+)(?: -> .+)?") { $matches['ref'] } }) +
                 @(if ($includeHEAD) { 'HEAD','FETCH_HEAD','ORIG_HEAD','MERGE_HEAD' })
 
     $branches |
@@ -147,7 +147,7 @@ function script:gitBranches($filter, $includeHEAD = $false, $prefix = '') {
 }
 
 function script:gitRemoteUniqueBranches($filter) {
-    git branch --no-color -r |
+    git branch --no-color --remotes --list "$filter*" |
         ForEach-Object { if ($_ -match "^  (?<remote>[^/]+)/(?<branch>\S+)(?! -> .+)?$") { $matches['branch'] } } |
         Group-Object -NoElement |
         Where-Object { $_.Count -eq 1 } |
@@ -169,7 +169,7 @@ function script:gitConfigKeys($section, $filter, $defaultOptions = '') {
 }
 
 function script:gitTags($filter, $prefix = '') {
-    git tag |
+    git tag --list "$filter*" |
         Where-Object { $_ -like "$filter*" } |
         ForEach-Object { $prefix + $_ } |
         quoteStringWithSpecialChars
@@ -177,7 +177,7 @@ function script:gitTags($filter, $prefix = '') {
 
 function script:gitFeatures($filter, $command) {
     $featurePrefix = git config --local --get "gitflow.prefix.$command"
-    $branches = @(git branch --no-color | ForEach-Object { if ($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
+    $branches = @(git branch --no-color --list "$filter*" | ForEach-Object { if ($_ -match "^\*?\s*$featurePrefix(?<ref>.*)") { $matches['ref'] } })
     $branches |
         Where-Object { $_ -ne '(no branch)' -and $_ -like "$filter*" } |
         ForEach-Object { $featurePrefix + $_ } |
@@ -185,7 +185,7 @@ function script:gitFeatures($filter, $command) {
 }
 
 function script:gitRemoteBranches($remote, $ref, $filter, $prefix = '') {
-    git branch --no-color -r |
+    git branch --no-color --remotes --list "$remote/$filter*" |
         Where-Object { $_ -like "  $remote/$filter*" } |
         ForEach-Object { $prefix + $ref + ($_ -replace "  $remote/","") } |
         quoteStringWithSpecialChars
