@@ -437,7 +437,8 @@ function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
     # The latter is more desirable.
     $pathInfo = Microsoft.PowerShell.Management\Get-Location
     $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-    $res = $currentPath.StartsWith($GitDir, (Get-PathStringComparison))
+    $separatorChar = [System.IO.Path]::DirectorySeparatorChar
+    $res = $currentPath.StartsWith("$GitDir$separatorChar", (Get-PathStringComparison))
     $res
 }
 
