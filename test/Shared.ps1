@@ -1,7 +1,24 @@
+# Define these variables since they are not defined in WinPS 5.x
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $IsWindows = $true
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $IsLinux = $false
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $IsMacOS = $false
+}
+
 $modulePath = Convert-Path $PSScriptRoot\..\src
 $moduleManifestPath = "$modulePath\posh-git.psd1"
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 $csi = [char]0x1b + "["
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+$expectedEncoding = if ($PSVersionTable.PSVersion.Major -le 5) { "utf8" } else { "ascii" }
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+$originalTitle = $Host.UI.RawUI.WindowTitle
 
 if (!(Get-Variable -Name gitbin -Scope global -ErrorAction SilentlyContinue)) {
     if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
@@ -43,7 +60,12 @@ function global:Convert-NativeLineEnding([string]$content, [switch]$SplitLines) 
 }
 
 function GetHomePath() {
-    $Home
+    if ($GitPromptSettings.DefaultPromptAbbreviateHomeDirectory) {
+        "~"
+    }
+    else {
+        $Home
+    }
 }
 
 function GetHomeRelPath([string]$Path) {
@@ -58,6 +80,39 @@ function GetHomeRelPath([string]$Path) {
     else {
         $Path
     }
+}
+
+function GetGitRelPath([string]$Path) {
+    $gitPath = Get-GitDirectory
+    if (!$gitPath) {
+        throw "GetGitRelPath Should -be called inside a git repository"
+    }
+    # Up one level from `.git`
+    $gitPath = Split-Path $gitPath -Parent
+
+    if (!$Path.StartsWith($gitPath)) {
+        # Path not under $gitPath
+        return $Path
+    }
+
+    if ($GitPromptSettings.DefaultPromptAbbreviateGitDirectory) {
+        $gitName = Split-Path $gitPath -Leaf
+        $relPath = if ($Path -eq $gitPath) { "" } else { $Path.Substring($gitPath.Length + 1) }
+        "$gitName`:$relPath"
+    }
+    else {
+        # Otherwise, honor Home path abbreviation
+        GetHomeRelPath $Path
+    }
+}
+
+function GetMacOSAdjustedTempPath($Path) {
+    if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsMacOS) {
+        # Mac OS's temp folder has a symlink in its path - /var is linked to /private/var
+        return "/private${Path}"
+    }
+
+    $Path
 }
 
 function MakeNativePath([string]$Path) {
@@ -102,7 +157,9 @@ function ResetGitTempRepoWorkingDir($RepoPath, $Branch = 'master') {
 Remove-Item Function:\prompt
 Remove-Module posh-git -Force *>$null
 
-# Force the posh-git prompt to be installed. Could be runnng on dev system where
-# user has customized the prompt.
+# For Pester testing, enable strict mode inside the posh-git module
+$env:POSHGIT_ENABLE_STRICTMODE = 1
+
+# Force the posh-git prompt to be installed. Could be runnng on dev system where user has customized the prompt.
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-$module = Import-Module $moduleManifestPath -ArgumentList $true,$true -Force -PassThru
+$module = Import-Module $moduleManifestPath -ArgumentList $true,$false -Force -PassThru

@@ -115,15 +115,15 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             }
 
             $b = Invoke-NullCoalescing `
-                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD -q 2>$null } `
+                { dbg 'Trying symbolic-ref' $sw; git --no-optional-locks symbolic-ref HEAD -q 2>$null } `
                 { '({0})' -f (Invoke-NullCoalescing `
                     {
                         dbg 'Trying describe' $sw
                         switch ($Global:GitPromptSettings.DescribeStyle) {
-                            'contains' { git describe --contains HEAD 2>$null }
-                            'branch' { git describe --contains --all HEAD 2>$null }
-                            'describe' { git describe HEAD 2>$null }
-                            default { git tag --points-at HEAD 2>$null }
+                            'contains' { git --no-optional-locks describe --contains HEAD 2>$null }
+                            'branch' { git --no-optional-locks describe --contains --all HEAD 2>$null }
+                            'describe' { git --no-optional-locks describe HEAD 2>$null }
+                            default { git --no-optional-locks tag --points-at HEAD 2>$null }
                         }
                     } `
                     {
@@ -136,7 +136,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                         }
                         else {
                             dbg 'Trying rev-parse' $sw
-                            $ref = git rev-parse HEAD 2>$null
+                            $ref = git --no-optional-locks rev-parse HEAD 2>$null
                         }
 
                         if ($ref -match 'ref: (?<ref>.+)') {
@@ -153,9 +153,11 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
         }
 
         dbg 'Inside git directory?' $sw
-        if ('true' -eq $(git rev-parse --is-inside-git-dir 2>$null)) {
+        $revParseOut = git --no-optional-locks rev-parse --is-inside-git-dir 2>$null
+        if ('true' -eq $revParseOut) {
             dbg 'Inside git directory' $sw
-            if ('true' -eq $(git rev-parse --is-bare-repository 2>$null)) {
+            $revParseOut = git --no-optional-locks rev-parse --is-bare-repository 2>$null
+            if ('true' -eq $revParseOut) {
                 $c = 'BARE:'
             }
             else {
@@ -187,16 +189,34 @@ $castStringSeq = [Linq.Enumerable].GetMethod("Cast").MakeGenericMethod([string])
 
 <#
 .SYNOPSIS
-    Gets a Git status object that is used by Write-GitStatus.
+    Gets a Git status object that is used by `Write-GitStatus`.
 .DESCRIPTION
-    Gets a Git status object that is used by Write-GitStatus.
-    The status object provides the information to be displayed in the various
-    sections of the posh-git prompt.
+    The `Get-GitStatus` cmdlet gets the status of the current Git repo.
+
+    The status object returned by this cmdlet provides the information
+    displayed in the various sections of the posh-git prompt. The following
+    properties in $GitPromptSettings control what information is returned in
+    the status object:
+
+    EnableFileStatus          = $true # Or $false if Git not installed
+    EnableFileStatusFromCache = <unset> # Or $true if GitStatusCachePoshClient installed
+    EnablePromptStatus        = $true
+    EnableStashStatus         = $false
+    UntrackedFilesMode        = Default # Other enum values: No, Normal, All
+
+    The `Force` parameter can be used to override the EnableFileStatus and
+    EnablePromptStatus properties to ensure that both file and prompt status
+    information is returned in the status object.
 .EXAMPLE
     PS C:\> $s = Get-GitStatus; Write-GitStatus $s
     Gets a Git status object. Then passes the object to Write-GitStatus which
     writes out a posh-git prompt (or returns a string in ANSI mode) with the
     information contained in the status object.
+.EXAMPLE
+    PS C:\> $s = Get-GitStatus -Force
+    Gets a Git status object that always returns all status information even
+    if $GitPromptSettings has disabled `EnableFileStatus` and/or
+    `EnablePromptStatus`.
 .INPUTS
     None
 .OUTPUTS
@@ -211,16 +231,17 @@ function Get-GitStatus {
         [Parameter(Position=0)]
         $GitDir = (Get-GitDirectory),
 
-        # If specified, overrides $GitPromptSettings.EnablePromptStatus when it
-        # is set to $false.
+        # If specified, overrides $GitPromptSettings.EnableFileStatus and
+        # $GitPromptSettings.EnablePromptStatus when they are set to $false.
         [Parameter()]
         [switch]
         $Force
     )
 
-    $settings = $Global:GitPromptSettings
-    $enabled = $Force -or !$settings -or $settings.EnablePromptStatus
-    if ($enabled -and $GitDir) {
+    $settings = if ($global:GitPromptSettings) { $global:GitPromptSettings } else { [PoshGitPromptSettings]::new() }
+
+    $promptStatusEnabled = $Force -or $settings.EnablePromptStatus
+    if ($promptStatusEnabled -and $GitDir) {
         if ($settings.Debug) {
             $sw = [Diagnostics.Stopwatch]::StartNew(); Write-Host ''
         }
@@ -232,6 +253,8 @@ function Get-GitStatus {
         $aheadBy = 0
         $behindBy = 0
         $gone = $false
+        $upstream = $null
+
         $indexAdded = New-Object System.Collections.Generic.List[string]
         $indexModified = New-Object System.Collections.Generic.List[string]
         $indexDeleted = New-Object System.Collections.Generic.List[string]
@@ -242,7 +265,8 @@ function Get-GitStatus {
         $filesUnmerged = New-Object System.Collections.Generic.List[string]
         $stashCount = 0
 
-        if ($settings.EnableFileStatus -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
+        $fileStatusEnabled = $Force -or $settings.EnableFileStatus
+        if ($fileStatusEnabled -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
             if ($null -eq $settings.EnableFileStatusFromCache) {
                 $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
@@ -250,44 +274,59 @@ function Get-GitStatus {
             if ($settings.EnableFileStatusFromCache) {
                 dbg 'Getting status from cache' $sw
                 $cacheResponse = Get-GitStatusFromCache
-                dbg 'Parsing status' $sw
 
-                $indexAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexAdded))))
-                $indexModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexModified))))
-                foreach ($indexRenamed in $cacheResponse.IndexRenamed) {
-                    $indexModified.Add($indexRenamed.Old)
+                if ($cacheResponse.Error) {
+                    # git-status-cache failed; set $global:GitStatusCacheLoggingEnabled = $true, call Restart-GitStatusCache,
+                    # and check %temp%\GitStatusCache_[timestamp].log for details.
+                    dbg "Cache returned an error: $($cacheResponse.Error)" $sw
+                    $branch = "CACHE ERROR"
+                    $behindBy = 1
                 }
-                $indexDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexDeleted))))
-                $indexUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
+                else {
+                    dbg 'Parsing status' $sw
 
-                $filesAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingAdded))))
-                $filesModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingModified))))
-                foreach ($workingRenamed in $cacheResponse.WorkingRenamed) {
-                    $filesModified.Add($workingRenamed.Old)
+                    $indexAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexAdded))))
+                    $indexModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexModified))))
+                    foreach ($indexRenamed in $cacheResponse.IndexRenamed) {
+                        $indexModified.Add($indexRenamed.Old)
+                    }
+                    $indexDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.IndexDeleted))))
+                    $indexUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
+
+                    $filesAdded.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingAdded))))
+                    $filesModified.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingModified))))
+                    foreach ($workingRenamed in $cacheResponse.WorkingRenamed) {
+                        $filesModified.Add($workingRenamed.Old)
+                    }
+                    $filesDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingDeleted))))
+                    $filesUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
+
+                    $branch = $cacheResponse.Branch
+                    $upstream = $cacheResponse.Upstream
+                    $gone = $cacheResponse.UpstreamGone
+                    $aheadBy = $cacheResponse.AheadBy
+                    $behindBy = $cacheResponse.BehindBy
+
+                    if ($settings.EnableStashStatus -and $cacheResponse.Stashes) {
+                        $stashCount = $cacheResponse.Stashes.Length
+                    }
+
+                    if ($cacheResponse.State) {
+                        $branch += "|" + $cacheResponse.State
+                    }
                 }
-                $filesDeleted.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.WorkingDeleted))))
-                $filesUnmerged.AddRange($castStringSeq.Invoke($null, (,@($cacheResponse.Conflicted))))
-
-                $branch = $cacheResponse.Branch
-                $upstream = $cacheResponse.Upstream
-                $gone = $cacheResponse.UpstreamGone
-                $aheadBy = $cacheResponse.AheadBy
-                $behindBy = $cacheResponse.BehindBy
-
-                if ($cacheResponse.Stashes) { $stashCount = $cacheResponse.Stashes.Length }
-                if ($cacheResponse.State) { $branch += "|" + $cacheResponse.State }
             }
             else {
                 dbg 'Getting status' $sw
                 switch ($settings.UntrackedFilesMode) {
                     "No"      { $untrackedFilesOption = "-uno" }
                     "All"     { $untrackedFilesOption = "-uall" }
-                    "Normal"  { $untrackedFilesOption = "-unormal" }
+                    default   { $untrackedFilesOption = "-unormal" }
                 }
-                $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
+                $status = Invoke-Utf8ConsoleCommand { git --no-optional-locks -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
                 if ($settings.EnableStashStatus) {
                     dbg 'Getting stash count' $sw
-                    $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
+                    $stashCount = $null | git --no-optional-locks stash list 2>$null | measure-object | Select-Object -expand Count
                 }
 
                 dbg 'Parsing status' $sw
@@ -402,8 +441,8 @@ function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
     $res
 }
 
-function Get-AliasPattern($exe) {
-   $aliases = @($exe) + @(Get-Alias | Where-Object { $_.Definition -eq $exe } | Select-Object -Exp Name)
+function Get-AliasPattern($cmd) {
+    $aliases = @($cmd) + @(Get-Alias | Where-Object { $_.Definition -match "^$cmd(\.exe)?$" } | Foreach-Object Name)
    "($($aliases -join '|'))"
 }
 
@@ -452,7 +491,7 @@ function Get-AliasPattern($exe) {
 
         Where-Object { $_ -match $Pattern }
 
-    ## Recovering Deleted Branches
+    Recovering Deleted Branches
 
     If you wind up deleting a branch you didn't intend to, you can easily recover it with the info provided by Git during the delete. For instance, let's say you realized you didn't want to delete the branch 'feature/exp1'. In the output of this command, you should see a deletion entry for this branch that looks like:
 

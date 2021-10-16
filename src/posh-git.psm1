@@ -1,4 +1,9 @@
-param([switch]$ForcePoshGitPrompt)
+param([bool]$ForcePoshGitPrompt, [bool]$UseLegacyTabExpansion, [bool]$EnableProxyFunctionExpansion)
+
+if (Test-Path Env:\POSHGIT_ENABLE_STRICTMODE) {
+    # Set strict mode to latest to help catch scripting errors in the module. This is done by the Pester tests.
+    Set-StrictMode -Version Latest
+}
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
@@ -13,14 +18,11 @@ param([switch]$ForcePoshGitPrompt)
 . $PSScriptRoot\GitTabExpansion.ps1
 . $PSScriptRoot\TortoiseGit.ps1
 
-if (!$Env:HOME) { $Env:HOME = "$Env:HOMEDRIVE$Env:HOMEPATH" }
-if (!$Env:HOME) { $Env:HOME = "$Env:USERPROFILE" }
-
 $IsAdmin = Test-Administrator
 
 # Get the default prompt definition.
-$initialSessionState = [Runspace]::DefaultRunspace.InitialSessionState
-if (!$initialSessionState.Commands -or !$initialSessionState.Commands['prompt']) {
+$initialSessionState = [System.Management.Automation.Runspaces.Runspace]::DefaultRunspace.InitialSessionState
+if (!$initialSessionState -or !$initialSessionState.PSObject.Properties.Match('Commands') -or !$initialSessionState.Commands['prompt']) {
     $defaultPromptDef = "`$(if (test-path variable:/PSDebugContext) { '[DBG]: ' } else { '' }) + 'PS ' + `$(Get-Location) + `$(if (`$nestedpromptlevel -ge 1) { '>>' }) + '> '"
 }
 else {
@@ -29,7 +31,19 @@ else {
 
 # The built-in posh-git prompt function in ScriptBlock form.
 $GitPromptScriptBlock = {
+    $origDollarQuestion = $global:?
+    $origLastExitCode = $global:LASTEXITCODE
+
+    if (!$global:GitPromptValues) {
+        $global:GitPromptValues = [PoshGitPromptValues]::new()
+    }
+
+    $global:GitPromptValues.DollarQuestion = $origDollarQuestion
+    $global:GitPromptValues.LastExitCode = $origLastExitCode
+    $global:GitPromptValues.IsAdmin = $IsAdmin
+
     $settings = $global:GitPromptSettings
+
     if (!$settings) {
         return "<`$GitPromptSettings not found> "
     }
@@ -37,8 +51,6 @@ $GitPromptScriptBlock = {
     if ($settings.DefaultPromptEnableTiming) {
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
     }
-
-    $origLastExitCode = $global:LASTEXITCODE
 
     if ($settings.SetEnvColumns) {
         # Set COLUMNS so git knows how wide the terminal is
@@ -54,13 +66,17 @@ $GitPromptScriptBlock = {
     # Get the current path - formatted correctly
     $promptPath = $settings.DefaultPromptPath.Expand()
 
-    # Write the path and Git status summary information
+    # Write the delimited path and Git status summary information
     if ($settings.DefaultPromptWriteStatusFirst) {
         $prompt += Write-VcsStatus
+        $prompt += Write-Prompt $settings.BeforePath.Expand()
         $prompt += Write-Prompt $promptPath
+        $prompt += Write-Prompt $settings.AfterPath.Expand()
     }
     else {
+        $prompt += Write-Prompt $settings.BeforePath.Expand()
         $prompt += Write-Prompt $promptPath
+        $prompt += Write-Prompt $settings.AfterPath.Expand()
         $prompt += Write-VcsStatus
     }
 
@@ -100,8 +116,7 @@ $GitPromptScriptBlock = {
     }
     else {
         # If using ANSI, set this global to help debug ANSI issues
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-        $global:PoshGitLastPrompt = EscapeAnsiString $prompt
+        $global:GitPromptValues.LastPrompt = EscapeAnsiString $prompt
     }
 
     $global:LASTEXITCODE = $origLastExitCode

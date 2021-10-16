@@ -1,5 +1,162 @@
 # posh-git Release History
 
+## 1.0.0 - March 10, 2021
+
+- Released to PowerShell Gallery.
+- Fate of Chocolatey to be determined.
+
+## 1.0.0-beta5 - February 14, 2021
+
+### Added
+
+- Added --renormalize to the "git add" parameters for tab-completion.
+  ([PR #791](https://github.com/dahlbyk/posh-git/pull/791))
+  Thanks @dannoe
+- Pass PowerShell aliases down to posh-git TabExpansion autocomplete function
+  ([#257](https://github.com/dahlbyk/posh-git/issues/257))
+  ([PR #779](https://github.com/dahlbyk/posh-git/pull/779))
+  Thanks @csc027
+- Autocomplete user-defined pretty formats
+  ([#786](https://github.com/dahlbyk/posh-git/issues/786))
+  ([PR #802](https://github.com/dahlbyk/posh-git/pull/802))
+  Thanks @rdnlsmith
+- Add warning for cygwin version of git, which does not play nicely
+  ([#771](https://github.com/dahlbyk/posh-git/issues/771))
+  ([PR #807](https://github.com/dahlbyk/posh-git/pull/807))
+- Add BeforePath and AfterPath settings
+  ([#821](https://github.com/dahlbyk/posh-git/pull/821))
+  ([PR #822](https://github.com/dahlbyk/posh-git/pull/822))
+  Thanks @breisfeld Brad Reisfeld
+
+### Changed
+
+- `$GitPromptSettings.DefaultPromptAbbreviateHomeDirectory` defaults to `$false` on Windows. When enabled, `~` is
+   always substituted for the user's home path. Before this change, when directly in your home dir, this setting would
+   result in the full path displayed in the prompt e.g. `C:\Users\Keith`.  After this change, `~` will be displayed.
+   The new behavior is consistent with how the home path is displayed in prompts in other shells on Linux.
+  ([#746](https://github.com/dahlbyk/posh-git/pull/746))
+  ([PR #801](https://github.com/dahlbyk/posh-git/pull/801))
+- Adds `--no-optional-locks` when invoking git to reduce conflicts with other tools.
+  ([PR #774](https://github.com/dahlbyk/posh-git/pull/774))
+  Thanks @jessehouwing
+
+### Fixed
+
+- Put 'CACHE ERROR' in prompt when [GitStatusCache](https://github.com/cmarcusreid/git-status-cache) returns failure.
+  ([PR #759](https://github.com/dahlbyk/posh-git/pull/759))
+  Thanks @cmarcusreid
+- Honor EnableStashStatus when using cache
+  ([#761](https://github.com/dahlbyk/posh-git/pull/761))
+  ([PR #762](https://github.com/dahlbyk/posh-git/pull/762))
+- Register-ArgumentCompleter based tab-expansion in beta4 doesn't work with PowerShell aliases to git,tgit,gitk.
+  ([#769](https://github.com/dahlbyk/posh-git/issues/769))
+  ([PR #770](https://github.com/dahlbyk/posh-git/pull/770))
+- Module now works in (and is tested in) strict mode
+  ([PR #783](https://github.com/dahlbyk/posh-git/pull/783))
+- "git help --all" output breaks $GitTabSettings.AllCommands = $true.
+  ([#788](https://github.com/dahlbyk/posh-git/issues/788))
+  ([PR #790](https://github.com/dahlbyk/posh-git/pull/790))
+  Thanks @dannoe
+- Fixed non-ascii git branch name garbled
+  ([PR #796](https://github.com/dahlbyk/posh-git/pull/796))
+  Thanks @LittleboyHarry
+- Fix tab completion of branches in different worktrees
+  ([PR #805](https://github.com/dahlbyk/posh-git/pull/805))
+  Thanks @wallybh
+- Using `DarkYellow` no longer results in extra `$Errors`
+  ([PR #806](https://github.com/dahlbyk/posh-git/pull/806))
+
+## 1.0.0-beta4 - March 14, 2020
+
+### Added
+
+- Branch name completion to the new `Remove-GitBranch` command.
+  ([PR #678](https://github.com/dahlbyk/posh-git/pull/678))
+  ([PR #705](https://github.com/dahlbyk/posh-git/pull/705))
+- `$global:GitPromptValues` with the following properties to enable users to have access to the information necessary
+  to display error status in their prompt as well as debug their prompt customizations:
+  - `DollarQuestion`
+  - `IsAdmin`
+  - `LastExitCode`
+  - `LastPrompt`
+  ([PR #684](https://github.com/dahlbyk/posh-git/pull/684))
+- Added tab-completion for new `git restore` and `git switch` commands.
+  ([#691](https://github.com/dahlbyk/posh-git/issues/691))
+  ([PR #702](https://github.com/dahlbyk/posh-git/pull/702))
+  ([PR #743](https://github.com/dahlbyk/posh-git/pull/743))
+  Thanks @pinkfloydx33 for the direction and motivation to add this.
+- Added tab-completion for `git merge --allow-unrelated-histories`
+  ([#632](https://github.com/dahlbyk/posh-git/issues/632))
+  ([PR #633](https://github.com/dahlbyk/posh-git/pull/633))
+- Abbreviate path from git root with new setting `DefaultPromptAbbreviateGitDirectory`
+  ([#719](https://github.com/dahlbyk/posh-git/issues/719))
+  ([PR #720](https://github.com/dahlbyk/posh-git/pull/720))
+  ([PR #729](https://github.com/dahlbyk/posh-git/pull/729))
+  Thanks Philippe Elsass (@elsassph)
+- Two new properties have been added to `$global:GitTabSettings`
+  - `EnableLogging` - default is `$false` but when set to `$true`, tab expansion functions log to a file.
+  - `LogPath` - the path to the log file that is appended to (created if necessary) when `EnableLogging` is `$true`.
+
+### Changed
+
+- Module parameter changed from a [switch] that forced the posh-git prompt to be used to a bools. The use of this
+  parameters during import is now simplified to: `Import-Module posh-git -Args 1`.
+- Shortened up the Windows title text to work better with Windows Terminal tabs. Now only displays '32-bit' in 32-bit
+  PowerShell, otherwise assumption is you're running 64-bit. Also display only PowerShell major.minor version number.
+  ([PR #707](https://github.com/dahlbyk/posh-git/pull/707))
+- Switched from overriding `TabExpansion` function to using `Register-ArgumentCompleter` for tab-completion on
+  PowerShell >= 6.0.  `posh-git` can be configured to use the old `TabExpansion` function on PowerShell >= 6.0 by
+  importing the module using the following arguments: `Import-Module posh-git -ArgumentList 0,1`
+  before importing `posh-git`.
+  ([#609](https://github.com/dahlbyk/posh-git/pull/609))
+  ([PR #711](https://github.com/dahlbyk/posh-git/pull/711))
+  Thanks Andrew Bradley (@cspotcode)
+  - ([#733](https://github.com/dahlbyk/posh-git/issues/733))
+    ([PR #741](https://github.com/dahlbyk/posh-git/pull/741))
+  - Fix conflict with `TabExpansionPlusPlus` module's `Register-ArgumentCompleter` command.
+    ([#715](https://github.com/dahlbyk/posh-git/issues/715))
+    ([PR #714](https://github.com/dahlbyk/posh-git/pull/714))
+    Thanks Kris Borowinski (@kborowinski)
+- Update Ubuntu build system from 14.04 to 16.04
+  ([PR #677](https://github.com/dahlbyk/posh-git/pull/677))
+  Thanks @ExE-Boss
+- `$GitPromptSettings.BeforeIndex` is always displayed even if there is nothing in the index.  The intent of
+  this separator setting is to provide a separator between the branch name / branch status and the following section of
+  index/working/summary/stash indicators.
+  ([PR #723](https://github.com/dahlbyk/posh-git/pull/723))
+- posh-git no longers sets missing `HOME` environment variable.
+  ([#718](https://github.com/dahlbyk/posh-git/issues/718))
+  ([PR #722](https://github.com/dahlbyk/posh-git/pull/722))
+- `Get-GitStatus -Force` now also overrides `$GitPromptSettings.EnableFileStatus` as well as
+  `$GitPromptSettings.EnablePromptStatus`.
+  ([#657](https://github.com/dahlbyk/posh-git/issues/657))
+  ([PR #721](https://github.com/dahlbyk/posh-git/pull/721))
+
+### Fixed
+
+- Remove `.exe` suffix from PowerTab integration to enable PowerTab integration to work with `git`, `git.cmd` or `git.exe`
+  ([#606](https://github.com/dahlbyk/posh-git/pull/606/))
+- `BranchBehindAndAheadDisplay` minimal/compact bug
+  ([#670](https://github.com/dahlbyk/posh-git/issues/670))
+  ([PR #671](https://github.com/dahlbyk/posh-git/pull/671))
+- Fix(status): Only reset changed colors
+  ([PR #673](https://github.com/dahlbyk/posh-git/pull/673))
+  Thanks @ExE-Boss
+- Fix rebase step count
+  ([PR #674](https://github.com/dahlbyk/posh-git/pull/674))
+  Thanks Saša Kajfeš (@skajfes)
+- Fix typo in cherry-pick parameters - `´continue`
+  ([PR #675](https://github.com/dahlbyk/posh-git/pull/675))
+  Thanks @KexyBiscuit
+- Prompt error in remote PSSession
+  ([#708](https://github.com/dahlbyk/posh-git/issues/708))
+  ([PR #727](https://github.com/dahlbyk/posh-git/pull/727)
+- Typos
+  - ([PR #665](https://github.com/dahlbyk/posh-git/pull/665))
+    Thanks @SJMakin
+  - ([PR #716](https://github.com/dahlbyk/posh-git/pull/716))
+    Thanks @theaquamarine
+
 ## 1.0.0-beta3 - March 10, 2019
 
 ### Removed

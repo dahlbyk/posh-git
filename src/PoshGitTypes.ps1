@@ -153,16 +153,20 @@ class PoshGitTextSpan {
     # $GitPromptSettings.AnsiConsole is $true.  It is also used by the default ToString()
     # implementation to display any ANSI seqs when AnsiConsole is $true.
     [string] ToAnsiString() {
+        # If we know which colors were changed, we can reset only these and leave others be.
+        $reset = [System.Collections.Generic.List[string]]::new()
         $e = [char]27 + "["
-
-        $bg = $this.BackgroundColor
-        if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
-            $bg = Get-BackgroundVirtualTerminalSequence $bg
-        }
 
         $fg = $this.ForegroundColor
         if (($null -ne $fg) -and !(Test-VirtualTerminalSequece $fg)) {
             $fg = Get-ForegroundVirtualTerminalSequence $fg
+            $reset.Add('39')
+        }
+
+        $bg = $this.BackgroundColor
+        if (($null -ne $bg) -and !(Test-VirtualTerminalSequece $bg)) {
+            $bg = Get-BackgroundVirtualTerminalSequence $bg
+            $reset.Add('49')
         }
 
         $txt = $this.Text
@@ -170,8 +174,13 @@ class PoshGitTextSpan {
 
         # ALWAYS terminate a VT sequence in case the host supports VT (regardless of AnsiConsole setting),
         # or the host display can get messed up.
-        if (Test-VirtualTerminalSequece $str -Force) {
-            $str += "${e}0m"
+        if (Test-VirtualTerminalSequece $txt -Force) {
+            $reset.Clear()
+            $reset.Add('0')
+        }
+
+        if ($reset.Count -gt 0) {
+            $str += "${e}$($reset -join ';')m"
         }
 
         return $str
@@ -193,7 +202,7 @@ class PoshGitTextSpan {
             $txt = $this.ToAnsiString()
             if (Test-VirtualTerminalSequece $txt) {
                 $escAnsi = "ANSI: `"$(EscapeAnsiString $txt)`""
-                $str = "Text: `"$txt`",${sep}${escAnsi}"
+                $str = "Text: `"$txt`e[39;49m`",${sep}${escAnsi}"
             }
             else {
                 $str = "Text: `"$txt`""
@@ -214,7 +223,7 @@ class PoshGitTextSpan {
 }
 
 class PoshGitPromptSettings {
-    [bool]$AnsiConsole = $Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")
+    [bool]$AnsiConsole = ($Host.UI.SupportsVirtualTerminal -or ($Env:ConEmuANSI -eq "ON")) -and !$script:GitCygwin
     [bool]$SetEnvColumns = $true
 
     [PoshGitCellColor]$DefaultColor = [PoshGitCellColor]::new()
@@ -229,6 +238,9 @@ class PoshGitPromptSettings {
     [PoshGitTextSpan]$BeforeStatus             = [PoshGitTextSpan]::new('[', [ConsoleColor]::Yellow)
     [PoshGitTextSpan]$DelimStatus              = [PoshGitTextSpan]::new(' |', [ConsoleColor]::Yellow)
     [PoshGitTextSpan]$AfterStatus              = [PoshGitTextSpan]::new(']', [ConsoleColor]::Yellow)
+
+    [PoshGitTextSpan]$BeforePath               = [PoshGitTextSpan]::new('', [ConsoleColor]::Yellow)
+    [PoshGitTextSpan]$AfterPath                = [PoshGitTextSpan]::new('', [ConsoleColor]::Yellow)
 
     [PoshGitTextSpan]$BeforeIndex              = [PoshGitTextSpan]::new('', [ConsoleColor]::DarkGreen)
     [PoshGitTextSpan]$BeforeStash              = [PoshGitTextSpan]::new(' (', [ConsoleColor]::Red)
@@ -265,7 +277,7 @@ class PoshGitPromptSettings {
     [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
     [string]$DescribeStyle = ''
-    [psobject]$WindowTitle = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Admin: '})$(if ($GitStatus) {"$($GitStatus.RepoName) [$($GitStatus.Branch)]"} else {Get-PromptPath}) ~ PowerShell $($PSVersionTable.PSVersion) $([IntPtr]::Size * 8)-bit ($PID)"}
+    [psobject]$WindowTitle = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Admin: '})$(if ($GitStatus) {"$($GitStatus.RepoName) [$($GitStatus.Branch)]"} else {Get-PromptPath}) - PowerShell $($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor) $(if ([IntPtr]::Size -eq 4) {'32-bit '})($PID)"}
 
     [PoshGitTextSpan]$DefaultPromptPrefix       = '$(Get-PromptConnectionInfo -Format "[{1}@{0}]: ")'
     [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
@@ -273,7 +285,8 @@ class PoshGitPromptSettings {
     [PoshGitTextSpan]$DefaultPromptDebug        = [PoshGitTextSpan]::new(' [DBG]:', [ConsoleColor]::Magenta)
     [PoshGitTextSpan]$DefaultPromptSuffix       = '$(">" * ($nestedPromptLevel + 1)) '
 
-    [bool]$DefaultPromptAbbreviateHomeDirectory = $true
+    [bool]$DefaultPromptAbbreviateHomeDirectory = ($PSVersionTable.PSVersion.Major -gt 5) -and !$IsWindows
+    [bool]$DefaultPromptAbbreviateGitDirectory  = $false
     [bool]$DefaultPromptWriteStatusFirst        = $false
     [bool]$DefaultPromptEnableTiming            = $false
     [PoshGitTextSpan]$DefaultPromptTimingFormat = ' {0}ms'
@@ -282,4 +295,11 @@ class PoshGitPromptSettings {
     [string]$TruncatedBranchSuffix = '...'
 
     [bool]$Debug = $false
+}
+
+class PoshGitPromptValues {
+    [int]$LastExitCode
+    [bool]$DollarQuestion
+    [bool]$IsAdmin
+    [string]$LastPrompt
 }

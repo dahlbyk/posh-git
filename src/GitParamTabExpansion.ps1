@@ -28,24 +28,26 @@ $shortGitParams = @{
     rebase = 'm s X S q v n C f i p x'
     remote = 'v'
     reset = 'q p'
+    restore = 's p W S q m'
     revert = 'e m n S s X'
     rm = 'f n r q'
     shortlog = 'n s e w'
     stash = 'p k u a q'
     status = 's b u z'
     submodule = 'q b f n N'
+    switch = 'c C d f m q t'
     tag = 'a s u f d v n l m F'
     whatchanged = 'p'
 }
 
 # Variable is used in GitTabExpansion.ps1
 $longGitParams = @{
-    add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing'
+    add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing renormalize'
     bisect = 'no-checkout term-old term-new'
     blame = 'root show-stats reverse porcelain line-porcelain incremental encoding= contents date score-debug show-name show-number show-email abbrev'
     branch = 'color no-color list abbrev= no-abbrev column no-column merged no-merged contains set-upstream track no-track set-upstream-to= unset-upstream edit-description delete create-reflog force move all verbose quiet'
     checkout = 'quiet force ours theirs track no-track detach orphan ignore-skip-worktree-bits merge conflict= patch'
-    'cherry-pick' = 'edit mainline no-commit signoff gpg-sign ff allow-empty allow-empty-message keep-redundant-commits strategy= strategy-option= ´continue quit abort'
+    'cherry-pick' = 'edit mainline no-commit signoff gpg-sign ff allow-empty allow-empty-message keep-redundant-commits strategy= strategy-option= continue quit abort'
     clean = 'force interactive dry-run quiet exclude='
     clone = 'local no-hardlinks shared reference quiet verbose progress no-checkout bare mirror origin branch upload-pack template= config depth single-branch no-single-branch recursive recurse-submodules separate-git-dir='
     commit = 'all patch reuse-message reedit-message fixup squash reset-author short branch porcelain long null file author date message template signoff no-verify allow-empty allow-empty-message cleanup= edit no-edit amend no-post-rewrite include only untracked-files verbose quiet dry-run status no-status gpg-sign no-gpg-sign'
@@ -59,7 +61,7 @@ $longGitParams = @{
     help = 'all guides info man web'
     init = 'quiet bare template= separate-git-dir= shared='
     log = 'follow no-decorate decorate source use-mailmap full-diff log-size max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents max-parents no-min-parents no-max-parents first-parent not all branches tags remote glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk= do-walk pretty format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break patch stat'
-    merge = 'commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy strategy-option verify-signatures no-verify-signatures summary no-summary quiet verbose progress no-progress gpg-sign rerere-autoupdate no-rerere-autoupdate abort'
+    merge = 'commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy strategy-option verify-signatures no-verify-signatures summary no-summary quiet verbose progress no-progress gpg-sign rerere-autoupdate no-rerere-autoupdate abort allow-unrelated-histories'
     mergetool = 'tool= tool-help no-prompt prompt'
     mv = 'force dry-run verbose'
     notes = 'force message file reuse-message reedit-message ref ignore-missing stdin dry-run strategy= commit abort quiet verbose'
@@ -70,6 +72,7 @@ $longGitParams = @{
     reflog = 'stale-fix expire= expire-unreachable= all updateref rewrite verbose'
     remote = 'verbose'
     reset = 'patch quiet soft mixed hard merge keep'
+    restore = 'source= patch worktree staged quiet progress no-progress ours theirs merge conflict= ignore-unmerged ignore-skip-worktree-bits overlay no-overlay'
     revert = 'edit mainline no-edit no-commit gpg-sign signoff strategy= strategy-option continue quit abort'
     rm = 'force dry-run cached ignore-unmatch quiet'
     shortlog = 'numbered summary email format='
@@ -77,6 +80,7 @@ $longGitParams = @{
     stash = 'patch no-keep-index keep-index include-untracked all quiet index'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     submodule = 'quiet branch force cached files summary-limit remote no-fetch checkout merge rebase init name reference recursive depth'
+    switch = 'create force-create detach guess no-guess force discard-changes merge conflict= quiet no-progress track no-track orphan ignore-other-worktrees recurse-submodules no-recurse-submodules'
     tag = 'annotate sign local-user force delete verify list sort column no-column contains points-at message file cleanup'
     whatchanged = 'since'
 }
@@ -146,8 +150,14 @@ $gitParamValues = @{
     log = @{
         decorate = 'short full no'
         'no-walk' = 'sorted unsorted'
-        pretty = 'oneline short medium full fuller email raw'
-        format = 'oneline short medium full fuller email raw'
+        pretty = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
+        format = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
         encoding = 'UTF-8'
         date = 'relative local default iso rfc short raw'
     }
@@ -173,16 +183,33 @@ $gitParamValues = @{
     rebase = @{
         strategy = 'resolve recursive octopus ours subtree'
     }
+    restore = @{
+        conflict = 'merge diff3'
+        source = {
+            param($ref)
+            gitBranches $ref $true
+            gitTags $ref
+        }
+    }
     revert = @{
         strategy = 'resolve recursive octopus ours subtree'
     }
     show = @{
-        pretty = 'oneline short medium full fuller email raw'
-        format = 'oneline short medium full fuller email raw'
+        pretty = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
+        format = {
+            param($format)
+            gitConfigKeys 'pretty' $format 'oneline short medium full fuller email raw'
+        }
         encoding = 'utf-8'
     }
     status = @{
         'untracked-files' = 'no normal all'
         'ignore-submodules' = 'none untracked dirty all'
+    }
+    switch = @{
+        conflict = 'merge diff3'
     }
 }

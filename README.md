@@ -20,13 +20,13 @@ Table of contents:
 posh-git is a PowerShell module that integrates Git and PowerShell by providing Git status summary information that
 can be displayed in the PowerShell prompt, e.g.:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> ][prompt-def-long]
+![C:\Users\Keith\GitHub\posh-git [main ≡ +0 ~1 -0 | +0 ~1 -0 !]> ][prompt-def-long]
 
 posh-git also provides tab completion support for common git commands, branch names, paths and more.
 For example, with posh-git, PowerShell can tab complete git commands like `checkout` by typing `git ch` and pressing
 the <kbd>tab</kbd> key. That will tab complete to `git checkout` and if you keep pressing <kbd>tab</kbd>, it will
 cycle through other command matches such as `cherry` and `cherry-pick`. You can also tab complete remote names and
-branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin master`.
+branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin main`.
 
 ## Versions
 
@@ -36,15 +36,22 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 |--------------------|----------------------|----------------------|
 | [![master build status][av-master-img]][av-master-site] | [![master build status][tv-master-img]][tv-master-site] | [![master build coverage][cc-master-img]][cc-master-site] |
 
-[README][v1-readme] • [CHANGELOG][v1-change]
+[README][main-readme] • [CHANGELOG][main-change]
 
 - Supports Windows PowerShell 5.x
 - Supports PowerShell Core 6+ on all platforms
 - Supports [ANSI escape sequences][ansi-esc-code] for color customization
 - Includes breaking changes from v0.x ([roadmap](https://github.com/dahlbyk/posh-git/issues/328))
+  - **All SSH commands removed** from `posh-git` and moved into the new module [posh-sshell][posh-sshell-url]
 
 #### Releases
 
+- v1.0.0
+  ( [README][v1-readme] • [CHANGELOG][v1-change] )
+- v1.0.0-beta5
+  ( [README][v1b5-readme] • [CHANGELOG][v1b5-change] )
+- v1.0.0-beta4
+  ( [README][v1b4-readme] • [CHANGELOG][v1b4-change] )
 - v1.0.0-beta3
   ( [README][v1b3-readme] • [CHANGELOG][v1b3-change] )
 - v1.0.0-beta2
@@ -99,22 +106,19 @@ Before installing posh-git make sure the following prerequisites have been met.
 
 ### Installing posh-git via PowerShellGet on Linux, macOS and Windows
 
-posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be installed using the PowerShellGet module.
+posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be installed using the built-in PowerShellGet module.
 
-1. Start either Windows PowerShell 5.x or PowerShell Core 6.x (`pwsh`).
+1. Start Windows PowerShell 5.x or PowerShell >= v6 (`pwsh`).
 
 2. Execute one of the following two commands from an elevated PowerShell prompt,
    depending on whether (A) you've never installed posh-git, or (B) you've already installed a previous version:
 
     ```powershell
     # (A) You've never installed posh-git from the PowerShell Gallery
-    #
-    # NOTE: If asked to trust packages from the PowerShell Gallery, answer yes to continue installation of posh-git
-    # NOTE: If the AllowPrerelease parameter is not recognized, update your version of PowerShellGet to >= 1.6 e.g.
-    #       Install-Module PowerShellGet -Scope CurrentUser -Force -AllowClobber
-
-    PowerShellGet\Install-Module posh-git -Scope CurrentUser -AllowPrerelease -Force
+    PowerShellGet\Install-Module posh-git -Scope CurrentUser -Force
     ```
+
+    > **NOTE**: If you're asked to trust packages from the PowerShell Gallery, answer `yes` to continue installation of posh-git
 
     OR
 
@@ -131,6 +135,17 @@ With Chocolatey installed, execute the following command to install posh-git:
 
 ```powershell
 choco install poshgit
+```
+
+### Installing posh-git via Scoop
+
+Another popular package manager for Windows is [Scoop](https://scoop.sh/), which you can also use
+ to install posh-git. With Scoop installed, execute these commands to install posh-git and import
+ it into your profile:
+
+```powershell
+scoop install posh-git
+Add-PoshGitToProfile
 ```
 
 ### Installing posh-git Manually
@@ -182,6 +197,10 @@ Save the profile script, then close PowerShell and open a new PowerShell session
 Type `git fe` and then press <kbd>tab</kbd>. If posh-git has been imported, that command should tab complete to
 `git fetch`.
 
+If you want posh-git to detect your own aliases for git, then you *must* have set the alias *before* importing posh-git.
+So if you have `Set-Alias g git` then ensure it is executed before `Import-Module posh-git`, and `g checkout` will
+complete as if you'd typed `git`.
+
 ## Git status summary information
 
 The Git status summary information provides a wealth of "Git status" information at a glance, all the time in your
@@ -228,10 +247,10 @@ By default, the status summary has the following format:
 
 The symbols and surrounding text can be customized by the corresponding properties on `$GitPromptSettings`.
 
-For example, a status of `[master ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
+For example, a status of `[main ≡ +0 ~2 -1 | +1 ~1 -0]` corresponds to the following `git status`:
 
 ```powershell
-# On branch master
+# On branch main
 #
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
@@ -272,11 +291,14 @@ function.
 
 The prompt function provided by posh-git creates a prompt that looks like this:
 
-![~\GitHub\posh-git [master ≡]> ][prompt-default]
+![~\GitHub\posh-git [main ≡]> ][prompt-default]
 
 You can customize the posh-git prompt function or define your own custom prompt function.
 The rest of this section covers how to customize posh-git's prompt function using the global variable
 `$GitPromptSettings`.
+
+**If you'd like to make any of following changes permanent, i.e. available whenever you start PowerShell, put the
+corresponding setting(s) in one of your profile scripts after the line that imports posh-git.**
 
 For instance, you can customize the default prompt prefix to display a colored timestamp with these settings:
 
@@ -287,7 +309,7 @@ $GitPromptSettings.DefaultPromptPrefix.ForegroundColor = [ConsoleColor]::Magenta
 
 This will change the prompt to:
 
-![02-18 13:45:19 ~\GitHub\posh-git [master ≡]> ][prompt-prefix]
+![02-18 13:45:19 ~\GitHub\posh-git [main ≡]> ][prompt-prefix]
 
 If you would prefer not to have any path under your home directory abbreviated with `~`, use the following setting:
 
@@ -297,7 +319,7 @@ $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $false
 
 This will change the prompt to:
 
-![C:\Users\Keith\GitHub\posh-git [master ≡]> ][prompt-no-abbr]
+![C:\Users\Keith\GitHub\posh-git [main ≡]> ][prompt-no-abbr]
 
 If you would like to change the color of the path, you can use the following setting on Windows:
 
@@ -317,7 +339,7 @@ $GitPromptSettings.DefaultPromptPath.ForegroundColor = 0xFFA500
 
 This will change the prompt to:
 
-![~\GitHub\posh-git [master]> ][prompt-path]
+![~\GitHub\posh-git [main]> ][prompt-path]
 
 If you would like to make your prompt span two lines, with a newline after the Git status summary, use this setting:
 
@@ -327,7 +349,7 @@ $GitPromptSettings.DefaultPromptBeforeSuffix.Text = '`n'
 
 This will change the prompt to:
 
-![~\GitHub\posh-git [master ≡]&#10;> ][prompt-two-line]
+![~\GitHub\posh-git [main ≡]&#10;> ][prompt-two-line]
 
 You can swap the order of the path and the Git status summary with the following setting:
 
@@ -337,7 +359,7 @@ $GitPromptSettings.DefaultPromptWriteStatusFirst = $true
 
 This will change the prompt to:
 
-![[master ≡] ~\GitHub\posh-git> ][prompt-swap]
+![[main ≡] ~\GitHub\posh-git> ][prompt-swap]
 
 Finally, you can combine these settings to customize the posh-git prompt fairly significantly.
 In the `DefaultPromptSuffix` field below, we are prepending the PowerShell history id number before the prompt
@@ -352,10 +374,23 @@ $GitPromptSettings.DefaultPromptSuffix = ' $((Get-History -Count 1).id + 1)$(">"
 
 This will change the prompt to:
 
-![[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
+![[main ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> ][prompt-custom]
 
-If you'd like to make any of these changes permanent, i.e. available whenever you start PowerShell, put the
-corresponding setting(s) in one of your profile scripts **after** the line that imports posh-git.
+Finally, the path portion of the prompt can be contained within delimiters.
+For instance, if you would like the containing characters to be red, curly braces, the following settings can be used:
+
+```powershell
+$GitPromptSettings.BeforePath = '{'
+$GitPromptSettings.AfterPath = '}'
+$GitPromptSettings.BeforePath.ForegroundColor = 'Red'
+$GitPromptSettings.AfterPath.ForegroundColor = 'Red'
+```
+
+With these additional values, the previous prompt would become
+
+![[main ≡] {~\GitHub\posh-git}&#10;02-18 14:04:35 38> ][prompt-custom-wpathdelim]
+
+### Prompt Layouts
 
 For reference, the following layouts show the relative position of the various parts of the posh-git prompt.
 Note that `<>` denotes parts of the prompt that may not appear depending on the status of settings and whether or not
@@ -365,21 +400,60 @@ To simplify the layout, `DP` is being used as an abbreviation for `DefaultPrompt
 Default prompt layout:
 
 ```text
-{DPPrefix}{DPPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+{DPPrefix}{BeforePath}{DPPath}{AfterPath}{PathStatusSeparator}<{BeforeStatus}{Status}{AfterStatus}>{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
 ```
 
 Prompt layout when DefaultPromptWriteStatusFirst is set to $true:
 
 ```text
-{DPPrefix}<{BeforeStatus}{Status}{AfterStatus}>{PathStatusSeparator}{DPPath}{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
+{DPPrefix}<{BeforeStatus}{Status}{AfterStatus}>{PathStatusSeparator}{BeforePath}{DPPath}{AfterPath}{DPBeforeSuffix}<{DPDebug}><{DPTimingFormat}>{DPSuffix}
 ```
+
+### Displaying Error Information
+
+If you want to display the error status of the last command, you can use the values stored in the `$global:GitPromptValues`
+object which includes the value of `$LastExitCode` and `$?` (represented by the property `DollarQuestion`). Here is
+a prompt customization that displays a Red exit code value when `$LastExitCode` is non-zero or a Red `!` if `$?`
+is `$false`:
+
+```powershell
+function global:PromptWriteErrorInfo() {
+    if ($global:GitPromptValues.DollarQuestion) { return }
+
+    if ($global:GitPromptValues.LastExitCode) {
+        "`e[31m(" + $global:GitPromptValues.LastExitCode + ") `e[0m"
+    }
+    else {
+        "`e[31m! `e[0m"
+    }
+}
+
+$global:GitPromptSettings.DefaultPromptBeforeSuffix.Text = '`n$(PromptWriteErrorInfo)$([DateTime]::now.ToString("MM-dd HH:mm:ss"))'
+```
+
+When a PowerShell command fails, this is the prompt you will see:
+
+![~\GitHub\posh-git [main ≡]&#10;! 07-01 22:36:31> ][prompt-error1]
+
+When an external application returns a non-zero exit code, 1 in this case, you will see the exit code in the prompt:
+
+![~\GitHub\posh-git [main ≡]&#10;(1) 07-01 22:32:28> ][prompt-error2]
+
+Note that until you run an external application that sets `$LASTEXITCODE` to zero or you manually set the variable to
+0, you will see the exit code for any error.  In addition to `LastExitCode` and `DollarQuestion`,
+`$global:GitPromptValues` also has `IsAdmin` and `LastPrompt` properties.  The `LastPrompt` property contains the ANSI
+escaped string that was used for the last prompt. This can be useful for debugging your prompt display particularly
+when using ANSI/VT sequences.
+
+### $GitPromptScriptBlock
 
 If you require even more customization than `$GitPromptSettings` provides, you can create your own prompt
 function to show whatever information you want.
 See the [Customizing Your PowerShell Prompt][wiki-custom-prompt] wiki page for details.
 
-However, if you need a custom prompt to perform some non-prompt logic, you can still use posh-git's prompt function to
-write out a prompt string.  This can be done with the `$GitPromptScriptBlock` variable as shown below e.g.:
+However, if you need a custom prompt just to perform some non-prompt logic, you can still use posh-git's
+prompt function to write out the prompt string.  This can be done with the `$GitPromptScriptBlock` variable as shown
+below e.g.:
 
 ```powershell
 # my profile.ps1
@@ -434,17 +508,22 @@ function prompt {
 [choco-site]:      https://chocolatey.org/packages/poshgit/
 [psgallery-img]:   https://img.shields.io/powershellgallery/dt/posh-git.svg
 [psgallery-site]:  https://www.powershellgallery.com/packages/posh-git
-[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0-beta3
+[psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
-[prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "~\GitHub\posh-git [master ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
-[prompt-default]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png       "~\GitHub\posh-git [master ≡]> "
-[prompt-prefix]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptPrefix.png        "02-18 13:45:19 ~\GitHub\posh-git [master ≡]>"
-[prompt-no-abbr]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptNoAbbrevHome.png  "C:\Users\Keith\GitHub\posh-git [master ≡]> "
-[prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "~\GitHub\posh-git [master ≡]> "
-[prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[master ≡] ~\GitHub\posh-git> "
-[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "~\GitHub\posh-git [master ≡]&#10;> "
-[prompt-custom]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustom.png        "[master ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> "
+[posh-sshell-url]: https://github.com/dahlbyk/posh-sshell
+
+[prompt-def-long]: https://github.com/dahlbyk/posh-git/wiki/images/PromptDefaultLong.png   "~\GitHub\posh-git [main ≡ +0 ~1 -0 | +0 ~1 -0 !]> "
+[prompt-default]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptDefault.png       "~\GitHub\posh-git [main ≡]> "
+[prompt-prefix]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptPrefix.png        "02-18 13:45:19 ~\GitHub\posh-git [main ≡]>"
+[prompt-no-abbr]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptNoAbbrevHome.png  "C:\Users\Keith\GitHub\posh-git [main ≡]> "
+[prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "~\GitHub\posh-git [main ≡]> "
+[prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[main ≡] ~\GitHub\posh-git> "
+[prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "~\GitHub\posh-git [main ≡]&#10;> "
+[prompt-custom]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustom.png        "[main ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> "
+[prompt-custom-wpathdelim]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustomDelim.png        "[main ≡] {~\GitHub\posh-git}&#10;02-18 14:04:35 38> "
+[prompt-error1]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptError1.png        "~\GitHub\posh-git [main ≡]&#10;! 07-01 22:36:31> "
+[prompt-error2]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptError2.png        "~\GitHub\posh-git [main ≡]&#10;(1) 07-01 22:32:28> "
 
 [v0-change]:       https://github.com/dahlbyk/posh-git/blob/v0/CHANGELOG.md
 [v0-readme]:       https://github.com/dahlbyk/posh-git/blob/v0/README.md
@@ -458,8 +537,8 @@ function prompt {
 [v073-change]:     https://github.com/dahlbyk/posh-git/blob/v0.7.3/CHANGELOG.md
 [v073-readme]:     https://github.com/dahlbyk/posh-git/blob/v0.7.3/README.md
 
-[v1-change]:       https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md
-[v1-readme]:       https://github.com/dahlbyk/posh-git/blob/master/README.md
+[main-change]:       https://github.com/dahlbyk/posh-git/blob/master/CHANGELOG.md
+[main-readme]:       https://github.com/dahlbyk/posh-git/blob/master/README.md
 
 [v1b1-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/CHANGELOG.md
 [v1b1-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta1/README.md
@@ -469,5 +548,15 @@ function prompt {
 
 [v1b3-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta3/CHANGELOG.md
 [v1b3-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta3/README.md
+
+[v1b4-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta4/CHANGELOG.md
+[v1b4-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta4/README.md
+
+[v1b5-change]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta5/CHANGELOG.md
+[v1b5-readme]:     https://github.com/dahlbyk/posh-git/blob/v1.0.0-beta5/README.md
+
+[v1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/CHANGELOG.md
+[v1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/README.md
+
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
