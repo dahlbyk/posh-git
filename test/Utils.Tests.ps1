@@ -101,6 +101,27 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             $expectedContent += "${newLine}${newLine}Import-Module '$(Join-Path $moduleBasePath posh-git).psd1'"
             $content -join $newLine | Should -BeExactly $expectedContent
         }
+        It 'Removes import from the profile correctly' {
+            $profileContent = @'
+Import-Module PSCX
+'@
+            Set-Content $profilePath -Value $profileContent -Encoding Ascii
+
+            $moduleBasePath = Split-Path $profilePath -Parent
+            Add-PoshGitToProfile $profilePath $moduleBasePath
+
+            $output = Remove-PoshGitFromProfile $profilePath 3>&1
+
+            Write-Host "output: $output"
+            $output.Length | Should -Be 0
+            Get-FileEncoding $profilePath | Should -Be 'ascii'
+            $content = Get-Content $profilePath
+            $content.Count | Should -Be 2
+            $content[0] | Should -BeExactly $profileContent
+            $content[1] | Should -BeExactly ''
+            $expectedContent = Convert-NativeLineEnding $profileContent
+            $content -join "" | Should -BeExactly $expectedContent
+        }
     }
 
     Context 'Get-PromptConnectionInfo' {
