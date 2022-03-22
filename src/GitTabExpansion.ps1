@@ -124,6 +124,15 @@ function script:gitCommands($filter, $includeAliases) {
     $cmdList | Sort-Object
 }
 
+function script:lastCheckouts($filter){
+    # for performance reasons we limit the number of returned entries from reflog to avoid scanning
+    # all reflog entries which can be huge in some cases. Number 10 is chose as "good enough" for most cases.
+    git log --walk-reflogs --max-count=10 '--grep-reflog="checkout: moving from "' --fixed-strings --format=%gs |
+    Where-Object { $_ -match 'checkout: moving from (.*) to (.*)' } |
+    ForEach-Object { $Matches[1] } |
+    Where-Object { $_ -like "$filter*" }
+}
+
 function script:gitRemotes($filter) {
     git remote |
         Where-Object { $_ -like "$filter*" } |
@@ -450,6 +459,7 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         # Handles git checkout|switch <ref>
         "^(?:checkout|switch).* (?<ref>\S*)$" {
             & {
+                lastCheckouts $matches['ref']
                 gitBranches $matches['ref'] $true
                 gitRemoteUniqueBranches $matches['ref']
                 gitTags $matches['ref']
