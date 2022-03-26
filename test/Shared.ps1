@@ -17,9 +17,6 @@ $csi = [char]0x1b + "["
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 $expectedEncoding = if ($PSVersionTable.PSVersion.Major -le 5) { "utf8" } else { "ascii" }
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$originalTitle = $Host.UI.RawUI.WindowTitle
-
 if (!(Get-Variable -Name gitbin -Scope global -ErrorAction SilentlyContinue)) {
     if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
         # On Windows, we can access the git binary via git.exe
