@@ -1,4 +1,4 @@
-name: Test Posh-Git
+name: PowerShell Core
 
 on:
   push:
