@@ -270,7 +270,8 @@ Describe 'TabExpansion Tests' {
             New-Alias ge git.exe -Scope Global
         }
         AfterAll {
-            Remove-Alias g, ge
+            Remove-Item Alias:/g
+            Remove-Item Alias:/ge
             RemoveGitTempRepo $repoPath
         }
         It 'Tab completes PowerShell alias specifying git (with no extension)' {
