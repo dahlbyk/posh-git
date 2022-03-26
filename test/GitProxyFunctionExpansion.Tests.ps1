@@ -11,7 +11,7 @@ Describe 'Proxy Function Expansion Tests' {
             if (Test-Path -Path Alias:\igf) {
                 Rename-Item -Path Alias:\igf -NewName igfbackup
             }
-            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Script'
+            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Global'
         }
         AfterEach {
             if (Test-Path -Path Function:\Invoke-GitFunction) {
@@ -68,7 +68,7 @@ Describe 'Proxy Function Expansion Tests' {
             if (Test-Path -Path Alias:\igf) {
                 Rename-Item -Path Alias:\igf -NewName igfbackup
             }
-            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Script'
+            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Global'
         }
         AfterEach {
             if (Test-Path -Path Function:\Invoke-GitFunction) {
