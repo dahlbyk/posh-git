@@ -39,8 +39,8 @@ function global:git {
     # Write-Warning "in global git func with: $cmdline"
     switch ($cmdline) {
         '--version' { 'git version 2.16.2.windows.1' }
-        'help'      { Get-Content $PSScriptRoot\git-help.txt  }
-        default     {
+        'help' { Get-Content $PSScriptRoot\git-help.txt }
+        default {
             $res = Invoke-Expression "&$gitbin $cmdline"
             $res
         }
@@ -49,7 +49,7 @@ function global:git {
 
 # This must global in order to be accessible in posh-git module scope
 function global:Convert-NativeLineEnding([string]$content, [switch]$SplitLines) {
-    $tmp = $content -split "`n" | ForEach-Object { $_.TrimEnd("`r")}
+    $tmp = $content -split "`n" | ForEach-Object { $_.TrimEnd("`r") }
     if ($SplitLines) {
         $tmp
     }
@@ -162,4 +162,4 @@ $env:POSHGIT_ENABLE_STRICTMODE = 1
 
 # Force the posh-git prompt to be installed. Could be runnng on dev system where user has customized the prompt.
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-$module = Import-Module $moduleManifestPath -ArgumentList $true,$false -Force -PassThru
+$module = Import-Module $moduleManifestPath -ArgumentList $true, $false -Force -PassThru

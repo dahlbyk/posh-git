@@ -396,7 +396,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $repoAdminRegex
             }
             else {
@@ -413,7 +413,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match '^daboss: poshgit == posh-git / master$'
             }
             else {
@@ -427,7 +427,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match '^daboss: poshgit == posh-git / master$'
             }
             else {
@@ -468,7 +468,7 @@ M test/Baz.Tests.ps1
             Set-Location $Home
             & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $nonRepoAdminRegex
             }
             else {
@@ -498,7 +498,7 @@ M test/Baz.Tests.ps1
             Set-Location $Home
             & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $nonRepoAdminRegex
             }
             else {
@@ -509,7 +509,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $repoAdminRegex
             }
             else {
@@ -519,7 +519,7 @@ M test/Baz.Tests.ps1
             Set-Location $Home
             & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $nonRepoAdminRegex
             }
             else {
