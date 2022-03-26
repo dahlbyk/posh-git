@@ -24,6 +24,7 @@ jobs:
 
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Scope CurrentUser -Force
+          "Pester:      $(Get-Module Pester | % Version)"
       - name: run tests
         shell: powershell
         run: |
