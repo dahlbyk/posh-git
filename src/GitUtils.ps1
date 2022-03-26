@@ -334,20 +334,22 @@ function Get-GitStatus {
                     '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
                         if ($sw) { dbg "Status: $_" $sw }
 
+                        $path1 = $matches['path1']
+
                         switch ($matches['index']) {
-                            'A' { $null = $indexAdded.Add($matches['path1']); break }
-                            'M' { $null = $indexModified.Add($matches['path1']); break }
-                            'R' { $null = $indexModified.Add($matches['path1']); break }
-                            'C' { $null = $indexModified.Add($matches['path1']); break }
-                            'D' { $null = $indexDeleted.Add($matches['path1']); break }
-                            'U' { $null = $indexUnmerged.Add($matches['path1']); break }
+                            'A' { $null = $indexAdded.Add($path1); break }
+                            'M' { $null = $indexModified.Add($path1); break }
+                            'R' { $null = $indexModified.Add($path1); break }
+                            'C' { $null = $indexModified.Add($path1); break }
+                            'D' { $null = $indexDeleted.Add($path1); break }
+                            'U' { $null = $indexUnmerged.Add($path1); break }
                         }
                         switch ($matches['working']) {
-                            '?' { $null = $filesAdded.Add($matches['path1']); break }
-                            'A' { $null = $filesAdded.Add($matches['path1']); break }
-                            'M' { $null = $filesModified.Add($matches['path1']); break }
-                            'D' { $null = $filesDeleted.Add($matches['path1']); break }
-                            'U' { $null = $filesUnmerged.Add($matches['path1']); break }
+                            '?' { $null = $filesAdded.Add($path1); break }
+                            'A' { $null = $filesAdded.Add($path1); break }
+                            'M' { $null = $filesModified.Add($path1); break }
+                            'D' { $null = $filesDeleted.Add($path1); break }
+                            'U' { $null = $filesUnmerged.Add($path1); break }
                         }
                         continue
                     }
