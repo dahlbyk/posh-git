@@ -336,6 +336,13 @@ function Get-GitStatus {
 
                         $path1 = $matches['path1']
 
+                        # Even with core.quotePath=false, paths with spaces are wrapped in ""
+                        # https://github.com/git/git/commit/dbfdc625a5aad10c47e3ffa446d0b92e341a7b44
+                        # https://github.com/git/git/commit/f3fc4a1b8680c114defd98ce6f2429f8946a5dc1
+                        if ($path1 -like '"*"') {
+                            $path1 = $path1.Substring(1, $path1.Length - 2)
+                        }
+
                         switch ($matches['index']) {
                             'A' { $null = $indexAdded.Add($path1); break }
                             'M' { $null = $indexModified.Add($path1); break }
