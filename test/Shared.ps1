@@ -70,7 +70,7 @@ function GetHomePath() {
 
 function GetHomeRelPath([string]$Path) {
     $separator = [System.IO.Path]::DirectorySeparatorChar
-    if (!$Path.StartsWith("$Home$separator)) {
+    if (!("$Path$separator".StartsWith("$Home$separator"))) {
         # Path not under $Home
         return $Path
     }
@@ -92,7 +92,7 @@ function GetGitRelPath([string]$Path) {
     $gitPath = Split-Path $gitPath -Parent
 
     $separator = [System.IO.Path]::DirectorySeparatorChar
-    if (!$Path.StartsWith("$gitPath$separator")) {
+    if (!"$Path$separator".StartsWith("$gitPath$separator")) {
         # Path not under $gitPath
         return $Path
     }
