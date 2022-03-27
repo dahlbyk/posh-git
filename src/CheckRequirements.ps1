@@ -8,7 +8,7 @@ if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
     return
 }
 
-if ([string](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)(?<g4w>(?<rc>\.rc\d+)?\.windows)?') {
+if ([string](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)(?<g4w>(?<rc>\.rc\d+)?\.windows|\.vfs)?') {
     $script:GitVersion = [System.Version]$Matches['ver']
 
     # On Windows, check if Git is not "Git for Windows"

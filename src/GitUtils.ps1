@@ -334,20 +334,29 @@ function Get-GitStatus {
                     '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
                         if ($sw) { dbg "Status: $_" $sw }
 
+                        $path1 = $matches['path1']
+
+                        # Even with core.quotePath=false, paths with spaces are wrapped in ""
+                        # https://github.com/git/git/commit/dbfdc625a5aad10c47e3ffa446d0b92e341a7b44
+                        # https://github.com/git/git/commit/f3fc4a1b8680c114defd98ce6f2429f8946a5dc1
+                        if ($path1 -like '"*"') {
+                            $path1 = $path1.Substring(1, $path1.Length - 2)
+                        }
+
                         switch ($matches['index']) {
-                            'A' { $null = $indexAdded.Add($matches['path1']); break }
-                            'M' { $null = $indexModified.Add($matches['path1']); break }
-                            'R' { $null = $indexModified.Add($matches['path1']); break }
-                            'C' { $null = $indexModified.Add($matches['path1']); break }
-                            'D' { $null = $indexDeleted.Add($matches['path1']); break }
-                            'U' { $null = $indexUnmerged.Add($matches['path1']); break }
+                            'A' { $null = $indexAdded.Add($path1); break }
+                            'M' { $null = $indexModified.Add($path1); break }
+                            'R' { $null = $indexModified.Add($path1); break }
+                            'C' { $null = $indexModified.Add($path1); break }
+                            'D' { $null = $indexDeleted.Add($path1); break }
+                            'U' { $null = $indexUnmerged.Add($path1); break }
                         }
                         switch ($matches['working']) {
-                            '?' { $null = $filesAdded.Add($matches['path1']); break }
-                            'A' { $null = $filesAdded.Add($matches['path1']); break }
-                            'M' { $null = $filesModified.Add($matches['path1']); break }
-                            'D' { $null = $filesDeleted.Add($matches['path1']); break }
-                            'U' { $null = $filesUnmerged.Add($matches['path1']); break }
+                            '?' { $null = $filesAdded.Add($path1); break }
+                            'A' { $null = $filesAdded.Add($path1); break }
+                            'M' { $null = $filesModified.Add($path1); break }
+                            'D' { $null = $filesDeleted.Add($path1); break }
+                            'U' { $null = $filesUnmerged.Add($path1); break }
                         }
                         continue
                     }
