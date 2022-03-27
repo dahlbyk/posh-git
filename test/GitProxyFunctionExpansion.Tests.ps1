@@ -5,25 +5,25 @@ BeforeAll {
 Describe 'Proxy Function Expansion Tests' {
     Context 'Proxy Function Name TabExpansion Tests' {
         BeforeEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
             }
-            if(Test-Path -Path Alias:\igf) {
+            if (Test-Path -Path Alias:\igf) {
                 Rename-Item -Path Alias:\igf -NewName igfbackup
             }
-            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Script'
+            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Global'
         }
         AfterEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Remove-Item -Path Function:\Invoke-GitFunction
             }
-            if(Test-Path -Path Function:\Invoke-GitFunctionBackup) {
+            if (Test-Path -Path Function:\Invoke-GitFunctionBackup) {
                 Rename-Item Function:\Invoke-GitFunctionBackup Invoke-GitFunction
             }
-            if(Test-Path -Path Alias:\igf) {
+            if (Test-Path -Path Alias:\igf) {
                 Remove-Item -Path Alias:\igf
             }
-            if(Test-Path -Path Alias:\igfbackup) {
+            if (Test-Path -Path Alias:\igfbackup) {
                 Rename-Item -Path Alias:\igfbackup -NewName igf
             }
         }
@@ -62,25 +62,25 @@ Describe 'Proxy Function Expansion Tests' {
     }
     Context 'Proxy Function Definition Expansion Tests' {
         BeforeEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
             }
-            if(Test-Path -Path Alias:\igf) {
+            if (Test-Path -Path Alias:\igf) {
                 Rename-Item -Path Alias:\igf -NewName igfbackup
             }
-            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Script'
+            New-Alias -Name 'igf' -Value Invoke-GitFunction -Scope 'Global'
         }
         AfterEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Remove-Item -Path Function:\Invoke-GitFunction
             }
-            if(Test-Path -Path Function:\Invoke-GitFunctionBackup) {
+            if (Test-Path -Path Function:\Invoke-GitFunctionBackup) {
                 Rename-Item Function:\Invoke-GitFunctionBackup Invoke-GitFunction
             }
-            if(Test-Path -Path Alias:\igf) {
+            if (Test-Path -Path Alias:\igf) {
                 Remove-Item -Path Alias:\igf
             }
-            if(Test-Path -Path Alias:\igfbackup) {
+            if (Test-Path -Path Alias:\igfbackup) {
                 Rename-Item -Path Alias:\igfbackup -NewName igf
             }
         }
@@ -167,8 +167,8 @@ Describe 'Proxy Function Expansion Tests' {
             function global:Invoke-GitFunction {
                 $a = 5; Write-Host $null
                 git `
-                checkout `
-                $args; Write-Host $null;
+                    checkout `
+                    $args; Write-Host $null;
             }
             $result = & $module Expand-GitProxyFunction 'Invoke-GitFunction '
             $result | Should -Be 'git checkout '
@@ -188,8 +188,8 @@ Describe 'Proxy Function Expansion Tests' {
         It 'Expands multiline function' {
             function global:Invoke-GitFunction {
                 git `
-                checkout `
-                $args
+                    checkout `
+                    $args
             }
             $result = & $module Expand-GitProxyFunction 'Invoke-GitFunction '
             $result | Should -Be 'git checkout '
@@ -198,9 +198,9 @@ Describe 'Proxy Function Expansion Tests' {
         It 'Expands multiline function that terminates with semicolon on new line' {
             function global:Invoke-GitFunction {
                 git `
-                checkout `
-                $args `
-                ;
+                    checkout `
+                    $args `
+                    ;
             }
             $result = & $module Expand-GitProxyFunction 'Invoke-GitFunction '
             $result | Should -Be 'git checkout '
@@ -209,9 +209,9 @@ Describe 'Proxy Function Expansion Tests' {
         It 'Expands multiline function with short parameter' {
             function global:Invoke-GitFunction {
                 git `
-                checkout `
-                -b `
-                $args
+                    checkout `
+                    -b `
+                    $args
             }
             $result = & $module Expand-GitProxyFunction 'Invoke-GitFunction '
             $result | Should -Be 'git checkout -b '
@@ -220,9 +220,9 @@ Describe 'Proxy Function Expansion Tests' {
         It 'Expands multiline function with long parameter' {
             function global:Invoke-GitFunction {
                 git `
-                checkout `
-                --detach `
-                $args
+                    checkout `
+                    --detach `
+                    $args
             }
             $result = & $module Expand-GitProxyFunction 'Invoke-GitFunction '
             $result | Should -Be 'git checkout --detach '
@@ -255,7 +255,7 @@ Describe 'Proxy Function Expansion Tests' {
             function global:Invoke-GitFunction {
                 $a = 5
                 git `
-                checkout
+                    checkout
                 Write-Host $args
             }
             & $module Expand-GitProxyFunction 'Invoke-GitFunction ' | Should -Be 'Invoke-GitFunction '
@@ -275,16 +275,16 @@ Describe 'Proxy Function Expansion Tests' {
     }
     Context 'Proxy Function Parameter Replacement Tests' {
         BeforeEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
             }
             function global:Invoke-GitFunction { git checkout $args }
         }
         AfterEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Remove-Item -Path Function:\Invoke-GitFunction
             }
-            if(Test-Path -Path Function:\Invoke-GitFunctionBackup) {
+            if (Test-Path -Path Function:\Invoke-GitFunctionBackup) {
                 Rename-Item Function:\Invoke-GitFunctionBackup Invoke-GitFunction
             }
         }
@@ -307,15 +307,15 @@ Describe 'Proxy Function Expansion Tests' {
     }
     Context 'Proxy Subcommand TabExpansion Tests' {
         BeforeEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Rename-Item -Path Function:\Invoke-GitFunction -NewName Invoke-GitFunctionBackup
             }
         }
         AfterEach {
-            if(Test-Path -Path Function:\Invoke-GitFunction) {
+            if (Test-Path -Path Function:\Invoke-GitFunction) {
                 Remove-Item -Path Function:\Invoke-GitFunction
             }
-            if(Test-Path -Path Function:\Invoke-GitFunctionBackup) {
+            if (Test-Path -Path Function:\Invoke-GitFunctionBackup) {
                 Rename-Item -Path Function:\Invoke-GitFunctionBackup -NewName Invoke-GitFunction
             }
         }

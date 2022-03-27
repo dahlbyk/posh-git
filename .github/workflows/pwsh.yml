@@ -1,6 +1,14 @@
-name: Test Posh-Git
+name: PowerShell Core
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -20,6 +28,7 @@ jobs:
 
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Scope CurrentUser -Force
+          "Pester:      $(Get-Module Pester | % Version)"
       - name: run tests
         shell: pwsh
         run: |

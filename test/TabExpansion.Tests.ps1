@@ -211,27 +211,6 @@ Describe 'TabExpansion Tests' {
         }
     }
 
-    Context 'Add/Reset/Checkout TabExpansion Tests' {
-        BeforeEach {
-            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $repoPath = NewGitTempRepo
-        }
-        AfterEach {
-            RemoveGitTempRepo $repoPath
-        }
-        It 'Tab completes non-ASCII file name' {
-            &$gitbin config core.quotepath true # Problematic (default) config
-
-            $fileName = "posh$([char]8226)git.txt"
-            New-Item $fileName -ItemType File
-
-            $gitStatus = & $module Get-GitStatus
-
-            $result = & $module GitTabExpansionInternal 'git add ' $gitStatus
-            $result | Should -BeExactly $fileName
-        }
-    }
-
     Context 'Git Config Alias TabExpansion Tests' {
         BeforeAll {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
@@ -291,7 +270,8 @@ Describe 'TabExpansion Tests' {
             New-Alias ge git.exe -Scope Global
         }
         AfterAll {
-            Remove-Alias g, ge
+            Remove-Item Alias:/g
+            Remove-Item Alias:/ge
             RemoveGitTempRepo $repoPath
         }
         It 'Tab completes PowerShell alias specifying git (with no extension)' {
@@ -364,6 +344,17 @@ Describe 'TabExpansion Tests' {
 
             $result = & $module GitTabExpansionInternal 'git add ' $gitStatus
             $result | Should -BeExactly "'$filename'"
+        }
+        It 'Tab completes add file with non-ASCII file name' {
+            &$gitbin config core.quotepath true # Problematic (default) config
+
+            $fileName = "posh$([char]8226)git.txt"
+            New-Item $fileName -ItemType File
+
+            $gitStatus = & $module Get-GitStatus
+
+            $result = & $module GitTabExpansionInternal 'git add ' $gitStatus
+            $result | Should -BeExactly $fileName
         }
     }
 }
