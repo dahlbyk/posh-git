@@ -181,6 +181,22 @@ Describe 'TabExpansion Tests' {
                 &$gitbin branch -D $branchName
             }
         }
+
+        It 'Tab completes branch names that are symbolic refs' {
+            $branchName = 'symbolic-ref--for-Pester-tests'
+            if (&$gitbin branch --list -q $branchName) {
+                &$gitbin branch -D $branchName
+            }
+
+            &$gitbin symbolic-ref refs/heads/$branchName refs/heads/master
+            try {
+                $result = & $module GitTabExpansionInternal 'git checkout symbolic-ref--for-Pester-test'
+                $result | Should -BeExactly $branchName
+            }
+            finally {
+                &$gitbin branch -D $branchName
+            }
+        }
     }
 
     Context 'Restore Source Branch TabExpansion Tests' {
