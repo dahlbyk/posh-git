@@ -4,6 +4,7 @@
 Describe 'Test-GitVersion' {
     InModuleScope 'posh-git' {
         It 'Returns true for Git for Windows newer than 2.15 (<_>)' -ForEach @(
+            'git version 2.33.0.rc2.windows.1',
             'git version 2.33.0-rc2.windows.1',
             'git version 2.31.0.vfs.0.1',
             'git version 2.15.0.windows.0',

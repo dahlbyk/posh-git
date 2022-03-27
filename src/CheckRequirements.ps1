@@ -9,7 +9,7 @@ if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
 }
 
 function Test-GitVersion ($version = $([string](git --version 2> $null))) {
-    if ($version -notmatch '(?<ver>\d+(?:\.\d+)+)(?<g4w>(?<rc>-rc\d+)?\.windows|\.vfs)?') {
+    if ($version -notmatch '(?<ver>\d+(?:\.\d+)+)(?<g4w>(?<rc>[-.]rc\d+)?\.windows|\.vfs)?') {
         Write-Warning "posh-git could not parse Git version ($version)"
         $script:GitVersion = $version
         return $false
