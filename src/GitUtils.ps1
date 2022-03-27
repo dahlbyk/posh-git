@@ -59,7 +59,7 @@ function Get-GitDirectory {
     }
 }
 
-function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw) {
+function Get-GitBranch($branch = $null, $gitDir = $(Get-GitDirectory), [switch]$isDotGitOrBare, [Diagnostics.Stopwatch]$sw) {
     if (!$gitDir) { return }
 
     Invoke-Utf8ConsoleCommand {
@@ -114,7 +114,13 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 $r = '|BISECTING'
             }
 
+            if ($step -and $total) {
+                $r += " $step/$total"
+            }
+
             $b = Invoke-NullCoalescing `
+                $b `
+                $branch `
                 { dbg 'Trying symbolic-ref' $sw; git --no-optional-locks symbolic-ref HEAD -q 2>$null } `
                 { '({0})' -f (Invoke-NullCoalescing `
                     {
@@ -152,21 +158,19 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                 ) }
         }
 
-        dbg 'Inside git directory?' $sw
-        $revParseOut = git --no-optional-locks rev-parse --is-inside-git-dir 2>$null
-        if ('true' -eq $revParseOut) {
-            dbg 'Inside git directory' $sw
-            $revParseOut = git --no-optional-locks rev-parse --is-bare-repository 2>$null
+        if ($isDotGitOrBare -or !$b) {
+            dbg 'Inside git directory?' $sw
+            $revParseOut = git --no-optional-locks rev-parse --is-inside-git-dir 2>$null
             if ('true' -eq $revParseOut) {
-                $c = 'BARE:'
+                dbg 'Inside git directory' $sw
+                $revParseOut = git --no-optional-locks rev-parse --is-bare-repository 2>$null
+                if ('true' -eq $revParseOut) {
+                    $c = 'BARE:'
+                }
+                else {
+                    $b = 'GIT_DIR!'
+                }
             }
-            else {
-                $b = 'GIT_DIR!'
-            }
-        }
-
-        if ($step -and $total) {
-            $r += " $step/$total"
         }
 
         "$c$($b -replace 'refs/heads/','')$r"
@@ -266,7 +270,8 @@ function Get-GitStatus {
         $stashCount = 0
 
         $fileStatusEnabled = $Force -or $settings.EnableFileStatus
-        if ($fileStatusEnabled -and !$(InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
+        # Optimization: short-circuit to avoid InDotGitOrBareRepoDir and InDisabledRepository if !$fileStatusEnabled
+        if ($fileStatusEnabled -and !$($isDotGitOrBare = InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
             if ($null -eq $settings.EnableFileStatusFromCache) {
                 $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
@@ -384,7 +389,7 @@ function Get-GitStatus {
             }
         }
 
-        if (!$branch) { $branch = Get-GitBranch $GitDir $sw }
+        $branch = Get-GitBranch -Branch $branch -GitDir $GitDir -IsDotGitOrBare:$isDotGitOrBare -sw $sw
 
         dbg 'Building status object' $sw
 
