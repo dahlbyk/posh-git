@@ -464,6 +464,13 @@ U  test/Unmerged.Tests.ps1
             $status.HasUntracked | Should -Be $false
             $status.HasWorking | Should -Be $false
             $status.Working.Added.Count | Should -Be 0
+
+            Set-Location "$repoPath/.git/refs" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $false
+            $status.HasWorking | Should -Be $false
+            $status.Working.Added.Count | Should -Be 0
         }
     }
 
@@ -471,7 +478,7 @@ U  test/Unmerged.Tests.ps1
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $repoPath = NewGitTempRepo
-            mkdir "$repoPath/.github"
+            New-Item -Type Directory -Force "$repoPath/.github/workflows"
         }
         AfterEach {
             Set-Location $PSScriptRoot
@@ -487,6 +494,13 @@ U  test/Unmerged.Tests.ps1
             $status.Working.Added.Count | Should -Be 1
 
             Set-Location "$repoPath/.github" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
+
+            Set-Location "$repoPath/.github/workflows" -ErrorAction Stop
 
             $status = Get-GitStatus
             $status.HasUntracked | Should -Be $true
