@@ -440,6 +440,77 @@ U  test/Unmerged.Tests.ps1
         }
     }
 
+    Context 'Branch progress suffix' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo -MakeInitialCommit
+        }
+        AfterEach {
+            Set-Location $PSScriptRoot
+            RemoveGitTempRepo $repoPath
+        }
+
+        It('Shows CHERRY-PICKING') {
+            git checkout -qb test
+            Write-Output 1 > test.txt
+            git add test.txt
+            git commit -qam 'first' 2> $null
+
+            git checkout -qb conflict
+            Write-Output 2 > test.txt
+            git commit -qam 'second' 2> $null
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be conflict
+
+            git cherry-pick test
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be 'conflict|CHERRY-PICKING'
+        }
+
+        It('Shows MERGING') {
+            git checkout -qb test
+            Write-Output 1 > test.txt
+            git add test.txt
+            git commit -qam 'first' 2> $null
+
+            Write-Output 2 > test.txt
+            git commit -qam 'second' 2> $null
+
+            git checkout HEAD~ -qb conflict
+            Write-Output 3 > test.txt
+            git commit -qam 'third' 2> $null
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be conflict
+
+            git merge test
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be 'conflict|MERGING'
+        }
+
+        It('Shows REVERTING') {
+            git checkout -qb test
+            Write-Output 1 > test.txt
+            git add test.txt
+            git commit -qam 'first' 2> $null
+
+            git checkout -qb conflict
+            Write-Output 2 > test.txt
+            git commit -qam 'second' 2> $null
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be conflict
+
+            git revert test
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be 'conflict|REVERTING'
+        }
+    }
+
     Context 'In .git' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
