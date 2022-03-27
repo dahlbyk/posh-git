@@ -24,6 +24,17 @@ Describe 'Get-GitStatus Tests' {
             $status = Get-GitStatus
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $status.Branch | Should -Be "rkeithill/more-status-tests"
+            $status.HasIndex | Should -Be $false
+            $status.HasUntracked | Should -Be $false
+            $status.HasWorking | Should -Be $false
+            $status.Working.Added.Count | Should -Be 0
+            $status.Working.Deleted.Count | Should -Be 0
+            $status.Working.Modified.Count | Should -Be 0
+            $status.Working.Unmerged.Count | Should -Be 0
+            $status.Index.Added.Count | Should -Be 0
+            $status.Index.Deleted.Count | Should -Be 0
+            $status.Index.Modified.Count | Should -Be 0
+            $status.Index.Unmerged.Count | Should -Be 0
         }
 
 
@@ -426,6 +437,61 @@ U  test/Unmerged.Tests.ps1
             $status.Index.Modified[1] | Should -Be "README.md"
             $status.Index.Modified[2] | Should -Be "test/Modified.Tests.ps1"
             $status.Index.Unmerged[0] | Should -Be "test/Unmerged.Tests.ps1"
+        }
+    }
+
+    Context 'In .git' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo
+        }
+        AfterEach {
+            Set-Location $PSScriptRoot
+            RemoveGitTempRepo $repoPath
+        }
+
+        It('Does not have files') {
+            New-Item "$repoPath/test.txt" -ItemType File
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
+
+            Set-Location "$repoPath/.git" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $false
+            $status.HasWorking | Should -Be $false
+            $status.Working.Added.Count | Should -Be 0
+        }
+    }
+
+    Context 'In .github' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo
+            mkdir "$repoPath/.github"
+        }
+        AfterEach {
+            Set-Location $PSScriptRoot
+            RemoveGitTempRepo $repoPath
+        }
+
+        It('Files are not ignored') {
+            New-Item "$repoPath/test.txt" -ItemType File
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
+
+            Set-Location "$repoPath/.github" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
         }
     }
 }
