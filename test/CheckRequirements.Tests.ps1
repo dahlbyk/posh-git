@@ -1,6 +1,5 @@
-BeforeAll {
-    . $PSScriptRoot\Shared.ps1
-}
+# Not using BeforeAll because discovery doesn't like InModuleScope without posh-git loaded
+. $PSScriptRoot\Shared.ps1
 
 Describe 'Test-GitVersion' {
     InModuleScope 'posh-git' {
