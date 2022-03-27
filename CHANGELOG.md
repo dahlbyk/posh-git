@@ -1,6 +1,11 @@
 # posh-git Release History
 
-## 1.0.0 - TBD
+## 1.0.0 - March 10, 2021
+
+- Released to PowerShell Gallery.
+- Fate of Chocolatey to be determined.
+
+## 1.0.0-beta5 - February 14, 2021
 
 ### Added
 
@@ -11,6 +16,17 @@
   ([#257](https://github.com/dahlbyk/posh-git/issues/257))
   ([PR #779](https://github.com/dahlbyk/posh-git/pull/779))
   Thanks @csc027
+- Autocomplete user-defined pretty formats
+  ([#786](https://github.com/dahlbyk/posh-git/issues/786))
+  ([PR #802](https://github.com/dahlbyk/posh-git/pull/802))
+  Thanks @rdnlsmith
+- Add warning for cygwin version of git, which does not play nicely
+  ([#771](https://github.com/dahlbyk/posh-git/issues/771))
+  ([PR #807](https://github.com/dahlbyk/posh-git/pull/807))
+- Add BeforePath and AfterPath settings
+  ([#821](https://github.com/dahlbyk/posh-git/pull/821))
+  ([PR #822](https://github.com/dahlbyk/posh-git/pull/822))
+  Thanks @breisfeld Brad Reisfeld
 
 ### Changed
 
@@ -18,16 +34,37 @@
    always substituted for the user's home path. Before this change, when directly in your home dir, this setting would
    result in the full path displayed in the prompt e.g. `C:\Users\Keith`.  After this change, `~` will be displayed.
    The new behavior is consistent with how the home path is displayed in prompts in other shells on Linux.
+  ([#746](https://github.com/dahlbyk/posh-git/pull/746))
+  ([PR #801](https://github.com/dahlbyk/posh-git/pull/801))
+- Adds `--no-optional-locks` when invoking git to reduce conflicts with other tools.
+  ([PR #774](https://github.com/dahlbyk/posh-git/pull/774))
+  Thanks @jessehouwing
 
 ### Fixed
 
+- Put 'CACHE ERROR' in prompt when [GitStatusCache](https://github.com/cmarcusreid/git-status-cache) returns failure.
+  ([PR #759](https://github.com/dahlbyk/posh-git/pull/759))
+  Thanks @cmarcusreid
+- Honor EnableStashStatus when using cache
+  ([#761](https://github.com/dahlbyk/posh-git/pull/761))
+  ([PR #762](https://github.com/dahlbyk/posh-git/pull/762))
 - Register-ArgumentCompleter based tab-expansion in beta4 doesn't work with PowerShell aliases to git,tgit,gitk.
   ([#769](https://github.com/dahlbyk/posh-git/issues/769))
   ([PR #770](https://github.com/dahlbyk/posh-git/pull/770))
+- Module now works in (and is tested in) strict mode
+  ([PR #783](https://github.com/dahlbyk/posh-git/pull/783))
 - "git help --all" output breaks $GitTabSettings.AllCommands = $true.
   ([#788](https://github.com/dahlbyk/posh-git/issues/788))
   ([PR #790](https://github.com/dahlbyk/posh-git/pull/790))
   Thanks @dannoe
+- Fixed non-ascii git branch name garbled
+  ([PR #796](https://github.com/dahlbyk/posh-git/pull/796))
+  Thanks @LittleboyHarry
+- Fix tab completion of branches in different worktrees
+  ([PR #805](https://github.com/dahlbyk/posh-git/pull/805))
+  Thanks @wallybh
+- Using `DarkYellow` no longer results in extra `$Errors`
+  ([PR #806](https://github.com/dahlbyk/posh-git/pull/806))
 
 ## 1.0.0-beta4 - March 14, 2020
 

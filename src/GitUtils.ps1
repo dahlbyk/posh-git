@@ -115,15 +115,15 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
             }
 
             $b = Invoke-NullCoalescing `
-                { dbg 'Trying symbolic-ref' $sw; git symbolic-ref HEAD -q 2>$null } `
+                { dbg 'Trying symbolic-ref' $sw; git --no-optional-locks symbolic-ref HEAD -q 2>$null } `
                 { '({0})' -f (Invoke-NullCoalescing `
                     {
                         dbg 'Trying describe' $sw
                         switch ($Global:GitPromptSettings.DescribeStyle) {
-                            'contains' { git describe --contains HEAD 2>$null }
-                            'branch' { git describe --contains --all HEAD 2>$null }
-                            'describe' { git describe HEAD 2>$null }
-                            default { git tag --points-at HEAD 2>$null }
+                            'contains' { git --no-optional-locks describe --contains HEAD 2>$null }
+                            'branch' { git --no-optional-locks describe --contains --all HEAD 2>$null }
+                            'describe' { git --no-optional-locks describe HEAD 2>$null }
+                            default { git --no-optional-locks tag --points-at HEAD 2>$null }
                         }
                     } `
                     {
@@ -136,7 +136,7 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
                         }
                         else {
                             dbg 'Trying rev-parse' $sw
-                            $ref = git rev-parse HEAD 2>$null
+                            $ref = git --no-optional-locks rev-parse HEAD 2>$null
                         }
 
                         if ($ref -match 'ref: (?<ref>.+)') {
@@ -153,10 +153,10 @@ function Get-GitBranch($gitDir = $(Get-GitDirectory), [Diagnostics.Stopwatch]$sw
         }
 
         dbg 'Inside git directory?' $sw
-        $revParseOut = git rev-parse --is-inside-git-dir 2>$null
+        $revParseOut = git --no-optional-locks rev-parse --is-inside-git-dir 2>$null
         if ('true' -eq $revParseOut) {
             dbg 'Inside git directory' $sw
-            $revParseOut = git rev-parse --is-bare-repository 2>$null
+            $revParseOut = git --no-optional-locks rev-parse --is-bare-repository 2>$null
             if ('true' -eq $revParseOut) {
                 $c = 'BARE:'
             }
@@ -323,10 +323,10 @@ function Get-GitStatus {
                     "All"     { $untrackedFilesOption = "-uall" }
                     default   { $untrackedFilesOption = "-unormal" }
                 }
-                $status = Invoke-Utf8ConsoleCommand { git -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
+                $status = Invoke-Utf8ConsoleCommand { git --no-optional-locks -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
                 if ($settings.EnableStashStatus) {
                     dbg 'Getting stash count' $sw
-                    $stashCount = $null | git stash list 2>$null | measure-object | Select-Object -expand Count
+                    $stashCount = $null | git --no-optional-locks stash list 2>$null | measure-object | Select-Object -expand Count
                 }
 
                 dbg 'Parsing status' $sw
@@ -334,20 +334,29 @@ function Get-GitStatus {
                     '^(?<index>[^#])(?<working>.) (?<path1>.*?)(?: -> (?<path2>.*))?$' {
                         if ($sw) { dbg "Status: $_" $sw }
 
+                        $path1 = $matches['path1']
+
+                        # Even with core.quotePath=false, paths with spaces are wrapped in ""
+                        # https://github.com/git/git/commit/dbfdc625a5aad10c47e3ffa446d0b92e341a7b44
+                        # https://github.com/git/git/commit/f3fc4a1b8680c114defd98ce6f2429f8946a5dc1
+                        if ($path1 -like '"*"') {
+                            $path1 = $path1.Substring(1, $path1.Length - 2)
+                        }
+
                         switch ($matches['index']) {
-                            'A' { $null = $indexAdded.Add($matches['path1']); break }
-                            'M' { $null = $indexModified.Add($matches['path1']); break }
-                            'R' { $null = $indexModified.Add($matches['path1']); break }
-                            'C' { $null = $indexModified.Add($matches['path1']); break }
-                            'D' { $null = $indexDeleted.Add($matches['path1']); break }
-                            'U' { $null = $indexUnmerged.Add($matches['path1']); break }
+                            'A' { $null = $indexAdded.Add($path1); break }
+                            'M' { $null = $indexModified.Add($path1); break }
+                            'R' { $null = $indexModified.Add($path1); break }
+                            'C' { $null = $indexModified.Add($path1); break }
+                            'D' { $null = $indexDeleted.Add($path1); break }
+                            'U' { $null = $indexUnmerged.Add($path1); break }
                         }
                         switch ($matches['working']) {
-                            '?' { $null = $filesAdded.Add($matches['path1']); break }
-                            'A' { $null = $filesAdded.Add($matches['path1']); break }
-                            'M' { $null = $filesModified.Add($matches['path1']); break }
-                            'D' { $null = $filesDeleted.Add($matches['path1']); break }
-                            'U' { $null = $filesUnmerged.Add($matches['path1']); break }
+                            '?' { $null = $filesAdded.Add($path1); break }
+                            'A' { $null = $filesAdded.Add($path1); break }
+                            'M' { $null = $filesModified.Add($path1); break }
+                            'D' { $null = $filesDeleted.Add($path1); break }
+                            'U' { $null = $filesUnmerged.Add($path1); break }
                         }
                         continue
                     }
@@ -429,12 +438,13 @@ function InDotGitOrBareRepoDir([string][ValidateNotNullOrEmpty()]$GitDir) {
     # The latter is more desirable.
     $pathInfo = Microsoft.PowerShell.Management\Get-Location
     $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
-    $res = $currentPath.StartsWith($GitDir, (Get-PathStringComparison))
+    $separator = [System.IO.Path]::DirectorySeparatorChar
+    $res = "$currentPath$separator".StartsWith("$GitDir$separator", (Get-PathStringComparison))
     $res
 }
 
 function Get-AliasPattern($cmd) {
-    $aliases = @($cmd) + @(Get-Alias | Where-Object { $_.Definition -eq $cmd } | Select-Object -Exp Name)
+    $aliases = @($cmd) + @(Get-Alias | Where-Object { $_.Definition -match "^$cmd(\.exe)?$" } | Foreach-Object Name)
    "($($aliases -join '|'))"
 }
 

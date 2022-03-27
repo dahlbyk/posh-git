@@ -1,6 +1,10 @@
 BeforeAll {
     . $PSScriptRoot\Shared.ps1
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $SkipWindowTitleTests = !(& $module Test-WindowTitleIsWriteable)
 }
+
 Describe 'Default Prompt Tests - NO ANSI' {
     BeforeAll {
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
@@ -349,9 +353,7 @@ A  test/Foo.Tests.ps1
     }
 }
 
-# Don't run these tests on the AppVeyor build - the Windows PowerShell host is RemoteHostImplementation which doesn't
-# support setting the Window title.
-Describe 'Default Prompt WindowTitle Tests' -Skip:($Host.Name -eq 'RemoteHostImplementation') {
+Describe 'Default Prompt WindowTitle Tests' -Skip:$SkipWindowTitleTests {
     BeforeAll {
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
         $homePath = [regex]::Escape((GetHomePath))
@@ -396,7 +398,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $repoAdminRegex
             }
             else {
@@ -413,7 +415,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match '^daboss: poshgit == posh-git / master$'
             }
             else {
@@ -427,7 +429,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match '^daboss: poshgit == posh-git / master$'
             }
             else {
@@ -468,7 +470,7 @@ M test/Baz.Tests.ps1
             Set-Location $Home
             & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $nonRepoAdminRegex
             }
             else {
@@ -498,7 +500,7 @@ M test/Baz.Tests.ps1
             Set-Location $Home
             & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $nonRepoAdminRegex
             }
             else {
@@ -509,7 +511,7 @@ M test/Baz.Tests.ps1
             & $GitPromptScriptBlock 6>&1
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $repoAdminRegex
             }
             else {
@@ -519,7 +521,7 @@ M test/Baz.Tests.ps1
             Set-Location $Home
             & $GitPromptScriptBlock 6>&1
             $title = $Host.UI.RawUI.WindowTitle
-            if (& $module {$IsAdmin}) {
+            if (& $module { $IsAdmin }) {
                 $title | Should -Match $nonRepoAdminRegex
             }
             else {
@@ -531,17 +533,12 @@ M test/Baz.Tests.ps1
         Context 'Removing the posh-git module' {
             It 'Correctly reverts the Window Title back to original state' {
                 Set-Item function:\prompt -Value ([Runspace]::DefaultRunspace.InitialSessionState.Commands['prompt']).Definition
+                $originalTitle = & $module { $OriginalWindowTitle }
+                $originalTitle | Should -Not -BeNullOrEmpty
+
                 Remove-Module posh-git -Force *>$null
                 $title = $Host.UI.RawUI.WindowTitle
-                if ($Host.Name -eq 'RemoteHostImplementation') {
-                    $title | Should -eq $originalTitle
-                }
-                elseif ($PSVersionTable.PSVersion.Major -lt 6) {
-                    $title | Should -match '^Windows PowerShell|:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe$'
-                }
-                else {
-                    $title | Should -match '^(Windows )?PowerShell'
-                }
+                $title | Should -eq $originalTitle
             }
         }
     }
