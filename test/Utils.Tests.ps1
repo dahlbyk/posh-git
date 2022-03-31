@@ -118,6 +118,8 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         It 'Removes import from the profile correctly' {
             $profileContent = @'
 Import-Module PSCX
+
+# import posh-git here:
 '@
             Set-Content $profilePath -Value $profileContent -Encoding Ascii
 
@@ -129,12 +131,8 @@ Import-Module PSCX
             Write-Host "output: $output"
             $output.Length | Should -Be 0
             Get-FileEncoding $profilePath | Should -Be 'ascii'
-            $content = Get-Content $profilePath
-            $content.Count | Should -Be 2
-            $content[0] | Should -BeExactly $profileContent
-            $content[1] | Should -BeExactly ''
-            $expectedContent = Convert-NativeLineEnding $profileContent
-            $content -join "" | Should -BeExactly $expectedContent
+            $content = Get-Content $profilePath -Raw
+            $content | Should -Be "$profileContent${newline}"
         }
     }
 
