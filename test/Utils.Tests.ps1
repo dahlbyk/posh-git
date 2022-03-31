@@ -18,7 +18,7 @@ Describe 'Utils Function Tests' {
         }
         It 'Creates profile file if it does not exist that imports absolute path' {
             Mock Get-PSModulePath {
-                 return @()
+                return @()
             }
             Remove-Item -LiteralPath $profilePath
             Test-Path -LiteralPath $profilePath | Should -Be $false
@@ -150,7 +150,8 @@ Import-Module PSCX
         AfterEach {
             if ($ssh_connection) {
                 Set-Item Env:SSH_CONNECTION $ssh_connection
-            } elseif (Test-Path Env:SSH_CONNECTION) {
+            }
+            elseif (Test-Path Env:SSH_CONNECTION) {
                 Remove-Item Env:SSH_CONNECTION
             }
         }
