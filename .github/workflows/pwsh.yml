@@ -1,0 +1,41 @@
+name: PowerShell Core
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'macos-latest', 'ubuntu-latest']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        shell: pwsh
+        run: |
+          "Git version: $(git --version)"
+          "PSVersion:   $($PSVersionTable.PSVersion)"
+          "Host name:   $($Host.Name)"
+
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Scope CurrentUser -Force
+          "Pester:      $(Get-Module Pester | % Version)"
+      - name: run tests
+        shell: pwsh
+        run: |
+          Import-Module Pester -PassThru
+          $ErrorActionPreference = 'Continue'
+          $res = Invoke-Pester -Path test -Output Detailed -PassThru -ErrorAction SilentlyContinue
+          if (!$res -or ($res.FailedCount -gt 0)) {
+            $Error | Format-List * -Force
+            exit 1
+          }
