@@ -287,7 +287,7 @@ function Remove-PoshGitFromProfile {
     if (!$profilePath) { $profilePath = $PROFILE }
 
     if (!$profilePath) {
-        Write-Warning "Skipping add of posh-git import to profile; no profile found."
+        Write-Warning "Skipping removal of posh-git import from profile; no profile found."
         Write-Verbose "`$PROFILE              = '$PROFILE'"
         Write-Verbose "CurrentUserCurrentHost = '$($PROFILE.CurrentUserCurrentHost)'"
         Write-Verbose "CurrentUserAllHosts    = '$($PROFILE.CurrentUserAllHosts)'"
@@ -305,8 +305,8 @@ function Remove-PoshGitFromProfile {
         else {
             $sig = Get-AuthenticodeSignature $profilePath
             if ($null -ne $sig.SignerCertificate) {
-                Write-Warning "Skipping add of posh-git import to profile; '$profilePath' appears to be signed."
-                Write-Warning "Add the command 'Import-Module posh-git' to your profile and resign it."
+                Write-Warning "Skipping removal of posh-git import from profile; '$profilePath' appears to be signed."
+                Write-Warning "Remove the command 'Import-Module posh-git' from your profile and resign it."
                 return
             }
         }
