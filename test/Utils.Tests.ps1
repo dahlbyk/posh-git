@@ -101,6 +101,20 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
             $expectedContent += "${newLine}${newLine}Import-Module '$(Join-Path $moduleBasePath posh-git).psd1'"
             $content -join $newLine | Should -BeExactly $expectedContent
         }
+    }
+
+    Context 'Remove-PoshGitFromProfile Tests' {
+        BeforeAll {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $newLine = [System.Environment]::NewLine
+        }
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $profilePath = [System.IO.Path]::GetTempFileName()
+        }
+        AfterEach {
+            Remove-Item $profilePath -Recurse -ErrorAction SilentlyContinue
+        }
         It 'Removes import from the profile correctly' {
             $profileContent = @'
 Import-Module PSCX
