@@ -46,6 +46,8 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 
 #### Releases
 
+- v1.1.0
+  ( [README][v1.1-readme] • [CHANGELOG][v1.1-change] )
 - v1.0.0
   ( [README][v1-readme] • [CHANGELOG][v1-change] )
 - v1.0.0-beta5
@@ -559,5 +561,7 @@ function prompt {
 [v1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/CHANGELOG.md
 [v1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/README.md
 
+[v1.1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.1.0/CHANGELOG.md
+[v1.1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.1.0/README.md
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt

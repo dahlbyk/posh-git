@@ -1,5 +1,54 @@
 # posh-git Release History
 
+## 1.1.0 - March 31, 2022
+
+### Added
+
+- `Remove-PoshGitFromProfile`
+  ([git-for-windows/build-extra#401](https://github.com/git-for-windows/build-extra/pull/401))
+  ([PR #877](https://github.com/dahlbyk/posh-git/pull/877))
+  Thanks @dscho
+
+### Fixed
+
+- Fix branch status when cherry-picking, merging, reverting
+  ([#818](https://github.com/dahlbyk/posh-git/issues/818))
+  ([PR #828](https://github.com/dahlbyk/posh-git/pull/828))
+  ([PR #894](https://github.com/dahlbyk/posh-git/pull/894))
+  Thanks @NihilityT
+- Fix tab expansion for PowerShell aliases to `git.exe`
+  ([#854](https://github.com/dahlbyk/posh-git/issues/854))
+  ([PR #855](https://github.com/dahlbyk/posh-git/pull/855))
+- Fix tab expansion for symbolic refs
+  ([#867](https://github.com/dahlbyk/posh-git/issues/867))
+  ([PR #868](https://github.com/dahlbyk/posh-git/pull/868))
+  Thanks @dmringo
+- Fix status inside `.github` directories
+  ([#873](https://github.com/dahlbyk/posh-git/issues/873))
+  ([PR #874](https://github.com/dahlbyk/posh-git/pull/874))
+  ([PR #893](https://github.com/dahlbyk/posh-git/pull/893))
+  Thanks @jethas-bennettjones
+- Version warning no longer flags VFS for Git
+  ([#860](https://github.com/dahlbyk/posh-git/issues/860))
+  ([PR #884](https://github.com/dahlbyk/posh-git/pull/884))
+  Thanks @shmuelie
+- Version warning no longer flags Git for Windows release candidates
+  ([#845](https://github.com/dahlbyk/posh-git/issues/845))
+  ([PR #885](https://github.com/dahlbyk/posh-git/pull/885))
+  Thanks @dscho
+
+### Chores
+
+- Migrated to GitHub Actions
+  ([PR #878](https://github.com/dahlbyk/posh-git/pull/878))
+  Thanks @dscho
+- Fixed Scoop install instructions
+  ([PR #862](https://github.com/dahlbyk/posh-git/pull/862))
+  Thanks @cjstewart88
+- Fix typo
+  ([PR #887](https://github.com/dahlbyk/posh-git/pull/887))
+  Thanks @bennett1412
+
 ## 1.0.0 - March 10, 2021
 
 - Released to PowerShell Gallery.
