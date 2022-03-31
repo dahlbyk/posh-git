@@ -18,7 +18,7 @@ Describe 'Utils Function Tests' {
         }
         It 'Creates profile file if it does not exist that imports absolute path' {
             Mock Get-PSModulePath {
-                 return @()
+                return @()
             }
             Remove-Item -LiteralPath $profilePath
             Test-Path -LiteralPath $profilePath | Should -Be $false
@@ -103,6 +103,39 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         }
     }
 
+    Context 'Remove-PoshGitFromProfile Tests' {
+        BeforeAll {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $newLine = [System.Environment]::NewLine
+        }
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $profilePath = [System.IO.Path]::GetTempFileName()
+        }
+        AfterEach {
+            Remove-Item $profilePath -Recurse -ErrorAction SilentlyContinue
+        }
+        It 'Removes import from the profile correctly' {
+            $profileContent = @'
+Import-Module PSCX
+
+# import posh-git here:
+'@
+            Set-Content $profilePath -Value $profileContent -Encoding Ascii
+
+            $moduleBasePath = Split-Path $profilePath -Parent
+            Add-PoshGitToProfile $profilePath $moduleBasePath
+
+            $output = Remove-PoshGitFromProfile $profilePath 3>&1
+
+            Write-Host "output: $output"
+            $output.Length | Should -Be 0
+            Get-FileEncoding $profilePath | Should -Be 'ascii'
+            $content = Get-Content $profilePath -Raw
+            $content | Should -Be "$profileContent${newline}"
+        }
+    }
+
     Context 'Get-PromptConnectionInfo' {
         BeforeEach {
             if (Test-Path Env:SSH_CONNECTION) {
@@ -115,7 +148,8 @@ New-Alias pscore C:\Users\Keith\GitHub\rkeithhill\PowerShell\src\powershell-win-
         AfterEach {
             if ($ssh_connection) {
                 Set-Item Env:SSH_CONNECTION $ssh_connection
-            } elseif (Test-Path Env:SSH_CONNECTION) {
+            }
+            elseif (Test-Path Env:SSH_CONNECTION) {
                 Remove-Item Env:SSH_CONNECTION
             }
         }

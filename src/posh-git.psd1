@@ -33,6 +33,7 @@ FunctionsToExport = @(
     'Get-PromptPath',
     'New-GitPromptSettings',
     'Remove-GitBranch',
+    'Remove-PoshGitFromProfile',
     'Update-AllBranches',
     'Write-GitStatus',
     'Write-GitBranchName',
