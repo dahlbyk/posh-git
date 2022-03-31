@@ -312,8 +312,6 @@ function Remove-PoshGitFromProfile {
         }
 
         $oldProfile = @(Get-Content $profilePath)
-
-        . $currentVersionPath\src\Utils.ps1
         $oldProfileEncoding = Get-FileEncoding $profilePath
 
         $newProfile = @()
