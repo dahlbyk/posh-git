@@ -142,7 +142,7 @@ function Add-PoshGitToProfile {
 
     if (!$Force) {
         # Search the user's profiles to see if any are using posh-git already, there is an extra search
-        # ($profilePath) taking place to accomodate the Pester tests.
+        # ($profilePath) taking place to accommodate the Pester tests.
         $importedInProfile = Test-PoshGitImportedInScript $profilePath
         if (!$importedInProfile -and !$underTest) {
             $importedInProfile = Test-PoshGitImportedInScript $PROFILE
