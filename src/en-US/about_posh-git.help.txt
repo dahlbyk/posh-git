@@ -149,7 +149,7 @@ USAGE AND CUSTOMIZATION
     and press Enter.
 
     For more information on customizing the posh-git default prompt or creating
-    your own prompt fuction see:
+    your own prompt function see:
 
     https://github.com/dahlbyk/posh-git/blob/master/README.md#customizing-the-posh-git-prompt
 
