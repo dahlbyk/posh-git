@@ -225,7 +225,7 @@ By default, the status summary has the following format:
   of the remote. Execute `git fetch` to update to the latest on the default remote repo. If you have multiple remotes,
   execute `git fetch --all`.
 
-  - `≡` = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
+  - `≡` = The local branch is at the same commit level as the remote branch (`BranchIdenticalStatus`)
   - `↑<num>` = The local branch is ahead of the remote branch by the specified number of commits; a `git push` is
     required to update the remote branch (`BranchAheadStatus`)
   - `↓<num>` = The local branch is behind the remote branch by the specified number of commits; a `git pull` is
