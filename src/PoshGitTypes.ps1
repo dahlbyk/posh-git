@@ -266,6 +266,7 @@ class PoshGitPromptSettings {
 
     [bool]$EnableStashStatus     = $false
     [bool]$ShowStatusWhenZero    = $true
+    [bool]$ShowRemoteName        = $false
     [bool]$AutoRefreshIndex      = $true
 
     [UntrackedFilesMode]$UntrackedFilesMode = [UntrackedFilesMode]::Default

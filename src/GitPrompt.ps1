@@ -220,6 +220,7 @@ function Write-GitStatus {
     }
 
     $sb | Write-Prompt $s.BeforeStatus > $null
+    $sb | Write-GitRemoteName $Status > $null
     $sb | Write-GitBranchName $Status -NoLeadingSpace > $null
     $sb | Write-GitBranchStatus $Status > $null
 
@@ -348,6 +349,63 @@ function Get-GitBranchStatusColor {
 
     $branchStatusTextSpan.Text = ''
     $branchStatusTextSpan
+}
+
+<#
+.SYNOPSIS
+    Writes the remote (Upstream) name with seperator.
+.DESCRIPTION
+    Writes the remote name and seperator given the current Git status which can retrieved
+    via the Get-GitStatus command. Remote name (Upstream) can be affected by the
+    $GitPromptSettings: ShowRemoteName.
+.EXAMPLE
+    PS C:\> Write-GitRemoteName (Get-GitStatus)
+
+    Writes the name of the remote name for branch, followed by seperator ('/') or empty line
+    when no Upstream is set.
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitRemoteName {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the branch name is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s -or !$s.ShowRemoteName) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    # Expecting same format as 'origin/master'. See regex here: https://regex101.com/library/TMX8aJ
+    if($Status.Upstream -match '(?<remotename>\w*)(?<seperator>\/)(?<branchname>\w*)') {
+
+        $remoteNameTextSpan = [PoshGitTextSpan]::new($s.DefaultColor)
+        $remoteNameTextSpan.Text = $Matches.remotename + $Matches.seperator
+
+        if ($StringBuilder) {
+            $StringBuilder | Write-Prompt $remoteNameTextSpan > $null
+        }
+        else {
+            $str = Write-Prompt $remoteNameTextSpan
+        }
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
 }
 
 <#

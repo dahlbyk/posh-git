@@ -39,6 +39,7 @@ FunctionsToExport = @(
     'Write-GitBranchName',
     'Write-GitBranchStatus',
     'Write-GitIndexStatus',
+    'Write-GitRemoteName',
     'Write-GitStashCount',
     'Write-GitWorkingDirStatus',
     'Write-GitWorkingDirStatusSummary',
