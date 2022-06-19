@@ -354,6 +354,16 @@ This will change the prompt to:
 
 ![~\GitHub\posh-git [main ≡]&#10;> ][prompt-two-line]
 
+If you prefer to show the remote repository name for the branch, use this setting:
+
+```text
+$GitPromptSettings.ShowRemoteName = $true
+```
+
+This will change the prompt to:
+
+![~\GitHub\posh-git [origin/master ≡]> ][prompt-show-remote-name]
+
 You can swap the order of the path and the Git status summary with the following setting:
 
 ```text
@@ -522,6 +532,7 @@ function prompt {
 [prompt-no-abbr]:  https://github.com/dahlbyk/posh-git/wiki/images/PromptNoAbbrevHome.png  "C:\Users\Keith\GitHub\posh-git [main ≡]> "
 [prompt-path]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptOrangePath.png    "~\GitHub\posh-git [main ≡]> "
 [prompt-swap]:     https://github.com/dahlbyk/posh-git/wiki/images/PromptStatusFirst.png   "[main ≡] ~\GitHub\posh-git> "
+[prompt-show-remote-name]:    https://github.com/dahlbyk/posh-git/wiki/images/PromptShowRemoteName.png     "~\GitHub\posh-git> [origin/main ≡] "
 [prompt-two-line]: https://github.com/dahlbyk/posh-git/wiki/images/PromptTwoLine.png       "~\GitHub\posh-git [main ≡]&#10;> "
 [prompt-custom]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustom.png        "[main ≡] ~\GitHub\posh-git&#10;02-18 14:04:35 38> "
 [prompt-custom-wpathdelim]:   https://github.com/dahlbyk/posh-git/wiki/images/PromptCustomDelim.png        "[main ≡] {~\GitHub\posh-git}&#10;02-18 14:04:35 38> "
