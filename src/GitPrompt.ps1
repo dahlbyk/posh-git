@@ -391,11 +391,10 @@ function Write-GitRemoteName {
 
     $str = ""
 
-    # Expecting same format as 'origin/master'. See regex here: https://regex101.com/library/TMX8aJ
-    if($Status.Upstream -match '(?<remotename>\w*)(?<seperator>\/)(?<branchname>\w*)') {
-
+    # Expecting similar format as 'origin/master' or 'origin/development/master'
+    if($Status.Upstream -match '(?<remotename>\w+)(?<seperator>\/).*' ) {
         $remoteNameTextSpan = [PoshGitTextSpan]::new($s.DefaultColor)
-        $remoteNameTextSpan.Text = $Matches.remotename + $Matches.seperator
+        $remoteNameTextSpan.Text = $Matches.remotename + '/'
 
         if ($StringBuilder) {
             $StringBuilder | Write-Prompt $remoteNameTextSpan > $null

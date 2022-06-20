@@ -54,3 +54,80 @@ M test/Baz.Tests.ps1
         }
     }
 }
+
+Describe 'Write-GitRemoteName Tests' {
+    Context 'ShowRemoteName enabled with single segment branch name' {
+        BeforeAll {
+            # Ensure these settings start out set to the default values
+            $global:GitPromptSettings = New-GitPromptSettings
+            $GitPromptSettings.ShowRemoteName = $true
+
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master...origin/master
+'@
+            }
+        }
+
+        It 'Should return status containing repository name with seperator' {
+            $res = Write-GitRemoteName (Get-GitStatus)
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $res | Should -BeExactly "origin/"
+        }
+    }
+
+    Context 'ShowRemoteName enabled with multi segment branch name' {
+        BeforeAll {
+            # Ensure these settings start out set to the default values
+            $global:GitPromptSettings = New-GitPromptSettings
+            $GitPromptSettings.ShowRemoteName = $true
+
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## development/master...origin/development/master
+'@
+            }
+        }
+
+        It 'Should return status containing repository name with seperator' {
+            $res = Write-GitRemoteName (Get-GitStatus)
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $res | Should -BeExactly "origin/"
+        }
+    }
+
+    Context 'ShowRemoteName disabled should not output' {
+        BeforeAll {
+            # Ensure these settings start out set to the default values
+            $global:GitPromptSettings = New-GitPromptSettings
+            $GitPromptSettings.ShowRemoteName = $false
+
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master...origin/master
+'@
+            }
+        }
+
+        It 'Should return status containing repository name with seperator' {
+            $res = Write-GitRemoteName (Get-GitStatus)
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $res | Should -BeNullOrEmpty
+        }
+    }
+}
