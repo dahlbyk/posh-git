@@ -220,7 +220,13 @@ function Write-GitStatus {
     }
 
     $sb | Write-Prompt $s.BeforeStatus > $null
-    $sb | Write-GitBranchName $Status -NoLeadingSpace > $null
+    if($s.RemoteNamePlacement -eq [Placement]::Start) {
+        $sb | Write-GitRemoteRepositoryLabel $Status | Write-GitBranchName $Status -NoLeadingSpace > $null
+    } elseif($s.RemoteNamePlacement -eq [Placement]::End) {
+        $sb | Write-GitBranchName $Status -NoLeadingSpace | Write-GitRemoteRepositoryLabel $Status > $null
+    } else {
+        $sb | Write-GitBranchName $Status -NoLeadingSpace > $null
+    }
     $sb | Write-GitBranchStatus $Status > $null
 
     $sb | Write-Prompt $s.BeforeIndex > $null
