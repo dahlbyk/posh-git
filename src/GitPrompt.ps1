@@ -352,6 +352,82 @@ function Get-GitBranchStatusColor {
 
 <#
 .SYNOPSIS
+    Writes the tracked repository name for branch with seperator.
+.DESCRIPTION
+    Writes the tracked/remote repository name (value of `Upstream` property from Write-GitStatus)
+    for branch and the seperator which is determined by the value of
+    $GitPromptSettings: RemoteNameSymbol. The placement of the seperator is
+    determined by the value of $GitPromptSettings: RemoteNamePlacement.
+    If that property has a value of `"Start"`, the value of RemoteNameSymbol
+    will be positioned right of name. And if that property has a value of
+    `"End"`, the value of RemoteNameSymbol will be positioned left of name.
+
+    When there is no tracked repository for a branch, this command doesn't
+    return a value. And this also applies when
+    $GitPromptSettings.RemoteNamePlacement has a value of `"None"`.
+.EXAMPLE
+    PS C:\> $GitPromptSettings.RemoteNameSymbol = " / "
+    PS C:\> $GitPromptSettings.RemoteNamePlacement = "Start"
+    PS C:\> Write-GitRemoteRepositoryLabel (Get-GitStatus)
+
+    Writes the tracked repository name for branch followed by seperator ('/')
+    or empty line if branch is untracked. For instance, `origin / master`
+.EXAMPLE
+    PS C:\> $GitPromptSettings.RemoteNameSymbol = " -> "
+    PS C:\> $GitPromptSettings.RemoteNamePlacement = "End"
+    PS C:\> Write-GitRemoteRepositoryLabel (Get-GitStatus)
+
+    Writes the seperator ("->") followed by name of the remote name for
+    branch, followed by  or empty line when no Upstream is set. For instance,
+    `master -> origin`
+.INPUTS
+    System.Management.Automation.PSCustomObject
+        This is PSCustomObject returned by Get-GitStatus
+.OUTPUTS
+    System.String, System.Text.StringBuilder
+        This command returns a System.String object unless the -StringBuilder parameter
+        is supplied. In this case, it returns a System.Text.StringBuilder.
+#>
+function Write-GitRemoteRepositoryLabel {
+    param(
+        # The Git status object that provides the status information to be written.
+        # This object is retrieved via the Get-GitStatus command.
+        [Parameter(Position = 0)]
+        $Status,
+
+        # If specified the branch name is written into the provided StringBuilder object.
+        [Parameter(ValueFromPipeline = $true)]
+        [System.Text.StringBuilder]
+        $StringBuilder
+    )
+
+    $s = $global:GitPromptSettings
+    if (!$Status -or !$s -or ($s.RemoteNamePlacement -eq [Placement]::None)) {
+        return $(if ($StringBuilder) { $StringBuilder } else { "" })
+    }
+
+    $str = ""
+
+    # Expecting similar format as 'origin/master' or 'origin/development/master'
+    if($Status.Upstream -match '(?<remotename>\w+)(?<seperator>\/).*' ) {
+        $remoteNameTextSpan = [PoshGitTextSpan]::new($s.DefaultColor)
+        $remoteNameTextSpan.Text = $s.RemoteNamePlacement -eq [Placement]::Start ?
+            $Matches.remotename + $s.RemoteNameSymbol :
+            $s.RemoteNameSymbol + $Matches.remotename
+
+        if ($StringBuilder) {
+            $StringBuilder | Write-Prompt $remoteNameTextSpan > $null
+        }
+        else {
+            $str = Write-Prompt $remoteNameTextSpan
+        }
+    }
+
+    return $(if ($StringBuilder) { $StringBuilder } else { $str })
+}
+
+<#
+.SYNOPSIS
     Writes the branch name given the current Git status.
 .DESCRIPTION
     Writes the branch name given the current Git status which can retrieved
