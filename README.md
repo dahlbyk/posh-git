@@ -354,6 +354,26 @@ This will change the prompt to:
 
 ![~\GitHub\posh-git [main ≡]&#10;> ][prompt-two-line]
 
+If you prefer to show the remote repository name for the branch, use this setting:
+
+```text
+$GitPromptSettings.RemoteNamePlacement = "Start"
+```
+
+This will change the prompt to:
+
+![~\GitHub\posh-git [origin/master ≡]> ][prompt-show-remote-name]
+
+Alternatively, you can change the placement of remote name relative to branch name and specify any value between the
+two. Such as:
+
+```text
+$GitPromptSettings.RemoteNameSymbol = " -> "
+$GitPromptSettings.RemoteNamePlacement = "End"
+```
+
+![~\GitHub\posh-git [master -> origin ≡]> ][prompt-show-remote-name-alternative]
+
 You can swap the order of the path and the Git status summary with the following setting:
 
 ```text
@@ -512,6 +532,8 @@ function prompt {
 [psgallery-img]:   https://img.shields.io/powershellgallery/dt/posh-git.svg
 [psgallery-site]:  https://www.powershellgallery.com/packages/posh-git
 [psgallery-v1]:    https://www.powershellgallery.com/packages/posh-git/1.0.0
+[prompt-show-remote-name]: https://github.com/dahlbyk/posh-git/wiki/images/PromptShowRemoteName.png           "~\GitHub\posh-git> [origin/main ≡] "
+[prompt-show-remote-name-end]: https://github.com/dahlbyk/posh-git/wiki/images/PromptShowRemoteNameEnd.png    "~\GitHub\posh-git> [main -> origin ≡] "
 [w3c-colors]:      https://www.w3schools.com/colors/colors_names.asp
 
 [posh-sshell-url]: https://github.com/dahlbyk/posh-sshell
