@@ -372,7 +372,7 @@ $GitPromptSettings.RemoteNameSymbol = " -> "
 $GitPromptSettings.RemoteNamePlacement = "End"
 ```
 
-![~\GitHub\posh-git [master -> origin ≡]> ][prompt-show-remote-name-alternative]
+![~\GitHub\posh-git [master -> origin ≡]> ][prompt-show-remote-name-end]
 
 You can swap the order of the path and the Git status summary with the following setting:
 
