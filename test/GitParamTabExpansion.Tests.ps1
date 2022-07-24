@@ -49,6 +49,7 @@ Describe 'ParamsTabExpansion Tests' {
         It 'Tab completes all long clone parameters' {
             $result = & $module GitTabExpansionInternal 'git clone --'
             $result -contains '--filter=' | Should -Be $true
+            $result -contains '--sparse' | Should -Be $true
         }
         It 'Tab completes clone parameters values' {
             $result = & $module GitTabExpansionInternal 'git clone --filter='
