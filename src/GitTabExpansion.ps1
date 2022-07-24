@@ -71,6 +71,7 @@ $script:gitCommandsWithShortParams = $shortGitParams.Keys -join '|'
 $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
 $script:vstsCommandsWithShortParams = $shortVstsParams.Keys -join '|'
 $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
+$script:sparseCheckoutCommandsWithLongParams = $longSparseCheckoutParams.Keys -join '|'
 
 # The regular expression here is roughly follows this pattern:
 #
