@@ -49,7 +49,7 @@ $longGitParams = @{
     checkout = 'quiet force ours theirs track no-track detach orphan ignore-skip-worktree-bits merge conflict= patch'
     'cherry-pick' = 'edit mainline no-commit signoff gpg-sign ff allow-empty allow-empty-message keep-redundant-commits strategy= strategy-option= continue quit abort'
     clean = 'force interactive dry-run quiet exclude='
-    clone = 'local no-hardlinks shared reference quiet verbose progress no-checkout bare mirror origin branch upload-pack template= config depth single-branch no-single-branch recursive recurse-submodules separate-git-dir='
+    clone = 'local no-hardlinks shared reference quiet verbose progress no-checkout bare mirror origin branch upload-pack template= config depth single-branch no-single-branch recursive recurse-submodules separate-git-dir= filter='
     commit = 'all patch reuse-message reedit-message fixup squash reset-author short branch porcelain long null file author date message template signoff no-verify allow-empty allow-empty-message cleanup= edit no-edit amend no-post-rewrite include only untracked-files verbose quiet dry-run status no-status gpg-sign no-gpg-sign'
     config = 'replace-all add get get-all get-regexp get-urlmatch global system local file blob remove-section rename-section unset unset-all list bool int bool-or-int path null get-colorbool get-color edit includes no-includes'
     describe = 'dirty all tags contains abbrev candidates= exact-match debug long match always first-parent'
@@ -109,7 +109,8 @@ $longVstsParams = @{
     update = " $longVstsGlobal"
 }
 
-# Variable is used in GitTabExpansion.ps1
+$filterSpecs = 'blob:none blob:limit= tree: sparse:oid= object:type=tag object:type=commit object:type=tree object:type=blob'
+
 $gitParamValues = @{
     blame = @{
         encoding = 'utf-8 none'
@@ -123,6 +124,9 @@ $gitParamValues = @{
     }
     'cherry-pick' = @{
         strategy = 'resolve recursive octopus ours subtree'
+    }
+    clone = @{
+        'filter' = $filterSpecs
     }
     commit = @{
         'cleanup' = 'strip whitespace verbatim scissors default'
