@@ -250,6 +250,7 @@ class PoshGitPromptSettings {
     [PoshGitTextSpan]$LocalWorkingStatusSymbol = [PoshGitTextSpan]::new('!', [ConsoleColor]::DarkRed)
     [PoshGitTextSpan]$LocalStagedStatusSymbol  = [PoshGitTextSpan]::new('~', [ConsoleColor]::Cyan)
 
+    [PoshGitTextSpan]$BranchUntrackedStatusSymbol      = [PoshGitTextSpan]::new('',           [ConsoleColor]::DarkCyan) #
     [PoshGitTextSpan]$BranchGoneStatusSymbol           = [PoshGitTextSpan]::new([char]0x00D7, [ConsoleColor]::DarkCyan) # × Multiplication sign
     [PoshGitTextSpan]$BranchIdenticalStatusSymbol      = [PoshGitTextSpan]::new([char]0x2261, [ConsoleColor]::Cyan)     # ≡ Three horizontal lines
     [PoshGitTextSpan]$BranchAheadStatusSymbol          = [PoshGitTextSpan]::new([char]0x2191, [ConsoleColor]::Green)    # ↑ Up arrow
@@ -262,7 +263,6 @@ class PoshGitPromptSettings {
     [string]$FileModifiedText    = '~'
     [string]$FileRemovedText     = '-'
     [string]$FileConflictedText  = '!'
-    [string]$BranchUntrackedText = ''
 
     [bool]$EnableStashStatus     = $false
     [bool]$ShowStatusWhenZero    = $true
