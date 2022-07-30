@@ -122,7 +122,7 @@ function Get-GitBranch($branch = $null, $gitDir = $(Get-GitDirectory), [switch]$
                 $b `
                 $branch `
                 { dbg 'Trying symbolic-ref' $sw; git --no-optional-locks symbolic-ref HEAD -q 2>$null } `
-                { '({0})' -f (Invoke-NullCoalescing `
+                { "`u{f417} {0}" -f (Invoke-NullCoalescing `
                     {
                         dbg 'Trying describe' $sw
                         switch ($Global:GitPromptSettings.DescribeStyle) {
@@ -148,8 +148,8 @@ function Get-GitBranch($branch = $null, $gitDir = $(Get-GitDirectory), [switch]$
                         if ($ref -match 'ref: (?<ref>.+)') {
                             return $Matches['ref']
                         }
-                        elseif ($ref -and $ref.Length -ge 7) {
-                            return $ref.Substring(0, 7) + '...'
+                        elseif ($ref -and $ref.Length -ge 10) {
+                            return $ref.Substring(0, 10)
                         }
                         else {
                             return 'unknown'
