@@ -279,46 +279,41 @@ function Get-GitStatus {
             if ($settings.EnableFileStatusFromCache) {
                 dbg 'Getting status from cache' $sw
                 $cacheResponse = Get-GitStatusFromCache
+            }
 
-                if ($cacheResponse.Error) {
-                    # git-status-cache failed; set $global:GitStatusCacheLoggingEnabled = $true, call Restart-GitStatusCache,
-                    # and check %temp%\GitStatusCache_[timestamp].log for details.
-                    dbg "Cache returned an error: $($cacheResponse.Error)" $sw
-                    $branch = "CACHE ERROR"
-                    $behindBy = 1
+            # git-status-cache failed; set $global:GitStatusCacheLoggingEnabled = $true, call Restart-GitStatusCache,
+            # and check %temp%\GitStatusCache_[timestamp].log for details.
+            if ($settings.EnableFileStatusFromCache -and (-not $cacheResponse.Error)) {
+                dbg 'Parsing status' $sw
+
+                $indexAdded.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.IndexAdded))))
+                $indexModified.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.IndexModified))))
+                foreach ($indexRenamed in $cacheResponse.IndexRenamed) {
+                    $indexModified.Add($indexRenamed.Old)
                 }
-                else {
-                    dbg 'Parsing status' $sw
+                $indexDeleted.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.IndexDeleted))))
+                $indexUnmerged.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.Conflicted))))
 
-                    $indexAdded.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.IndexAdded))))
-                    $indexModified.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.IndexModified))))
-                    foreach ($indexRenamed in $cacheResponse.IndexRenamed) {
-                        $indexModified.Add($indexRenamed.Old)
-                    }
-                    $indexDeleted.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.IndexDeleted))))
-                    $indexUnmerged.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.Conflicted))))
+                $filesAdded.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.WorkingAdded))))
+                $filesModified.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.WorkingModified))))
+                foreach ($workingRenamed in $cacheResponse.WorkingRenamed) {
+                    $filesModified.Add($workingRenamed.Old)
+                }
+                $filesDeleted.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.WorkingDeleted))))
+                $filesUnmerged.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.Conflicted))))
 
-                    $filesAdded.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.WorkingAdded))))
-                    $filesModified.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.WorkingModified))))
-                    foreach ($workingRenamed in $cacheResponse.WorkingRenamed) {
-                        $filesModified.Add($workingRenamed.Old)
-                    }
-                    $filesDeleted.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.WorkingDeleted))))
-                    $filesUnmerged.AddRange($castStringSeq.Invoke($null, (, @($cacheResponse.Conflicted))))
+                $branch = $cacheResponse.Branch
+                $upstream = $cacheResponse.Upstream
+                $gone = $cacheResponse.UpstreamGone
+                $aheadBy = $cacheResponse.AheadBy
+                $behindBy = $cacheResponse.BehindBy
 
-                    $branch = $cacheResponse.Branch
-                    $upstream = $cacheResponse.Upstream
-                    $gone = $cacheResponse.UpstreamGone
-                    $aheadBy = $cacheResponse.AheadBy
-                    $behindBy = $cacheResponse.BehindBy
+                if ($settings.EnableStashStatus -and $cacheResponse.Stashes) {
+                    $stashCount = $cacheResponse.Stashes.Length
+                }
 
-                    if ($settings.EnableStashStatus -and $cacheResponse.Stashes) {
-                        $stashCount = $cacheResponse.Stashes.Length
-                    }
-
-                    if ($cacheResponse.State) {
-                        $branch += "|" + $cacheResponse.State
-                    }
+                if ($cacheResponse.State) {
+                    $branch += "|" + $cacheResponse.State
                 }
             }
             else {
