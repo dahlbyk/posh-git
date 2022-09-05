@@ -570,7 +570,20 @@ function Write-GitIndexStatus {
                 $NoLeadingSpace = $false
             }
 
-            $indexStatusText += "$($s.FileAddedText)$($Status.Index.Added.Count)"
+            if ($settings.EnableFileConciseStatusFromCache) {
+                $added = $status.Index.Added
+                $modified = $status.Index.Modified
+                $deleted = $status.Index.Deleted
+                $unmerged = $status.Index.Unmerged
+            }
+            else {
+                $added = $status.Index.Added.Count
+                $modified = $status.Index.Modified.Count
+                $deleted = $status.Index.Deleted.Count
+                $unmerged = $status.Index.Unmerged.Count
+            }
+
+            $indexStatusText += "$($s.FileAddedText)$($added)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
@@ -587,7 +600,7 @@ function Write-GitIndexStatus {
                 $NoLeadingSpace = $false
             }
 
-            $indexStatusText += "$($s.FileModifiedText)$($status.Index.Modified.Count)"
+            $indexStatusText += "$($s.FileModifiedText)$($modified)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
@@ -604,7 +617,7 @@ function Write-GitIndexStatus {
                 $NoLeadingSpace = $false
             }
 
-            $indexStatusText += "$($s.FileRemovedText)$($Status.Index.Deleted.Count)"
+            $indexStatusText += "$($s.FileRemovedText)$($deleted)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
@@ -621,7 +634,7 @@ function Write-GitIndexStatus {
                 $NoLeadingSpace = $false
             }
 
-            $indexStatusText += "$($s.FileConflictedText)$($Status.Index.Unmerged.Count)"
+            $indexStatusText += "$($s.FileConflictedText)$($unmerged)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $indexStatusText -Color $s.IndexColor > $null
@@ -685,7 +698,20 @@ function Write-GitWorkingDirStatus {
                 $NoLeadingSpace = $false
             }
 
-            $workingStatusText += "$($s.FileAddedText)$($Status.Working.Added.Count)"
+            if ($settings.EnableFileConciseStatusFromCache) {
+                $added = $status.Working.Added
+                $modified = $status.Working.Modified
+                $deleted = $status.Working.Deleted
+                $unmerged = $status.Working.Unmerged
+            }
+            else {
+                $added = $status.Working.Added.Count
+                $modified = $status.Working.Modified.Count
+                $deleted = $status.Working.Deleted.Count
+                $unmerged = $status.Working.Unmerged.Count
+            }
+
+            $workingStatusText += "$($s.FileAddedText)$($added)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
@@ -702,7 +728,7 @@ function Write-GitWorkingDirStatus {
                 $NoLeadingSpace = $false
             }
 
-            $workingStatusText += "$($s.FileModifiedText)$($Status.Working.Modified.Count)"
+            $workingStatusText += "$($s.FileModifiedText)$($modified)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
@@ -719,7 +745,7 @@ function Write-GitWorkingDirStatus {
                 $NoLeadingSpace = $false
             }
 
-            $workingStatusText += "$($s.FileRemovedText)$($Status.Working.Deleted.Count)"
+            $workingStatusText += "$($s.FileRemovedText)$($deleted)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
@@ -736,7 +762,7 @@ function Write-GitWorkingDirStatus {
                 $NoLeadingSpace = $false
             }
 
-            $workingStatusText += "$($s.FileConflictedText)$($Status.Working.Unmerged.Count)"
+            $workingStatusText += "$($s.FileConflictedText)$($unmerged)"
 
             if ($StringBuilder) {
                 $StringBuilder | Write-Prompt $workingStatusText -Color $s.WorkingColor > $null
