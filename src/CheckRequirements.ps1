@@ -8,8 +8,12 @@ if (!(Get-Command git -TotalCount 1 -ErrorAction SilentlyContinue)) {
     return
 }
 
-if ([string](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)(?<g4w>\.windows)?') {
-    $script:GitVersion = [System.Version]$Matches['ver']
+function Test-GitVersion ($version = $([string](git --version 2> $null))) {
+    if ($version -notmatch '(?<ver>\d+(?:\.\d+)+)(?<g4w>(?<rc>[-.]rc\d+)?\.windows|\.vfs)?') {
+        Write-Warning "posh-git could not parse Git version ($version)"
+        $script:GitVersion = $version
+        return $false
+    }
 
     # On Windows, check if Git is not "Git for Windows"
     if ((($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) -and !$Matches['g4w']) {
@@ -19,8 +23,12 @@ if ([string](git --version 2> $null) -match '(?<ver>\d+(?:\.\d+)+)(?<g4w>\.windo
             Write-Warning 'You appear to have an unsupported Git distribution; setting $GitPromptSettings.AnsiConsole = $false. posh-git recommends Git for Windows.'
         }
     }
+
+    $script:GitVersion = [System.Version]$Matches['ver']
+
+    return $GitVersion -ge $requiredVersion
 }
 
-if ($GitVersion -lt $requiredVersion) {
+if (!(Test-GitVersion)) {
     Write-Warning "posh-git requires Git $requiredVersion or better. You have $GitVersion."
 }

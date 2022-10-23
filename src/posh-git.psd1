@@ -4,7 +4,7 @@
 RootModule = 'posh-git.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0.1'
+ModuleVersion = '1.1.0.1'
 
 # ID used to uniquely identify this module
 GUID = '74c9fd30-734b-4c89-a8ae-7727ad21d1d5'
@@ -33,6 +33,7 @@ FunctionsToExport = @(
     'Get-PromptPath',
     'New-GitPromptSettings',
     'Remove-GitBranch',
+    'Remove-PoshGitFromProfile',
     'Update-AllBranches',
     'Write-GitStatus',
     'Write-GitBranchName',

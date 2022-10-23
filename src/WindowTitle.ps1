@@ -6,6 +6,11 @@ function Test-WindowTitleIsWriteable {
         # Probe $Host.UI.RawUI.WindowTitle to see if it can be set without errors
         try {
             $script:OriginalWindowTitle = $Host.UI.RawUI.WindowTitle
+            if (!$script:OriginalWindowTitle) {
+                # Set a reasonable title to revert to on uninstall
+                $Host.UI.RawUI.WindowTitle = 'PowerShell';
+                $script:OriginalWindowTitle = $Host.UI.RawUI.WindowTitle
+            }
             $newTitle = "${OriginalWindowTitle} "
             $Host.UI.RawUI.WindowTitle = $newTitle
             $script:HostSupportsSettingWindowTitle = ($Host.UI.RawUI.WindowTitle -eq $newTitle)

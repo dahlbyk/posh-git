@@ -46,6 +46,8 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 
 #### Releases
 
+- v1.1.0
+  ( [README][v1.1-readme] • [CHANGELOG][v1.1-change] )
 - v1.0.0
   ( [README][v1-readme] • [CHANGELOG][v1-change] )
 - v1.0.0-beta5
@@ -144,6 +146,7 @@ Another popular package manager for Windows is [Scoop](https://scoop.sh/), which
  it into your profile:
 
 ```powershell
+scoop bucket add extras
 scoop install posh-git
 Add-PoshGitToProfile
 ```
@@ -222,7 +225,7 @@ By default, the status summary has the following format:
   of the remote. Execute `git fetch` to update to the latest on the default remote repo. If you have multiple remotes,
   execute `git fetch --all`.
 
-  - `≡` = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
+  - `≡` = The local branch is at the same commit level as the remote branch (`BranchIdenticalStatus`)
   - `↑<num>` = The local branch is ahead of the remote branch by the specified number of commits; a `git push` is
     required to update the remote branch (`BranchAheadStatus`)
   - `↓<num>` = The local branch is behind the remote branch by the specified number of commits; a `git pull` is
@@ -558,5 +561,7 @@ function prompt {
 [v1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/CHANGELOG.md
 [v1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/README.md
 
+[v1.1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.1.0/CHANGELOG.md
+[v1.1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.1.0/README.md
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt

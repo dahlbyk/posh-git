@@ -142,7 +142,7 @@ function Add-PoshGitToProfile {
 
     if (!$Force) {
         # Search the user's profiles to see if any are using posh-git already, there is an extra search
-        # ($profilePath) taking place to accomodate the Pester tests.
+        # ($profilePath) taking place to accommodate the Pester tests.
         $importedInProfile = Test-PoshGitImportedInScript $profilePath
         if (!$importedInProfile -and !$underTest) {
             $importedInProfile = Test-PoshGitImportedInScript $PROFILE
@@ -213,6 +213,121 @@ function Add-PoshGitToProfile {
 
     if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module posh-git' to profile")) {
         Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
+    }
+}
+
+<#
+.SYNOPSIS
+    Modifies your PowerShell profile (startup) script so that it does not import
+    the posh-git module when PowerShell starts.
+.DESCRIPTION
+    Checks if your PowerShell profile script is importing posh-git and if it does,
+    removes the command to import the posh-git module. This will cause PowerShell
+    to no longer load posh-git whenever PowerShell starts.
+.PARAMETER AllHosts
+    By default, this command modifies the CurrentUserCurrentHost profile
+    script.  By specifying the AllHosts switch, the command updates the
+    CurrentUserAllHosts profile (or AllUsersAllHosts, given -AllUsers).
+.PARAMETER AllUsers
+    By default, this command modifies the CurrentUserCurrentHost profile
+    script.  By specifying the AllUsers switch, the command updates the
+    AllUsersCurrentHost profile (or AllUsersAllHosts, given -AllHosts).
+    Requires elevated permissions.
+.EXAMPLE
+    PS C:\> Remove-PoshGitFromProfile
+    Updates your profile script for the current PowerShell host to stop importing
+    the posh-git module when the current PowerShell host starts.
+.EXAMPLE
+    PS C:\> Remove-PoshGitFromProfile -AllHosts
+    Updates your profile script for all PowerShell hosts to no longer import the
+    posh-git module whenever any PowerShell host starts.
+.INPUTS
+    None.
+.OUTPUTS
+    None.
+#>
+function Remove-PoshGitFromProfile {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter()]
+        [switch]
+        $AllHosts,
+
+        [Parameter()]
+        [switch]
+        $AllUsers,
+
+        [Parameter(ValueFromRemainingArguments)]
+        [psobject[]]
+        $TestParams
+    )
+
+    if ($AllUsers -and !(Test-Administrator)) {
+        throw 'Removing posh-git from an AllUsers profile requires an elevated host.'
+    }
+
+    $underTest = $false
+
+    $profileName = $(if ($AllUsers) { 'AllUsers' } else { 'CurrentUser' }) `
+                 + $(if ($AllHosts) { 'AllHosts' } else { 'CurrentHost' })
+    Write-Verbose "`$profileName = '$profileName'"
+
+    $profilePath = $PROFILE.$profileName
+    Write-Verbose "`$profilePath = '$profilePath'"
+
+    # Under test, we override some variables using $args as a backdoor.
+    if (($TestParams.Count -gt 0) -and ($TestParams[0] -is [string])) {
+        $profilePath = [string]$TestParams[0]
+        $underTest = $true
+        if ($TestParams.Count -gt 1) {
+            $ModuleBasePath = [string]$TestParams[1]
+        }
+    }
+
+    if (!$profilePath) { $profilePath = $PROFILE }
+
+    if (!$profilePath) {
+        Write-Warning "Skipping removal of posh-git import from profile; no profile found."
+        Write-Verbose "`$PROFILE              = '$PROFILE'"
+        Write-Verbose "CurrentUserCurrentHost = '$($PROFILE.CurrentUserCurrentHost)'"
+        Write-Verbose "CurrentUserAllHosts    = '$($PROFILE.CurrentUserAllHosts)'"
+        Write-Verbose "AllUsersCurrentHost    = '$($PROFILE.AllUsersCurrentHost)'"
+        Write-Verbose "AllUsersAllHosts       = '$($PROFILE.AllUsersAllHosts)'"
+        return
+    }
+
+    if (Test-Path -LiteralPath $profilePath) {
+        # If the profile script exists and is signed, then we should not modify it
+        if (!(Get-Command Get-AuthenticodeSignature -ErrorAction SilentlyContinue))
+        {
+            Write-Verbose "Platform doesn't support script signing, skipping test for signed profile."
+        }
+        else {
+            $sig = Get-AuthenticodeSignature $profilePath
+            if ($null -ne $sig.SignerCertificate) {
+                Write-Warning "Skipping removal of posh-git import from profile; '$profilePath' appears to be signed."
+                Write-Warning "Remove the command 'Import-Module posh-git' from your profile and resign it."
+                return
+            }
+        }
+
+        $oldProfile = @(Get-Content $profilePath)
+        $oldProfileEncoding = Get-FileEncoding $profilePath
+
+        $newProfile = @()
+        foreach($line in $oldProfile) {
+            if ($line -like '*PoshGitPrompt*') { continue; }
+            if ($line -like '*Load posh-git example profile*') { continue; }
+
+            if($line -like '. *posh-git*profile.example.ps1*') {
+                continue;
+            }
+            if($line -like 'Import-Module *\posh-git.psd1*') {
+                continue;
+            }
+            $newProfile += $line
+        }
+        Set-Content -path $profilePath -value $newProfile -Force -Encoding $oldProfileEncoding
     }
 }
 

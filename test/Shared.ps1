@@ -17,9 +17,6 @@ $csi = [char]0x1b + "["
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 $expectedEncoding = if ($PSVersionTable.PSVersion.Major -le 5) { "utf8" } else { "ascii" }
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$originalTitle = $Host.UI.RawUI.WindowTitle
-
 if (!(Get-Variable -Name gitbin -Scope global -ErrorAction SilentlyContinue)) {
     if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
         # On Windows, we can access the git binary via git.exe
@@ -39,8 +36,8 @@ function global:git {
     # Write-Warning "in global git func with: $cmdline"
     switch ($cmdline) {
         '--version' { 'git version 2.16.2.windows.1' }
-        'help'      { Get-Content $PSScriptRoot\git-help.txt  }
-        default     {
+        'help' { Get-Content $PSScriptRoot\git-help.txt }
+        default {
             $res = Invoke-Expression "&$gitbin $cmdline"
             $res
         }
@@ -49,7 +46,7 @@ function global:git {
 
 # This must global in order to be accessible in posh-git module scope
 function global:Convert-NativeLineEnding([string]$content, [switch]$SplitLines) {
-    $tmp = $content -split "`n" | ForEach-Object { $_.TrimEnd("`r")}
+    $tmp = $content -split "`n" | ForEach-Object { $_.TrimEnd("`r") }
     if ($SplitLines) {
         $tmp
     }
@@ -69,7 +66,8 @@ function GetHomePath() {
 }
 
 function GetHomeRelPath([string]$Path) {
-    if (!$Path.StartsWith($Home)) {
+    $separator = [System.IO.Path]::DirectorySeparatorChar
+    if (!("$Path$separator".StartsWith("$Home$separator"))) {
         # Path not under $Home
         return $Path
     }
@@ -90,7 +88,8 @@ function GetGitRelPath([string]$Path) {
     # Up one level from `.git`
     $gitPath = Split-Path $gitPath -Parent
 
-    if (!$Path.StartsWith($gitPath)) {
+    $separator = [System.IO.Path]::DirectorySeparatorChar
+    if (!"$Path$separator".StartsWith("$gitPath$separator")) {
         # Path not under $gitPath
         return $Path
     }
@@ -127,7 +126,12 @@ function NewGitTempRepo([switch]$MakeInitialCommit) {
     Push-Location
     $temp = [System.IO.Path]::GetTempPath()
     $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
-    &$gitbin init $repoPath *>$null
+    $initArgs = @()
+    if (&$gitbin config init.defaultBranch) {
+        $initArgs += '--initial-branch', 'master'
+    }
+
+    &$gitbin init $initArgs $repoPath *>$null
     Set-Location $repoPath
 
     if ($MakeInitialCommit) {
@@ -162,4 +166,4 @@ $env:POSHGIT_ENABLE_STRICTMODE = 1
 
 # Force the posh-git prompt to be installed. Could be runnng on dev system where user has customized the prompt.
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-$module = Import-Module $moduleManifestPath -ArgumentList $true,$false -Force -PassThru
+$module = Import-Module $moduleManifestPath -ArgumentList $true, $false -Force -PassThru

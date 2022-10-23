@@ -24,6 +24,17 @@ Describe 'Get-GitStatus Tests' {
             $status = Get-GitStatus
             Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
             $status.Branch | Should -Be "rkeithill/more-status-tests"
+            $status.HasIndex | Should -Be $false
+            $status.HasUntracked | Should -Be $false
+            $status.HasWorking | Should -Be $false
+            $status.Working.Added.Count | Should -Be 0
+            $status.Working.Deleted.Count | Should -Be 0
+            $status.Working.Modified.Count | Should -Be 0
+            $status.Working.Unmerged.Count | Should -Be 0
+            $status.Index.Added.Count | Should -Be 0
+            $status.Index.Deleted.Count | Should -Be 0
+            $status.Index.Modified.Count | Should -Be 0
+            $status.Index.Unmerged.Count | Should -Be 0
         }
 
 
@@ -426,6 +437,146 @@ U  test/Unmerged.Tests.ps1
             $status.Index.Modified[1] | Should -Be "README.md"
             $status.Index.Modified[2] | Should -Be "test/Modified.Tests.ps1"
             $status.Index.Unmerged[0] | Should -Be "test/Unmerged.Tests.ps1"
+        }
+    }
+
+    Context 'Branch progress suffix' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo -MakeInitialCommit
+        }
+        AfterEach {
+            Set-Location $PSScriptRoot
+            RemoveGitTempRepo $repoPath
+        }
+
+        It('Shows CHERRY-PICKING') {
+            git checkout -qb test
+            Write-Output 1 > test.txt
+            git add test.txt
+            git commit -qam 'first' 2> $null
+
+            git checkout -qb conflict
+            Write-Output 2 > test.txt
+            git commit -qam 'second' 2> $null
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be conflict
+
+            git cherry-pick test
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be 'conflict|CHERRY-PICKING'
+        }
+
+        It('Shows MERGING') {
+            git checkout -qb test
+            Write-Output 1 > test.txt
+            git add test.txt
+            git commit -qam 'first' 2> $null
+
+            Write-Output 2 > test.txt
+            git commit -qam 'second' 2> $null
+
+            git checkout HEAD~ -qb conflict
+            Write-Output 3 > test.txt
+            git commit -qam 'third' 2> $null
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be conflict
+
+            git merge test
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be 'conflict|MERGING'
+        }
+
+        It('Shows REVERTING') {
+            git checkout -qb test
+            Write-Output 1 > test.txt
+            git add test.txt
+            git commit -qam 'first' 2> $null
+
+            git checkout -qb conflict
+            Write-Output 2 > test.txt
+            git commit -qam 'second' 2> $null
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be conflict
+
+            git revert test
+
+            $status = Get-GitStatus
+            $status.Branch | Should -Be 'conflict|REVERTING'
+        }
+    }
+
+    Context 'In .git' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo
+        }
+        AfterEach {
+            Set-Location $PSScriptRoot
+            RemoveGitTempRepo $repoPath
+        }
+
+        It('Does not have files') {
+            New-Item "$repoPath/test.txt" -ItemType File
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
+
+            Set-Location "$repoPath/.git" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $false
+            $status.HasWorking | Should -Be $false
+            $status.Working.Added.Count | Should -Be 0
+
+            Set-Location "$repoPath/.git/refs" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $false
+            $status.HasWorking | Should -Be $false
+            $status.Working.Added.Count | Should -Be 0
+        }
+    }
+
+    Context 'In .github' {
+        BeforeEach {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo
+            New-Item -Type Directory -Force "$repoPath/.github/workflows"
+        }
+        AfterEach {
+            Set-Location $PSScriptRoot
+            RemoveGitTempRepo $repoPath
+        }
+
+        It('Files are not ignored') {
+            New-Item "$repoPath/test.txt" -ItemType File
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
+
+            Set-Location "$repoPath/.github" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
+
+            Set-Location "$repoPath/.github/workflows" -ErrorAction Stop
+
+            $status = Get-GitStatus
+            $status.HasUntracked | Should -Be $true
+            $status.HasWorking | Should -Be $true
+            $status.Working.Added.Count | Should -Be 1
         }
     }
 }

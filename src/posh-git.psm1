@@ -83,7 +83,7 @@ $GitPromptScriptBlock = {
     # Write default prompt before suffix text
     $prompt += Write-Prompt $settings.DefaultPromptBeforeSuffix.Expand()
 
-    # If stopped in the debugger, the prompt needs to indicate that by writing default propmt debug
+    # If stopped in the debugger, the prompt needs to indicate that by writing default prompt debug
     if ((Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint) {
         $prompt += Write-Prompt $settings.DefaultPromptDebug.Expand()
     }
@@ -171,6 +171,7 @@ $exportModuleMemberParams = @{
         'Get-PromptPath',
         'New-GitPromptSettings',
         'Remove-GitBranch',
+        'Remove-PoshGitFromProfile',
         'Update-AllBranches',
         'Write-GitStatus',
         'Write-GitBranchName',

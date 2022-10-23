@@ -8,14 +8,16 @@ Describe 'Get-GitBranch Tests' {
             $repoRoot = (Resolve-Path $PSScriptRoot\..).Path
             Set-Location $repoRoot\.git -ErrorAction Stop
             InModuleScope posh-git {
-                Get-GitBranch | Should -BeExactly 'GIT_DIR!'
+                InDotGitOrBareRepoDir (Get-Location) | Should -Be $true
+                Get-GitBranch -IsDotGitOrBare | Should -BeExactly 'GIT_DIR!'
             }
         }
         It 'Returns correct path when in a child folder of the .git dir of the repo' {
             $repoRoot = (Resolve-Path $PSScriptRoot\..).Path
             Set-Location $repoRoot\.git\hooks -ErrorAction Stop
             InModuleScope posh-git {
-                Get-GitBranch | Should -BeExactly 'GIT_DIR!'
+                InDotGitOrBareRepoDir (Get-Location) | Should -Be $true
+                Get-GitBranch -IsDotGitOrBare | Should -BeExactly 'GIT_DIR!'
             }
         }
     }
