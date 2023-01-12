@@ -76,7 +76,7 @@ $longGitParams = @{
     revert = 'edit mainline no-edit no-commit gpg-sign signoff strategy= strategy-option continue quit abort'
     rm = 'force dry-run cached ignore-unmatch quiet'
     shortlog = 'numbered summary email format='
-    show = 'pretty= format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes show-notes no-standard-notes standard-notes show-signature'
+    show = 'pretty= format= abbrev-commit no-abbrev-commit oneline encoding= expand-tabs no-expand-tabs notes no-notes show-notes no-standard-notes standard-notes show-signature name-only name-status stat shortstat numstat'
     stash = 'patch no-keep-index keep-index include-untracked all quiet index'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     submodule = 'quiet branch force cached files summary-limit remote no-fetch checkout merge rebase init name reference recursive depth'
