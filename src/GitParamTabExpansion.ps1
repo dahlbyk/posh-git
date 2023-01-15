@@ -40,6 +40,7 @@ $shortGitParams = @{
     whatchanged = 'p'
 }
 
+$longFormatParamsGlobal = 'abbrev abbrev-commit anchored= binary break-rewrites cc check color color-moved color-moved-ws= color-words combined-all-paths compact-summary cumulative diff-algorithm= diff-filter= diff-merges= dirstat dirstat-by-file dst-prefix= exit-code ext-diff find-copies find-copies-harder find-object= find-renames full-index function-context histogram ignore-all-space ignore-blank-lines ignore-cr-at-eol ignore-matching-lines= ignore-space-at-eol ignore-space-change ignore-submodules indent-heuristic inter-hunk-context= irreversible-delete ita-invisible-in-index line-prefix= minimal name-only name-status no-abbrev-commit no-color no-color-moved no-color-moved-ws no-diff-merges no-ext-diff no-indent-heuristic no-patch no-prefix no-relative no-renames no-textconv numstat output-indicator-context= output-indicator-new= output-indicator-old= output= patch patch-with-raw patch-with-stat patience pickaxe-all pickaxe-regex quiet raw relative remerge-diff rename-empty rotate-to= shortstat skip-to= src-prefix= stat submodule summary text textconv unified= word-diff word-diff-regex= ws-error-highlight='
 # Variable is used in GitTabExpansion.ps1
 $longGitParams = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing renormalize'
