@@ -41,6 +41,18 @@
             "problemMatcher": [
                 "$pester"
             ]
+        },
+        {
+            "label": "TestCurrentFile",
+            "type": "shell",
+            "command": "Clear-Host; Import-Module Pester -MinimumVersion 5.0.0; $c = [PesterConfiguration]::Default; $c.Run.Path = '${file}'; $c.Output.Verbosity = 'Detailed'; Invoke-Pester -Configuration $c",
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            },
+            "problemMatcher": [
+                "$pester"
+            ]
         }
     ]
 }
