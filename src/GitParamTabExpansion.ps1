@@ -1,6 +1,7 @@
 $shortFormatParamsGlobal = 'a b B c C D G I l m M O p R s S t u U W w X z'
 
 # Variable is used in GitTabExpansion.ps1
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
 $shortGitParams = @{
     add = 'n v f i p e u A N'
     bisect = ''
@@ -46,6 +47,7 @@ $shortGitParams = @{
 
 $longFormatParamsGlobal = 'abbrev abbrev-commit anchored= binary break-rewrites cc check color color-moved color-moved-ws= color-words combined-all-paths compact-summary cumulative diff-algorithm= diff-filter= diff-merges= dirstat dirstat-by-file dst-prefix= exit-code ext-diff find-copies find-copies-harder find-object= find-renames full-index function-context histogram ignore-all-space ignore-blank-lines ignore-cr-at-eol ignore-matching-lines= ignore-space-at-eol ignore-space-change ignore-submodules indent-heuristic inter-hunk-context= irreversible-delete ita-invisible-in-index line-prefix= minimal name-only name-status no-abbrev-commit no-color no-color-moved no-color-moved-ws no-diff-merges no-ext-diff no-indent-heuristic no-patch no-prefix no-relative no-renames no-textconv numstat output-indicator-context= output-indicator-new= output-indicator-old= output= patch patch-with-raw patch-with-stat patience pickaxe-all pickaxe-regex quiet raw relative remerge-diff rename-empty rotate-to= shortstat skip-to= src-prefix= stat submodule summary text textconv unified= word-diff word-diff-regex= ws-error-highlight='
 # Variable is used in GitTabExpansion.ps1
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
 $longGitParams = @{
     add = 'dry-run verbose force interactive patch edit update all no-ignore-removal no-all ignore-removal intent-to-add refresh ignore-errors ignore-missing renormalize'
     bisect = 'no-checkout term-old term-new'
@@ -91,6 +93,7 @@ $longGitParams = @{
 }
 
 $shortVstsGlobal = 'h o'
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
 $shortVstsParams = @{
     abandon = "i $shortVstsGlobal"
     create = "d i p r s t $shortVstsGlobal"
@@ -103,6 +106,7 @@ $shortVstsParams = @{
 }
 
 $longVstsGlobal = 'debug help output query verbose'
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
 $longVstsParams = @{
     abandon = "id detect instance $longVstsGlobal"
     create = "auto-complete delete-source-branch work-items bypass-policy bypass-policy-reason description detect instance merge-commit-message open project repository reviewers source-branch squash target-branch title $longVstsGlobal"
@@ -115,6 +119,7 @@ $longVstsParams = @{
 }
 
 # Variable is used in GitTabExpansion.ps1
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
 $gitParamValues = @{
     blame = @{
         encoding = 'utf-8 none'
