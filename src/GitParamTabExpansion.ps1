@@ -54,14 +54,14 @@ $longGitParams = @{
     commit = 'all patch reuse-message reedit-message fixup squash reset-author short branch porcelain long null file author date message template signoff no-verify allow-empty allow-empty-message cleanup= edit no-edit amend no-post-rewrite include only untracked-files verbose quiet dry-run status no-status gpg-sign no-gpg-sign'
     config = 'replace-all add get get-all get-regexp get-urlmatch global system local file blob remove-section rename-section unset unset-all list bool int bool-or-int path null get-colorbool get-color edit includes no-includes'
     describe = 'dirty all tags contains abbrev candidates= exact-match debug long match always first-parent'
-    diff = 'cached patch no-patch unified= raw patch-with-raw minimal patience histogram diff-algorithm= stat numstat shortstat dirstat summary patch-with-stat name-only name-status submodule color no-color word-diff word-diff-regex color-words no-renames check full-index binary apprev break-rewrites find-renames find-copies find-copies-harder irreversible-delete diff-filter= pickaxe-all pickaxe-regex relative text ignore-space-at-eol ignore-space-change ignore-all-space ignore-blank-lines inter-hunk-context= function-context exit-code quiet ext-diff no-ext-diff textconv no-textconv ignore-submodules src-prefix dst-prefix no-prefix staged'
+    diff = "$longFormatParamsGlobal cached staged"
     difftool = 'dir-diff no-prompt prompt tool= tool-help no-symlinks symlinks extcmd= gui'
     fetch = 'all append depth= unshallow update-shallow dry-run force keep multiple prune no-tags tags recurse-submodules= no-recurse-submodules submodule-prefix= recurse-submodules-default= update-head-ok upload-pack quiet verbose progress'
     gc = 'aggressive auto prune= no-prune quiet force'
     grep = 'cached no-index untracked no-exclude-standard exclude-standard text textconv no-textconv ignore-case max-depth word-regexp invert-match full-name extended-regexp basic-regexp perl-regexp fixed-strings line-number files-with-matches open-files-in-pager null count color no-color break heading show-function context after-context before-context function-context and or not all-match quiet'
     help = 'all guides info man web'
     init = 'quiet bare template= separate-git-dir= shared='
-    log = 'follow no-decorate decorate source use-mailmap full-diff log-size max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents= max-parents= no-min-parents no-max-parents first-parent not all branches tags remotes glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk= do-walk pretty format= abbrev-commit no-abbrev-commit oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break patch stat'
+    log = "$longFormatParamsGlobal follow no-decorate decorate source use-mailmap full-diff log-size max-count skip since after until before author committer grep-reflog grep all-match regexp-ignore-case basic-regexp extended-regexp fixed-strings perl-regexp remove-empty merges no-merges min-parents= max-parents= no-min-parents no-max-parents first-parent not all branches tags remotes glob= exclude= ignore-missing bisect stdin cherry-mark cherry-pick left-only right-only cherry walk-reflogs merge boundary simplify-by-decoration full-history dense sparse simplify-merges ancestry-path date-order author-date-order topo-order reverse objects objects-edge unpacked no-walk= do-walk pretty format= oneline encoding= notes no-notes standard-notes no-standard-notes show-signature relative-date date= parents children left-right graph show-linear-break"
     merge = 'commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy strategy-option verify-signatures no-verify-signatures summary no-summary quiet verbose progress no-progress gpg-sign rerere-autoupdate no-rerere-autoupdate abort allow-unrelated-histories'
     mergetool = 'tool= tool-help no-prompt prompt'
     mv = 'force dry-run verbose'
@@ -70,14 +70,14 @@ $longGitParams = @{
     pull = 'quiet verbose recurse-submodules= no-recurse-submodules= commit no-commit edit no-edit ff no-ff ff-only log no-log stat no-stat squash no-squash strategy= strategy-option= verify-signatures no-verify-signatures summary no-summary rebase= no-rebase all append depth= unshallow update-shallow force keep no-tags upload-pack progress'
     push = 'all prune mirror dry-run porcelain delete tags follow-tags receive-pack= exec= force-with-lease no-force-with-lease force repo= set-upstream thin no-thin quiet verbose progress recurse-submodules= verify no-verify'
     rebase = 'onto continue abort keep-empty skip edit-todo merge strategy= strategy-option= gpg-sign quiet verbose stat no-stat no-verify verify force-rebase fork-point no-fork-point ignore-whitespace whitespace= committer-date-is-author-date ignore-date interactive preserve-merges exec root autosquash no-autosquash autostash no-autostash no-ff'
-    reflog = 'stale-fix expire= expire-unreachable= all updateref rewrite verbose'
+    reflog = "$longFormatParamsGlobal stale-fix expire= expire-unreachable= all updateref rewrite verbose"
     remote = 'verbose'
     reset = 'patch quiet soft mixed hard merge keep'
     restore = 'source= patch worktree staged quiet progress no-progress ours theirs merge conflict= ignore-unmerged ignore-skip-worktree-bits overlay no-overlay'
     revert = 'edit mainline no-edit no-commit gpg-sign signoff strategy= strategy-option continue quit abort'
     rm = 'force dry-run cached ignore-unmatch quiet'
     shortlog = 'numbered summary email format='
-    show = 'pretty= format= abbrev-commit no-abbrev-commit oneline encoding= expand-tabs no-expand-tabs notes no-notes show-notes no-standard-notes standard-notes show-signature name-only name-status stat shortstat numstat'
+    show = "$longFormatParamsGlobal pretty= format= oneline encoding= expand-tabs no-expand-tabs notes no-notes show-notes no-standard-notes standard-notes show-signature"
     stash = 'patch no-keep-index keep-index include-untracked all quiet index'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     submodule = 'quiet branch force cached files summary-limit remote no-fetch checkout merge rebase init name reference recursive depth'
