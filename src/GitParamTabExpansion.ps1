@@ -1,3 +1,5 @@
+$shortFormatParamsGlobal = 'a b B c C D G I l m M O p R s S t u U W w X z'
+
 # Variable is used in GitTabExpansion.ps1
 $shortGitParams = @{
     add = 'n v f i p e u A N'
