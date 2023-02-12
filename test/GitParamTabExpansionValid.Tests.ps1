@@ -4,16 +4,16 @@ BeforeAll {
 }
 
 Describe 'TabExpansion Tests' {
+    BeforeAll {
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+        $repoPath = NewGitTempRepo -MakeInitialCommit
+    }
+
+    AfterAll {
+        RemoveGitTempRepo $repoPath
+    }
+
     Context 'TabExpansion suggest valid long params' {
-        BeforeAll {
-            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $repoPath = NewGitTempRepo -MakeInitialCommit
-        }
-
-        AfterAll {
-            RemoveGitTempRepo $repoPath
-        }
-
         It 'Suggest only valid long params for "add" subcommand' {
             $invalidOptions = GetInvalidLongParams -subcommand 'add' -paramsToSkip @('--edit', '--interactive')
 
@@ -244,6 +244,242 @@ Describe 'TabExpansion Tests' {
 
         It 'Suggest only valid long params for "whatchanged" subcommand' {
             $invalidOptions = GetInvalidLongParams -subcommand 'whatchanged'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+    }
+
+    Context 'TabExpansion suggest valid short params' {
+        It 'Suggest only valid short params for "add" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'add' -paramsToSkip @('-e', '-i')
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "bisect" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'bisect'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "blame" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'blame'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "branch" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'branch'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "checkout" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'checkout'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "cherry" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'cherry'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "cherry-pick" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'cherry-pick'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "clean" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'clean'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "clone" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'clone'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "commit" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'commit'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "config" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'config' -paramsToSkip @('-e')
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "diff" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'diff'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "difftool" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'difftool'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "fetch" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'fetch'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "grep" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'grep'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "help" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'help'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "init" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'init'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "log" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'log'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "merge" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'merge'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "mergetool" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'mergetool'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "mv" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'mv'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "prune" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'prune'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "pull" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'pull' -paramsToSkip @('-e')
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "push" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'push'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "rebase" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'rebase'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "reflog" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'reflog'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "remote" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'remote'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "reset" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'reset'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "restore" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'restore'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "revert" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'revert'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "rm" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'rm'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "shortlog" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'shortlog'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "show" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'show'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "stash" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'stash'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "status" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'status'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "submodule" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'submodule'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "switch" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'switch'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "tag" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'tag'
+
+            $invalidOptions | Should -BeNullOrEmpty
+        }
+
+        It 'Suggest only valid short params for "whatchanged" subcommand' {
+            $invalidOptions = GetInvalidShortParams -subcommand 'whatchanged'
 
             $invalidOptions | Should -BeNullOrEmpty
         }
