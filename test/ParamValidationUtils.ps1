@@ -60,8 +60,8 @@ function IsStreamContainsInvalidParamsErrors($errorStream) {
     return $false
 }
 
-function GetInvalidLongParams($subcommand, $paramsToSkip = @()) {
-    $command = $('git ' + $subcommand + ' --')
+function GetInvalidParams($subcommand, $paramsPrefix, $paramsToSkip = @()) {
+    $command = $('git ' + $subcommand + ' ' + $paramsPrefix)
     $gitStatus = Get-GitStatus
     $completions = & $module GitTabExpansionInternal $command $gitStatus
     $invalidCompletions = @()
@@ -91,4 +91,12 @@ function GetInvalidLongParams($subcommand, $paramsToSkip = @()) {
     }
 
     return $invalidCompletions
+}
+
+function GetInvalidLongParams($subcommand, $paramsToSkip = @()) {
+    return GetInvalidParams -subcommand $subcommand -paramsPrefix '--' -paramsToSkip $paramsToSkip
+}
+
+function GetInvalidShortParams($subcommand, $paramsToSkip = @()) {
+    return GetInvalidParams -subcommand $subcommand -paramsPrefix '-' -paramsToSkip $paramsToSkip
 }

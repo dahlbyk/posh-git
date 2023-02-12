@@ -62,4 +62,48 @@ Describe 'ParamValidationUtils Tests' {
             $result | Should -be $true
         }
     }
+
+    Context 'Catching short params error' {
+        It 'Correct command with correct short param does not contains params errors' {
+            $errorStream = GetErrorStream -command "$gitbin help -h"
+            $result = IsStreamContainsInvalidParamsErrors -errorStream $errorStream
+
+            $result | Should -be $false
+        }
+
+        It 'Command with invalid short param contains errors' {
+            # Returns: error: invalid option: -Z
+            $errorStream = GetErrorStream -command "$gitbin diff -Z"
+            $result = IsStreamContainsInvalidParamsErrors -errorStream $errorStream
+
+            $result | Should -be $true
+        }
+
+        It 'Command with unknow short param contains errors' {
+            # Returns: error: unknown option `-Z'
+            # and usage info
+            $errorStream = GetErrorStream -command "$gitbin blame -Z"
+            $result = IsStreamContainsInvalidParamsErrors -errorStream $errorStream
+
+            $result | Should -be $true
+        }
+
+        It 'Command with unrecognized short param contains error' {
+            # Returns: fatal: unrecognized argument: -Z
+            $errorStream = GetErrorStream -command "$gitbin show -Z"
+            $result = IsStreamContainsInvalidParamsErrors -errorStream $errorStream
+
+            $result | Should -be $true
+        }
+
+        It 'Command with unknown switch short param contains error' {
+            # Returns: error: unknown switch `e'
+            # and usage info
+
+            $errorStream = GetErrorStream -command "$gitbin pull -e"
+            $result = IsStreamContainsInvalidParamsErrors -errorStream $errorStream
+
+            $result | Should -be $true
+        }
+    }
 }
