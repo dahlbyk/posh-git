@@ -36,6 +36,7 @@ FunctionsToExport = @(
     'Remove-PoshGitFromProfile',
     'Update-AllBranches',
     'Write-GitStatus',
+    'Write-GitRemoteRepositoryLabel',
     'Write-GitBranchName',
     'Write-GitBranchStatus',
     'Write-GitIndexStatus',
