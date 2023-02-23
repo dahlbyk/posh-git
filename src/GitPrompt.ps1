@@ -345,6 +345,14 @@ function Get-GitBranchStatusColor {
         # We are ahead of remote
         $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchAheadStatusSymbol)
     }
+    elseif ($Status.UpstreamGone -eq $true) {
+        # Upstream branch is gone
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchGoneStatusSymbol)
+    }
+    elseif (!$Status.Upstream) {
+        # Untracked branch
+        $branchStatusTextSpan = [PoshGitTextSpan]::new($s.BranchUntrackedStatusSymbol)
+    }
 
     $branchStatusTextSpan.Text = ''
     $branchStatusTextSpan
@@ -457,7 +465,8 @@ function Write-GitBranchStatus {
     $branchStatusTextSpan = Get-GitBranchStatusColor $Status
 
     if (!$Status.Upstream) {
-        $branchStatusTextSpan.Text = $s.BranchUntrackedText
+        # Untracked branch
+        $branchStatusTextSpan.Text = $s.BranchUntrackedStatusSymbol.Text
     }
     elseif ($Status.UpstreamGone -eq $true) {
         # Upstream branch is gone
