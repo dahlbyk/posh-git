@@ -137,6 +137,8 @@ function NewGitTempRepo([switch]$MakeInitialCommit) {
     if ($MakeInitialCommit) {
         &$gitbin config user.email "spaceman.spiff@appveyor.com"
         &$gitbin config user.name "Spaceman Spiff"
+        &$gitbin config commit.gpgSign "false"
+
         'readme' | Out-File ./README.md -Encoding ascii
         &$gitbin add ./README.md *>$null
         &$gitbin commit -m "initial commit." *>$null
