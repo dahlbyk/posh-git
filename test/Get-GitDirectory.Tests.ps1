@@ -35,44 +35,25 @@ Describe 'Get-GitDiretory Tests' {
     Context 'Test worktree' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $origPath = Get-Location
-            $temp = [System.IO.Path]::GetTempPath()
-            $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
-            $worktreePath = Join-Path $temp ([IO.Path]::GetRandomFileName())
+            $repoPath = NewGitTempRepo -MakeInitialCommit
+            $worktree = [IO.Path]::GetRandomFileName()
+            $worktreePath = Split-Path $repoPath -Parent
+            $worktreePath = Join-Path $worktreePath $worktree
 
-            &$gitbin init $repoPath
-            Set-Location $repoPath
-
-            # Git rid of Git warnings about configuring user for the commit we do below
-            &$gitbin config user.email "you@example.com"
-            &$gitbin config user.name "Pester User"
-
-            'foo' > ./README.md
-            &$gitbin add ./README.md
-            # Quoting is a hack due to our use of the global:git function and how it converts args for invoke-expression
-            &$gitbin commit -m "`"initial commit.`""
-
-            if (Test-Path $worktreePath) {
-                Remove-Item $worktreePath -Recurse -Force
-            }
             New-Item $worktreePath -ItemType Directory > $null
             &$gitbin worktree add -b test-worktree $worktreePath master 2>$null
         }
         AfterEach {
-            Set-Location $origPath
-            if (Test-Path $repoPath) {
-                Remove-Item $repoPath -Recurse -Force
-            }
-            if (Test-Path $worktreePath) {
+            RemoveGitTempRepo $repoPath
+            if ($worktreePath -and (Test-Path $worktreePath)) {
                 Remove-Item $worktreePath -Recurse -Force
             }
         }
 
         It 'Returns the correct dir when under a worktree' {
             Set-Location $worktreePath
-            $worktreeBaseName = Split-Path $worktreePath -Leaf
             $path = GetMacOSAdjustedTempPath $repoPath
-            Get-GitDirectory | Should -BeExactly (MakeGitPath $path\.git\worktrees\$worktreeBaseName)
+            Get-GitDirectory | Should -BeExactly (MakeGitPath $path\.git\worktrees\$worktree)
         }
     }
 
