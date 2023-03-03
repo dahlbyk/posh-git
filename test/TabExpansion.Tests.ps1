@@ -213,10 +213,7 @@ Describe 'TabExpansion Tests' {
     Context 'Vsts' {
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $repoPath = NewGitTempRepo
-
-            # Test with non-standard vsts pr alias name
-            &$gitbin config alias.test-vsts-pr "!f() { exec vsts code pr \`"`$`@\`"; }; f"
+            $repoPath = NewGitTempRepo -WithAliasTestVstsPr
         }
         AfterEach {
             RemoveGitTempRepo $repoPath
