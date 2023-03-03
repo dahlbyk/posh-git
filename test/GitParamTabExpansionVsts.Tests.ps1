@@ -7,10 +7,7 @@ Describe 'ParamsTabExpansion VSTS Tests' {
         # Create a git alias for 'pr', as if we'd installed vsts-cli
         BeforeEach {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
-            $repoPath = NewGitTempRepo
-
-            # Test with non-standard vsts pr alias name
-            &$gitbin config alias.test-vsts-pr "!f() { exec vsts code pr \`"`$`@\`"; }; f"
+            $repoPath = NewGitTempRepo -WithAliasTestVstsPr
         }
         AfterEach {
             RemoveGitTempRepo $repoPath
