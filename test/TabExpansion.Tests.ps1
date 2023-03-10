@@ -175,7 +175,7 @@ Describe 'TabExpansion Tests' {
                 $result | Should -BeExactly $branchName
 
                 $result = & $module GitTabExpansionInternal 'git push  --follow-tags  -u   origin '
-                $result -contains $branchName | Should -Be $true
+                $result | Should -Contain $branchName
             }
             finally {
                 &$gitbin branch -D $branchName
