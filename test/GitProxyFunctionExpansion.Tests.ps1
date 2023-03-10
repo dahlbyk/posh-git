@@ -331,33 +331,33 @@ Describe 'Proxy Function Expansion Tests' {
             $functionText = & $module Expand-GitProxyFunction 'Invoke-GitFunction '
             $result = & $module GitTabExpansionInternal $functionText
 
-            $result -contains '' | Should -Be $false
-            $result -contains 'start' | Should -Be $true
-            $result -contains 'run' | Should -Be $true
+            $result | Should -Not -Contain ''
+            $result | Should -Contain 'start'
+            $result | Should -Contain 'run'
 
             $functionText = & $module Expand-GitProxyFunction 'Invoke-GitFunction s'
             $result2 = & $module GitTabExpansionInternal $functionText
 
-            $result2 -contains 'start' | Should -Be $true
-            $result2 -contains 'skip' | Should -Be $true
+            $result2 | Should -Contain 'start'
+            $result2 | Should -Contain 'skip'
         }
         It 'Tab completes remote subcommands' {
             function global:Invoke-GitFunction { git remote $args }
             $functionText = & $module Expand-GitProxyFunction 'Invoke-GitFunction '
             $result = & $module GitTabExpansionInternal $functionText
 
-            $result -contains '' | Should -Be $false
-            $result -contains 'add' | Should -Be $true
-            $result -contains 'set-branches' | Should -Be $true
-            $result -contains 'get-url' | Should -Be $true
-            $result -contains 'update' | Should -Be $true
+            $result | Should -Not -Contain ''
+            $result | Should -Contain 'add'
+            $result | Should -Contain 'set-branches'
+            $result | Should -Contain 'get-url'
+            $result | Should -Contain 'update'
 
             $functionText = & $module Expand-GitProxyFunction 'Invoke-GitFunction s'
             $result2 = & $module GitTabExpansionInternal $functionText
 
-            $result2 -contains 'set-branches' | Should -Be $true
-            $result2 -contains 'set-head' | Should -Be $true
-            $result2 -contains 'set-url' | Should -Be $true
+            $result2 | Should -Contain 'set-branches'
+            $result2 | Should -Contain 'set-head'
+            $result2 | Should -Contain 'set-url'
         }
     }
 }

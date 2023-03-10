@@ -6,85 +6,85 @@ Describe 'ParamsTabExpansion Tests' {
     Context 'Push Parameters TabExpansion Tests' {
         It 'Tab completes all long push parameters' {
             $result = & $module GitTabExpansionInternal 'git push --'
-            $result -contains '--all' | Should -Be $true
-            $result -contains '--delete' | Should -Be $true
-            $result -contains '--dry-run' | Should -Be $true
-            $result -contains '--exec=' | Should -Be $true
-            $result -contains '--follow-tags' | Should -Be $true
-            $result -contains '--force' | Should -Be $true
-            $result -contains '--force-with-lease' | Should -Be $true
-            $result -contains '--mirror' | Should -Be $true
-            $result -contains '--no-force-with-lease' | Should -Be $true
-            $result -contains '--no-thin' | Should -Be $true
-            $result -contains '--no-verify' | Should -Be $true
-            $result -contains '--porcelain' | Should -Be $true
-            $result -contains '--progress' | Should -Be $true
-            $result -contains '--prune' | Should -Be $true
-            $result -contains '--quiet' | Should -Be $true
-            $result -contains '--receive-pack=' | Should -Be $true
-            $result -contains '--recurse-submodules=' | Should -Be $true
-            $result -contains '--repo=' | Should -Be $true
-            $result -contains '--set-upstream' | Should -Be $true
-            $result -contains '--tags' | Should -Be $true
-            $result -contains '--thin' | Should -Be $true
-            $result -contains '--verbose' | Should -Be $true
-            $result -contains '--verify' | Should -Be $true
+            $result | Should -Contain '--all'
+            $result | Should -Contain '--delete'
+            $result | Should -Contain '--dry-run'
+            $result | Should -Contain '--exec='
+            $result | Should -Contain '--follow-tags'
+            $result | Should -Contain '--force'
+            $result | Should -Contain '--force-with-lease'
+            $result | Should -Contain '--mirror'
+            $result | Should -Contain '--no-force-with-lease'
+            $result | Should -Contain '--no-thin'
+            $result | Should -Contain '--no-verify'
+            $result | Should -Contain '--porcelain'
+            $result | Should -Contain '--progress'
+            $result | Should -Contain '--prune'
+            $result | Should -Contain '--quiet'
+            $result | Should -Contain '--receive-pack='
+            $result | Should -Contain '--recurse-submodules='
+            $result | Should -Contain '--repo='
+            $result | Should -Contain '--set-upstream'
+            $result | Should -Contain '--tags'
+            $result | Should -Contain '--thin'
+            $result | Should -Contain '--verbose'
+            $result | Should -Contain '--verify'
         }
         It 'Tab completes all short push parameters' {
             $result = & $module GitTabExpansionInternal 'git push -'
-            $result -contains '-f' | Should -Be $true
-            $result -contains '-n' | Should -Be $true
-            $result -contains '-q' | Should -Be $true
-            $result -contains '-u' | Should -Be $true
-            $result -contains '-v' | Should -Be $true
+            $result | Should -Contain '-f'
+            $result | Should -Contain '-n'
+            $result | Should -Contain '-q'
+            $result | Should -Contain '-u'
+            $result | Should -Contain '-v'
         }
         It 'Tab completes push parameters values' {
             $result = & $module GitTabExpansionInternal 'git push --recurse-submodules='
-            $result -contains '--recurse-submodules=check' | Should -Be $true
-            $result -contains '--recurse-submodules=on-demand' | Should -Be $true
+            $result | Should -Contain '--recurse-submodules=check'
+            $result | Should -Contain '--recurse-submodules=on-demand'
         }
     }
 
     Context 'Pretty/Format TabCompletion Tests - No Custom Formats' {
         It 'Tab completes default formats for log --pretty' {
             $result = & $module GitTabExpansionInternal 'git log --pretty='
-            $result -contains '--pretty=oneline' | Should -Be $true
-            $result -contains '--pretty=short' | Should -Be $true
-            $result -contains '--pretty=medium' | Should -Be $true
-            $result -contains '--pretty=full' | Should -Be $true
-            $result -contains '--pretty=fuller' | Should -Be $true
-            $result -contains '--pretty=email' | Should -Be $true
-            $result -contains '--pretty=raw' | Should -Be $true
+            $result | Should -Contain '--pretty=oneline'
+            $result | Should -Contain '--pretty=short'
+            $result | Should -Contain '--pretty=medium'
+            $result | Should -Contain '--pretty=full'
+            $result | Should -Contain '--pretty=fuller'
+            $result | Should -Contain '--pretty=email'
+            $result | Should -Contain '--pretty=raw'
         }
         It 'Tab completes default formats for log --format' {
             $result = & $module GitTabExpansionInternal 'git log --format='
-            $result -contains '--format=oneline' | Should -Be $true
-            $result -contains '--format=short' | Should -Be $true
-            $result -contains '--format=medium' | Should -Be $true
-            $result -contains '--format=full' | Should -Be $true
-            $result -contains '--format=fuller' | Should -Be $true
-            $result -contains '--format=email' | Should -Be $true
-            $result -contains '--format=raw' | Should -Be $true
+            $result | Should -Contain '--format=oneline'
+            $result | Should -Contain '--format=short'
+            $result | Should -Contain '--format=medium'
+            $result | Should -Contain '--format=full'
+            $result | Should -Contain '--format=fuller'
+            $result | Should -Contain '--format=email'
+            $result | Should -Contain '--format=raw'
         }
         It 'Tab completes default formats for show --pretty' {
             $result = & $module GitTabExpansionInternal 'git show --pretty='
-            $result -contains '--pretty=oneline' | Should -Be $true
-            $result -contains '--pretty=short' | Should -Be $true
-            $result -contains '--pretty=medium' | Should -Be $true
-            $result -contains '--pretty=full' | Should -Be $true
-            $result -contains '--pretty=fuller' | Should -Be $true
-            $result -contains '--pretty=email' | Should -Be $true
-            $result -contains '--pretty=raw' | Should -Be $true
+            $result | Should -Contain '--pretty=oneline'
+            $result | Should -Contain '--pretty=short'
+            $result | Should -Contain '--pretty=medium'
+            $result | Should -Contain '--pretty=full'
+            $result | Should -Contain '--pretty=fuller'
+            $result | Should -Contain '--pretty=email'
+            $result | Should -Contain '--pretty=raw'
         }
         It 'Tab completes default formats for show --format' {
             $result = & $module GitTabExpansionInternal 'git show --format='
-            $result -contains '--format=oneline' | Should -Be $true
-            $result -contains '--format=short' | Should -Be $true
-            $result -contains '--format=medium' | Should -Be $true
-            $result -contains '--format=full' | Should -Be $true
-            $result -contains '--format=fuller' | Should -Be $true
-            $result -contains '--format=email' | Should -Be $true
-            $result -contains '--format=raw' | Should -Be $true
+            $result | Should -Contain '--format=oneline'
+            $result | Should -Contain '--format=short'
+            $result | Should -Contain '--format=medium'
+            $result | Should -Contain '--format=full'
+            $result | Should -Contain '--format=fuller'
+            $result | Should -Contain '--format=email'
+            $result | Should -Contain '--format=raw'
         }
     }
 
@@ -103,51 +103,51 @@ Describe 'ParamsTabExpansion Tests' {
 
         It 'Tab completes default and custom formats for log --pretty' {
             $result = & $module GitTabExpansionInternal 'git log --pretty='
-            $result -contains '--pretty=oneline' | Should -Be $true
-            $result -contains '--pretty=short' | Should -Be $true
-            $result -contains '--pretty=medium' | Should -Be $true
-            $result -contains '--pretty=full' | Should -Be $true
-            $result -contains '--pretty=fuller' | Should -Be $true
-            $result -contains '--pretty=email' | Should -Be $true
-            $result -contains '--pretty=raw' | Should -Be $true
-            $result -contains '--pretty=birdseye' | Should -Be $true
-            $result -contains '--pretty=test2' | Should -Be $true
+            $result | Should -Contain '--pretty=oneline'
+            $result | Should -Contain '--pretty=short'
+            $result | Should -Contain '--pretty=medium'
+            $result | Should -Contain '--pretty=full'
+            $result | Should -Contain '--pretty=fuller'
+            $result | Should -Contain '--pretty=email'
+            $result | Should -Contain '--pretty=raw'
+            $result | Should -Contain '--pretty=birdseye'
+            $result | Should -Contain '--pretty=test2'
         }
         It 'Tab completes default and custom formats for log --format' {
             $result = & $module GitTabExpansionInternal 'git log --format='
-            $result -contains '--format=oneline' | Should -Be $true
-            $result -contains '--format=short' | Should -Be $true
-            $result -contains '--format=medium' | Should -Be $true
-            $result -contains '--format=full' | Should -Be $true
-            $result -contains '--format=fuller' | Should -Be $true
-            $result -contains '--format=email' | Should -Be $true
-            $result -contains '--format=raw' | Should -Be $true
-            $result -contains '--format=birdseye' | Should -Be $true
-            $result -contains '--format=test2' | Should -Be $true
+            $result | Should -Contain '--format=oneline'
+            $result | Should -Contain '--format=short'
+            $result | Should -Contain '--format=medium'
+            $result | Should -Contain '--format=full'
+            $result | Should -Contain '--format=fuller'
+            $result | Should -Contain '--format=email'
+            $result | Should -Contain '--format=raw'
+            $result | Should -Contain '--format=birdseye'
+            $result | Should -Contain '--format=test2'
         }
         It 'Tab completes default and custom formats for show --pretty' {
             $result = & $module GitTabExpansionInternal 'git show --pretty='
-            $result -contains '--pretty=oneline' | Should -Be $true
-            $result -contains '--pretty=short' | Should -Be $true
-            $result -contains '--pretty=medium' | Should -Be $true
-            $result -contains '--pretty=full' | Should -Be $true
-            $result -contains '--pretty=fuller' | Should -Be $true
-            $result -contains '--pretty=email' | Should -Be $true
-            $result -contains '--pretty=raw' | Should -Be $true
-            $result -contains '--pretty=birdseye' | Should -Be $true
-            $result -contains '--pretty=test2' | Should -Be $true
+            $result | Should -Contain '--pretty=oneline'
+            $result | Should -Contain '--pretty=short'
+            $result | Should -Contain '--pretty=medium'
+            $result | Should -Contain '--pretty=full'
+            $result | Should -Contain '--pretty=fuller'
+            $result | Should -Contain '--pretty=email'
+            $result | Should -Contain '--pretty=raw'
+            $result | Should -Contain '--pretty=birdseye'
+            $result | Should -Contain '--pretty=test2'
         }
         It 'Tab completes default and custom formats for show --format' {
             $result = & $module GitTabExpansionInternal 'git show --format='
-            $result -contains '--format=oneline' | Should -Be $true
-            $result -contains '--format=short' | Should -Be $true
-            $result -contains '--format=medium' | Should -Be $true
-            $result -contains '--format=full' | Should -Be $true
-            $result -contains '--format=fuller' | Should -Be $true
-            $result -contains '--format=email' | Should -Be $true
-            $result -contains '--format=raw' | Should -Be $true
-            $result -contains '--format=birdseye' | Should -Be $true
-            $result -contains '--format=test2' | Should -Be $true
+            $result | Should -Contain '--format=oneline'
+            $result | Should -Contain '--format=short'
+            $result | Should -Contain '--format=medium'
+            $result | Should -Contain '--format=full'
+            $result | Should -Contain '--format=fuller'
+            $result | Should -Contain '--format=email'
+            $result | Should -Contain '--format=raw'
+            $result | Should -Contain '--format=birdseye'
+            $result | Should -Contain '--format=test2'
         }
     }
 }
