@@ -28,32 +28,32 @@ Describe 'ParamsTabExpansion VSTS Tests' {
 
         It 'Tab completes git pr create parameters values' {
             $result = & $module GitTabExpansionInternal 'git test-vsts-pr create --'
-            $result -contains '--auto-complete' | Should -Be $true
+            $result | Should -Contain '--auto-complete'
         }
         It 'Tab completes git pr create auto-complete parameters values' {
             $result = & $module GitTabExpansionInternal 'git test-vsts-pr create --auto-complete --'
-            $result -contains '--delete-source-branch' | Should -Be $true
+            $result | Should -Contain '--delete-source-branch'
         }
 
         It 'Tab completes git pr show all parameters values' {
             $result = & $module GitTabExpansionInternal 'git test-vsts-pr show --'
-            $result -contains '--' | Should -Be $false
-            $result -contains '--debug' | Should -Be $true
-            $result -contains '--help' | Should -Be $true
-            $result -contains '--output' | Should -Be $true
-            $result -contains '--query' | Should -Be $true
-            $result -contains '--verbose' | Should -Be $true
+            $result | Should -Not -Contain '--'
+            $result | Should -Contain '--debug'
+            $result | Should -Contain '--help'
+            $result | Should -Contain '--output'
+            $result | Should -Contain '--query'
+            $result | Should -Contain '--verbose'
         }
 
         It 'Tab completes git pr create all short push parameters' {
             $result = & $module GitTabExpansionInternal 'git test-vsts-pr create -'
-            $result -contains '-d' | Should -Be $true
-            $result -contains '-i' | Should -Be $true
-            $result -contains '-p' | Should -Be $true
-            $result -contains '-r' | Should -Be $true
-            $result -contains '-s' | Should -Be $true
-            $result -contains '-h' | Should -Be $true
-            $result -contains '-o' | Should -Be $true
+            $result | Should -Contain '-d'
+            $result | Should -Contain '-i'
+            $result | Should -Contain '-p'
+            $result | Should -Contain '-r'
+            $result | Should -Contain '-s'
+            $result | Should -Contain '-h'
+            $result | Should -Contain '-o'
         }
     }
 }

@@ -4,7 +4,7 @@ BeforeAll {
 
 Describe 'TabExpansion function test' -Skip:($PSVersionTable.PSVersion.Major -gt 5) {
     It 'Windows PowerShell v5 exports a TabExpansion function' {
-        $module.ExportedFunctions.Keys -contains 'TabExpansion' | Should -Be $true
+        $module.ExportedFunctions.Keys | Should -Contain 'TabExpansion'
     }
 }
 
@@ -18,36 +18,36 @@ Describe 'TabExpansion Tests' {
         It 'Tab completes bisect subcommands' {
             $result = & $module GitTabExpansionInternal 'git bisect '
 
-            $result -contains '' | Should -Be $false
-            $result -contains 'start' | Should -Be $true
-            $result -contains 'run' | Should -Be $true
+            $result | Should -Not -Contain ''
+            $result | Should -Contain 'start'
+            $result | Should -Contain 'run'
 
             $result2 = & $module GitTabExpansionInternal 'git bisect s'
 
-            $result2 -contains 'start' | Should -Be $true
-            $result2 -contains 'skip' | Should -Be $true
+            $result2 | Should -Contain 'start'
+            $result2 | Should -Contain 'skip'
         }
         It 'Tab completes remote subcommands' {
             $result = & $module GitTabExpansionInternal 'git remote '
 
-            $result -contains '' | Should -Be $false
-            $result -contains 'add' | Should -Be $true
-            $result -contains 'set-branches' | Should -Be $true
-            $result -contains 'get-url' | Should -Be $true
-            $result -contains 'update' | Should -Be $true
+            $result | Should -Not -Contain ''
+            $result | Should -Contain 'add'
+            $result | Should -Contain 'set-branches'
+            $result | Should -Contain 'get-url'
+            $result | Should -Contain 'update'
 
             $result2 = & $module GitTabExpansionInternal 'git remote s'
 
-            $result2 -contains 'set-branches' | Should -Be $true
-            $result2 -contains 'set-head' | Should -Be $true
-            $result2 -contains 'set-url' | Should -Be $true
+            $result2 | Should -Contain 'set-branches'
+            $result2 | Should -Contain 'set-head'
+            $result2 | Should -Contain 'set-url'
         }
         It 'Tab completes update-git-for-windows only on Windows' {
             $result = & $module GitTabExpansionInternal 'git update-'
 
             if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows)) {
-                $result -contains '' | Should -Be $false
-                $result -contains 'update-git-for-windows' | Should -Be $true
+                $result | Should -Not -Contain ''
+                $result | Should -Contain 'update-git-for-windows'
             }
             else {
                 $result | Should -BeNullOrEmpty
@@ -66,20 +66,20 @@ Describe 'TabExpansion Tests' {
             &$gitbin symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/master 2>$null
         }
         It 'Tab completes all remotes' {
-            (&$gitbin remote) -contains 'origin' | Should -Be $true
+            (&$gitbin remote) | Should -Contain 'origin'
 
             $result = & $module GitTabExpansionInternal 'git push '
-            $result -contains 'origin' | Should -Be $true
+            $result | Should -Contain 'origin'
         }
         It 'Tab completes all branches' {
             $result = & $module GitTabExpansionInternal 'git push origin '
-            $result -contains 'master' | Should -Be $true
-            $result -contains 'origin/master' | Should -Be $true
-            $result -contains 'origin/HEAD' | Should -Be $true
+            $result | Should -Contain 'master'
+            $result | Should -Contain 'origin/master'
+            $result | Should -Contain 'origin/HEAD'
         }
         It 'Tab completes all :branches' {
             $result = & $module GitTabExpansionInternal 'git push origin :'
-            $result -contains ':master' | Should -Be $true
+            $result | Should -Contain ':master'
         }
         It 'Tab completes matching remotes' {
             $result = & $module GitTabExpansionInternal 'git push or'
@@ -111,9 +111,9 @@ Describe 'TabExpansion Tests' {
         }
         It 'Tab completes all branches with preceding parameters' {
             $result = & $module GitTabExpansionInternal 'git push  --follow-tags  -u   origin '
-            $result -contains 'master' | Should -Be $true
-            $result -contains 'origin/master' | Should -Be $true
-            $result -contains 'origin/HEAD' | Should -Be $true
+            $result | Should -Contain 'master'
+            $result | Should -Contain 'origin/master'
+            $result | Should -Contain 'origin/HEAD'
         }
         It 'Tab completes matching branch with preceding parameters' {
             $result = & $module GitTabExpansionInternal 'git push  --follow-tags  -u   origin ma'
@@ -223,7 +223,7 @@ Describe 'TabExpansion Tests' {
         }
         It 'Tab completes pr options' {
             $result = & $module GitTabExpansionInternal 'git test-vsts-pr '
-            $result -contains 'abandon' | Should -Be $true
+            $result | Should -Contain 'abandon'
         }
     }
 
