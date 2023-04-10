@@ -45,6 +45,25 @@ Describe 'ParamsTabExpansion Tests' {
         }
     }
 
+    Context 'Clone Parameters TabExpansion Tests' {
+        It 'Tab completes all long clone parameters' {
+            $result = & $module GitTabExpansionInternal 'git clone --'
+            $result -contains '--filter=' | Should -Be $true
+            $result -contains '--sparse' | Should -Be $true
+        }
+        It 'Tab completes clone parameters values' {
+            $result = & $module GitTabExpansionInternal 'git clone --filter='
+            $result -contains '--filter=blob:none' | Should -Be $true
+            $result -contains '--filter=blob:limit=' | Should -Be $true
+            $result -contains '--filter=tree:' | Should -Be $true
+            $result -contains '--filter=object:type=tag' | Should -Be $true
+            $result -contains '--filter=object:type=commit' | Should -Be $true
+            $result -contains '--filter=object:type=tree' | Should -Be $true
+            $result -contains '--filter=object:type=blob' | Should -Be $true
+            $result -contains '--filter=sparse:oid=' | Should -Be $true
+        }
+    }
+
     Context 'Pretty/Format TabCompletion Tests - No Custom Formats' {
         It 'Tab completes default formats for log --pretty' {
             $result = & $module GitTabExpansionInternal 'git log --pretty='
