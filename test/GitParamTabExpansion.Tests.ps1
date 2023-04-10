@@ -161,7 +161,7 @@ Describe 'ParamsTabExpansion Tests' {
             $result -contains '--stdin' | Should -Be $true
         }
         It 'Tab completes all long sparse-checkout reapply parameters' {
-            $result = & $module GitTabExpansionInternal 'git sparse-index reapply --'
+            $result = & $module GitTabExpansionInternal 'git sparse-checkout reapply --'
             $result -contains '--cone' | Should -Be $true
             $result -contains '--no-cone' | Should -Be $true
             $result -contains '--sparse-index' | Should -Be $true

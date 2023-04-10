@@ -466,8 +466,9 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         }
 
         # Handles git sparse-checkout <cmd>
-        "^sparse-checkout (?<cmd>$($subcommands.Keys -join '|'))\s+(?<op>\S*)$" {
-            gitCmdOperations $subcommands $matches['cmd'] $matches['op']
+        "sparse-checkout\s+(?<cmd>$sparseCheckoutCommandsWithLongParams).*--(?<param>\S*)$"
+        {
+            expandLongParams $longSparseCheckoutParams $matches['cmd'] $matches['param']
         }
 
         # Handles git <cmd> <ref>
