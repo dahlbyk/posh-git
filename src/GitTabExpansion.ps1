@@ -21,6 +21,7 @@ $subcommands = @{
         get-url set-url show prune update
         "
     rerere = "clear forget diff remaining status gc"
+    'sparse-checkout' = "list set add reapply disable"
     stash = 'push save list show apply clear drop pop create branch'
     submodule = "add status init deinit update summary foreach sync"
     svn = "
@@ -58,7 +59,8 @@ $script:someCommands = @('add','am','annotate','archive','bisect','blame','branc
                          'cherry-pick','citool','clean','clone','commit','config','describe','diff','difftool','fetch',
                          'format-patch','gc','grep','gui','help','init','instaweb','log','merge','mergetool','mv',
                          'notes','prune','pull','push','rebase','reflog','remote','rerere','reset','restore','revert','rm',
-                         'shortlog','show','stash','status','submodule','svn','switch','tag','whatchanged', 'worktree')
+                         'shortlog','show','sparse-checkout','stash','status','submodule','svn','switch','tag','whatchanged',
+                         'worktree')
 
 if ((($PSVersionTable.PSVersion.Major -eq 5) -or $IsWindows) -and ($script:GitVersion -ge [System.Version]'2.16.2')) {
     $script:someCommands += 'update-git-for-windows'
@@ -69,6 +71,7 @@ $script:gitCommandsWithShortParams = $shortGitParams.Keys -join '|'
 $script:gitCommandsWithParamValues = $gitParamValues.Keys -join '|'
 $script:vstsCommandsWithShortParams = $shortVstsParams.Keys -join '|'
 $script:vstsCommandsWithLongParams = $longVstsParams.Keys -join '|'
+$script:sparseCheckoutCommandsWithLongParams = $longSparseCheckoutParams.Keys -join '|'
 
 # The regular expression here is roughly follows this pattern:
 #
@@ -460,6 +463,12 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         # Handles git worktree add <path> <ref>
         "^worktree add.* (?<files>\S+) (?<ref>\S*)$" {
             gitBranches $matches['ref']
+        }
+
+        # Handles git sparse-checkout <cmd>
+        "sparse-checkout\s+(?<cmd>$sparseCheckoutCommandsWithLongParams).*--(?<param>\S*)$"
+        {
+            expandLongParams $longSparseCheckoutParams $matches['cmd'] $matches['param']
         }
 
         # Handles git <cmd> <ref>

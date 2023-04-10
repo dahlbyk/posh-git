@@ -150,5 +150,27 @@ Describe 'ParamsTabExpansion Tests' {
             $result -contains '--format=test2' | Should -Be $true
         }
     }
+
+    Context 'Sparse-Checkout Parameters TabExpansion Tests' {
+        It 'Tab completes all long sparse-checkout set parameters' {
+            $result = & $module GitTabExpansionInternal 'git sparse-checkout set --'
+            $result -contains '--cone' | Should -Be $true
+            $result -contains '--no-cone' | Should -Be $true
+            $result -contains '--sparse-index' | Should -Be $true
+            $result -contains '--no-sparse-index' | Should -Be $true
+            $result -contains '--stdin' | Should -Be $true
+        }
+        It 'Tab completes all long sparse-checkout reapply parameters' {
+            $result = & $module GitTabExpansionInternal 'git sparse-checkout reapply --'
+            $result -contains '--cone' | Should -Be $true
+            $result -contains '--no-cone' | Should -Be $true
+            $result -contains '--sparse-index' | Should -Be $true
+            $result -contains '--no-sparse-index' | Should -Be $true
+        }
+        It 'Tab completes all long sparse-checkout add parameters' {
+            $result = & $module GitTabExpansionInternal 'git sparse-checkout add --'
+            $result -contains '--stdin' | Should -Be $true
+        }
+    }
 }
 

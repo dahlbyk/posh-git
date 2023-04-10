@@ -42,6 +42,16 @@ Describe 'TabExpansion Tests' {
             $result2 -contains 'set-head' | Should -Be $true
             $result2 -contains 'set-url' | Should -Be $true
         }
+        It 'Tab completes sparse-checkout subcommands' {
+            $result = & $module GitTabExpansionInternal 'git sparse-checkout '
+
+            $result -contains '' | Should -Be $false
+            $result -contains 'list' | Should -Be $true
+            $result -contains 'set' | Should -Be $true
+            $result -contains 'add' | Should -Be $true
+            $result -contains 'reapply' | Should -Be $true
+            $result -contains 'disable' | Should -Be $true
+        }
         It 'Tab completes update-git-for-windows only on Windows' {
             $result = & $module GitTabExpansionInternal 'git update-'
 
