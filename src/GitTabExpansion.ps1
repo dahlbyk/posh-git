@@ -304,6 +304,7 @@ function script:expandParamValues($cmd, $param, $filter) {
 function Expand-GitCommand($Command) {
     # Parse all Git output as UTF8, including tab completion output - https://github.com/dahlbyk/posh-git/pull/359
     $res = Invoke-Utf8ConsoleCommand { GitTabExpansionInternal $Command $Global:GitStatus }
+    $res = Add-HintsToParams -Command $Command -PossibleParams $res
     $res
 }
 
