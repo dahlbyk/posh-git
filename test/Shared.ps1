@@ -126,7 +126,12 @@ function NewGitTempRepo([switch]$MakeInitialCommit) {
     Push-Location
     $temp = [System.IO.Path]::GetTempPath()
     $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
-    &$gitbin init $repoPath *>$null
+    $initArgs = @()
+    if (&$gitbin config init.defaultBranch) {
+        $initArgs += '--initial-branch', 'master'
+    }
+
+    &$gitbin init $initArgs $repoPath *>$null
     Set-Location $repoPath
 
     if ($MakeInitialCommit) {

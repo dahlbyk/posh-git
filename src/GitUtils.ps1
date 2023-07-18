@@ -328,7 +328,7 @@ function Get-GitStatus {
                     "All" { $untrackedFilesOption = "-uall" }
                     default { $untrackedFilesOption = "-unormal" }
                 }
-                $status = Invoke-Utf8ConsoleCommand { git --no-optional-locks -c core.quotepath=false -c color.status=false status $untrackedFilesOption --short --branch 2>$null }
+                $status = Invoke-Utf8ConsoleCommand { git --no-optional-locks '-c' core.quotepath=false '-c' color.status=false status $untrackedFilesOption --short --branch 2>$null }
                 if ($settings.EnableStashStatus) {
                     dbg 'Getting stash count' $sw
                     $stashCount = $null | git --no-optional-locks stash list 2>$null | measure-object | Select-Object -expand Count

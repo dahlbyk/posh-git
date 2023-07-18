@@ -46,6 +46,8 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 
 #### Releases
 
+- v1.1.0
+  ( [README][v1.1-readme] • [CHANGELOG][v1.1-change] )
 - v1.0.0
   ( [README][v1-readme] • [CHANGELOG][v1-change] )
 - v1.0.0-beta5
@@ -82,7 +84,7 @@ branch names e.g.: `git pull or<tab> ma<tab>` tab completes to `git pull origin 
 
 ## Installation
 
-These installation instructions, as well as rest of this readme, applies only to version 1.x of posh-git.
+These installation instructions, as well as the rest of this README, applies only to version 1.x of posh-git.
 For v0.x installation instructions see this [README][v0-readme].
 
 ### Prerequisites
@@ -130,7 +132,7 @@ posh-git is available on the [PowerShell Gallery][psgallery-v1] and can be insta
 ### Installing posh-git via Chocolatey
 
 If you prefer to manage posh-git as a Windows package, you can use [Chocolatey](https://chocolatey.org) to install posh-git.
-If you don't have Chocolatey, you can install it from the [Chocolately Install page](https://chocolatey.org/install).
+If you don't have Chocolatey, you can install it from the [Chocolatey Install page](https://chocolatey.org/install).
 With Chocolatey installed, execute the following command to install posh-git:
 
 ```powershell
@@ -217,13 +219,13 @@ By default, the status summary has the following format:
   - Green means the branch is ahead of its remote (green light to push)
   - Red means the branch is behind its remote
   - Yellow means the branch is both ahead of and behind its remote
-- `S` represents the branch status in relation to remote (tracked origin) branch.
+- `S` represents the branch status in relation to the remote (tracked origin) branch.
 
   Note: This status information reflects the state of the remote tracked branch after the last `git fetch/pull`
   of the remote. Execute `git fetch` to update to the latest on the default remote repo. If you have multiple remotes,
   execute `git fetch --all`.
 
-  - `≡` = The local branch in at the same commit level as the remote branch (`BranchIdenticalStatus`)
+  - `≡` = The local branch is at the same commit level as the remote branch (`BranchIdenticalStatus`)
   - `↑<num>` = The local branch is ahead of the remote branch by the specified number of commits; a `git push` is
     required to update the remote branch (`BranchAheadStatus`)
   - `↓<num>` = The local branch is behind the remote branch by the specified number of commits; a `git pull` is
@@ -559,5 +561,7 @@ function prompt {
 [v1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/CHANGELOG.md
 [v1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.0.0/README.md
 
+[v1.1-change]:       https://github.com/dahlbyk/posh-git/blob/v1.1.0/CHANGELOG.md
+[v1.1-readme]:       https://github.com/dahlbyk/posh-git/blob/v1.1.0/README.md
 
 [wiki-custom-prompt]: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
