@@ -401,14 +401,26 @@ function Get-SshAgent() {
     else {
         $agentPid = $Env:SSH_AGENT_PID
         if ($agentPid) {
-            $sshAgentProcess = Get-Process | Where-Object { ($_.Id -eq $agentPid) -and ($_.Name -eq 'ssh-agent') }
-            if ($null -ne $sshAgentProcess) {
-                return $agentPid
+            # Convert cygwin PID to Windows PID
+            $ps = Find-Ssh('ps')
+            if (!$ps) {
+                Write-Warning 'Could not find ps'
+                return 0
             }
-            else {
-                setenv 'SSH_AGENT_PID' $null
-                setenv 'SSH_AUTH_SOCK' $null
+            $pidMap = @{ }
+            (& $ps) | Select-Object -skip 1 | ForEach-Object {
+                $line = ($_ -split "\s+" -match "\S")
+                $pidMap[$line[0]] = $line[3]
             }
+            $winPid = $pidMap[$agentPid]
+            if ($winPid) {
+                $sshAgentProcess = Get-Process | Where-Object { ($_.Id -eq $winPid) -and ($_.Name -eq 'ssh-agent') }
+                if ($null -ne $sshAgentProcess) {
+                    return $winPid
+                }
+            }
+            setenv 'SSH_AGENT_PID' $null
+            setenv 'SSH_AUTH_SOCK' $null
         }
     }
 
@@ -505,12 +517,12 @@ function Find-Ssh($program = 'ssh-agent') {
         return
     }
 
-    $sshLocation = join-path $gitItem.directory.parent.fullname bin/$program
+    $sshLocation = join-path $gitItem.directory.parent.fullname[0] bin/$program
     if (get-command $sshLocation -Erroraction SilentlyContinue) {
         return $sshLocation
     }
 
-    $sshLocation = join-path $gitItem.directory.parent.fullname usr/bin/$program
+    $sshLocation = join-path $gitItem.directory.parent.fullname[0] usr/bin/$program
     if (get-command $sshLocation -Erroraction SilentlyContinue) {
         return $sshLocation
     }
