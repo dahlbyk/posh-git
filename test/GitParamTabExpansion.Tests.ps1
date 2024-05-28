@@ -13,6 +13,7 @@ Describe 'ParamsTabExpansion Tests' {
             $result -contains '--follow-tags' | Should -Be $true
             $result -contains '--force' | Should -Be $true
             $result -contains '--force-with-lease' | Should -Be $true
+            $result -contains '--force-if-includes' | Should -Be $true
             $result -contains '--mirror' | Should -Be $true
             $result -contains '--no-force-with-lease' | Should -Be $true
             $result -contains '--no-thin' | Should -Be $true
