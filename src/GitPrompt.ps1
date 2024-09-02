@@ -886,15 +886,15 @@ if (!(Test-Path Variable:Global:VcsPromptStatuses)) {
 
 <#
 .SYNOPSIS
-    Writes all version control prompt statuses configured in $global:VscPromptStatuses.
+    Writes all version control prompt statuses configured in $global:VcsPromptStatuses.
 .DESCRIPTION
-    Writes all version control prompt statuses configured in $global:VscPromptStatuses.
+    Writes all version control prompt statuses configured in $global:VcsPromptStatuses.
     By default, this includes the PoshGit prompt status.
 .EXAMPLE
     PS C:\> Write-VcsStatus
 
     Writes all version control prompt statuses that have been configured
-    with the global variable $VscPromptStatuses
+    with the global variable $VcsPromptStatuses
 #>
 function Global:Write-VcsStatus {
     Set-ConsoleMode -ANSI
