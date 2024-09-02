@@ -32,6 +32,7 @@ $shortGitParams = @{
     revert = 'e m n S s X'
     rm = 'f n r q'
     shortlog = 'n s e w'
+    'sparse-checkout' = ''
     stash = 'p k u a q'
     status = 's b u z'
     submodule = 'q b f n N'
@@ -77,6 +78,7 @@ $longGitParams = @{
     rm = 'force dry-run cached ignore-unmatch quiet'
     shortlog = 'numbered summary email format='
     show = 'pretty= format= abbrev-commit no-abbrev-commit oneline encoding= expand-tabs no-expand-tabs notes no-notes show-notes no-standard-notes standard-notes show-signature name-only name-status stat shortstat numstat'
+    'sparse-checkout' = ''
     stash = 'patch no-keep-index keep-index include-untracked all quiet index'
     status = 'short branch porcelain long untracked-files ignore-submodules ignored column no-column'
     submodule = 'quiet branch force cached files summary-limit remote no-fetch checkout merge rebase init name reference recursive depth'
@@ -107,6 +109,12 @@ $longVstsParams = @{
     'set-vote' = " $longVstsGlobal"
     show = " $longVstsGlobal"
     update = " $longVstsGlobal"
+}
+
+$longSparseCheckoutParams = @{
+    add = "stdin"
+    set = "cone no-cone sparse-index no-sparse-index stdin"
+    reapply = "cone no-cone sparse-index no-sparse-index"
 }
 
 # Variable is used in GitTabExpansion.ps1
