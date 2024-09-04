@@ -298,10 +298,12 @@ function Expand-GitCommand($Command) {
     $res
 }
 
-function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
+function GitTabExpansionInternal($Command, $GitStatus = $null) {
     $ignoreGitParams = '(?<params>\s+-(?:[aA-zZ0-9]+|-[aA-zZ0-9][aA-zZ0-9-]*)(?:=\S+)?)*'
 
-    if ($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
+    $lastBlock = $Command
+    if ($Command -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
+        $Command = $Matches['cmd'] + " " + $Matches['args']
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
     }
 
@@ -489,6 +491,13 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         "vsts\.pr\s+(?<cmd>$vstsCommandsWithShortParams).*-(?<shortparam>\S*)$"
         {
             expandShortParams $shortVstsParams $matches['cmd'] $matches['shortparam']
+        }
+
+        # Handles any other command
+        default {
+            $extraGitTabExpansions | ForEach-Object {
+                & $_ $Command
+            }
         }
     }
 }

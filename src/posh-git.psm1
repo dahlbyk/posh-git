@@ -7,6 +7,19 @@ if (Test-Path Env:\POSHGIT_ENABLE_STRICTMODE) {
 
 . $PSScriptRoot\CheckRequirements.ps1 > $null
 
+# Load extra modules with user customized configuration
+$extraGitTabExpansions = @()
+Get-Module -ListAvailable posh-git-extras-* | ForEach-Object {
+    Import-Module -Force $_
+    $local:expandGitCommand = Get-Command -Module $_ -Name "GitTabCustomExpansion" -All
+    $local:params = $expandGitCommand.Parameters
+
+    if ($params.Count -eq 1 -and
+            $params["gitCommandBlock"].ParameterType -eq [string]) {
+        $extraGitTabExpansions += ($expandGitCommand)
+    }
+}
+
 . $PSScriptRoot\ConsoleMode.ps1
 . $PSScriptRoot\Utils.ps1
 . $PSScriptRoot\AnsiUtils.ps1
