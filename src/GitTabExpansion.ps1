@@ -95,15 +95,6 @@ catch {
     Write-Debug "Search for 'flow' in 'git help' output failed with error: $_"
 }
 
-filter quoteStringWithSpecialChars {
-    if ($_ -and ($_ -match '\s+|#|@|\$|;|,|''|\{|\}|\(|\)')) {
-        $str = $_ -replace "'", "''"
-        "'$str'"
-    }
-    else {
-        $_
-    }
-}
 
 function script:gitCommands($filter, $includeAliases) {
     $cmdList = @()

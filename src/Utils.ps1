@@ -497,3 +497,13 @@ function dbg($Message, [Diagnostics.Stopwatch]$Stopwatch) {
         Write-Verbose ('{0:00000}:{1}' -f $Stopwatch.ElapsedMilliseconds,$Message) -Verbose # -ForegroundColor Yellow
     }
 }
+
+filter global:quoteStringWithSpecialChars {
+    if ($_ -and ($_ -match '\s+|#|@|\$|;|,|''|\{|\}|\(|\)')) {
+        $str = $_ -replace "'", "''"
+        "'$str'"
+    }
+    else {
+        $_
+    }
+}
