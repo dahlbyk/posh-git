@@ -122,7 +122,7 @@ function MakeGitPath([string]$Path) {
     $Path -replace '\\', '/'
 }
 
-function NewGitTempRepo([switch]$MakeInitialCommit) {
+function NewGitTempRepo([switch]$MakeInitialCommit, [switch]$WithAliasTestVstsPr) {
     Push-Location
     $temp = [System.IO.Path]::GetTempPath()
     $repoPath = Join-Path $temp ([IO.Path]::GetRandomFileName())
@@ -140,6 +140,18 @@ function NewGitTempRepo([switch]$MakeInitialCommit) {
         'readme' | Out-File ./README.md -Encoding ascii
         &$gitbin add ./README.md *>$null
         &$gitbin commit -m "initial commit." *>$null
+    }
+
+    if ($WithAliasTestVstsPr) {
+        # Test with non-standard vsts pr alias name
+        $value = "!f() { exec vsts code pr `"$@`"; }; f"
+
+        if (-not (Test-Path Variable:PSNativeCommandArgumentPassing) `
+                -or $PSNativeCommandArgumentPassing -eq 'Legacy') {
+            $value = $value.Replace("`"", "\`"")
+        }
+
+        &$gitbin config alias.test-vsts-pr $value
     }
 
     $repoPath
