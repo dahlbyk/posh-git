@@ -482,6 +482,53 @@ function prompt {
 }
 ```
 
+## Creating custom completers for complex aliases
+
+`posh-git` will search the `$env:PSModulePath` for modules whose name match `posh-git-extras-*` and use any
+function in the found modules that has the name `GitTabCustomExpansion` and expects a single parameter of type
+`[string]`.
+
+These functions receive the command as written on the console, stripped by the `git` binary command
+and should return/write custom suggestions.
+
+Here's how you can do it:
+
+```
+# Configure an alias:
+> git config --global alias.wttr '!f() { curl https://wttr.in/$1; }; f'
+
+# Find your PS-Module-Paths:
+> $env:PSModulePath
+C:\Users\me\Documents\WindowsPowerShell\Modules;C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules
+```
+
+You probably want to select a folder in your user space. In the `Modules` folder, create another folder,
+e.g. `posh-git-extras-aliases` and in that folder a file named `posh-git-extras-aliases.psm1`.
+
+In this module file, you must declare and export the function `GitTabCustomExpansion`:
+
+```
+# C:\Users\me\Documents\WindowsPowerShell\Modules\posh-git-extras-aliases\posh-git-extras-aliases.psm1
+
+function GitTabCustomExpansion()
+{
+    param(
+        [string]$gitCommandBlock
+    )
+
+    switch -regex ($gitCommandBlock) {
+        "^wttr\s+(?<loc>[\S]*)$" {
+            @('London', 'Berlin', 'Amsterdam') |
+            Where-Object { $_ -like "$($Matches['loc'])*" }
+        }
+    }
+}
+
+Export-ModuleMember -Function GitTabCustomExpansion
+
+```
+
+
 ## Based on work by
 
 - Keith Dahlby,   http://solutionizing.net/
