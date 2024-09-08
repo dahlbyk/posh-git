@@ -274,6 +274,7 @@ class PoshGitPromptSettings {
     [bool]$EnableFileStatus      = $true
 
     [Nullable[bool]]$EnableFileStatusFromCache        = $null
+    [Nullable[bool]]$EnableFileConciseStatusFromCache = $null
     [string[]]$RepositoriesInWhichToDisableFileStatus = @()
 
     [string]$DescribeStyle = ''

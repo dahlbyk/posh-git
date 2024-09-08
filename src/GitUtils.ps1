@@ -272,7 +272,7 @@ function Get-GitStatus {
         $fileStatusEnabled = $Force -or $settings.EnableFileStatus
         # Optimization: short-circuit to avoid InDotGitOrBareRepoDir and InDisabledRepository if !$fileStatusEnabled
         if ($fileStatusEnabled -and !$($isDotGitOrBare = InDotGitOrBareRepoDir $GitDir) -and !$(InDisabledRepository)) {
-            if ($null -eq $settings.EnableFileStatusFromCache) {
+            if ($null -eq $settings.EnableFileStatusFromCache -and !$settings.EnableFileConciseStatusFromCache) {
                 $settings.EnableFileStatusFromCache = $null -ne (Get-Module GitStatusCachePoshClient)
             }
 
@@ -320,6 +320,47 @@ function Get-GitStatus {
                         $branch += "|" + $cacheResponse.State
                     }
                 }
+            }
+            elseif ($settings.EnableFileConciseStatusFromCache) {
+                dbg 'Getting concise status from cache' $sw
+                $cacheResponse = Get-GitConciseStatusFromCache
+
+                if ($cacheResponse.Error) {
+                    # git-status-cache failed; set $global:GitStatusCacheLoggingEnabled = $true, call Restart-GitStatusCache,
+                    # and check %temp%\GitStatusCache_[timestamp].log for details.
+                    dbg "Cache returned an error: $($cacheResponse.Error)" $sw
+                    $branch = "CACHE ERROR"
+                    $behindBy = 1
+                }
+                else {
+                    dbg 'Parsing status' $sw
+
+                    $indexAdded = $cacheResponse.IndexAdded
+                    $indexDeleted= $cacheResponse.IndexDeleted
+                    $indexModified = $cacheResponse.IndexModified + $cacheResponse.IndexRenamed
+                    $indexUnmerged = $cacheResponse.Conflicted
+
+                    $filesAdded = $cacheResponse.WorkingAdded
+                    $filesDeleted= $cacheResponse.IndexDeleted
+                    $filesModified = $cacheResponse.WorkingModified + $cacheResponse.WorkingRenamed
+                    $filesUnmerged = $cacheResponse.Conflicted
+
+                    $branch = $cacheResponse.Branch
+                    $upstream = $cacheResponse.Upstream
+                    $gone = $cacheResponse.UpstreamGone
+                    $aheadBy = $cacheResponse.AheadBy
+                    $behindBy = $cacheResponse.BehindBy
+
+                    if ($settings.EnableStashStatus -and $cacheResponse.Stashes) {
+                        $stashCount = $cacheResponse.Stashes.Length
+                    }
+
+                    if ($cacheResponse.State) {
+                        $branch += "|" + $cacheResponse.State
+                    }
+                }
+
+
             }
             else {
                 dbg 'Getting status' $sw
@@ -392,23 +433,39 @@ function Get-GitStatus {
         $branch = Get-GitBranch -Branch $branch -GitDir $GitDir -IsDotGitOrBare:$isDotGitOrBare -sw $sw
 
         dbg 'Building status object' $sw
+        if ($settings.EnableFileConciseStatusFromCache) {
+            $indexPaths = @(GetUniquePaths $indexAdded, $indexModified, $indexDeleted, $indexUnmerged)
+            $workingPaths = @(GetUniquePaths $filesAdded, $filesModified, $filesDeleted, $filesUnmerged)
+            $index = (, $indexPaths) |
+            Add-Member -Force -PassThru NoteProperty Added    $indexAdded |
+            Add-Member -Force -PassThru NoteProperty Modified $indexModified |
+            Add-Member -Force -PassThru NoteProperty Deleted  $indexDeleted |
+            Add-Member -Force -PassThru NoteProperty Unmerged $indexUnmerged
 
-        # This collection is used twice, so create the array just once
-        $filesAdded = $filesAdded.ToArray()
+            $working = (, $workingPaths) |
+            Add-Member -Force -PassThru NoteProperty Added    $filesAdded |
+            Add-Member -Force -PassThru NoteProperty Modified $filesModified |
+            Add-Member -Force -PassThru NoteProperty Deleted  $filesDeleted |
+            Add-Member -Force -PassThru NoteProperty Unmerged $filesUnmerged
+        }
+        else {
+            # This collection is used twice, so create the array just once
+            $filesAdded = $filesAdded.ToArray()
 
-        $indexPaths = @(GetUniquePaths $indexAdded, $indexModified, $indexDeleted, $indexUnmerged)
-        $workingPaths = @(GetUniquePaths $filesAdded, $filesModified, $filesDeleted, $filesUnmerged)
-        $index = (, $indexPaths) |
+            $indexPaths = @(GetUniquePaths $indexAdded, $indexModified, $indexDeleted, $indexUnmerged)
+            $workingPaths = @(GetUniquePaths $filesAdded, $filesModified, $filesDeleted, $filesUnmerged)
+            $index = (, $indexPaths) |
             Add-Member -Force -PassThru NoteProperty Added    $indexAdded.ToArray() |
             Add-Member -Force -PassThru NoteProperty Modified $indexModified.ToArray() |
             Add-Member -Force -PassThru NoteProperty Deleted  $indexDeleted.ToArray() |
             Add-Member -Force -PassThru NoteProperty Unmerged $indexUnmerged.ToArray()
 
-        $working = (, $workingPaths) |
+            $working = (, $workingPaths) |
             Add-Member -Force -PassThru NoteProperty Added    $filesAdded |
             Add-Member -Force -PassThru NoteProperty Modified $filesModified.ToArray() |
             Add-Member -Force -PassThru NoteProperty Deleted  $filesDeleted.ToArray() |
             Add-Member -Force -PassThru NoteProperty Unmerged $filesUnmerged.ToArray()
+        }
 
         $result = New-Object PSObject -Property @{
             GitDir       = $GitDir
