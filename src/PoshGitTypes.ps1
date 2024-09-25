@@ -279,6 +279,13 @@ class PoshGitPromptSettings {
     [string]$DescribeStyle = ''
     [psobject]$WindowTitle = {param($GitStatus, [bool]$IsAdmin) "$(if ($IsAdmin) {'Admin: '})$(if ($GitStatus) {"$($GitStatus.RepoName) [$($GitStatus.Branch)]"} else {Get-PromptPath}) - PowerShell $($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor) $(if ([IntPtr]::Size -eq 4) {'32-bit '})($PID)"}
 
+    [psobject]$TabTitle = {
+        param($GitStatus, [bool]$IsAdmin)
+        if ($GitStatus) {
+            Get-UniqueTabTitle "$($GitStatus.RepoName) [$($GitStatus.Branch)]"
+        }
+    }
+
     [PoshGitTextSpan]$DefaultPromptPrefix       = '$(Get-PromptConnectionInfo -Format "[{1}@{0}]: ")'
     [PoshGitTextSpan]$DefaultPromptPath         = '$(Get-PromptPath)'
     [PoshGitTextSpan]$DefaultPromptBeforeSuffix = ''
