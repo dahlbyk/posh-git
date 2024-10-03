@@ -232,16 +232,16 @@ Describe 'TabExpansion Tests' {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $repoPath = NewGitTempRepo -MakeInitialCommit
 
-            $addedAliases = @()
+            $addedAliases = @{}
             function Add-GlobalTestAlias($Name, $Value) {
                 if (!(&$gitbin config --global "alias.$Name")) {
                     &$gitbin config --global "alias.$Name" $Value
-                    $addedAliases += $Name
+                    $addedAliases[$Name] = $Value
                 }
             }
         }
         AfterAll {
-            $addedAliases | Where-Object { $_ } | ForEach-Object {
+            $addedAliases.Keys | ForEach-Object {
                 &$gitbin config --global --unset "alias.$_" 2>$null
             }
 
