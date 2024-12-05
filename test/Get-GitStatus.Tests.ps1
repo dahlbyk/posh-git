@@ -36,8 +36,35 @@ Describe 'Get-GitStatus Tests' {
             $status.Index.Modified.Count | Should -Be 0
             $status.Index.Unmerged.Count | Should -Be 0
         }
+        It 'Returns the correct remote repository name' {
+            Mock -ModuleName posh-git git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding @'
+## rkeithill/more-status-tests...origin/rkeithill/more-status-tests
+'@
+            }
 
 
+            $status = Get-GitStatus
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $status.Branch | Should -Be "rkeithill/more-status-tests"
+            $status.Upstream | Should -Be "origin/rkeithill/more-status-tests"
+            $status.HasIndex | Should -Be $false
+            $status.HasUntracked | Should -Be $false
+            $status.HasWorking | Should -Be $false
+            $status.Working.Added.Count | Should -Be 0
+            $status.Working.Deleted.Count | Should -Be 0
+            $status.Working.Modified.Count | Should -Be 0
+            $status.Working.Unmerged.Count | Should -Be 0
+            $status.Index.Added.Count | Should -Be 0
+            $status.Index.Deleted.Count | Should -Be 0
+            $status.Index.Modified.Count | Should -Be 0
+            $status.Index.Unmerged.Count | Should -Be 0
+        }
         It 'Returns the correct number of added untracked working files' {
             Mock -ModuleName posh-git git {
                 $OFS = " "

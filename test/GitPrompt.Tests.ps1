@@ -54,3 +54,109 @@ M test/Baz.Tests.ps1
         }
     }
 }
+
+Describe 'Write-GitRemoteRepositoryLabel Tests' {
+    Context 'RemoteNamePlacement having a value of `"Start"` with single segment branch name' {
+        BeforeAll {
+            # Ensure these settings start out set to the default values
+            $global:GitPromptSettings = New-GitPromptSettings
+            $GitPromptSettings.RemoteNamePlacement = "Start"
+            $GitPromptSettings.RemoteNameSymbol = "/"
+
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master...origin/master
+'@
+            }
+        }
+
+        It 'Should write repository name followed by seperator' {
+            $res = Write-GitRemoteRepositoryLabel (Get-GitStatus)
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $res | Should -BeExactly "origin/"
+        }
+    }
+
+    Context 'RemoteNamePlacement having a value of `"Start"` with multi segment branch name' {
+        BeforeAll {
+            # Ensure these settings start out set to the default values
+            $global:GitPromptSettings = New-GitPromptSettings
+            $GitPromptSettings.RemoteNamePlacement = "Start"
+            $GitPromptSettings.RemoteNameSymbol = "/"
+
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## development/master...origin/development/master
+'@
+            }
+        }
+
+        It 'Should write repository name followed by seperator' {
+            $res = Write-GitRemoteRepositoryLabel (Get-GitStatus)
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $res | Should -BeExactly "origin/"
+        }
+    }
+
+    Context 'RemoteNamePlacement having a value of `"End"` with single segment branch name' {
+        BeforeAll {
+            # Ensure these settings start out set to the default values
+            $global:GitPromptSettings = New-GitPromptSettings
+            $GitPromptSettings.RemoteNamePlacement = "End"
+            $GitPromptSettings.RemoteNameSymbol = " -> "
+
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master...origin/master
+'@
+            }
+        }
+
+        It 'Should write seperator followed by repository name' {
+            $res = Write-GitRemoteRepositoryLabel (Get-GitStatus)
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $res | Should -BeExactly " -> origin"
+        }
+    }
+
+    Context 'RemoteNamePlacement having a value of `"None"`' {
+        BeforeAll {
+            # Ensure these settings start out set to the default values
+            $global:GitPromptSettings = New-GitPromptSettings
+            $GitPromptSettings.RemoteNamePlacement = "None"
+            $GitPromptSettings.RemoteNameSymbol = "/"
+
+            Mock -ModuleName posh-git -CommandName git {
+                $OFS = " "
+                if ($args -contains 'rev-parse') {
+                    $res = Invoke-Expression "&$gitbin $args"
+                    return $res
+                }
+                Convert-NativeLineEnding -SplitLines @'
+## master...origin/master
+'@
+            }
+        }
+
+        It 'Should not return any sort of truthy' {
+            $res = Write-GitRemoteRepositoryLabel (Get-GitStatus)
+            Should -Invoke -ModuleName posh-git -CommandName git -Exactly 1
+            $res | Should -BeNullOrEmpty
+        }
+    }
+}

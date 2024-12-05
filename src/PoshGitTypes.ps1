@@ -1,5 +1,6 @@
 enum BranchBehindAndAheadDisplayOptions { Full; Compact; Minimal }
 enum UntrackedFilesMode { Default; No; Normal; All }
+[Flags()]enum Placement { None; Start; End }
 
 class PoshGitCellColor {
     [psobject]$BackgroundColor
@@ -266,6 +267,8 @@ class PoshGitPromptSettings {
 
     [bool]$EnableStashStatus     = $false
     [bool]$ShowStatusWhenZero    = $true
+    [Placement]$RemoteNamePlacement = [Placement]::None
+    [string]$RemoteNameSymbol    = '/'
     [bool]$AutoRefreshIndex      = $true
 
     [UntrackedFilesMode]$UntrackedFilesMode = [UntrackedFilesMode]::Default
