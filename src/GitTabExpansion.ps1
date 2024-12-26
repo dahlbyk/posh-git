@@ -310,6 +310,12 @@ function Expand-GitCommand($Command) {
 function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
     $ignoreGitParams = '(?<params>\s+-(?:[aA-zZ0-9]+|-[aA-zZ0-9][aA-zZ0-9-]*)(?:=\S+)?)*'
 
+    # Remove direct git parameters like -p, -P
+    # @ToDo: doesn't work with parameters followed by a value like -C <path>
+    if ($lastBlock -match "\s*(\S+\s)\s*((?:-\S+\s)*)([^-]\S+.*)") {
+        $lastBlock = $matches[1] + $matches[3]
+    }
+
     if ($lastBlock -match "^$(Get-AliasPattern git) (?<cmd>\S+)(?<args> .*)$") {
         $lastBlock = expandGitAlias $Matches['cmd'] $Matches['args']
     }
