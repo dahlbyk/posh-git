@@ -83,6 +83,11 @@ function Test-Administrator {
 .PARAMETER Force
     Do not check if the specified profile script is already importing
     posh-git. Just add Import-Module posh-git command.
+.PARAMETER LazyLoad
+    This would change the timing of loading whole module from the start of
+    terminal to the first time you press tab for some git command. This
+    would be helpful to those who do not want to load module every time.
+    Unfortunately, ProxyFucntion filtering is not included in current edition.
 .EXAMPLE
     PS C:\> Add-PoshGitToProfile
     Updates your profile script for the current PowerShell host to import the
@@ -110,6 +115,11 @@ function Add-PoshGitToProfile {
         [Parameter()]
         [switch]
         $Force,
+
+        
+        [Parameter()]
+        [switch]
+        $LazyLoad,
 
         [Parameter(ValueFromRemainingArguments)]
         [psobject[]]
@@ -201,6 +211,44 @@ function Add-PoshGitToProfile {
     else {
         $modulePath = Join-Path $ModuleBasePath posh-git.psd1
         $profileContent = "`nImport-Module '$modulePath'"
+    }
+
+    if ($LazyLoad) {
+        # This will assemble an ArgumentCompleter
+        # This ArgumentCompleter would postpone the timing of importing module from the start of terminal to the first time you enter git and press <tab>,
+        # which might be useful in some cases
+        # After the module is imported, the module would Register a new real completer and override this one since it comes later
+        #
+        # Currently I have not found a way to filter ProxyFunction, hope this could be done in the future
+
+        $startPoint = "`n" + '# Start Point of posh-git lazy load script'
+        $cmdsFilterCommand = @'
+
+$cmdNames = @("git","tgit","gitk")
+
+$cmdNamesPattern = "^($($cmdNames -join '|'))(\.exe)?$"
+$cmdNames += Get-Alias | Where-Object { $_.Definition -match $cmdNamesPattern } | Foreach-Object Name
+
+'@
+
+        $commandRegister = @'
+
+Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName $cmdNames -Native -ScriptBlock {
+    param($wordToComplete, $commandAst, $cursorPosition)
+'@
+
+        $moduleCommand = $profileContent
+        $paddedName = "`n`t" + '$command = $commandAst.ToString().PadRight($cursorPosition)'
+        $completionResult = "`n`t" + 'return (TabExpansion2 -inputScript $command -cursorColumn $cursorPosition).CompletionMatches' + "`n}`n"
+
+        $removeBranchRegister = @'
+
+Microsoft.PowerShell.Core\Register-ArgumentCompleter -CommandName Remove-GitBranch -ParameterName Name -ScriptBlock {
+    param($wordToComplete, $commandAst, $cursorPosition)
+'@
+        $endPoint = '# End point of posh-git lazy load script'
+
+        $profileContent = $startPoint + $cmdsFilterCommand + $commandRegister + $moduleCommand + $paddedName + $completionResult + $removeBranchRegister + $moduleCommand + $paddedName + $completionResult + $endPoint
     }
 
     # Make sure the PowerShell profile directory exists
@@ -313,6 +361,44 @@ function Remove-PoshGitFromProfile {
 
         $oldProfile = @(Get-Content $profilePath)
         $oldProfileEncoding = Get-FileEncoding $profilePath
+
+        # New Logic to delete lazy load script
+        # If start or end is deleted, only Import-Module lines would be deleted by using default logic
+        # This would leave some useless code in $PROFILE. However, it is harmless and would cost little time to load,
+        # while we can prevent that delete the whole $PROFILE if end is deleted. So I think this design is a valid one
+        $lazyStart = '# Start Point of posh-git lazy load script'
+        $lazyEnd = '# End point of posh-git lazy load script'
+
+        $blocksToRemove = @()
+        $linesToRemove = @()
+        $currentStartIndex = -1
+        
+        for ($i = 0; $i -lt $oldProfile.Count; $i += 1) {
+            $line = $oldProfile[$i]
+            if ($line -eq $lazyStart) {
+                $currentStartIndex = $i
+            } elseif (($line -eq $lazyEnd) -and ($currentStartIndex -ne -1)) {
+                $blocksToRemove += [PSCustomObject]@{
+                    start = $currentStartIndex
+                    end = $i
+                }
+                $currentStartIndex = -1
+            }
+        }
+
+        foreach ($block in $blocksToRemove) {
+            for ($i = $block.start; $i -le $block.end; $i += 1) {
+                $linesToRemove += $i
+            }
+        }
+
+        $oldProfile = & {
+            for ($i = 0; $i -lt $oldProfile.Count; $i += 1) {
+                if (-not ($i -in $linesToRemove)) {
+                    $oldProfile[$i]
+                }
+            }
+        }
 
         $newProfile = @()
         foreach($line in $oldProfile) {
