@@ -3,6 +3,7 @@
 
 $Global:GitTabSettings = New-Object PSObject -Property @{
     AllCommands = $false
+    CustomCommands = $false
     KnownAliases = @{
         '!f() { exec vsts code pr "$@"; }; f' = 'vsts.pr'
     }
@@ -48,6 +49,13 @@ $gitflowsubcommands = @{
     hotfix = 'list start finish track publish help delete'
     support = 'list start help'
     config = 'list set base'
+}
+
+$customCommands = Get-Command "git-*" -CommandType Application | ForEach-Object {
+    New-Object PSObject -Property @{
+        Command = $_
+        ShortName = $_.Name -replace '^git-' -replace '\..*$'
+    }
 }
 
 function script:gitCmdOperations($commands, $command, $filter) {
@@ -119,6 +127,10 @@ function script:gitCommands($filter, $includeAliases) {
 
     if ($includeAliases) {
         $cmdList += gitAliases $filter
+    }
+
+    if ($global:GitTabSettings.CustomCommands) {
+        $cmdList += $customCommands.ShortName | Where-Object { $_ -like "$filter*" }
     }
 
     $cmdList | Sort-Object
@@ -330,6 +342,20 @@ function GitTabExpansionInternal($lastBlock, $GitStatus = $null) {
         # Handles git <cmd> <op>
         "^(?<cmd>$($subcommands.Keys -join '|'))\s+(?<op>\S*)$" {
             gitCmdOperations $subcommands $matches['cmd'] $matches['op']
+        }
+
+        # Handles custom subcommands
+        "^(?<cmd>$($customCommands.ShortName -join '|'))\s+(?<args>.*)$" {
+            if ($global:GitTabSettings.CustomCommands) {
+                $externalExe = Get-Command "git-$($matches['cmd'])" -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($externalExe) {
+                    $externalInput = "$($externalExe.Name) $($matches['args'])"
+                    $completion = [System.Management.Automation.CommandCompletion]::CompleteInput($externalInput, $externalInput.Length, $null)
+                    if ($completion) {
+                        $completion.CompletionMatches | Foreach-Object { $_.CompletionText }
+                    }
+                }
+            }
         }
 
         # Handles git flow <cmd> <op>
