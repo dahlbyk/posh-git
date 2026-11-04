@@ -1,0 +1,224 @@
+[1mdiff --git a/src/posh-git.psm1 b/src/posh-git.psm1[m
+[1mindex 06e4515..18a7d0d 100644[m
+[1m--- a/src/posh-git.psm1[m
+[1m+++ b/src/posh-git.psm1[m
+[36m@@ -30,99 +30,136 @@[m [melse {[m
+ }[m
+ [m
+ # The built-in posh-git prompt function in ScriptBlock form.[m
+[32m+[m
+ $GitPromptScriptBlock = {[m
+     $origDollarQuestion = $global:?[m
+     $origLastExitCode = $global:LASTEXITCODE[m
+[31m-[m
+[31m-    if (!$global:GitPromptValues) {[m
+[31m-        $global:GitPromptValues = [PoshGitPromptValues]::new()[m
+[31m-    }[m
+[31m-[m
+[31m-    $global:GitPromptValues.DollarQuestion = $origDollarQuestion[m
+[31m-    $global:GitPromptValues.LastExitCode = $origLastExitCode[m
+[31m-    $global:GitPromptValues.IsAdmin = $IsAdmin[m
+[31m-[m
+     $settings = $global:GitPromptSettings[m
+ [m
+[31m-    if (!$settings) {[m
+[31m-        return "<`$GitPromptSettings not found> "[m
+[31m-    }[m
+[31m-[m
+[31m-    if ($settings.DefaultPromptEnableTiming) {[m
+[31m-        $sw = [System.Diagnostics.Stopwatch]::StartNew()[m
+[31m-    }[m
+[31m-[m
+[31m-    if ($settings.SetEnvColumns) {[m
+[31m-        # Set COLUMNS so git knows how wide the terminal is[m
+[31m-        $Env:COLUMNS = $Host.UI.RawUI.WindowSize.Width[m
+[31m-    }[m
+[31m-[m
+[31m-    # Construct/write the prompt text[m
+[31m-    $prompt = ''[m
+[31m-[m
+[31m-    # Write default prompt prefix[m
+[31m-    $prompt += Write-Prompt $settings.DefaultPromptPrefix.Expand()[m
+[31m-[m
+[31m-    # Get the current path - formatted correctly[m
+[31m-    $promptPath = $settings.DefaultPromptPath.Expand()[m
+[31m-[m
+[31m-    # Write the delimited path and Git status summary information[m
+[31m-    if ($settings.DefaultPromptWriteStatusFirst) {[m
+[31m-        $prompt += Write-VcsStatus[m
+[31m-        $prompt += Write-Prompt $settings.BeforePath.Expand()[m
+[31m-        $prompt += Write-Prompt $promptPath[m
+[31m-        $prompt += Write-Prompt $settings.AfterPath.Expand()[m
+[32m+[m[32m    try {[m
+[32m+[m[32m        if (!$global:GitPromptValues) {[m
+[32m+[m[32m            $global:GitPromptValues = [PoshGitPromptValues]::new()[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        $global:GitPromptValues.DollarQuestion = $origDollarQuestion[m
+[32m+[m[32m        $global:GitPromptValues.LastExitCode = $origLastExitCode[m
+[32m+[m[32m        $global:GitPromptValues.IsAdmin = $IsAdmin[m
+[32m+[m
+[32m+[m[32m        if (!$settings) {[m
+[32m+[m[32m            return "<`$GitPromptSettings not found> "[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        if ($settings.DefaultPromptEnableTiming) {[m
+[32m+[m[32m            $sw = [System.Diagnostics.Stopwatch]::StartNew()[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        if ($settings.SetEnvColumns) {[m
+[32m+[m[32m            # Set COLUMNS so git knows how wide the terminal is[m
+[32m+[m[32m            $Env:COLUMNS = $Host.UI.RawUI.WindowSize.Width[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        # Construct/write the prompt text[m
+[32m+[m[32m        $prompt = ''[m
+[32m+[m
+[32m+[m[32m        # Write default prompt prefix[m
+[32m+[m[32m        $prompt += Write-Prompt $settings.DefaultPromptPrefix.Expand()[m
+[32m+[m
+[32m+[m[32m        # Get the current path - formatted correctly[m
+[32m+[m[32m        $promptPath = $settings.DefaultPromptPath.Expand()[m
+[32m+[m
+[32m+[m[32m        # Write the delimited path and Git status summary information[m
+[32m+[m[32m        if ($settings.DefaultPromptWriteStatusFirst) {[m
+[32m+[m[32m            $prompt += Write-VcsStatus[m
+[32m+[m[32m            $prompt += Write-Prompt $settings.BeforePath.Expand()[m
+[32m+[m[32m            $prompt += Write-Prompt $promptPath[m
+[32m+[m[32m            $prompt += Write-Prompt $settings.AfterPath.Expand()[m
+[32m+[m[32m        }[m
+[32m+[m[32m        else {[m
+[32m+[m[32m            $prompt += Write-Prompt $settings.BeforePath.Expand()[m
+[32m+[m[32m            $prompt += Write-Prompt $promptPath[m
+[32m+[m[32m            $prompt += Write-Prompt $settings.AfterPath.Expand()[m
+[32m+[m[32m            $prompt += Write-VcsStatus[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        # Write default prompt before suffix text[m
+[32m+[m[32m        $prompt += Write-Prompt $settings.DefaultPromptBeforeSuffix.Expand()[m
+[32m+[m
+[32m+[m[32m        # If stopped in the debugger, indicate that in the prompt[m
+[32m+[m[32m        if ((Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint) {[m
+[32m+[m[32m            $prompt += Write-Prompt $settings.DefaultPromptDebug.Expand()[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        # Get the prompt suffix text[m
+[32m+[m[32m        $promptSuffix = $settings.DefaultPromptSuffix.Expand()[m
+[32m+[m
+[32m+[m[32m        # When using Write-Host, return a single space to prevent PowerShell[m
+[32m+[m[32m        # from displaying its default PS> prompt.[m
+[32m+[m[32m        if (!$settings.AnsiConsole -and $promptSuffix.Text.EndsWith(' ')) {[m
+[32m+[m[32m            $promptSuffix.Text = $promptSuffix.Text.Substring(0, $promptSuffix.Text.Length - 1)[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        # This has to be after Write-VcsStatus, which populates $global:GitStatus[m
+[32m+[m[32m        Set-WindowTitle $global:GitStatus $IsAdmin[m
+[32m+[m
+[32m+[m[32m        # If prompt timing is enabled, write elapsed milliseconds[m
+[32m+[m[32m        if ($settings.DefaultPromptEnableTiming) {[m
+[32m+[m[32m            $timingInfo = [PoshGitTextSpan]::new($settings.DefaultPromptTimingFormat)[m
+[32m+[m[32m            $sw.Stop()[m
+[32m+[m[32m            $timingInfo.Text = $timingInfo.Text -f $sw.ElapsedMilliseconds[m
+[32m+[m[32m            $prompt += Write-Prompt $timingInfo[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        $prompt += Write-Prompt $promptSuffix[m
+[32m+[m
+[32m+[m[32m        # When using Write-Host, return at least a space[m
+[32m+[m[32m        if (!$settings.AnsiConsole) {[m
+[32m+[m[32m            $prompt += " "[m
+[32m+[m[32m        }[m
+[32m+[m[32m        else {[m
+[32m+[m[32m            # Save the ANSI prompt for debugging[m
+[32m+[m[32m            $global:GitPromptValues.LastPrompt = EscapeAnsiString $prompt[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        $prompt[m
+     }[m
+[31m-    else {[m
+[31m-        $prompt += Write-Prompt $settings.BeforePath.Expand()[m
+[31m-        $prompt += Write-Prompt $promptPath[m
+[31m-        $prompt += Write-Prompt $settings.AfterPath.Expand()[m
+[31m-        $prompt += Write-VcsStatus[m
+[32m+[m[32m    catch {[m
+[32m+[m[32m        $promptError = $_[m
+[32m+[m[32m        $errorText = "posh-git prompt error: $promptError"[m
+[32m+[m
+[32m+[m[32m        # Try to display the error using the configured prompt error color[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            if ($settings) {[m
+[32m+[m[32m                $errorPrompt = Write-Prompt $errorText -Color $settings.ErrorColor[m
+[32m+[m
+[32m+[m[32m                if ($settings.Debug) {[m
+[32m+[m[32m                    if (!$settings.AnsiConsole) {[m
+[32m+[m[32m                        Write-Host[m
+[32m+[m[32m                    }[m
+[32m+[m
+[32m+[m[32m                    Write-Verbose "posh-git prompt error details: $($promptError | Format-List * -Force | Out-String)" -Verbose[m
+[32m+[m[32m                }[m
+[32m+[m
+[32m+[m[32m                if ($settings.AnsiConsole) {[m
+[32m+[m[32m                    return "$errorPrompt "[m
+[32m+[m[32m                }[m
+[32m+[m
+[32m+[m[32m                return " "[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        catch {[m
+[32m+[m[32m            # Fall back to a warning if the error cannot be rendered.[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        Write-Warning $errorText[m
+[32m+[m[32m        return " "[m
+     }[m
+[31m-[m
+[31m-    # Write default prompt before suffix text[m
+[31m-    $prompt += Write-Prompt $settings.DefaultPromptBeforeSuffix.Expand()[m
+[31m-[m
+[31m-    # If stopped in the debugger, the prompt needs to indicate that by writing default prompt debug[m
+[31m-    if ((Test-Path Variable:/PSDebugContext) -or [runspace]::DefaultRunspace.Debugger.InBreakpoint) {[m
+[31m-        $prompt += Write-Prompt $settings.DefaultPromptDebug.Expand()[m
+[31m-    }[m
+[31m-[m
+[31m-    # Get the prompt suffix text[m
+[31m-    $promptSuffix = $settings.DefaultPromptSuffix.Expand()[m
+[31m-[m
+[31m-    # When using Write-Host, we return a single space from this function to prevent PowerShell from displaying "PS>"[m
+[31m-    # So to avoid two spaces at the end of the suffix, remove one here if it exists[m
+[31m-    if (!$settings.AnsiConsole -and $promptSuffix.Text.EndsWith(' ')) {[m
+[31m-        $promptSuffix.Text = $promptSuffix.Text.Substring(0, $promptSuffix.Text.Length - 1)[m
+[31m-    }[m
+[31m-[m
+[31m-    # This has to be *after* the call to Write-VcsStatus, which populates $global:GitStatus[m
+[31m-    Set-WindowTitle $global:GitStatus $IsAdmin[m
+[31m-[m
+[31m-    # If prompt timing enabled, write elapsed milliseconds[m
+[31m-    if ($settings.DefaultPromptEnableTiming) {[m
+[31m-        $timingInfo = [PoshGitTextSpan]::new($settings.DefaultPromptTimingFormat)[m
+[31m-        $sw.Stop()[m
+[31m-        $timingInfo.Text = $timingInfo.Text -f $sw.ElapsedMilliseconds[m
+[31m-        $prompt += Write-Prompt $timingInfo[m
+[31m-    }[m
+[31m-[m
+[31m-    $prompt += Write-Prompt $promptSuffix[m
+[31m-[m
+[31m-    # When using Write-Host, return at least a space to avoid "PS>" being unexpectedly displayed[m
+[31m-    if (!$settings.AnsiConsole) {[m
+[31m-        $prompt += " "[m
+[32m+[m[32m    finally {[m
+[32m+[m[32m        # Restore the original exit code even if prompt generation fails[m
+[32m+[m[32m        $global:LASTEXITCODE = $origLastExitCode[m
+     }[m
+[31m-    else {[m
+[31m-        # If using ANSI, set this global to help debug ANSI issues[m
+[31m-        $global:GitPromptValues.LastPrompt = EscapeAnsiString $prompt[m
+[31m-    }[m
+[31m-[m
+[31m-    $global:LASTEXITCODE = $origLastExitCode[m
+[31m-    $prompt[m
+ }[m
+ [m
+[32m+[m
+ $currentPromptDef = if ($funcInfo = Get-Command prompt -ErrorAction SilentlyContinue) { $funcInfo.Definition }[m
+ [m
+ # If prompt matches pre-0.7 posh-git prompt, ignore it[m
