@@ -227,6 +227,49 @@ Describe 'TabExpansion Tests' {
         }
     }
 
+    Context 'Git Add File Completion Tests' {
+        BeforeAll {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
+            $repoPath = NewGitTempRepo -MakeInitialCommit
+
+            'clean' | Out-File ./clean.txt
+            'dirty' | Out-File ./dirty.txt
+            &$gitbin add clean.txt dirty.txt
+            &$gitbin commit -m 'add files' *>$null
+
+            # Modify one tracked file and create an untracked one.
+            'changed' | Out-File ./dirty.txt
+            'new' | Out-File ./untracked.txt
+
+            # Make sure no status is cached so that the completion has to
+            # compute the status on its own.
+            $global:GitStatus = $null
+        }
+        AfterAll {
+            RemoveGitTempRepo $repoPath
+        }
+        It 'Tab completes the dirty files when no status has been cached' {
+            $result = & $module GitTabExpansionInternal 'git add '
+
+            $result -contains 'dirty.txt' | Should -Be $true
+            $result -contains 'untracked.txt' | Should -Be $true
+            $result -contains 'clean.txt' | Should -Be $false
+        }
+        It 'Tab completes the dirty files when a status is passed in' {
+            $gitStatus = & $module Get-GitStatus
+            $result = & $module GitTabExpansionInternal 'git add ' $gitStatus
+
+            $result -contains 'dirty.txt' | Should -Be $true
+            $result -contains 'untracked.txt' | Should -Be $true
+            $result -contains 'clean.txt' | Should -Be $false
+        }
+        It 'Tab completes the dirty files that match the filter' {
+            $result = & $module GitTabExpansionInternal 'git add dirty'
+
+            $result | Should -BeExactly 'dirty.txt'
+        }
+    }
+
     Context 'Git Config Alias TabExpansion Tests' {
         BeforeAll {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
