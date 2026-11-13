@@ -209,41 +209,84 @@ function script:gitFiles($filter, $files) {
         quoteStringWithSpecialChars
 }
 
+<#
+.SYNOPSIS
+    Gets the Git status to use for file name completion.
+.DESCRIPTION
+    File name completion (e.g. "git add <tab>") is based on the files that
+    are reported as modified by Git. That information is normally cached in
+    $global:GitStatus by the posh-git prompt function.
+
+    When the prompt function of posh-git is not the one being used (e.g. when
+    the prompt is provided by another tool like oh-my-posh) or when the prompt
+    has not been rendered yet, $global:GitStatus is not available. In that
+    case the status is computed on demand so that completion keeps offering the
+    interesting (dirty) files instead of falling back to the file system
+    completion of the shell.
+#>
+function script:getGitStatusForCompletion($GitStatus) {
+    if ($GitStatus) { return $GitStatus }
+    if ($global:GitStatus) { return $global:GitStatus }
+
+    try {
+        $global:GitStatus = Get-GitStatus
+    }
+    catch {
+        $global:GitStatus = $null
+    }
+
+    $global:GitStatus
+}
+
 function script:gitIndex($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Index
+    $status = getGitStatusForCompletion $GitStatus
+    if (!$status) { return }
+    gitFiles $filter $status.Index
 }
 
 function script:gitAddFiles($GitStatus, $filter) {
-    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Added))
+    $status = getGitStatusForCompletion $GitStatus
+    if (!$status) { return }
+    gitFiles $filter (@($status.Working.Unmerged) + @($status.Working.Modified) + @($status.Working.Added))
 }
 
 function script:gitCheckoutFiles($GitStatus, $filter) {
-    gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
+    $status = getGitStatusForCompletion $GitStatus
+    if (!$status) { return }
+    gitFiles $filter (@($status.Working.Unmerged) + @($status.Working.Modified) + @($status.Working.Deleted))
 }
 
 function script:gitDeleted($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Working.Deleted
+    $status = getGitStatusForCompletion $GitStatus
+    if (!$status) { return }
+    gitFiles $filter $status.Working.Deleted
 }
 
 function script:gitDiffFiles($GitStatus, $filter, $staged) {
+    $status = getGitStatusForCompletion $GitStatus
+    if (!$status) { return }
     if ($staged) {
-        gitFiles $filter $GitStatus.Index.Modified
+        gitFiles $filter $status.Index.Modified
     }
     else {
-        gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Index.Modified))
+        gitFiles $filter (@($status.Working.Unmerged) + @($status.Working.Modified) + @($status.Index.Modified))
     }
 }
 
 function script:gitMergeFiles($GitStatus, $filter) {
-    gitFiles $filter $GitStatus.Working.Unmerged
+    $status = getGitStatusForCompletion $GitStatus
+    if (!$status) { return }
+    gitFiles $filter $status.Working.Unmerged
 }
 
 function script:gitRestoreFiles($GitStatus, $filter, $staged) {
+    $status = getGitStatusForCompletion $GitStatus
+    if (!$status) { return }
     if ($staged) {
-        gitFiles $filter (@($GitStatus.Index.Added) + @($GitStatus.Index.Modified) + @($GitStatus.Index.Deleted))
+        gitFiles $filter (@($status.Index.Added) + @($status.Index.Modified) + @($status.Index.Deleted))
     }
     else {
-        gitFiles $filter (@($GitStatus.Working.Unmerged) + @($GitStatus.Working.Modified) + @($GitStatus.Working.Deleted))
+        gitFiles $filter (@($status.Working.Unmerged) + @($status.Working.Modified) + @($status.Working.Deleted))
     }
 }
 
